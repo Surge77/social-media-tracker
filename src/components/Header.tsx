@@ -38,9 +38,6 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" className="hidden md:flex">
-              Press S
-            </Button>
             <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Get Started →
             </Button>
