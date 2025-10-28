@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TrendWatch Orb",
+  title: "Public Trending",
   description: "Track and analyze trends in real-time",
 };
 
