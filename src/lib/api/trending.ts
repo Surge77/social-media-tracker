@@ -150,7 +150,7 @@ export const fetchTrending = async (params: FeedParams): Promise<FeedResponse> =
   // Apply sorting
   switch (params.sort) {
     case 'velocity':
-      filteredItems.sort((a, b) => b.velocity - a.velocity);
+      filteredItems.sort((a, b) => (b.velocity || 0) - (a.velocity || 0));
       break;
     case 'popular':
       filteredItems.sort((a, b) => b.score - a.score);
@@ -158,7 +158,7 @@ export const fetchTrending = async (params: FeedParams): Promise<FeedResponse> =
     case 'trending':
     default:
       // Default trending sort (combination of score and velocity)
-      filteredItems.sort((a, b) => (b.score + b.velocity) - (a.score + a.velocity));
+      filteredItems.sort((a, b) => (b.score + (b.velocity || 0)) - (a.score + (a.velocity || 0)));
       break;
   }
   

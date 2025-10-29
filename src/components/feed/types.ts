@@ -24,7 +24,7 @@ export interface FeedItem {
   summary: string;
   score: number;
   comments: number;
-  velocity: number;
+  velocity?: number;
   source: string;
   timeAgo: string;
   views: number;

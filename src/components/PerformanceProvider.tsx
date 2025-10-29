@@ -20,11 +20,11 @@ export default function PerformanceProvider({ children }: PerformanceProviderPro
 
   useEffect(() => {
     // Monitor route changes
-    performanceMonitor.markRouteChangeStart(pathname);
+    performanceMonitor.markRouteChangeStart(pathname || '/');
     
     // Use a small delay to ensure the route change is complete
     const timer = setTimeout(() => {
-      performanceMonitor.markRouteChangeComplete(pathname);
+      performanceMonitor.markRouteChangeComplete(pathname || '/');
     }, 100);
 
     return () => {
