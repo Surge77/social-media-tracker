@@ -1,0 +1,15 @@
+{
+  "hn": {
+    "maxStories": 30,
+    "concurrentRequests": 5
+  },
+  "rss": {
+    "timeout": 10000,
+    "maxItemsPerFeed": 20
+  },
+  "newsapi": {
+    "country": "us",
+    "category": "technology",
+    "pageSize": 50
+  }
+}

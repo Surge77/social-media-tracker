@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react";
+import AnimatedCTA from "./AnimatedCTA";
 
 const Header = () => {
   return (
@@ -38,9 +38,13 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <AnimatedCTA 
+              href="/dashboard/trending"
+              size="sm" 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
               Get Started →
-            </Button>
+            </AnimatedCTA>
           </div>
         </div>
       </div>

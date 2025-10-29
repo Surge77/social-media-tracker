@@ -1,0 +1,31 @@
+{
+  "sources": [
+    {
+      "name": "TechCrunch",
+      "url": "https://techcrunch.com/feed/",
+      "category": "technology"
+    },
+    {
+      "name": "Hacker News RSS",
+      "url": "https://hnrss.org/frontpage",
+      "category": "technology"
+    },
+    {
+      "name": "The Verge",
+      "url": "https://www.theverge.com/rss/index.xml",
+      "category": "technology"
+    },
+    {
+      "name": "Ars Technica",
+      "url": "https://feeds.arstechnica.com/arstechnica/index",
+      "category": "technology"
+    },
+    {
+      "name": "Wired",
+      "url": "https://www.wired.com/feed/rss",
+      "category": "technology"
+    }
+  ],
+  "maxItemsPerFeed": 20,
+  "maxAgeHours": 24
+}

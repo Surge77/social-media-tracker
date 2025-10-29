@@ -1,9 +1,9 @@
 'use client';
 
-import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import FloatingIcons from "./FloatingIcons";
+import AnimatedCTA from "./AnimatedCTA";
+import SharedTitle from "./SharedTitle";
 
 const Hero = () => {
   return (
@@ -13,21 +13,10 @@ const Hero = () => {
       <FloatingIcons />
 
       <div className="container relative mx-auto px-6 text-center">
-        <h2 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-          <span className="text-foreground">See what's </span>
-          <span className="bg-gradient-to-r from-primary via-warning to-primary bg-clip-text text-transparent">
-            trending now
-          </span>
-          <span className="text-foreground">,</span>
-          <br />
-          <span className="text-foreground">know </span>
-          <span className="text-secondary">WHY</span>
-          <span className="text-foreground"> it's trending,</span>
-          <br />
-          <span className="text-muted-foreground text-4xl md:text-5xl">
-            without giving up your data.
-          </span>
-        </h2>
+        <SharedTitle 
+          variant="hero" 
+          className="text-5xl md:text-7xl mb-6" 
+        />
 
         <div className="flex justify-center gap-2 mb-8">
           <Button variant="outline" size="sm" className="rounded-full">
@@ -42,19 +31,30 @@ const Hero = () => {
         </div>
 
         <div className="max-w-2xl mx-auto mb-12">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search trending topics..."
-              className="pl-12 pr-20 py-6 text-lg bg-card border-border rounded-full focus:ring-2 focus:ring-primary"
-            />
-            <Button 
-              size="sm" 
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 rounded-full bg-primary hover:bg-primary/90"
+          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+            Discover what&apos;s trending across the web with AI-powered insights. 
+            Get the full picture without compromising your privacy.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <AnimatedCTA 
+              href="/dashboard/trending" 
+              size="lg"
+              className="px-8 py-4 text-lg font-semibold rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl"
+              delay={150}
             >
-              Go
-            </Button>
+              Get Started →
+            </AnimatedCTA>
+            
+            <AnimatedCTA 
+              href="/dashboard/trending" 
+              variant="outline"
+              size="lg"
+              className="px-8 py-4 text-lg font-medium rounded-full border-2 hover:bg-primary/5"
+              delay={100}
+            >
+              Explore Trending
+            </AnimatedCTA>
           </div>
         </div>
 

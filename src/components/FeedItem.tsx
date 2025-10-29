@@ -9,7 +9,7 @@ interface FeedItemProps {
   summary: string;
   score: number;
   comments: number;
-  velocity: number;
+  velocity?: number;
   source: string;
   timeAgo: string;
   views: number;
@@ -56,7 +56,7 @@ const FeedItem = ({
         </span>
         <span className="flex items-center gap-1.5 text-success">
           <span className="text-lg">🔼</span>
-          <span className="font-medium">+{velocity}</span> (1h)
+          <span className="font-medium">+{velocity || 0}</span> (1h)
         </span>
       </div>
 

@@ -61,12 +61,96 @@ All colors MUST be HSL.
     animation: float 6s ease-in-out infinite 2s;
   }
 
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-float-delayed {
+      animation: none;
+    }
+    
+    .animate-fade-in {
+      animation: fadeInReduced 0.2s ease-out forwards;
+    }
+    
+    .animate-slide-up {
+      animation: fadeInReduced 0.2s ease-out forwards;
+      transform: none;
+    }
+    
+    .animate-pulse-glow {
+      animation: none;
+      opacity: 1;
+    }
+    
+    .hover-lift:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);
     }
     50% {
       transform: translateY(-20px);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 5px hsl(var(--success) / 0.5);
+    }
+    50% {
+      opacity: 0.7;
+      box-shadow: 0 0 10px hsl(var(--success) / 0.8);
+    }
+  }
+
+  @keyframes fadeInReduced {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
 
