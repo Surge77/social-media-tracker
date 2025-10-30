@@ -14,9 +14,9 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="border-t border-border bg-background">
-      <div className="container mx-auto px-6 py-5">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+    <footer className="bg-gradient-to-b from-muted/20 to-background">
+      <div className="container mx-auto px-6 py-12">
+        <div className="flex flex-col items-center text-center gap-6">
           {/* Brand */}
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
@@ -29,7 +29,7 @@ const Footer = () => {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 {link.name}
               </Link>
@@ -37,8 +37,8 @@ const Footer = () => {
           </nav>
 
           {/* Copyright */}
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} All rights reserved
+          <p className="text-xs text-muted-foreground">
+            © {currentYear} Public Trending. All rights reserved.
           </p>
         </div>
       </div>
