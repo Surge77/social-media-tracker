@@ -40,10 +40,10 @@ const Hero = () => {
             <AnimatedCTA 
               href="/dashboard/trending" 
               size="lg"
-              className="px-8 py-4 text-lg font-semibold rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl"
+              className="relative px-10 py-4 text-lg font-semibold rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground border border-white/30 shadow-[0_4px_12px_rgba(0,0,0,0.15),0_0_20px_hsl(var(--primary)/0.3)] overflow-hidden cursor-pointer transition-shadow duration-300 hover:shadow-[0_8px_24px_rgba(0,0,0,0.2),0_0_40px_hsl(var(--primary)/0.5)] before:absolute before:inset-0 before:rounded-full before:bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,0.8)_45%,rgba(255,255,255,1)_50%,rgba(255,255,255,0.8)_55%,transparent_75%)] before:bg-[length:200%_200%] before:animate-shimmer hover:before:opacity-100"
               delay={150}
             >
-              Get Started →
+              <span className="relative z-10">Get Started →</span>
             </AnimatedCTA>
             
             <AnimatedCTA 

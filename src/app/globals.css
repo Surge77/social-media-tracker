@@ -109,6 +109,29 @@ All colors MUST be HSL.
     }
   }
 
+  .animate-shimmer {
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-150%) skewX(-15deg);
+      opacity: 0;
+    }
+    30% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 1;
+    }
+    70% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateX(250%) skewX(-15deg);
+      opacity: 0;
+    }
+  }
 
   .hover-lift {
     transition: var(--transition-smooth);
