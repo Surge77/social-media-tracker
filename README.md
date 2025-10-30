@@ -1,4 +1,4 @@
-# TrendWatch
+# Public Trending
 
 A real-time trending content dashboard that aggregates and displays trending items from multiple sources with automatic refresh capabilities.
 
