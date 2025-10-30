@@ -15,8 +15,8 @@ const Footer = () => {
 
   return (
     <footer className="border-t border-border bg-background">
-      <div className="container mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="container mx-auto px-6 py-5">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
           {/* Brand */}
           <div className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
