@@ -2,25 +2,93 @@
 
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, RefreshCw, WifiOff, Clock, Server } from "lucide-react";
+import { AlertTriangle, RefreshCw, WifiOff, Clock, Server, XCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+
+export type ErrorType = 'network' | 'server' | 'rate-limit' | 'client' | 'unknown';
 
 interface FeedErrorProps {
   error: Error;
   onRetry?: () => void;
   isRetrying?: boolean;
   retryCount?: number;
+  errorType?: ErrorType;
 }
 
-const FeedError = ({ error, onRetry, isRetrying = false, retryCount = 0 }: FeedErrorProps) => {
+const FeedError = ({ error, onRetry, isRetrying = false, retryCount = 0, errorType }: FeedErrorProps) => {
+  const [countdown, setCountdown] = useState(60);
+  const [canRetryAfterCountdown, setCanRetryAfterCountdown] = useState(false);
+
+  // Countdown timer for rate-limit errors
+  useEffect(() => {
+    if (errorType === 'rate-limit' && countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (errorType === 'rate-limit' && countdown === 0) {
+      setCanRetryAfterCountdown(true);
+    }
+  }, [errorType, countdown]);
+
   const getErrorDetails = () => {
+    // If errorType is explicitly provided, use it
+    if (errorType) {
+      switch (errorType) {
+        case 'network':
+          return {
+            icon: WifiOff,
+            title: 'No Internet Connection',
+            description: 'Unable to connect to the server. Please check your internet connection.',
+            suggestion: 'Check your network settings and try again.',
+            canRetry: true,
+          };
+        case 'server':
+          return {
+            icon: Server,
+            title: 'Server Error',
+            description: 'Something went wrong on our end. We\'re working on it.',
+            suggestion: 'This is usually temporary. Please try again in a few moments.',
+            canRetry: true,
+          };
+        case 'rate-limit':
+          return {
+            icon: Clock,
+            title: 'Too Many Requests',
+            description: 'You\'ve made too many requests. Please wait before trying again.',
+            suggestion: countdown > 0 
+              ? `Please wait ${countdown} seconds before retrying.`
+              : 'You can now retry your request.',
+            canRetry: countdown === 0,
+          };
+        case 'client':
+          return {
+            icon: XCircle,
+            title: 'Invalid Request',
+            description: 'The request could not be processed due to invalid parameters.',
+            suggestion: 'Please refresh the page and try again.',
+            canRetry: false,
+          };
+        default:
+          return {
+            icon: AlertTriangle,
+            title: 'Something Went Wrong',
+            description: 'An unexpected error occurred while loading the feed.',
+            suggestion: 'Please try refreshing the page.',
+            canRetry: true,
+          };
+      }
+    }
+
+    // Fallback to error message parsing if errorType not provided
     const message = error.message.toLowerCase();
     
     if (message.includes('fetch') || message.includes('network')) {
       return {
         icon: WifiOff,
-        title: 'Connection Error',
+        title: 'No Internet Connection',
         description: 'Unable to connect to the server. Please check your internet connection.',
-        suggestion: 'Try refreshing the page or check your network settings.',
+        suggestion: 'Check your network settings and try again.',
         canRetry: true,
       };
     }
@@ -39,7 +107,7 @@ const FeedError = ({ error, onRetry, isRetrying = false, retryCount = 0 }: FeedE
       return {
         icon: Server,
         title: 'Server Error',
-        description: 'The server encountered an error while processing your request.',
+        description: 'Something went wrong on our end. We\'re working on it.',
         suggestion: 'This is usually temporary. Please try again in a few moments.',
         canRetry: true,
       };
@@ -48,10 +116,12 @@ const FeedError = ({ error, onRetry, isRetrying = false, retryCount = 0 }: FeedE
     if (message.includes('429') || message.includes('rate limit')) {
       return {
         icon: Clock,
-        title: 'Rate Limited',
-        description: 'Too many requests have been made. Please wait before trying again.',
-        suggestion: 'Wait a minute before refreshing to avoid being rate limited.',
-        canRetry: true,
+        title: 'Too Many Requests',
+        description: 'You\'ve made too many requests. Please wait before trying again.',
+        suggestion: countdown > 0 
+          ? `Please wait ${countdown} seconds before retrying.`
+          : 'You can now retry your request.',
+        canRetry: countdown === 0,
       };
     }
     
@@ -64,10 +134,20 @@ const FeedError = ({ error, onRetry, isRetrying = false, retryCount = 0 }: FeedE
         canRetry: false,
       };
     }
+
+    if (message.includes('400') || message.includes('bad request')) {
+      return {
+        icon: XCircle,
+        title: 'Invalid Request',
+        description: 'The request could not be processed due to invalid parameters.',
+        suggestion: 'Please refresh the page and try again.',
+        canRetry: false,
+      };
+    }
     
     return {
       icon: AlertTriangle,
-      title: 'Something went wrong',
+      title: 'Something Went Wrong',
       description: 'An unexpected error occurred while loading the feed.',
       suggestion: 'Please try refreshing the page.',
       canRetry: true,
@@ -92,16 +172,16 @@ const FeedError = ({ error, onRetry, isRetrying = false, retryCount = 0 }: FeedE
         </AlertDescription>
       </Alert>
 
-      {canRetry && onRetry && (
+      {onRetry && (
         <div className="flex justify-center">
           <Button 
             onClick={onRetry}
-            disabled={isRetrying}
+            disabled={isRetrying || !canRetry || (errorType === 'rate-limit' && !canRetryAfterCountdown)}
             className="flex items-center gap-2"
             variant="outline"
           >
             <RefreshCw className={`h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
-            {isRetrying ? 'Retrying...' : 'Try Again'}
+            {isRetrying ? 'Retrying...' : errorType === 'rate-limit' && countdown > 0 ? `Wait ${countdown}s` : 'Try Again'}
           </Button>
         </div>
       )}

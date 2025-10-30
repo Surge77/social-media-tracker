@@ -7,6 +7,9 @@
 //   --page-size <number>   Number of articles (default: 50)
 //   --dry-run             Collect but don't store in database
 
+// Load environment variables from .env file
+import 'dotenv/config'
+
 import { NewsAPICollector } from '../src/lib/collectors/newsapi'
 import { deduplicateAndStore } from '../src/lib/collectors/utils/deduplication'
 import { logInfo, logError, logCollectionComplete } from '../src/lib/collectors/utils/logger'

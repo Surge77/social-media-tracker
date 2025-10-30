@@ -5,6 +5,18 @@ import { FeedParams } from '@/components/feed/types';
 import { fetchTrending, handleTrendingError, APIError } from '@/lib/api/trending';
 import { performanceMonitor } from '@/lib/performance';
 
+// Configuration from environment variables
+const REFRESH_INTERVAL_MS = parseInt(
+  process.env.NEXT_PUBLIC_REFRESH_INTERVAL_MS || '60000',
+  10
+);
+const STALE_TIME_MS = parseInt(
+  process.env.NEXT_PUBLIC_STALE_TIME_MS || '30000',
+  10
+);
+const ENABLE_AUTO_REFRESH = 
+  process.env.NEXT_PUBLIC_ENABLE_AUTO_REFRESH !== 'false';
+
 // Generate query key based on filter parameters
 export const generateTrendingQueryKey = (params: FeedParams): string[] => {
   const key = ['trending'];
@@ -37,8 +49,8 @@ export const useTrending = (params: FeedParams) => {
         throw error;
       }
     },
-    staleTime: 30000, // 30 seconds - data is considered fresh for 30 seconds
-    refetchInterval: 60000, // 1 minute - automatically refetch every minute
+    staleTime: STALE_TIME_MS, // Configurable stale time (default: 30 seconds)
+    refetchInterval: ENABLE_AUTO_REFRESH ? REFRESH_INTERVAL_MS : false, // Configurable auto-refresh (default: 60 seconds)
     retry: (failureCount, error) => {
       const apiError = error as APIError;
       const errorHandling = handleTrendingError(apiError);
@@ -75,8 +87,8 @@ export const useTrendingInfinite = (params: Omit<FeedParams, 'page'>) => {
   return useQuery({
     queryKey: [...generateTrendingQueryKey(params), 'infinite'],
     queryFn: () => fetchTrending({ ...params, page: 1 }),
-    staleTime: 30000,
-    refetchInterval: 60000,
+    staleTime: STALE_TIME_MS,
+    refetchInterval: ENABLE_AUTO_REFRESH ? REFRESH_INTERVAL_MS : false,
     retry: (failureCount, error) => {
       const apiError = error as APIError;
       const errorHandling = handleTrendingError(apiError);

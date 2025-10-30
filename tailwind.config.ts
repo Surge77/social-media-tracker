@@ -117,5 +117,18 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    function({ addBase }: any) {
+      addBase({
+        '@media (prefers-reduced-motion: reduce)': {
+          '*': {
+            'animation-duration': '0.01ms !important',
+            'animation-iteration-count': '1 !important',
+            'transition-duration': '0.01ms !important',
+          },
+        },
+      });
+    },
+  ],
 } satisfies Config;

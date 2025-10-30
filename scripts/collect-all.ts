@@ -3,6 +3,9 @@
 // Runs all collectors in sequence with configuration and error handling
 // Run with: npx tsx scripts/collect-all.ts [options]
 
+// Load environment variables from .env file
+import 'dotenv/config'
+
 import { HackerNewsCollector } from '../src/lib/collectors/hackernews'
 import { RSSCollector } from '../src/lib/collectors/rss'
 import { NewsAPICollector } from '../src/lib/collectors/newsapi'
