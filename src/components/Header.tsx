@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react";
 import AnimatedCTA from "./AnimatedCTA";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Header = () => {
   return (
@@ -11,10 +12,10 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold text-foreground">Public Trending</h1>
+              <TrendingUp className="h-6 w-6 text-primary transition-colors" />
+              <h1 className="text-xl font-bold text-foreground transition-colors">Public Trending</h1>
             </div>
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs transition-colors">
               BETA
             </Badge>
           </div>
@@ -38,6 +39,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <AnimatedCTA 
               href="/dashboard/trending"
               size="sm" 

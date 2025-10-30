@@ -4,12 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
+import { ThemeProvider } from 'next-themes';
 import { useState, useEffect } from 'react';
-import AnimatedLayout from '@/components/AnimatedLayout';
 import PerformanceProvider from '@/components/PerformanceProvider';
 import PerformanceDashboard from '@/components/PerformanceDashboard';
 import { validateEnvironment } from '@/lib/supabase';
 import { CategorizedError, ErrorCategory, ErrorSeverity } from '@/lib/supabase/error-handling';
+import { ThemeWaveTransition } from '@/components/ThemeWaveTransition';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({
@@ -73,17 +74,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <PerformanceProvider>
-          <AnimatedLayout>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <PerformanceProvider>
             {children}
-          </AnimatedLayout>
-        </PerformanceProvider>
-        <PerformanceDashboard />
-        <Toaster />
-        <Sonner />
-      </TooltipProvider>
-    </QueryClientProvider>
+            <ThemeWaveTransition />
+          </PerformanceProvider>
+          <PerformanceDashboard />
+          <Toaster />
+          <Sonner />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

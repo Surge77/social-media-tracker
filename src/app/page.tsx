@@ -21,32 +21,32 @@ export default function HomePage() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔍</span>
+            <div className="text-center p-6 rounded-lg bg-card border border-border transition-all hover:shadow-lg">
+              <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
+                <span className="text-2xl" role="img" aria-label="search">🔍</span>
               </div>
-              <h3 className="text-xl font-semibold mb-3">AI-Powered Insights</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground transition-colors">AI-Powered Insights</h3>
+              <p className="text-muted-foreground transition-colors">
                 Understand not just what&apos;s trending, but why it&apos;s trending with our advanced AI analysis.
               </p>
             </div>
             
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔒</span>
+            <div className="text-center p-6 rounded-lg bg-card border border-border transition-all hover:shadow-lg">
+              <div className="w-16 h-16 bg-secondary/10 dark:bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
+                <span className="text-2xl" role="img" aria-label="lock">🔒</span>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Privacy First</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground transition-colors">Privacy First</h3>
+              <p className="text-muted-foreground transition-colors">
                 No tracking, no data collection. Your browsing habits stay private while you stay informed.
               </p>
             </div>
             
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🌍</span>
+            <div className="text-center p-6 rounded-lg bg-card border border-border transition-all hover:shadow-lg">
+              <div className="w-16 h-16 bg-warning/10 dark:bg-warning/20 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
+                <span className="text-2xl" role="img" aria-label="globe">🌍</span>
               </div>
-              <h3 className="text-xl font-semibold mb-3">Global Coverage</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold mb-3 text-card-foreground transition-colors">Global Coverage</h3>
+              <p className="text-muted-foreground transition-colors">
                 Track trends from multiple sources worldwide to get the complete picture of what&apos;s happening.
               </p>
             </div>
@@ -55,12 +55,12 @@ export default function HomePage() {
       </section>
       
       {/* CTA Section */}
-      <section className="py-20 bg-background">
+      <section className="py-20 bg-background transition-colors">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground transition-colors">
             Ready to Discover What&apos;s Trending?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto transition-colors">
             Join thousands of users who stay ahead of the curve with our trending insights platform.
           </p>
           

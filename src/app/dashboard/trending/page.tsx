@@ -61,11 +61,11 @@ function TrendingContent() {
 export default function TrendingPage() {
   return (
     <div className="flex min-h-screen">
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 transition-colors">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Trending Now</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-2xl font-bold text-foreground mb-2 transition-colors">Trending Now</h2>
+            <p className="text-muted-foreground transition-colors">
               Discover what&apos;s trending across the web in real-time
             </p>
           </div>
@@ -74,7 +74,7 @@ export default function TrendingPage() {
           </FeedContainer>
         </div>
       </div>
-      <div className="w-80 border-l border-border">
+      <div className="w-80 border-l border-border transition-colors">
         <InsightsSidebar />
       </div>
     </div>

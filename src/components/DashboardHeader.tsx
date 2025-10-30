@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import SharedTitle from "./SharedTitle";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface NavigationItem {
   href: string;
@@ -105,6 +106,7 @@ export default function DashboardHeader() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             <Button 
               size="sm" 
               variant="outline"
@@ -161,7 +163,11 @@ export default function DashboardHeader() {
                   </nav>
 
                   {/* Mobile Actions */}
-                  <div className="pt-4 border-t border-border">
+                  <div className="pt-4 border-t border-border space-y-2">
+                    <div className="flex items-center justify-between px-4 py-2">
+                      <span className="text-sm font-medium text-foreground">Theme</span>
+                      <ThemeToggle />
+                    </div>
                     <Button 
                       size="sm" 
                       variant="outline" 

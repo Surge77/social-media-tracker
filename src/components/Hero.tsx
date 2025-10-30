@@ -31,7 +31,7 @@ const Hero = () => {
         </div>
 
         <div className="max-w-2xl mx-auto mb-12">
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+          <p className="text-lg text-muted-foreground mb-8 leading-relaxed transition-colors">
             Discover what&apos;s trending across the web with AI-powered insights. 
             Get the full picture without compromising your privacy.
           </p>
@@ -58,19 +58,19 @@ const Hero = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground transition-colors">
           <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-success animate-pulse-glow"></span>
+            <span className="h-2 w-2 rounded-full bg-success animate-pulse-glow transition-colors"></span>
             Transparent
           </span>
           <span>•</span>
           <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-secondary animate-pulse-glow"></span>
+            <span className="h-2 w-2 rounded-full bg-secondary animate-pulse-glow transition-colors"></span>
             Explainable
           </span>
           <span>•</span>
           <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-warning animate-pulse-glow"></span>
+            <span className="h-2 w-2 rounded-full bg-warning animate-pulse-glow transition-colors"></span>
             Global
           </span>
         </div>
