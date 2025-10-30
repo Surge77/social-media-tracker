@@ -7,6 +7,9 @@
 //   --timeout <number>      Request timeout in ms (default: 15000)
 //   --dry-run              Collect but don't store in database
 
+// Load environment variables from .env file
+import 'dotenv/config'
+
 import { RSSCollector } from '../src/lib/collectors/rss'
 import { deduplicateAndStore } from '../src/lib/collectors/utils/deduplication'
 import { logInfo, logError, logCollectionComplete } from '../src/lib/collectors/utils/logger'

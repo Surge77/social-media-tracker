@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { InsightsSidebar, FeedContainer } from "@/components/LazyComponents";
 import { useTrending } from '@/hooks/useTrending';
 import { useFeedContext } from '@/components/feed/FeedContext';
@@ -8,6 +9,7 @@ import FeedSearch from '@/components/feed/FeedSearch';
 
 function TrendingContent() {
   const { filters } = useFeedContext();
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   
   // Convert FeedFilters to FeedParams for the API
   const params = {
@@ -19,7 +21,14 @@ function TrendingContent() {
     page: filters.page,
   };
 
-  const { data, isLoading, error, isError, refetch, isRefetching } = useTrending(params);
+  const { data, isLoading, error, isError, refetch, isRefetching, dataUpdatedAt } = useTrending(params);
+
+  // Update last updated timestamp when data changes
+  useEffect(() => {
+    if (dataUpdatedAt) {
+      setLastUpdated(new Date(dataUpdatedAt));
+    }
+  }, [dataUpdatedAt]);
 
   const handleRetry = () => {
     refetch();
@@ -43,6 +52,7 @@ function TrendingContent() {
         onLoadMore={data?.hasMore ? handleLoadMore : undefined}
         isRetrying={isRefetching}
         showTimeWindowPills={true}
+        lastUpdated={lastUpdated}
       />
     </>
   );

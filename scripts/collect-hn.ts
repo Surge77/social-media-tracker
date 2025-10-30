@@ -6,6 +6,9 @@
 //   --concurrent <number>   Number of concurrent requests (default: 5)
 //   --dry-run              Collect but don't store in database
 
+// Load environment variables from .env file
+import 'dotenv/config'
+
 import { HackerNewsCollector } from '../src/lib/collectors/hackernews'
 import { deduplicateAndStore } from '../src/lib/collectors/utils/deduplication'
 import { logInfo, logError, logCollectionComplete } from '../src/lib/collectors/utils/logger'

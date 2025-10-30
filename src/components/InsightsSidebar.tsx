@@ -2,8 +2,18 @@
 
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTrending } from '@/hooks/useTrending';
 
 const InsightsSidebar = () => {
+  // Fetch top 3 trending items
+  const { data: topTrending, isLoading, refetch } = useTrending({
+    window: '24h',
+    sort: 'trending',
+    limit: 3,
+  });
+
+  const topItems = topTrending?.items || [];
+
   return (
     <aside className="w-72 border-l border-border bg-background/50 backdrop-blur-sm p-6 space-y-6">
       <div className="glass-card rounded-xl p-4 space-y-3">
@@ -66,24 +76,24 @@ const InsightsSidebar = () => {
           <span>🏆</span> Top Today
         </h3>
         <div className="space-y-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">1. OpenAI News</p>
-              <p className="text-xs text-muted-foreground">2,340 pts</p>
-            </div>
-          </div>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">2. Tech Layoffs</p>
-              <p className="text-xs text-muted-foreground">1,890 pts</p>
-            </div>
-          </div>
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">3. Security Breach</p>
-              <p className="text-xs text-muted-foreground">1,567 pts</p>
-            </div>
-          </div>
+          {isLoading ? (
+            <div className="text-xs text-muted-foreground">Loading...</div>
+          ) : topItems.length > 0 ? (
+            topItems.map((item, index) => (
+              <div key={item.id} className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {index + 1}. {item.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {item.score} pts · {item.source}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-xs text-muted-foreground">No trending items</div>
+          )}
         </div>
       </div>
 
@@ -100,8 +110,14 @@ const InsightsSidebar = () => {
             <span className="text-muted-foreground">Last Update:</span>
             <span className="font-medium text-foreground">10:34 AM</span>
           </div>
-          <Button size="sm" variant="outline" className="w-full mt-2 gap-2">
-            <RefreshCw className="h-3.5 w-3.5" />
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="w-full mt-2 gap-2" 
+            onClick={() => refetch()}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>

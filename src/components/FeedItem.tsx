@@ -6,6 +6,7 @@ import ExplanationChip from "./ExplanationChip";
 
 interface FeedItemProps {
   title: string;
+  url: string;
   summary: string;
   score: number;
   comments: number;
@@ -19,6 +20,7 @@ interface FeedItemProps {
 
 const FeedItem = ({
   title,
+  url,
   summary,
   score,
   comments,
@@ -37,9 +39,14 @@ const FeedItem = ({
         ))}
       </div>
 
-      <h3 className="text-xl font-bold text-foreground mb-3 hover:text-primary transition-colors cursor-pointer">
+      <a 
+        href={url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="text-xl font-bold text-foreground mb-3 hover:text-primary transition-colors cursor-pointer block"
+      >
         {title}
-      </h3>
+      </a>
 
       <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
         {summary}
@@ -79,8 +86,15 @@ const FeedItem = ({
         <Button size="sm" variant="secondary" className="gap-2">
           <span>🔍</span> Explain
         </Button>
-        <Button size="sm" variant="outline" className="gap-2">
-          <ExternalLink className="h-3.5 w-3.5" /> Visit
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="gap-2"
+          asChild
+        >
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            <ExternalLink className="h-3.5 w-3.5" /> Visit
+          </a>
         </Button>
         <Button size="sm" variant="ghost" className="gap-2">
           📋 Copy

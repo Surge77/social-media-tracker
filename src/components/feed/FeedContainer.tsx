@@ -20,7 +20,7 @@ const FeedContainer = ({ children, initialFilters = {} }: FeedContainerProps) =>
     if (!searchParams) {
       return {
         sources: initialFilters.sources,
-        window: initialFilters.window || '1h',
+        window: initialFilters.window || '24h',
         sort: initialFilters.sort || 'trending',
         search: initialFilters.search,
         limit: initialFilters.limit || 20,
@@ -37,7 +37,7 @@ const FeedContainer = ({ children, initialFilters = {} }: FeedContainerProps) =>
 
     return {
       sources: sourcesParam ? sourcesParam.split(',') : initialFilters.sources,
-      window: windowParam || initialFilters.window || '1h',
+      window: windowParam || initialFilters.window || '24h',
       sort: sortParam || initialFilters.sort || 'trending',
       search: searchParam || initialFilters.search,
       limit: limitParam ? parseInt(limitParam, 10) : initialFilters.limit || 20,
@@ -55,7 +55,7 @@ const FeedContainer = ({ children, initialFilters = {} }: FeedContainerProps) =>
       params.set('sources', updatedFilters.sources.join(','));
     }
     
-    if (updatedFilters.window && updatedFilters.window !== '1h') {
+    if (updatedFilters.window && updatedFilters.window !== '24h') {
       params.set('window', updatedFilters.window);
     }
     

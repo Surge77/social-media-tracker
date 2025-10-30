@@ -6,6 +6,7 @@ import TimeWindowPills from "../TimeWindowPills";
 import FeedItem from "../FeedItem";
 import FeedSkeleton from './FeedSkeleton';
 import FeedError from './FeedError';
+import RefreshControls from './RefreshControls';
 import { FeedResponse } from './types';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
@@ -17,6 +18,7 @@ interface FeedListProps {
   onRetry?: () => void;
   showTimeWindowPills?: boolean;
   isRetrying?: boolean;
+  lastUpdated?: Date;
 }
 
 const FeedList = ({ 
@@ -26,7 +28,8 @@ const FeedList = ({
   onLoadMore, 
   onRetry,
   showTimeWindowPills = true,
-  isRetrying = false
+  isRetrying = false,
+  lastUpdated
 }: FeedListProps) => {
   const [retryCount, setRetryCount] = useState(0);
   const prefersReducedMotion = useReducedMotion();
@@ -99,14 +102,17 @@ const FeedList = ({
 
   return (
     <main className="flex-1 p-6 space-y-6">
+      {/* Refresh controls - only shown when not loading and no error */}
+      <RefreshControls
+        isRefetching={isRetrying}
+        onRefresh={onRetry || (() => {})}
+        totalItems={data?.total}
+        lastUpdated={lastUpdated}
+      />
+
       {showTimeWindowPills && (
         <div className="space-y-4">
           <TimeWindowPills />
-          
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="h-2 w-2 rounded-full bg-success animate-pulse-glow"></span>
-            <span>Live feed • {data.total} items • Updated just now</span>
-          </div>
         </div>
       )}
 
