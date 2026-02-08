@@ -1,39 +1,26 @@
-# Dev Career Intelligence Platform - Landing Page
+# DevTrends - Developer Career Intelligence Platform
 
-> Clean landing page ready for implementing the Developer Career Intelligence Platform from PIVOT_STRATEGY.md
+> Track technology trends, job market insights, and career opportunities in real-time
 
-## 📚 Documentation
+## 🎯 What It Does
 
-- **PIVOT_STRATEGY.md** - Complete pivot strategy with 5 focused directions for building the Dev Career Intelligence Platform
+DevTrends aggregates data from multiple sources (GitHub, Hacker News, Stack Overflow, Dev.to, NewsAPI, job boards) to provide developers with:
 
-## 🎨 What's Included
-
-This project contains a beautiful, fully functional landing page with:
-
-- Modern hero section with floating icons
-- Bento grid features section
-- Dark/light theme toggle with smooth wave transition
-- Fully responsive design
-- Accessibility features
-- Smooth animations (respects prefers-reduced-motion)
+- **Real-time technology trend tracking** with scoring and velocity metrics
+- **Job market insights** including salary data and demand trends
+- **Personalized learning roadmaps** based on your skills and market trends
+- **Technology comparisons** to help you make informed career decisions
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **Next.js 16.1.5** - React framework with App Router and Turbopack
+- **Next.js 16.1.5** - React framework with App Router
 - **React 19.1.0** - UI library
 - **TypeScript 5** - Type safety
-- **Tailwind CSS 3.4.17** - Utility-first CSS
-- **Framer Motion 12.23.24** - Animation library
-- **Next Themes 0.3.0** - Dark mode support
-- **Lucide React 0.462.0** - Icon library
-
-### UI Components
-- **Radix UI React Slot 1.2.3** - Accessible component primitives
-- **CVA 0.7.1** (Class Variance Authority) - Component variants
-- **Tailwind Merge 2.6.0** - Smart class merging
-- **Tailwindcss Animate 1.0.7** - Animation utilities
-- **clsx 2.1.1** - Conditional classnames
+- **Tailwind CSS 3.4.17** - Styling
+- **Framer Motion 12.23.24** - Animations
+- **Supabase** - Database and authentication
+- **TanStack Query** - Data fetching and caching
+- **Recharts** - Data visualization
 
 ## 🚀 Getting Started
 
@@ -41,20 +28,14 @@ This project contains a beautiful, fully functional landing page with:
 # Install dependencies
 npm install
 
+# Set up environment variables
+cp .env.example .env.local
+# Add your API keys to .env.local
+
 # Run development server
 npm run dev
 
 # Open http://localhost:3000
-```
-
-### Build for Production
-
-```bash
-# Create production build
-npm run build
-
-# Start production server
-npm start
 ```
 
 ## 📁 Project Structure
@@ -62,75 +43,38 @@ npm start
 ```
 /
 ├── src/
-│   ├── app/
-│   │   ├── page.tsx           # Landing page
-│   │   ├── layout.tsx         # Root layout
-│   │   ├── globals.css        # Global styles
-│   │   ├── providers.tsx      # Theme provider
-│   │   └── favicon.ico        # Favicon
-│   ├── components/
-│   │   ├── Header.tsx         # Header with navigation
-│   │   ├── Hero.tsx           # Hero section
-│   │   ├── BentoFeatures.tsx  # Features grid
-│   │   ├── Footer.tsx         # Footer
-│   │   ├── FloatingIcons.tsx  # Animated icons
-│   │   ├── AnimatedCTA.tsx    # Animated button
-│   │   ├── SharedTitle.tsx    # Shared title component
-│   │   ├── ThemeToggle.tsx    # Theme switcher
-│   │   ├── ThemeWaveTransition.tsx  # Theme transition effect
-│   │   └── ui/                # UI primitives
-│   │       ├── button.tsx
-│   │       ├── badge.tsx
-│   │       └── card.tsx
-│   ├── hooks/
-│   │   └── useReducedMotion.ts  # Accessibility hook
-│   └── lib/
-│       └── utils.ts           # Utility functions
-├── PIVOT_STRATEGY.md          # Strategic direction
-├── README.md                  # This file
-├── package.json               # Dependencies
-├── tailwind.config.ts         # Tailwind configuration
-├── next.config.ts             # Next.js configuration
-├── tsconfig.json              # TypeScript configuration
-└── .env.example               # Environment variables template
+│   ├── app/              # Next.js pages and layouts
+│   ├── components/       # React components
+│   ├── hooks/            # Custom React hooks
+│   └── lib/              # Utilities and helpers
+├── PROJECT_FLOW.md       # Complete data flow documentation
+├── PIVOT_STRATEGY.md     # Strategic direction
+├── TECH_STACK_PLAN.md    # Technical architecture
+└── DATA_SOURCES_PLAN.md  # API integration details
 ```
 
-**Total: ~20 source files** (clean and minimal!)
+## 📚 Documentation
 
+- **[PROJECT_FLOW.md](PROJECT_FLOW.md)** - Complete data flow from input to output
+- **[PIVOT_STRATEGY.md](PIVOT_STRATEGY.md)** - Strategic direction and implementation plan
+- **[TECH_STACK_PLAN.md](TECH_STACK_PLAN.md)** - Technical architecture and decisions
+- **[DATA_SOURCES_PLAN.md](DATA_SOURCES_PLAN.md)** - API sources and integration details
 
-## 🎯 Next Steps
+## 🔑 Required API Keys
 
-1. **Review PIVOT_STRATEGY.md** - Choose your implementation direction (DevTrends recommended)
-2. **Customize the landing page** - Update hero text, features, and colors
-3. **Start building features** - Add dashboard, API routes, and database integration
-4. **Deploy** - The landing page is production-ready and can stay as your homepage
+Add these to your `.env.local`:
 
-## 🎨 Customization
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
-### Update Content
-- **Hero section**: Edit `src/components/Hero.tsx`
-- **Features**: Edit `src/components/BentoFeatures.tsx`
-- **Navigation**: Edit `src/components/Header.tsx`
-- **Footer**: Edit `src/components/Footer.tsx`
-
-### Change Colors
-Edit `src/app/globals.css` to customize the color scheme:
-
-```css
-:root {
-  --primary: 16 100% 60%;  /* Orange - change HSL values */
-  --secondary: 217 91% 60%; /* Blue */
-}
-```
-
-### Add New Pages
-Create a new page in `src/app/`:
-
-```tsx
-// src/app/about/page.tsx
-export default function AboutPage() {
-  return <div>About page content</div>;
-}
+# Data Sources
+GITHUB_TOKEN=
+NEWSAPI_KEY=
+ADZUNA_APP_ID=
+ADZUNA_APP_KEY=
+JSEARCH_API_KEY=
 ```
 
 ## 🚢 Deployment
@@ -138,25 +82,13 @@ export default function AboutPage() {
 ### Vercel (Recommended)
 1. Push code to GitHub
 2. Import project at [vercel.com](https://vercel.com)
-3. Deploy automatically
+3. Add environment variables
+4. Deploy
 
-### Other Platforms
-```bash
-npm run build
-npm start
-```
-
-## 📝 Notes
-
-- All animations respect `prefers-reduced-motion` for accessibility
-- Theme toggle uses smooth wave transition effect
-- Fully responsive design works on all devices
-- Built with TypeScript for type safety
-
-## 📄 License
+## 📝 License
 
 MIT
 
 ---
 
-**Beautiful landing page ready for your dev career intelligence platform! 🚀**
+**Track trends. Make informed decisions. Advance your career.** 🚀
