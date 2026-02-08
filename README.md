@@ -4,11 +4,7 @@
 
 ## 📚 Documentation
 
-Strategic documentation:
-
-- **PIVOT_STRATEGY.md** - Complete pivot strategy with 5 focused directions
-- **REFRAMING_STRATEGY.md** - Reframing strategy document
-- **QUICK_START.md** - Get started quickly with customization tips
+- **PIVOT_STRATEGY.md** - Complete pivot strategy with 5 focused directions for building the Dev Career Intelligence Platform
 
 ## 🎨 What's Included
 
@@ -41,8 +37,6 @@ This project contains a beautiful, fully functional landing page with:
 
 ## 🚀 Getting Started
 
-### Quick Start
-
 ```bash
 # Install dependencies
 npm install
@@ -52,10 +46,6 @@ npm run dev
 
 # Open http://localhost:3000
 ```
-
-**First time?** Run `npm install` then `npm run dev`
-
-**Want to customize?** Check **QUICK_START.md** for tips.
 
 ### Build for Production
 
@@ -97,8 +87,7 @@ npm start
 │   └── lib/
 │       └── utils.ts           # Utility functions
 ├── PIVOT_STRATEGY.md          # Strategic direction
-├── REFRAMING_STRATEGY.md      # Reframing notes
-├── QUICK_START.md             # Quick start guide
+├── README.md                  # This file
 ├── package.json               # Dependencies
 ├── tailwind.config.ts         # Tailwind configuration
 ├── next.config.ts             # Next.js configuration
@@ -106,28 +95,63 @@ npm start
 └── .env.example               # Environment variables template
 ```
 
-**Total: ~25 source files** (clean and focused!)
+**Total: ~20 source files** (clean and minimal!)
 
 
 ## 🎯 Next Steps
 
-1. Review **PIVOT_STRATEGY.md** for implementation direction
-2. Choose your focus (DevTrends recommended)
-3. Start building features on top of this landing page
-4. The landing page is production-ready and can stay as your homepage
+1. **Review PIVOT_STRATEGY.md** - Choose your implementation direction (DevTrends recommended)
+2. **Customize the landing page** - Update hero text, features, and colors
+3. **Start building features** - Add dashboard, API routes, and database integration
+4. **Deploy** - The landing page is production-ready and can stay as your homepage
 
 ## 🎨 Customization
 
-### Colors
-Edit `src/app/globals.css` to customize the color scheme. All colors use HSL format for easy theming.
+### Update Content
+- **Hero section**: Edit `src/components/Hero.tsx`
+- **Features**: Edit `src/components/BentoFeatures.tsx`
+- **Navigation**: Edit `src/components/Header.tsx`
+- **Footer**: Edit `src/components/Footer.tsx`
 
-### Content
-- Update hero text in `src/components/Hero.tsx`
-- Modify features in `src/components/BentoFeatures.tsx`
-- Change navigation in `src/components/Header.tsx`
+### Change Colors
+Edit `src/app/globals.css` to customize the color scheme:
 
-### Animations
-All animations respect `prefers-reduced-motion` for accessibility.
+```css
+:root {
+  --primary: 16 100% 60%;  /* Orange - change HSL values */
+  --secondary: 217 91% 60%; /* Blue */
+}
+```
+
+### Add New Pages
+Create a new page in `src/app/`:
+
+```tsx
+// src/app/about/page.tsx
+export default function AboutPage() {
+  return <div>About page content</div>;
+}
+```
+
+## 🚢 Deployment
+
+### Vercel (Recommended)
+1. Push code to GitHub
+2. Import project at [vercel.com](https://vercel.com)
+3. Deploy automatically
+
+### Other Platforms
+```bash
+npm run build
+npm start
+```
+
+## 📝 Notes
+
+- All animations respect `prefers-reduced-motion` for accessibility
+- Theme toggle uses smooth wave transition effect
+- Fully responsive design works on all devices
+- Built with TypeScript for type safety
 
 ## 📄 License
 
