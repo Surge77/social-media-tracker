@@ -1,19 +1,27 @@
-import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import BentoFeatures from '@/components/BentoFeatures';
-import Footer from '@/components/Footer';
+import HeaderNew from '@/components/landing/HeaderNew';
+import HeroNew from '@/components/landing/HeroNew';
+import DataSourcesBar from '@/components/landing/DataSourcesBar';
+import BentoFeaturesNew from '@/components/landing/BentoFeaturesNew';
+import HowItWorks from '@/components/landing/HowItWorks';
+import LiveDataShowcase from '@/components/landing/LiveDataShowcase';
+import ComparisonTable from '@/components/landing/ComparisonTable';
+import StatsSection from '@/components/landing/StatsSection';
+import FinalCTA from '@/components/landing/FinalCTA';
+import FooterNew from '@/components/landing/FooterNew';
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <Hero />
-      
-      {/* Enhanced Features Section with Bento Grid */}
-      <BentoFeatures />
-      
-      {/* Footer */}
-      <Footer />
+      <HeaderNew />
+      <HeroNew />
+      <DataSourcesBar />
+      <BentoFeaturesNew />
+      <HowItWorks />
+      <LiveDataShowcase />
+      <ComparisonTable />
+      <StatsSection />
+      <FinalCTA />
+      <FooterNew />
     </div>
   );
 }

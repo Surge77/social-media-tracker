@@ -26,6 +26,11 @@ yarn-error.log*
 .env*.local
 .env
 
+# secret files - NEVER commit
+API_keys.txt
+*.secret
+*.key
+
 # vercel
 .vercel
 
