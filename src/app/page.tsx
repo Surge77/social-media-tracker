@@ -2,7 +2,6 @@ import HeaderNew from '@/components/landing/HeaderNew';
 import HeroNew from '@/components/landing/HeroNew';
 import DataSourcesBar from '@/components/landing/DataSourcesBar';
 import BentoFeaturesNew from '@/components/landing/BentoFeaturesNew';
-import HowItWorks from '@/components/landing/HowItWorks';
 import LiveDataShowcase from '@/components/landing/LiveDataShowcase';
 import ComparisonTable from '@/components/landing/ComparisonTable';
 import StatsSection from '@/components/landing/StatsSection';
@@ -16,7 +15,6 @@ export default function HomePage() {
       <HeroNew />
       <DataSourcesBar />
       <BentoFeaturesNew />
-      <HowItWorks />
       <LiveDataShowcase />
       <ComparisonTable />
       <StatsSection />

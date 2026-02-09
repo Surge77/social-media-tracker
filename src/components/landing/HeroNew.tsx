@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import FloatingIcons from '../FloatingIcons';
 import AnimatedCTA from '../AnimatedCTA';
 import { Badge } from '@/components/ui/badge';
-import { Activity, TrendingUp, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 const mockLeaderboard = [
@@ -55,9 +55,12 @@ export default function HeroNew() {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <Badge className="px-4 py-2 text-sm font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15 backdrop-blur-sm">
-              <Activity className="w-3.5 h-3.5 mr-2 animate-pulse" />
-              NOW TRACKING 4,200+ TECH SIGNALS
+            <Badge className="px-4 py-2 text-sm font-medium bg-primary/5 text-primary border border-primary/20 backdrop-blur-sm cursor-default">
+              <span className="relative flex h-2 w-2 mr-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              </span>
+              FREE & OPEN BETA
             </Badge>
           </motion.div>
 
