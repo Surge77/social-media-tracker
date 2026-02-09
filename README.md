@@ -1,28 +1,34 @@
 # DevTrends - Developer Career Intelligence Platform
 
-> Track technology trends, job market insights, and career opportunities in real-time
+> The Bloomberg Terminal for tech trends. Track technology momentum, job market demand, and career signals across 68 data sources.
 
-## 🎯 What It Does
+## What It Does
 
-DevTrends aggregates data from multiple sources (GitHub, Hacker News, Stack Overflow, Dev.to, NewsAPI, job boards) to provide developers with:
+DevTrends aggregates real-time data from GitHub, Hacker News, Stack Overflow, Reddit, Dev.to, RSS feeds, npm, PyPI, and job boards to produce a single **composite trend score** for each technology. Developers use it to:
 
-- **Real-time technology trend tracking** with scoring and velocity metrics
-- **Job market insights** including salary data and demand trends
-- **Personalized learning roadmaps** based on your skills and market trends
-- **Technology comparisons** to help you make informed career decisions
+- **Track 101 technologies** across 8 categories with daily scoring
+- **Compare technologies** side-by-side with historical trend data
+- **Monitor job market demand** from Adzuna, JSearch, Remotive, and Arbeitnow
+- **Discover rising/falling trends** using z-score normalization and momentum signals
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Next.js 16.1.5** - React framework with App Router
-- **React 19.1.0** - UI library
-- **TypeScript 5** - Type safety
-- **Tailwind CSS 3.4.17** - Styling
-- **Framer Motion 12.23.24** - Animations
-- **Supabase** - Database and authentication
-- **TanStack Query** - Data fetching and caching
-- **Recharts** - Data visualization
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16.1.5 (App Router, React 19) |
+| Language | TypeScript 5 (strict mode) |
+| Database | Supabase (PostgreSQL + RLS) |
+| Styling | Tailwind CSS 3.4 + shadcn/ui |
+| Animation | Framer Motion 12.x |
+| Data Fetching | TanStack React Query 5.x |
+| Validation | Zod 4.x |
+| Charts | Recharts 3.x |
+| Sentiment | wink-sentiment |
+| Statistics | simple-statistics |
+| RSS Parsing | rss-parser |
+| Deployment | Vercel |
 
-## 🚀 Getting Started
+## Getting Started
 
 ```bash
 # Install dependencies
@@ -30,65 +36,111 @@ npm install
 
 # Set up environment variables
 cp .env.example .env.local
-# Add your API keys to .env.local
+# Fill in your API keys (see .env.example for full list)
 
-# Run development server
+# Run development server (Turbopack)
 npm run dev
 
 # Open http://localhost:3000
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-/
-├── src/
-│   ├── app/              # Next.js pages and layouts
-│   ├── components/       # React components
-│   ├── hooks/            # Custom React hooks
-│   └── lib/              # Utilities and helpers
-├── PROJECT_FLOW.md       # Complete data flow documentation
-├── PIVOT_STRATEGY.md     # Strategic direction
-├── TECH_STACK_PLAN.md    # Technical architecture
-└── DATA_SOURCES_PLAN.md  # API integration details
+src/
+├── app/
+│   ├── page.tsx                 # Landing page
+│   ├── layout.tsx               # Root layout (Geist fonts, providers)
+│   ├── providers.tsx            # Theme + transitions
+│   ├── api/
+│   │   └── test/route.ts       # Supabase connection test
+│   └── globals.css              # Design tokens (HSL variables)
+│
+├── components/
+│   ├── ui/                      # shadcn/ui primitives (button, badge, card)
+│   ├── Header.tsx               # Sticky nav + theme toggle
+│   ├── Hero.tsx                 # Hero section with floating icons
+│   ├── BentoFeatures.tsx        # Feature grid with hover animations
+│   ├── Footer.tsx               # Site footer
+│   └── ThemeWaveTransition.tsx  # Theme switch animation
+│
+├── lib/
+│   ├── supabase/
+│   │   ├── server.ts            # Server component client
+│   │   ├── client.ts            # Browser client
+│   │   └── admin.ts             # Service role client (bypasses RLS)
+│   ├── constants/
+│   │   ├── technologies.ts      # 101 technology taxonomy entries
+│   │   └── data-sources.ts      # 68 data source configurations
+│   └── utils.ts                 # cn() utility
+│
+├── types/
+│   └── index.ts                 # Core TypeScript interfaces
+│
+└── hooks/
+    └── useReducedMotion.ts      # Accessibility: reduced motion check
 ```
 
-## 📚 Documentation
+## Database Schema
 
-- **[PROJECT_FLOW.md](PROJECT_FLOW.md)** - Complete data flow from input to output
-- **[PIVOT_STRATEGY.md](PIVOT_STRATEGY.md)** - Strategic direction and implementation plan
-- **[TECH_STACK_PLAN.md](TECH_STACK_PLAN.md)** - Technical architecture and decisions
-- **[DATA_SOURCES_PLAN.md](DATA_SOURCES_PLAN.md)** - API sources and integration details
+4 tables in Supabase (PostgreSQL) with RLS enabled:
 
-## 🔑 Required API Keys
+| Table | Purpose | Rows |
+|-------|---------|------|
+| `technologies` | 101-tech taxonomy with full metadata | 100 |
+| `data_points` | Raw metrics from all sources | Growing |
+| `daily_scores` | Pre-computed composite scores per tech/day | Growing |
+| `fetch_logs` | Operational tracking for data pipelines | Growing |
 
-Add these to your `.env.local`:
+## Data Sources (68 total)
+
+- **24 RSS Feeds** - TechCrunch, HN, Lobste.rs, DEV.to, engineering blogs
+- **7 Public APIs** - Hacker News, Dev.to, Remotive, Lobste.rs, Product Hunt
+- **10 Package Registries** - npm, PyPI, crates.io, NuGet, pub.dev, RubyGems
+- **7 Authenticated APIs** - GitHub, Stack Overflow, Reddit, NewsAPI, Adzuna, JSearch
+- **7 Supplementary** - GitHub Trending, TIOBE, State of JS, RedMonk
+
+## API Keys
+
+See `.env.example` for the full template. Required keys:
 
 ```env
-# Supabase
+# Supabase (required)
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
-# Data Sources
+# Data Sources (add as needed)
 GITHUB_TOKEN=
+STACKOVERFLOW_API_KEY=
 NEWSAPI_KEY=
 ADZUNA_APP_ID=
-ADZUNA_APP_KEY=
-JSEARCH_API_KEY=
+ADZUNA_API_KEY=
+RAPIDAPI_KEY=
 ```
 
-## 🚢 Deployment
+## Documentation
 
-### Vercel (Recommended)
-1. Push code to GitHub
-2. Import project at [vercel.com](https://vercel.com)
-3. Add environment variables
-4. Deploy
+| File | Description |
+|------|-------------|
+| [MVP_SPEC.md](MVP_SPEC.md) | Master spec — database, APIs, algorithms, build plan |
+| [ALGORITHMS_AND_ML.md](ALGORITHMS_AND_ML.md) | Scoring engine, sentiment analysis, trend detection |
+| [PRODUCT_STRATEGY.md](PRODUCT_STRATEGY.md) | Business model and monetization strategy |
+| [BUILD_GUIDE.md](BUILD_GUIDE.md) | Phase-by-phase implementation guide |
+| [CLAUDE.md](CLAUDE.md) | Project conventions and architecture reference |
 
-## 📝 License
+## Deployment
+
+**Vercel (Recommended):**
+1. Push to GitHub
+2. Import at [vercel.com](https://vercel.com)
+3. Add environment variables from `.env.example`
+4. Deploy — cron jobs auto-configured via `vercel.json`
+
+## License
 
 MIT
 
 ---
 
-**Track trends. Make informed decisions. Advance your career.** 🚀
+**Track trends. Make informed decisions. Advance your career.**
