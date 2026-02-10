@@ -1,6 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
 
 export default function DashboardLayout({
   children,
@@ -13,11 +14,8 @@ export default function DashboardLayout({
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-orange-500 to-pink-500">
-              <span className="text-lg font-bold text-white">D</span>
-            </div>
-            <span className="text-xl font-bold">DevTrends</span>
+          <Link href="/" className="flex items-center">
+            <DevTrendsLogo size="md" />
           </Link>
 
           {/* Navigation */}

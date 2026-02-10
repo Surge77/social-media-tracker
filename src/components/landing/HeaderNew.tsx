@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp } from 'lucide-react';
+import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo';
 import AnimatedCTA from '../AnimatedCTA';
 import { ThemeToggle } from '../ThemeToggle';
 
@@ -12,10 +12,7 @@ export default function HeaderNew() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary transition-colors" />
-              <h1 className="text-lg font-bold text-foreground transition-colors">DevTrends</h1>
-            </div>
+            <DevTrendsLogo size="sm" />
             <Badge variant="secondary" className="text-[10px] px-2 py-0.5 transition-colors">
               BETA
             </Badge>

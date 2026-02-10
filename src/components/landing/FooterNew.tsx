@@ -1,7 +1,7 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
 import Link from 'next/link';
+import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo';
 
 const footerLinks = {
   Product: [
@@ -32,9 +32,8 @@ export default function FooterNew() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-8">
           {/* Brand column */}
           <div className="md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <span className="text-lg font-bold text-foreground">DevTrends</span>
+            <div className="mb-4">
+              <DevTrendsLogo size="sm" />
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               The intelligence layer for your technical career. Powered by real data, built for developers.
