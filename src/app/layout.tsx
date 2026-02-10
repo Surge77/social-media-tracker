@@ -14,8 +14,40 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DevTrends",
-  description: "Track and analyze trends in real-time",
+  title: {
+    default: 'DevTrends — Developer Career Intelligence',
+    template: '%s | DevTrends',
+  },
+  description:
+    'Track technology trends across GitHub, Hacker News, Stack Overflow, and job boards. Make smarter career decisions with data-driven insights.',
+  keywords: [
+    'developer trends',
+    'technology tracking',
+    'career intelligence',
+    'programming languages',
+    'tech job market',
+    'GitHub trends',
+  ],
+  authors: [{ name: 'DevTrends' }],
+  metadataBase: new URL('https://devtrends.dev'),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'DevTrends',
+    title: 'DevTrends — Developer Career Intelligence',
+    description:
+      'Track technology trends across GitHub, Hacker News, Stack Overflow, and job boards.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DevTrends — Developer Career Intelligence',
+    description:
+      'Track technology trends across GitHub, Hacker News, Stack Overflow, and job boards.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
