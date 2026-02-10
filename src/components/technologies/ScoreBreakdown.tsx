@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
+import { getSubScoreInsight } from '@/lib/insights'
 import { Code, Users, Briefcase, Package } from 'lucide-react'
 
 interface ScoreBreakdownProps {
@@ -107,6 +108,11 @@ export const ScoreBreakdown = React.forwardRef<HTMLDivElement, ScoreBreakdownPro
                   className={cn('h-full rounded-full', item.color.replace('text-', 'bg-'))}
                 />
               </div>
+
+              {/* Plain-English insight */}
+              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
+                {getSubScoreInsight(item.key, score)}
+              </p>
             </motion.div>
           )
         })}

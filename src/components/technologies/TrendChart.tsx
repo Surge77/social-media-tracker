@@ -35,8 +35,8 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
     }
 
     // Format date for display
-    const formatDate = (dateStr: string) => {
-      const date = new Date(dateStr)
+    const formatDate = (dateStr: unknown) => {
+      const date = new Date(String(dateStr))
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     }
 
@@ -69,7 +69,7 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
                 fontSize: '0.875rem',
               }}
               labelFormatter={formatDate}
-              formatter={(value: number) => [Math.round(value), '']}
+              formatter={(value: number | undefined) => [Math.round(value ?? 0), '']}
             />
             <Legend
               wrapperStyle={{ fontSize: '0.875rem' }}

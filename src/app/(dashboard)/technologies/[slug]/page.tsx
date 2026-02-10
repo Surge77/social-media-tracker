@@ -3,18 +3,19 @@
 import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
-import { ConfidenceBadge } from '@/components/shared/ConfidenceBadge'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { DataFreshness } from '@/components/shared/DataFreshness'
 import { MomentumBadge } from '@/components/technologies/MomentumBadge'
 import { ScoreBreakdown } from '@/components/technologies/ScoreBreakdown'
 import { TrendChart } from '@/components/technologies/TrendChart'
 import { SourceSignalCard } from '@/components/technologies/SourceSignalCard'
 import { RelatedTechnologies } from '@/components/technologies/RelatedTechnologies'
+import { getRecommendation, getMomentumInsight } from '@/lib/insights'
 import type { TechnologyDetail } from '@/types'
 
 export default function TechnologyDetailPage() {
@@ -125,9 +126,14 @@ export default function TechnologyDetailPage() {
 
         {/* Badges & Meta */}
         <div className="flex flex-wrap items-center gap-3">
+          <StatusBadge
+            compositeScore={current_scores?.composite_score ?? null}
+            momentum={current_scores?.momentum ?? null}
+            dataCompleteness={current_scores?.data_completeness ?? null}
+            size="md"
+          />
           <CategoryBadge category={technology.category} size="md" />
           <MomentumBadge momentum={current_scores?.momentum ?? null} size="md" />
-          <ConfidenceBadge completeness={current_scores?.data_completeness ?? null} size="md" />
           {technology.website_url && (
             <a
               href={technology.website_url}
@@ -154,11 +160,44 @@ export default function TechnologyDetailPage() {
         </div>
       </motion.div>
 
-      {/* Score Breakdown */}
+      {/* Recommendation Card */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.1 }}
+        className="mb-8"
+      >
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-5 backdrop-blur-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-md bg-primary/10 p-2">
+              <Lightbulb className="h-5 w-5 text-primary" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="mb-1 text-sm font-semibold text-foreground">Career Insight</h2>
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {getRecommendation(
+                  current_scores?.composite_score ?? null,
+                  current_scores?.momentum ?? null,
+                  current_scores?.jobs_score ?? null,
+                  current_scores?.community_score ?? null,
+                  current_scores?.data_completeness ?? null
+                )}
+              </p>
+              {current_scores?.momentum !== null && current_scores?.momentum !== undefined && (
+                <p className="mt-2 text-xs text-muted-foreground/80">
+                  Momentum: {getMomentumInsight(current_scores.momentum)}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Score Breakdown */}
+      <motion.section
+        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.2 }}
         className="mb-8"
       >
         <h2 className="mb-4 text-xl font-semibold text-foreground">Score Breakdown</h2>
@@ -174,7 +213,7 @@ export default function TechnologyDetailPage() {
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.2 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.3 }}
         className="mb-8"
       >
         <h2 className="mb-4 text-xl font-semibold text-foreground">90-Day Trend</h2>
@@ -187,7 +226,7 @@ export default function TechnologyDetailPage() {
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.3 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.4 }}
         className="mb-8"
       >
         <h2 className="mb-4 text-xl font-semibold text-foreground">Latest Signals</h2>
@@ -263,7 +302,7 @@ export default function TechnologyDetailPage() {
         <motion.section
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.4 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.5 }}
         >
           <h2 className="mb-4 text-xl font-semibold text-foreground">Related Technologies</h2>
           <RelatedTechnologies technologies={related_technologies} />

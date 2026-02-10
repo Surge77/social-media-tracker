@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { Suspense, useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Share2, Copy, Check } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { TechSelector } from '@/components/compare/TechSelector'
 import { CompareChart } from '@/components/compare/CompareChart'
@@ -11,6 +12,25 @@ import { CompareTable } from '@/components/compare/CompareTable'
 import type { TechnologyWithScore, CompareData } from '@/types'
 
 export default function ComparePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto max-w-7xl px-4 py-8">
+          <div className="flex min-h-[600px] items-center justify-center">
+            <div className="text-center">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+              <p className="mt-4 text-sm text-muted-foreground">Loading comparison...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <ComparePageContent />
+    </Suspense>
+  )
+}
+
+function ComparePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const prefersReducedMotion = useReducedMotion()
@@ -271,8 +291,4 @@ export default function ComparePage() {
       )}
     </div>
   )
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ')
 }
