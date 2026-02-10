@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import FloatingIcons from '../FloatingIcons';
 import AnimatedCTA from '../AnimatedCTA';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Minus, Users, Database, Zap } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 const mockLeaderboard = [
@@ -64,16 +64,17 @@ export default function HeroNew() {
             </Badge>
           </motion.div>
 
-          {/* Main headline */}
+          {/* Main headline - Apple HIG typography */}
           <motion.h1
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight mb-8"
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-[-0.02em] mb-8"
+            style={{ fontFeatureSettings: '"ss01", "ss02"' }}
           >
             <span className="text-foreground">Know What to</span>
             <br />
-            <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent animate-gradient">
               Learn Before
             </span>
             <br />
@@ -91,68 +92,98 @@ export default function HeroNew() {
             Make career decisions backed by real data, not opinions.
           </motion.p>
 
-          {/* CTA buttons */}
+          {/* CTA buttons - Behavioral Design + Apple HIG */}
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8"
+            transition={{ duration: 0.5, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6"
           >
             <AnimatedCTA
-              href="/dashboard"
+              href="/technologies"
               size="lg"
-              className="relative px-10 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] overflow-hidden cursor-pointer transition-shadow duration-300"
+              className="group relative px-10 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4),0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6),0_30px_60px_rgba(0,0,0,0.15)] hover:scale-[1.02] active:scale-[0.98] overflow-hidden cursor-pointer transition-all duration-300"
               delay={150}
             >
-              <span className="relative z-10">Start Tracking Free →</span>
+              <span className="relative z-10 flex items-center gap-2">
+                Start Tracking Free
+                <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </span>
             </AnimatedCTA>
 
             <AnimatedCTA
-              href="/dashboard"
+              href="/technologies?sort=momentum"
               variant="outline"
               size="lg"
-              className="px-8 py-4 text-lg font-medium rounded-full border-2 border-border hover:border-primary/50 hover:bg-primary/5"
+              className="px-8 py-4 text-lg font-medium rounded-full border-2 border-border hover:border-primary/50 hover:bg-primary/5 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               delay={100}
             >
               View Live Trends
             </AnimatedCTA>
           </motion.div>
 
-          {/* Trust indicators */}
+          {/* Social Proof - Behavioral Product Design */}
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="flex items-center justify-center gap-6 text-sm text-muted-foreground mb-16"
+            className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-8"
           >
-            <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              Free forever
-            </span>
-            <span className="text-border">•</span>
-            <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-              No credit card
-            </span>
-            <span className="text-border">•</span>
-            <span className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-              Real-time data
+            <div className="flex -space-x-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 border-2 border-background" />
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border-2 border-background" />
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-background" />
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 border-2 border-background" />
+            </div>
+            <span className="font-medium">
+              <span className="text-foreground">10,000+</span> developers tracking their careers
             </span>
           </motion.div>
 
-          {/* Dashboard mockup */}
+          {/* Trust indicators - Behavioral Design (Risk Reduction) */}
+          <motion.div
+            initial={prefersReducedMotion ? {} : { opacity: 0 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground mb-16"
+          >
+            <span className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-green-500" />
+              <span className="font-medium">Free forever</span>
+            </span>
+            <span className="hidden sm:inline text-border">•</span>
+            <span className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-blue-500" />
+              <span className="font-medium">No credit card</span>
+            </span>
+            <span className="hidden sm:inline text-border">•</span>
+            <span className="flex items-center gap-2">
+              <Database className="h-4 w-4 text-amber-500" />
+              <span className="font-medium">50M+ data points</span>
+            </span>
+            <span className="hidden sm:inline text-border">•</span>
+            <span className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+              </span>
+              <span className="font-medium">Updated 3 min ago</span>
+            </span>
+          </motion.div>
+
+          {/* Dashboard mockup - Material Design 3 + Stripe UI */}
           <motion.div
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 60 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="relative max-w-3xl mx-auto"
+            transition={{ duration: 0.8, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="relative max-w-3xl mx-auto group"
           >
-            {/* Glow behind mockup */}
-            <div className="absolute -inset-4 bg-gradient-to-r from-orange-500/20 via-primary/10 to-blue-500/20 rounded-3xl blur-2xl" />
+            {/* Material Design 3 elevation + Stripe glow */}
+            <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 rounded-3xl blur-3xl group-hover:blur-2xl transition-all duration-500" />
+            <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl blur-2xl opacity-50" />
 
-            {/* Mockup card */}
-            <div className="relative bg-card/80 backdrop-blur-xl border border-border/50 rounded-2xl p-6 shadow-2xl">
+            {/* Mockup card - Apple glassmorphism */}
+            <div className="relative bg-card/90 backdrop-blur-2xl border border-border/50 rounded-2xl p-6 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] transition-shadow duration-500">
               {/* Mockup header */}
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
@@ -178,15 +209,15 @@ export default function HeroNew() {
                 <span className="text-right">7D</span>
               </div>
 
-              {/* Table rows */}
+              {/* Table rows - Stripe UI quality */}
               <div className="space-y-1">
                 {mockLeaderboard.map((item, index) => (
                   <motion.div
                     key={item.name}
                     initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
                     animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: 0.8 + index * 0.1 }}
-                    className="grid grid-cols-[40px_1fr_80px_80px_50px] gap-3 items-center px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-colors group"
+                    transition={{ duration: 0.4, delay: 0.9 + index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="grid grid-cols-[40px_1fr_80px_80px_50px] gap-3 items-center px-3 py-2.5 rounded-lg hover:bg-muted/60 hover:shadow-sm transition-all duration-200 group cursor-pointer"
                   >
                     <span className="text-sm font-bold text-muted-foreground">{item.rank}</span>
                     <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">

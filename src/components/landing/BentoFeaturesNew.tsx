@@ -222,8 +222,9 @@ export default function BentoFeaturesNew() {
                   transition={{ duration: 0.5, delay: index * 0.08 }}
                   className={feature.large ? 'lg:col-span-2' : ''}
                 >
-                  <div className="group h-full border border-border/50 hover:border-primary/40 rounded-2xl p-5 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 overflow-hidden relative bg-card/50 backdrop-blur-sm">
+                  <div className="group h-full border border-border/50 hover:border-primary/40 rounded-2xl p-5 transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden relative bg-card/50 backdrop-blur-sm elevation-2 hover:elevation-4">
                     <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                     <div className="relative">
                       <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
