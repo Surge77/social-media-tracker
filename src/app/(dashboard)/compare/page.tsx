@@ -44,7 +44,8 @@ export default function ComparePage() {
 
   // Fetch comparison data when selections change
   useEffect(() => {
-    if (selectedSlugs.length === 0) {
+    // Don't fetch if less than 2 technologies selected
+    if (selectedSlugs.length < 2) {
       setCompareData(null)
       setIsLoading(false)
       return
@@ -52,9 +53,13 @@ export default function ComparePage() {
 
     async function fetchCompareData() {
       setIsLoading(true)
+      setError(null) // Clear any previous errors
       try {
         const response = await fetch(`/api/compare?techs=${selectedSlugs.join(',')}`)
-        if (!response.ok) throw new Error('Failed to fetch comparison data')
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to fetch comparison data')
+        }
 
         const data = await response.json()
         setCompareData(data)
@@ -107,14 +112,20 @@ export default function ComparePage() {
     }))
   }, [compareData])
 
-  if (error) {
+  // Don't show error page if we just don't have technologies selected
+  const showErrorPage = error && selectedSlugs.length >= 2
+
+  if (showErrorPage) {
     return (
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <div className="flex min-h-[600px] items-center justify-center">
           <div className="text-center">
             <p className="text-sm text-destructive">Error: {error}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                setError(null)
+                window.location.reload()
+              }}
               className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Retry
