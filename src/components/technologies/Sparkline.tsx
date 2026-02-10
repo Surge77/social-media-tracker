@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { LineChart, Line, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, YAxis, ResponsiveContainer, ReferenceLine } from 'recharts'
 
 interface SparklineProps {
   data: number[]
@@ -33,15 +33,19 @@ export const Sparkline = React.forwardRef<HTMLDivElement, SparklineProps>(
     // Determine color based on trend (first vs last value)
     const trend = data[data.length - 1] - data[0]
     const strokeColor = color || (
-      trend > 5 ? '#10B981' : // emerald-500
-      trend < -5 ? '#EF4444' : // red-500
-      '#64748B' // slate-500
+      trend > 3 ? '#10B981' : // emerald-500 (rising)
+      trend < -3 ? '#EF4444' : // red-500 (declining)
+      '#64748B' // slate-500 (stable)
     )
 
     return (
       <div ref={ref} className={className} style={{ width, height }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
+            {/* Fixed Y-domain 0-100 so all sparklines are comparable */}
+            <YAxis domain={[0, 100]} hide />
+            {/* Subtle midpoint reference */}
+            <ReferenceLine y={50} stroke="#64748B" strokeOpacity={0.15} />
             <Line
               type="monotone"
               dataKey="value"
