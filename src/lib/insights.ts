@@ -8,13 +8,13 @@
 // ---- Status Labels ----
 
 export type TechStatus =
-  | 'rising-star'
-  | 'hot-right-now'
-  | 'stable-leader'
-  | 'worth-watching'
-  | 'cooling-down'
-  | 'declining'
-  | 'new-entry'
+  | 'strong-growth'
+  | 'high-demand'
+  | 'established'
+  | 'emerging'
+  | 'slowing'
+  | 'low-demand'
+  | 'collecting-data'
 
 interface StatusInfo {
   label: string
@@ -25,51 +25,51 @@ interface StatusInfo {
 }
 
 export const STATUS_INFO: Record<TechStatus, StatusInfo> = {
-  'rising-star': {
-    label: 'Rising Star',
-    description: 'Growing fast across multiple signals',
+  'strong-growth': {
+    label: 'Strong Growth',
+    description: 'High scores and accelerating adoption — invest now',
     color: 'text-emerald-400',
     bgColor: 'bg-emerald-500/10',
     borderColor: 'border-emerald-500/30',
   },
-  'hot-right-now': {
-    label: 'Hot Right Now',
-    description: 'High community buzz and momentum',
+  'high-demand': {
+    label: 'High Demand',
+    description: 'Surging community interest and employer demand',
     color: 'text-orange-400',
     bgColor: 'bg-orange-500/10',
     borderColor: 'border-orange-500/30',
   },
-  'stable-leader': {
-    label: 'Stable Leader',
-    description: 'Consistently high scores, safe bet',
+  established: {
+    label: 'Established',
+    description: 'Proven and stable — reliable career skill',
     color: 'text-blue-400',
     bgColor: 'bg-blue-500/10',
     borderColor: 'border-blue-500/30',
   },
-  'worth-watching': {
-    label: 'Worth Watching',
-    description: 'Showing potential, building momentum',
+  emerging: {
+    label: 'Emerging',
+    description: 'Growing adoption — early investment opportunity',
     color: 'text-cyan-400',
     bgColor: 'bg-cyan-500/10',
     borderColor: 'border-cyan-500/30',
   },
-  'cooling-down': {
-    label: 'Cooling Down',
+  slowing: {
+    label: 'Slowing',
     description: 'Still relevant but losing momentum',
     color: 'text-amber-400',
     bgColor: 'bg-amber-500/10',
     borderColor: 'border-amber-500/30',
   },
-  declining: {
-    label: 'Declining',
-    description: 'Losing relevance, consider alternatives',
+  'low-demand': {
+    label: 'Low Demand',
+    description: 'Declining interest — consider alternatives',
     color: 'text-red-400',
     bgColor: 'bg-red-500/10',
     borderColor: 'border-red-500/30',
   },
-  'new-entry': {
-    label: 'New Entry',
-    description: 'Recently added, collecting data',
+  'collecting-data': {
+    label: 'New',
+    description: 'Recently added — still gathering signals',
     color: 'text-slate-400',
     bgColor: 'bg-slate-500/10',
     borderColor: 'border-slate-500/30',
@@ -84,31 +84,31 @@ export function getTechStatus(
   momentum: number | null,
   dataCompleteness: number | null
 ): TechStatus {
-  if (dataCompleteness !== null && dataCompleteness < 0.3) return 'new-entry'
+  if (dataCompleteness !== null && dataCompleteness < 0.3) return 'collecting-data'
 
   const score = compositeScore ?? 0
   const mom = momentum ?? 0
 
-  // Rising star: good score AND strong positive momentum
-  if (score >= 50 && mom > 8) return 'rising-star'
+  // Strong growth: good score AND strong positive momentum
+  if (score >= 50 && mom > 8) return 'strong-growth'
 
-  // Hot right now: high momentum regardless of score
-  if (mom > 12) return 'hot-right-now'
+  // High demand: high momentum regardless of score
+  if (mom > 12) return 'high-demand'
 
-  // Stable leader: high score, low momentum (already on top)
-  if (score >= 60 && Math.abs(mom) <= 5) return 'stable-leader'
+  // Established: high score, stable momentum (industry standard)
+  if (score >= 60 && Math.abs(mom) <= 5) return 'established'
 
-  // Worth watching: medium score with positive momentum
-  if (score >= 35 && mom > 3) return 'worth-watching'
+  // Emerging: medium score with positive momentum
+  if (score >= 35 && mom > 3) return 'emerging'
 
-  // Cooling down: decent score but negative momentum
-  if (score >= 40 && mom < -3) return 'cooling-down'
+  // Slowing: decent score but negative momentum
+  if (score >= 40 && mom < -3) return 'slowing'
 
-  // Declining: low score or strong negative momentum
-  if (score < 30 || mom < -8) return 'declining'
+  // Low demand: low score or strong negative momentum
+  if (score < 30 || mom < -8) return 'low-demand'
 
-  // Default: worth watching
-  return 'worth-watching'
+  // Default: emerging
+  return 'emerging'
 }
 
 // ---- Score Descriptions ----

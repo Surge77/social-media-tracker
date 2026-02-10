@@ -198,13 +198,13 @@ export default function MethodologyPage() {
         </p>
 
         <div className="mt-4 space-y-2 text-sm">
-          <StatusLabel label="Rising Star" color="text-emerald-400" description="Good score AND strong positive momentum" />
-          <StatusLabel label="Hot Right Now" color="text-orange-400" description="Very high community buzz and momentum" />
-          <StatusLabel label="Stable Leader" color="text-blue-400" description="Consistently high scores, safe bet" />
-          <StatusLabel label="Worth Watching" color="text-cyan-400" description="Showing potential, building momentum" />
-          <StatusLabel label="Cooling Down" color="text-amber-400" description="Still relevant but losing momentum" />
-          <StatusLabel label="Declining" color="text-red-400" description="Losing relevance, consider alternatives" />
-          <StatusLabel label="New Entry" color="text-slate-400" description="Recently added, still collecting data" />
+          <StatusLabel label="Strong Growth" color="text-emerald-400" description="High scores and accelerating adoption — invest now" />
+          <StatusLabel label="High Demand" color="text-orange-400" description="Surging community interest and employer demand" />
+          <StatusLabel label="Established" color="text-blue-400" description="Proven and stable — reliable career skill" />
+          <StatusLabel label="Emerging" color="text-cyan-400" description="Growing adoption — early investment opportunity" />
+          <StatusLabel label="Slowing" color="text-amber-400" description="Still relevant but losing momentum" />
+          <StatusLabel label="Low Demand" color="text-red-400" description="Declining interest — consider alternatives" />
+          <StatusLabel label="New" color="text-slate-400" description="Recently added — still gathering signals" />
         </div>
       </Section>
 
