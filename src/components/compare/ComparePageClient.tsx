@@ -204,7 +204,7 @@ function ComparePageContent() {
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.1 }}
-        className="mb-8 rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm"
+        className="relative z-20 mb-8 rounded-lg border border-border bg-card/30 p-4"
       >
         <TechSelector
           availableTechnologies={allTechnologies}
