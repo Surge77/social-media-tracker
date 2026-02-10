@@ -3,12 +3,13 @@
 import React, { Suspense, useState, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Share2, Copy, Check } from 'lucide-react'
+import { Share2, Copy, Check, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { TechSelector } from '@/components/compare/TechSelector'
 import { CompareChart } from '@/components/compare/CompareChart'
 import { CompareTable } from '@/components/compare/CompareTable'
+import { getComparisonSummary } from '@/lib/insights'
 import type { TechnologyWithScore, CompareData } from '@/types'
 
 export function ComparePageClient() {
@@ -245,15 +246,48 @@ function ComparePageContent() {
       {/* Comparison content */}
       {!isLoading && compareData && compareData.technologies.length >= 2 && (
         <>
+          {/* Comparison Summary */}
+          <motion.section
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.15 }}
+            className="mb-8"
+          >
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-5">
+              <div className="flex items-start gap-3">
+                <div className="rounded-md bg-primary/10 p-2">
+                  <Lightbulb className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="mb-1 text-sm font-semibold text-foreground">Bottom Line</h2>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {getComparisonSummary(
+                      compareData.technologies.map((t) => ({
+                        name: t.name,
+                        compositeScore: t.composite_score,
+                        momentum: t.momentum,
+                        githubScore: t.github_score,
+                        communityScore: t.community_score,
+                        jobsScore: t.jobs_score,
+                        ecosystemScore: t.ecosystem_score,
+                        dataCompleteness: t.data_completeness,
+                      }))
+                    )}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+
           {/* Trend Chart */}
           <motion.section
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.2 }}
+            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.25 }}
             className="mb-8"
           >
-            <h2 className="mb-4 text-xl font-semibold text-foreground">Trend Comparison</h2>
-            <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm">
+            <h2 className="mb-4 text-xl font-semibold text-foreground">30-Day Trend</h2>
+            <div className="rounded-lg border border-border bg-card/30 p-4">
               <CompareChart
                 data={compareData.chart_data}
                 technologies={chartTechnologies}
@@ -261,13 +295,13 @@ function ComparePageContent() {
             </div>
           </motion.section>
 
-          {/* Metrics Table */}
+          {/* Dimension Breakdown */}
           <motion.section
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.3 }}
+            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.35 }}
           >
-            <h2 className="mb-4 text-xl font-semibold text-foreground">Metrics Comparison</h2>
+            <h2 className="mb-4 text-xl font-semibold text-foreground">How They Stack Up</h2>
             <CompareTable technologies={compareData.technologies} />
           </motion.section>
         </>

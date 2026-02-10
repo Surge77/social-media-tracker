@@ -3,11 +3,18 @@
 import React from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, Trophy, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { MomentumBadge } from '@/components/technologies/MomentumBadge'
+import {
+  getScoreLabel,
+  getMomentumInsight,
+  getJobInsight,
+  getDimensionComparison,
+} from '@/lib/insights'
 import type { TechnologyWithScore } from '@/types'
 
 interface CompareTableProps {
@@ -15,11 +22,49 @@ interface CompareTableProps {
   className?: string
 }
 
-interface MetricRow {
+interface DimensionConfig {
+  key: 'github' | 'community' | 'jobs' | 'ecosystem'
   label: string
-  getValue: (tech: TechnologyWithScore) => string | number | React.ReactNode
-  format?: (value: any) => string
+  question: string
+  scoreKey: 'github_score' | 'community_score' | 'jobs_score' | 'ecosystem_score'
+  color: string
+  bgColor: string
 }
+
+const DIMENSIONS: DimensionConfig[] = [
+  {
+    key: 'github',
+    label: 'Open-Source Activity',
+    question: 'Which has more active development?',
+    scoreKey: 'github_score',
+    color: 'text-violet-400',
+    bgColor: 'bg-violet-500/10',
+  },
+  {
+    key: 'community',
+    label: 'Community Buzz',
+    question: 'Which one are developers talking about?',
+    scoreKey: 'community_score',
+    color: 'text-cyan-400',
+    bgColor: 'bg-cyan-500/10',
+  },
+  {
+    key: 'jobs',
+    label: 'Job Market Demand',
+    question: 'Which one will get me hired?',
+    scoreKey: 'jobs_score',
+    color: 'text-emerald-400',
+    bgColor: 'bg-emerald-500/10',
+  },
+  {
+    key: 'ecosystem',
+    label: 'Ecosystem Health',
+    question: 'Which has better tooling and support?',
+    scoreKey: 'ecosystem_score',
+    color: 'text-amber-400',
+    bgColor: 'bg-amber-500/10',
+  },
+]
 
 export const CompareTable = React.forwardRef<HTMLDivElement, CompareTableProps>(
   ({ technologies, className }, ref) => {
@@ -39,122 +84,177 @@ export const CompareTable = React.forwardRef<HTMLDivElement, CompareTableProps>(
       )
     }
 
-    const formatNumber = (num: number | null) => {
-      if (num === null) return 'N/A'
-      if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
-      if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
-      return num.toLocaleString()
-    }
-
-    const metrics: MetricRow[] = [
-      {
-        label: 'Composite Score',
-        getValue: (tech) => <ScoreBadge score={tech.composite_score} size="md" />,
-      },
-      {
-        label: 'Momentum',
-        getValue: (tech) => <MomentumBadge momentum={tech.momentum} size="md" />,
-      },
-      {
-        label: 'GitHub Score',
-        getValue: (tech) => tech.github_score ?? 'N/A',
-        format: (val) => (typeof val === 'number' ? Math.round(val).toString() : val),
-      },
-      {
-        label: 'Community Score',
-        getValue: (tech) => tech.community_score ?? 'N/A',
-        format: (val) => (typeof val === 'number' ? Math.round(val).toString() : val),
-      },
-      {
-        label: 'Jobs Score',
-        getValue: (tech) => tech.jobs_score ?? 'N/A',
-        format: (val) => (typeof val === 'number' ? Math.round(val).toString() : val),
-      },
-      {
-        label: 'Ecosystem Score',
-        getValue: (tech) => tech.ecosystem_score ?? 'N/A',
-        format: (val) => (typeof val === 'number' ? Math.round(val).toString() : val),
-      },
-      {
-        label: 'Data Confidence',
-        getValue: (tech) => {
-          const pct = tech.data_completeness ? Math.round(tech.data_completeness * 100) : 0
-          return `${pct}%`
-        },
-      },
-    ]
-
     return (
-      <motion.div
-        ref={ref}
-        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? {} : { duration: 0.4 }}
-        className={cn(
-          'overflow-hidden rounded-lg border border-border bg-card/30 backdrop-blur-sm',
-          className
-        )}
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Metric
-                </th>
-                {technologies.map((tech) => (
-                  <th
-                    key={tech.id}
-                    className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground"
-                  >
-                    <Link
-                      href={`/technologies/${tech.slug}`}
-                      className="inline-flex items-center gap-1 hover:text-primary transition-colors"
-                    >
-                      {tech.name}
-                      <ExternalLink size={12} />
-                    </Link>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {metrics.map((metric, index) => (
-                <motion.tr
-                  key={metric.label}
-                  initial={prefersReducedMotion ? {} : { opacity: 0, x: -10 }}
-                  animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
-                  transition={
-                    prefersReducedMotion ? {} : { duration: 0.2, delay: index * 0.05 }
-                  }
-                  className="hover:bg-muted/20 transition-colors"
-                >
-                  <td className="px-4 py-3 text-sm font-medium text-foreground">
-                    {metric.label}
-                  </td>
-                  {technologies.map((tech) => {
-                    const value = metric.getValue(tech)
-                    const displayValue = React.isValidElement(value)
-                      ? value
-                      : metric.format
-                        ? metric.format(value)
-                        : value
+      <div ref={ref} className={cn('space-y-4', className)}>
+        {/* Overall Score Cards */}
+        <motion.div
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4 }}
+          className="grid gap-3"
+          style={{ gridTemplateColumns: `repeat(${technologies.length}, 1fr)` }}
+        >
+          {technologies.map((tech) => {
+            const isHighest =
+              tech.composite_score !== null &&
+              tech.composite_score ===
+                Math.max(...technologies.map((t) => t.composite_score ?? -1))
 
-                    return (
-                      <td
-                        key={tech.id}
-                        className="px-4 py-3 text-center text-sm font-mono text-foreground"
-                      >
-                        {displayValue}
-                      </td>
-                    )
-                  })}
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </motion.div>
+            return (
+              <div
+                key={tech.id}
+                className={cn(
+                  'rounded-lg border p-4 text-center transition-all',
+                  isHighest
+                    ? 'border-primary/40 bg-primary/5'
+                    : 'border-border bg-card/30'
+                )}
+              >
+                <Link
+                  href={`/technologies/${tech.slug}`}
+                  className="group inline-flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                >
+                  <div
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: tech.color }}
+                  />
+                  {tech.name}
+                  <ExternalLink size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+
+                <div className="mt-3 flex justify-center">
+                  <ScoreBadge score={tech.composite_score} size="lg" />
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {getScoreLabel(tech.composite_score)} overall
+                </p>
+
+                <div className="mt-3 flex justify-center">
+                  <StatusBadge
+                    compositeScore={tech.composite_score}
+                    momentum={tech.momentum}
+                    dataCompleteness={tech.data_completeness}
+                  />
+                </div>
+
+                <div className="mt-2 flex justify-center">
+                  <MomentumBadge momentum={tech.momentum} />
+                </div>
+                <p className="mt-1 text-[11px] text-muted-foreground leading-tight">
+                  {getMomentumInsight(tech.momentum).split(' — ')[0]}
+                </p>
+              </div>
+            )
+          })}
+        </motion.div>
+
+        {/* Dimension-by-dimension comparison */}
+        {DIMENSIONS.map((dim, index) => {
+          const techScores = technologies.map((t) => ({
+            name: t.name,
+            score: t[dim.scoreKey],
+          }))
+          const { winner, insight } = getDimensionComparison(dim.key, techScores)
+
+          const maxScore = Math.max(
+            ...technologies.map((t) => t[dim.scoreKey] ?? 0)
+          )
+
+          return (
+            <motion.div
+              key={dim.key}
+              initial={prefersReducedMotion ? {} : { opacity: 0, y: 15 }}
+              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+              transition={
+                prefersReducedMotion ? {} : { duration: 0.3, delay: 0.1 + index * 0.08 }
+              }
+              className="rounded-lg border border-border bg-card/30 p-4"
+            >
+              {/* Dimension header */}
+              <div className="mb-3 flex items-baseline justify-between gap-2">
+                <div>
+                  <h3 className={cn('text-sm font-semibold', dim.color)}>
+                    {dim.label}
+                  </h3>
+                  <p className="text-xs text-muted-foreground italic">
+                    {dim.question}
+                  </p>
+                </div>
+                {winner && (
+                  <span className="flex items-center gap-1 text-xs font-medium text-amber-400">
+                    <Trophy size={12} />
+                    {winner}
+                  </span>
+                )}
+                {!winner && techScores.some((t) => t.score !== null) && (
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Minus size={12} />
+                    Tie
+                  </span>
+                )}
+              </div>
+
+              {/* Score bars */}
+              <div className="space-y-2">
+                {technologies.map((tech) => {
+                  const score = tech[dim.scoreKey]
+                  const isWinner = winner === tech.name
+                  return (
+                    <div key={tech.id} className="flex items-center gap-3">
+                      <span className="w-20 shrink-0 truncate text-xs font-medium text-foreground/80">
+                        {tech.name}
+                      </span>
+                      <div className="relative flex-1 h-5 overflow-hidden rounded-full bg-muted/30">
+                        <motion.div
+                          initial={prefersReducedMotion ? { width: `${score ?? 0}%` } : { width: 0 }}
+                          animate={{ width: `${score ?? 0}%` }}
+                          transition={prefersReducedMotion ? {} : { duration: 0.6, delay: 0.2 + index * 0.08 }}
+                          className={cn(
+                            'h-full rounded-full transition-colors',
+                            isWinner
+                              ? dim.color.replace('text-', 'bg-')
+                              : 'bg-muted-foreground/30'
+                          )}
+                        />
+                        {score !== null && (
+                          <span className="absolute inset-y-0 right-2 flex items-center text-[11px] font-mono font-semibold text-foreground/70">
+                            {Math.round(score)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Insight text */}
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                {insight}
+              </p>
+            </motion.div>
+          )
+        })}
+
+        {/* Job market callout */}
+        <motion.div
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 15 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.3, delay: 0.5 }}
+          className="rounded-lg border border-border/50 bg-muted/10 p-4"
+        >
+          <h3 className="mb-2 text-sm font-semibold text-foreground">
+            Job Market Takeaway
+          </h3>
+          <div className="space-y-1">
+            {technologies.map((tech) => (
+              <p key={tech.id} className="text-xs text-muted-foreground">
+                <span className="font-medium text-foreground/80">{tech.name}:</span>{' '}
+                {getJobInsight(tech.jobs_score, tech.momentum)}
+              </p>
+            ))}
+          </div>
+        </motion.div>
+      </div>
     )
   }
 )

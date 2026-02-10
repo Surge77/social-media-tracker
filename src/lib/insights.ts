@@ -223,6 +223,125 @@ export function getJobInsight(jobScore: number | null, momentum: number | null):
   return `Limited demand — niche or emerging skill${trend}`
 }
 
+// ---- Comparison Insights ----
+
+interface ComparedTech {
+  name: string
+  compositeScore: number | null
+  momentum: number | null
+  githubScore: number | null
+  communityScore: number | null
+  jobsScore: number | null
+  ecosystemScore: number | null
+  dataCompleteness: number | null
+}
+
+/**
+ * Generate a plain-English comparison summary for 2-4 technologies.
+ * This is the "so what?" — the thing users actually want to know.
+ */
+export function getComparisonSummary(techs: ComparedTech[]): string {
+  if (techs.length < 2) return ''
+
+  const sorted = [...techs].sort(
+    (a, b) => (b.compositeScore ?? 0) - (a.compositeScore ?? 0)
+  )
+  const leader = sorted[0]
+  const runner = sorted[1]
+  const leaderScore = leader.compositeScore ?? 0
+  const runnerScore = runner.compositeScore ?? 0
+  const gap = leaderScore - runnerScore
+
+  // Check if leader has momentum advantage too
+  const leaderMom = leader.momentum ?? 0
+  const runnerMom = runner.momentum ?? 0
+
+  if (gap < 5) {
+    // Very close
+    if (leaderMom > runnerMom + 5) {
+      return `${leader.name} and ${runner.name} are neck-and-neck overall, but ${leader.name} has stronger momentum — it's gaining ground faster.`
+    }
+    if (runnerMom > leaderMom + 5) {
+      return `${leader.name} barely edges out ${runner.name} on score, but ${runner.name} is growing faster — it could overtake soon.`
+    }
+    return `${leader.name} and ${runner.name} are very close in overall strength. Your choice may come down to which ecosystem fits your project better.`
+  }
+
+  if (gap >= 20) {
+    // Large gap
+    const runnerStrength = getBestDimension(runner)
+    if (runnerStrength) {
+      return `${leader.name} leads significantly overall, but ${runner.name} ${runnerStrength}. Pick ${leader.name} for a safer bet, or ${runner.name} if ${runnerStrength.replace('has stronger', 'you need strong').replace('leads in', 'you prioritize')}.`
+    }
+    return `${leader.name} is the clear frontrunner here — stronger across most dimensions. ${runner.name} may still be worth learning for specific use cases.`
+  }
+
+  // Moderate gap
+  const leaderStrength = getBestDimension(leader)
+  const runnerStrength = getBestDimension(runner)
+  if (leaderStrength && runnerStrength) {
+    return `${leader.name} leads overall and ${leaderStrength}. ${runner.name} ${runnerStrength}. Both are solid choices — it depends on what matters most to you.`
+  }
+
+  return `${leader.name} scores higher overall. ${runner.name} is still competitive but trails in most dimensions.`
+}
+
+function getBestDimension(tech: ComparedTech): string | null {
+  const dims = [
+    { score: tech.githubScore, label: 'has stronger open-source activity' },
+    { score: tech.communityScore, label: 'has more community buzz' },
+    { score: tech.jobsScore, label: 'leads in job market demand' },
+    { score: tech.ecosystemScore, label: 'has a healthier ecosystem' },
+  ]
+  const best = dims
+    .filter((d) => d.score !== null)
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))[0]
+  return best && (best.score ?? 0) >= 50 ? best.label : null
+}
+
+/**
+ * For a specific dimension, explain who wins and what it means.
+ */
+export function getDimensionComparison(
+  dimension: 'github' | 'community' | 'jobs' | 'ecosystem',
+  techs: Array<{ name: string; score: number | null }>
+): { winner: string | null; insight: string } {
+  const withScores = techs.filter((t) => t.score !== null)
+  if (withScores.length === 0) return { winner: null, insight: 'No data available for this dimension.' }
+
+  const sorted = [...withScores].sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+  const best = sorted[0]
+  const gap = sorted.length >= 2 ? (best.score ?? 0) - (sorted[1].score ?? 0) : 0
+
+  const dimensionContext: Record<string, { tight: string; clear: string; dominant: string }> = {
+    github: {
+      tight: 'Both have similar open-source activity — active development and community contributions.',
+      clear: `${best.name} has more GitHub traction — more stars, forks, and contributor activity.`,
+      dominant: `${best.name} dominates on GitHub — significantly more developer interest and activity.`,
+    },
+    community: {
+      tight: 'Similar levels of developer buzz — both are discussed regularly in tech communities.',
+      clear: `${best.name} gets more attention on Hacker News, Reddit, and dev blogs.`,
+      dominant: `${best.name} is generating far more community discussion — it's the hotter topic right now.`,
+    },
+    jobs: {
+      tight: 'Both are in similar demand from employers — either is a solid resume skill.',
+      clear: `${best.name} appears in more job postings — employers are actively looking for this skill.`,
+      dominant: `${best.name} has significantly higher job demand — a much safer bet for employment.`,
+    },
+    ecosystem: {
+      tight: 'Both have healthy ecosystems — good package downloads and Stack Overflow support.',
+      clear: `${best.name} has a more mature ecosystem — more downloads and community resources.`,
+      dominant: `${best.name} has a much larger ecosystem — far more packages, downloads, and SO activity.`,
+    },
+  }
+
+  const context = dimensionContext[dimension]
+  if (gap < 8) return { winner: null, insight: context.tight }
+  if (gap < 20) return { winner: best.name, insight: context.clear }
+  return { winner: best.name, insight: context.dominant }
+}
+
 // ---- Recommendation Engine ----
 
 /**
