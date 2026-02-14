@@ -103,6 +103,19 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Screen reader only - WCAG 2.1 accessibility */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
   /* Premium animations - Apple HIG + Material Design 3 */
   .animate-float {
     animation: float 6s ease-in-out infinite;

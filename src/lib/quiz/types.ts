@@ -17,10 +17,13 @@ export type QuestionType =
   | 'text'
 
 export interface QuizOption {
+  id?: string  // For roadmap quiz compatibility
   value: string
   label: string
   description?: string
   icon?: string
+  disabled?: boolean  // For roadmap quiz: coming soon options
+  disabledMessage?: string  // For roadmap quiz: coming soon message
 }
 
 export interface QuizQuestion {

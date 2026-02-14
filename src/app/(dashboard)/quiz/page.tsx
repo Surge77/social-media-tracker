@@ -81,15 +81,15 @@ const quizzes: QuizMetadata[] = [
   },
   {
     id: 'roadmap',
-    title: 'Build My Learning Roadmap',
-    description: 'Get a step-by-step learning plan from where you are to where you want to be.',
+    title: 'Build My Career Roadmap',
+    description: 'Get a personalized, data-backed learning roadmap from where you are to where you want to be.',
     icon: 'Map',
-    duration: '40 seconds',
-    questionCount: 5,
+    duration: '45 seconds',
+    questionCount: 6,
     gradient: 'from-teal-500 via-cyan-500 to-teal-400',
     href: '/quiz/roadmap',
-    priority: 6,
-    enabled: false
+    priority: 1,  // Make it first priority
+    enabled: true  // ✅ NOW ENABLED!
   },
   {
     id: 'salary',
