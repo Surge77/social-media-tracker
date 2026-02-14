@@ -124,6 +124,15 @@ export interface TechnologyWithScore extends Technology {
   momentum: number | null
   data_completeness: number | null
   sparkline: number[]
+  previous_rank: number | null      // Rank 7 days ago
+  rank_change: number | null        // Current rank - previous rank (positive = moved up)
+  ai_summary: string                // Generated honest one-liner
+  // Raw signals (optional, added by compare API)
+  github_stars?: number | null
+  npm_downloads?: number | null
+  so_questions?: number | null
+  job_postings?: number | null
+  hn_mentions?: number | null
 }
 
 export interface TechnologyDetail {
@@ -169,6 +178,20 @@ export interface HNStory {
 export interface CompareData {
   technologies: TechnologyWithScore[]
   chart_data: Array<Record<string, string | number>>
+  lifecycle_data?: Record<string, {
+    stage: string
+    confidence: number
+    reasoning: string[]
+    daysInStage: number
+    stageTransitionProbability: number
+    previousStage?: string
+  }>
+  relationships?: Array<{
+    source: string
+    target: string
+    type: string
+    strength: number
+  }>
 }
 
 // ---- Fetcher types ----

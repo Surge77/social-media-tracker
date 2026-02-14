@@ -1,12 +1,18 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { Search } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
-import { TechFilters } from '@/components/technologies/TechFilters'
+import { MoversShakers } from '@/components/technologies/MoversShakers'
+import { StackCheckCTA } from '@/components/technologies/StackCheckCTA'
+import { SmartFilters, applySmartFilter, getFilterEmptyMessage, type SmartFilter } from '@/components/technologies/SmartFilters'
+import { ViewToggle, type ViewMode } from '@/components/technologies/ViewToggle'
+import { StrategicOverview } from '@/components/technologies/StrategicOverview'
 import { TechTable } from '@/components/technologies/TechTable'
 import { TechCard } from '@/components/technologies/TechCard'
 import type { TechnologyCategory, TechnologyWithScore } from '@/types'
+import { CATEGORY_LABELS } from '@/types'
 
 export function TechnologiesPageClient() {
   const prefersReducedMotion = useReducedMotion()
@@ -18,7 +24,8 @@ export function TechnologiesPageClient() {
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<TechnologyCategory | 'all'>('all')
-  const [sortBy, setSortBy] = useState<'score' | 'momentum' | 'name'>('score')
+  const [smartFilter, setSmartFilter] = useState<SmartFilter>('all')
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
 
   // Fetch technologies
   React.useEffect(() => {
@@ -40,9 +47,21 @@ export function TechnologiesPageClient() {
     fetchTechnologies()
   }, [])
 
+  // Handle smart filter change
+  const handleSmartFilterChange = useCallback((filter: SmartFilter) => {
+    setSmartFilter(filter)
+    // Reset category when switching to a smart filter
+    if (filter !== 'all') {
+      setSelectedCategory('all')
+    }
+  }, [])
+
   // Filter and sort technologies
   const filteredAndSorted = useMemo(() => {
     let result = [...technologies]
+
+    // Apply smart filter first
+    result = applySmartFilter(result, smartFilter)
 
     // Filter by search query
     if (searchQuery) {
@@ -55,29 +74,13 @@ export function TechnologiesPageClient() {
       )
     }
 
-    // Filter by category
-    if (selectedCategory !== 'all') {
+    // Filter by category (only if smart filter is 'all')
+    if (selectedCategory !== 'all' && smartFilter === 'all') {
       result = result.filter((tech) => tech.category === selectedCategory)
     }
 
-    // Sort
-    result.sort((a, b) => {
-      if (sortBy === 'score') {
-        const scoreA = a.composite_score ?? -1
-        const scoreB = b.composite_score ?? -1
-        return scoreB - scoreA
-      }
-      if (sortBy === 'momentum') {
-        const momA = a.momentum ?? -999
-        const momB = b.momentum ?? -999
-        return momB - momA
-      }
-      // name
-      return a.name.localeCompare(b.name)
-    })
-
     return result
-  }, [technologies, searchQuery, selectedCategory, sortBy])
+  }, [technologies, searchQuery, selectedCategory, smartFilter])
 
   if (isLoading) {
     return (
@@ -120,7 +123,7 @@ export function TechnologiesPageClient() {
         className="mb-8"
       >
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Technology Explorer
+          Technology Intelligence
         </h1>
         <p className="mt-2 text-muted-foreground">
           Track {technologies.length} technologies across 8 categories
@@ -137,51 +140,115 @@ export function TechnologiesPageClient() {
         </p>
       </motion.div>
 
-      {/* Filters */}
-      <motion.div
-        initial={prefersReducedMotion ? {} : { opacity: 0, y: -10 }}
-        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.1 }}
-        className="mb-6"
-      >
-        <TechFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-        />
-      </motion.div>
+      {/* Movers & Shakers Hero */}
+      <MoversShakers />
+
+      {/* Stack Check CTA */}
+      <StackCheckCTA technologies={technologies} />
+
+      {/* Smart Filters */}
+      <SmartFilters activeFilter={smartFilter} onFilterChange={handleSmartFilterChange} />
+
+      {/* Search + Category + View Toggle */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 gap-4">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search technologies..."
+              className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </div>
+
+          {/* Category filter (only when smart filter is 'all') */}
+          {smartFilter === 'all' && (
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value as TechnologyCategory | 'all')}
+              className="rounded-lg border bg-background px-4 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="all">All Categories</option>
+              {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        {/* View Toggle */}
+        <ViewToggle view={viewMode} onViewChange={setViewMode} />
+      </div>
 
       {/* Results count */}
-      <motion.div
-        initial={prefersReducedMotion ? {} : { opacity: 0 }}
-        animate={prefersReducedMotion ? {} : { opacity: 1 }}
-        transition={prefersReducedMotion ? {} : { duration: 0.3, delay: 0.2 }}
-        className="mb-4"
-      >
+      <div className="mb-4">
         <p className="text-sm text-muted-foreground">
           Showing {filteredAndSorted.length} {filteredAndSorted.length === 1 ? 'technology' : 'technologies'}
         </p>
-      </motion.div>
-
-      {/* Desktop Table */}
-      <motion.div
-        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.2 }}
-        className="hidden md:block"
-      >
-        <TechTable technologies={filteredAndSorted} />
-      </motion.div>
-
-      {/* Mobile Cards */}
-      <div className="grid gap-4 md:hidden">
-        {filteredAndSorted.map((tech, index) => (
-          <TechCard key={tech.id} technology={tech} index={index} />
-        ))}
       </div>
+
+      {/* Empty state */}
+      {filteredAndSorted.length === 0 && (
+        <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-dashed">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              {searchQuery
+                ? 'No technologies match your search'
+                : getFilterEmptyMessage(smartFilter)}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Content based on view mode */}
+      {filteredAndSorted.length > 0 && (
+        <>
+          {/* Overview */}
+          {viewMode === 'overview' && (
+            <div className="hidden sm:block">
+              <StrategicOverview technologies={filteredAndSorted} />
+            </div>
+          )}
+
+          {/* Table View (desktop) */}
+          {viewMode === 'table' && (
+            <motion.div
+              initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+              transition={prefersReducedMotion ? {} : { duration: 0.4 }}
+              className="hidden md:block"
+            >
+              <TechTable technologies={filteredAndSorted} />
+            </motion.div>
+          )}
+
+          {/* Cards View or Mobile fallback */}
+          {(viewMode === 'cards' || viewMode === 'table') && (
+            <div className={viewMode === 'cards' ? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'grid gap-4 md:hidden'}>
+              {filteredAndSorted.map((tech, index) => (
+                <TechCard key={tech.id} technology={tech} index={index} />
+              ))}
+            </div>
+          )}
+
+          {/* Overview mobile fallback */}
+          {viewMode === 'overview' && (
+            <div className="grid gap-4 sm:hidden">
+              <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+                Overview is best experienced on larger screens. Try table or cards view instead.
+              </p>
+              {filteredAndSorted.slice(0, 10).map((tech, index) => (
+                <TechCard key={tech.id} technology={tech} index={index} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }

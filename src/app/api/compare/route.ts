@@ -1,10 +1,12 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import type { NextRequest } from 'next/server'
+import { classifyLifecycle, type LifecycleClassification } from '@/lib/analysis/lifecycle'
 
 /**
  * GET /api/compare?techs=react,vue,svelte
  *
- * Compare 2-4 technologies. Returns scores, raw signals, and 90-day chart data.
+ * Compare 2-4 technologies. Returns scores, raw signals, 90-day chart data,
+ * lifecycle classifications, and relationships.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -143,9 +145,83 @@ export async function GET(request: NextRequest) {
       (a.date as string).localeCompare(b.date as string)
     )
 
+    // Fetch lifecycle data (momentum analysis + recent scores)
+    const lifecycle_data: Record<string, LifecycleClassification> = {}
+
+    for (const tech of technologies) {
+      // Get momentum analysis
+      const { data: momentum } = await supabase
+        .from('momentum_analysis')
+        .select('*')
+        .eq('technology_id', tech.id)
+        .order('analysis_date', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      // Get recent 30 days of scores for volatility calculation
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+      const { data: recentScores } = await supabase
+        .from('daily_scores')
+        .select('composite_score')
+        .eq('technology_id', tech.id)
+        .gte('score_date', thirtyDaysAgo.toISOString().split('T')[0])
+        .order('score_date', { ascending: false })
+
+      const scores = recentScores?.map(s => Number(s.composite_score)) || []
+      const currentScore = scores[0] || 50
+
+      if (momentum) {
+        const classification = classifyLifecycle({
+          compositeScore: currentScore,
+          momentum: {
+            shortTerm: Number(momentum.short_term ?? 0),
+            mediumTerm: Number(momentum.medium_term ?? 0),
+            longTerm: Number(momentum.long_term ?? 0),
+            acceleration: Number(momentum.acceleration ?? 0),
+            volatility: Number(momentum.volatility ?? 0),
+            trend: (momentum.trend as any) ?? 'stable',
+            confidence: Number(momentum.confidence ?? 0),
+            streak: Number(momentum.streak ?? 0),
+          },
+          confidence: {
+            overall: 75,
+            sourceCoverage: 75,
+            dataRecency: 100,
+            historicalDepth: 50,
+            signalAgreement: 75,
+            grade: 'B',
+          },
+          dataAgeDays: 365, // Simplified
+          category: tech.name,
+          recentScores: scores,
+        })
+
+        lifecycle_data[tech.slug] = classification
+      }
+    }
+
+    // Fetch relationships from tech_relationships table
+    const { data: relationships } = await supabase
+      .from('tech_relationships')
+      .select('source_technology_id, target_technology_id, relationship_type, strength')
+      .or(
+        `source_technology_id.in.(${techIds.join(',')}),target_technology_id.in.(${techIds.join(',')})`
+      )
+
+    const relationshipResults = (relationships || []).map(rel => ({
+      source: techIdToSlug.get(rel.source_technology_id) || '',
+      target: techIdToSlug.get(rel.target_technology_id) || '',
+      type: rel.relationship_type,
+      strength: Number(rel.strength ?? 0.5),
+    })).filter(r => r.source && r.target)
+
     return Response.json({
       technologies: techResults,
       chart_data,
+      lifecycle_data,
+      relationships: relationshipResults,
     })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)

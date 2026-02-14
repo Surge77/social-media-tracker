@@ -32,11 +32,39 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
       return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    // Filter technologies
+    const selectedTechs = availableTechnologies.filter((tech) =>
+      selectedSlugs.includes(tech.slug)
+    )
+
+    const canAddMore = selectedSlugs.length < maxSelections
+
+    // Smart suggestions based on selected technologies
+    const getSuggestions = () => {
+      if (selectedSlugs.length === 0 || searchQuery) return []
+
+      const firstSelected = selectedTechs[0]
+      if (!firstSelected) return []
+
+      // Same category suggestions
+      const sameCategorySuggestions = availableTechnologies
+        .filter(tech =>
+          tech.category === firstSelected.category &&
+          !selectedSlugs.includes(tech.slug) &&
+          tech.composite_score !== null
+        )
+        .sort((a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0))
+        .slice(0, 3)
+
+      return sameCategorySuggestions
+    }
+
+    const suggestions = getSuggestions()
+
+    // Filter technologies for search results
     const filteredTechs = availableTechnologies
       .filter((tech) => !selectedSlugs.includes(tech.slug))
       .filter((tech) => {
-        if (!searchQuery) return true
+        if (!searchQuery) return false // Only show when searching
         const query = searchQuery.toLowerCase()
         return (
           tech.name.toLowerCase().includes(query) ||
@@ -45,12 +73,6 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
         )
       })
       .slice(0, 10) // Limit to 10 results
-
-    const selectedTechs = availableTechnologies.filter((tech) =>
-      selectedSlugs.includes(tech.slug)
-    )
-
-    const canAddMore = selectedSlugs.length < maxSelections
 
     return (
       <div ref={ref} className={cn('flex flex-wrap items-center gap-2', className)}>
@@ -118,7 +140,43 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
 
                 {/* Results */}
                 <div className="max-h-64 overflow-y-auto">
-                  {filteredTechs.length > 0 ? (
+                  {/* Show suggestions when not searching */}
+                  {!searchQuery && suggestions.length > 0 && (
+                    <div className="p-1">
+                      <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Frequently Compared With {selectedTechs[0]?.name}
+                      </div>
+                      {suggestions.map((tech) => (
+                        <button
+                          key={tech.slug}
+                          onClick={() => {
+                            onAdd(tech.slug)
+                            setSearchQuery('')
+                            setIsOpen(false)
+                          }}
+                          className={cn(
+                            'flex w-full items-center gap-3 rounded-md px-3 py-2 text-left',
+                            'transition-colors hover:bg-primary/10 hover:text-primary'
+                          )}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-foreground">{tech.name}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              Same category: {tech.category}
+                            </div>
+                          </div>
+                          {tech.composite_score !== null && (
+                            <div className="flex-shrink-0 font-mono text-sm font-semibold text-primary">
+                              {Math.round(tech.composite_score)}
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Show search results when searching */}
+                  {searchQuery && filteredTechs.length > 0 && (
                     <div className="p-1">
                       {filteredTechs.map((tech) => (
                         <button
@@ -147,9 +205,24 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
                         </button>
                       ))}
                     </div>
-                  ) : (
+                  )}
+
+                  {/* Empty states */}
+                  {!searchQuery && suggestions.length === 0 && selectedSlugs.length > 0 && (
                     <div className="p-8 text-center text-sm text-muted-foreground">
-                      No technologies found
+                      Search to add more technologies
+                    </div>
+                  )}
+
+                  {!searchQuery && selectedSlugs.length === 0 && (
+                    <div className="p-8 text-center text-sm text-muted-foreground">
+                      Search for technologies to compare
+                    </div>
+                  )}
+
+                  {searchQuery && filteredTechs.length === 0 && (
+                    <div className="p-8 text-center text-sm text-muted-foreground">
+                      No technologies found matching "{searchQuery}"
                     </div>
                   )}
                 </div>

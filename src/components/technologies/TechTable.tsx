@@ -10,6 +10,8 @@ import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { MomentumBadge } from '@/components/technologies/MomentumBadge'
 import { Sparkline } from '@/components/technologies/Sparkline'
+import { RankChangeBadge } from '@/components/technologies/RankChangeBadge'
+import { AISummaryTooltip } from '@/components/technologies/AISummaryTooltip'
 import { getScoreLabel, getMomentumInsight } from '@/lib/insights'
 import type { TechnologyWithScore } from '@/types'
 
@@ -51,6 +53,9 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   #
                 </th>
+                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Δ
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Technology
                 </th>
@@ -65,6 +70,9 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   30-Day Chart
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Insight
                 </th>
               </tr>
             </thead>
@@ -86,6 +94,11 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                     <span className="font-mono text-sm text-muted-foreground">
                       {index + 1}
                     </span>
+                  </td>
+
+                  {/* Rank Change */}
+                  <td className="px-4 py-3 text-center">
+                    <RankChangeBadge rankChange={tech.rank_change} />
                   </td>
 
                   {/* Technology Name + Category */}
@@ -146,6 +159,11 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                     <div className="flex justify-center">
                       <Sparkline data={tech.sparkline} />
                     </div>
+                  </td>
+
+                  {/* AI Summary */}
+                  <td className="px-4 py-3">
+                    <AISummaryTooltip summary={tech.ai_summary} maxLength={50} />
                   </td>
                 </motion.tr>
               ))}

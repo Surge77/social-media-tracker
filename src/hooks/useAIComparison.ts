@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { ComparisonInsight } from '@/lib/ai/generators/comparison-insight'
+import type { ComparisonInsight, UserContext } from '@/lib/ai/generators/comparison-insight'
 
 interface AIComparisonState {
   comparison: ComparisonInsight | null
@@ -12,7 +12,10 @@ interface AIComparisonState {
   refetch: () => void
 }
 
-export function useAIComparison(slugs: string[]): AIComparisonState {
+export function useAIComparison(
+  slugs: string[],
+  context?: UserContext
+): AIComparisonState {
   const [comparison, setComparison] = useState<ComparisonInsight | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -20,6 +23,7 @@ export function useAIComparison(slugs: string[]): AIComparisonState {
   const [cached, setCached] = useState(false)
 
   const slugKey = slugs.sort().join(',')
+  const contextKey = context ? `${context.role}_${context.goal}` : ''
 
   const fetchComparison = useCallback(async () => {
     if (slugs.length < 2) {
@@ -31,7 +35,12 @@ export function useAIComparison(slugs: string[]): AIComparisonState {
     setError(null)
 
     try {
-      const response = await fetch(`/api/ai/compare?slugs=${slugs.join(',')}`)
+      let url = `/api/ai/compare?slugs=${slugs.join(',')}`
+      if (context) {
+        url += `&role=${context.role}&goal=${context.goal}`
+      }
+
+      const response = await fetch(url)
 
       if (!response.ok) {
         if (response.status === 429) {
@@ -54,7 +63,7 @@ export function useAIComparison(slugs: string[]): AIComparisonState {
       setError('Network error')
       setIsLoading(false)
     }
-  }, [slugKey])
+  }, [slugKey, contextKey])
 
   useEffect(() => {
     fetchComparison()

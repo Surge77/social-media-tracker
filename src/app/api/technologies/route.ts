@@ -1,9 +1,12 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { generateTechSummary } from '@/lib/insights/ai-summaries'
+import type { TechnologyWithScore } from '@/types'
 
 /**
  * GET /api/technologies
  *
- * Returns all active technologies with their latest scores and 30-day sparklines.
+ * Returns all active technologies with their latest scores, 30-day sparklines,
+ * rank changes (vs 7 days ago), and honest AI summaries.
  */
 export async function GET() {
   try {
@@ -47,6 +50,26 @@ export async function GET() {
       }
     }
 
+    // Fetch scores from 7 days ago for rank change calculation
+    const previousScoreMap = new Map<string, Record<string, unknown>>()
+
+    if (lastUpdated) {
+      const sevenDaysAgo = new Date(lastUpdated)
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      const previousDate = sevenDaysAgo.toISOString().split('T')[0]
+
+      const { data: previousScores } = await supabase
+        .from('daily_scores')
+        .select('technology_id, composite_score')
+        .eq('score_date', previousDate)
+
+      if (previousScores) {
+        for (const s of previousScores) {
+          previousScoreMap.set(s.technology_id, s)
+        }
+      }
+    }
+
     // Fetch sparkline data (last 30 days of composite scores)
     const sparklineMap = new Map<string, number[]>()
 
@@ -71,8 +94,10 @@ export async function GET() {
     }
 
     // Merge technologies with scores and sparklines
-    const result = (technologies ?? []).map((tech) => {
+    const result: TechnologyWithScore[] = (technologies ?? []).map((tech) => {
       const scores = scoreMap.get(tech.id) as Record<string, unknown> | undefined
+      const previousScore = previousScoreMap.get(tech.id) as Record<string, unknown> | undefined
+
       return {
         ...tech,
         composite_score: scores ? Number(scores.composite_score) : null,
@@ -83,15 +108,48 @@ export async function GET() {
         momentum: scores ? Number(scores.momentum) : null,
         data_completeness: scores ? Number(scores.data_completeness) : null,
         sparkline: sparklineMap.get(tech.id) ?? [],
-      }
+        previous_rank: null, // Will be computed after sorting
+        rank_change: null,   // Will be computed after sorting
+        ai_summary: '',      // Will be generated after sorting
+      } as TechnologyWithScore
     })
 
-    // Sort by composite score descending, nulls last
+    // Sort by composite score descending, nulls last (current ranking)
     result.sort((a, b) => {
       if (a.composite_score === null && b.composite_score === null) return 0
       if (a.composite_score === null) return 1
       if (b.composite_score === null) return -1
       return b.composite_score - a.composite_score
+    })
+
+    // Compute previous ranking (by previous scores)
+    const previousRanking = [...result]
+    previousRanking.sort((a, b) => {
+      const prevScoreA = previousScoreMap.get(a.id)
+      const prevScoreB = previousScoreMap.get(b.id)
+      const scoreA = prevScoreA ? Number(prevScoreA.composite_score) : null
+      const scoreB = prevScoreB ? Number(prevScoreB.composite_score) : null
+
+      if (scoreA === null && scoreB === null) return 0
+      if (scoreA === null) return 1
+      if (scoreB === null) return -1
+      return scoreB - scoreA
+    })
+
+    // Create previous rank map
+    const previousRankMap = new Map<string, number>()
+    previousRanking.forEach((tech, index) => {
+      previousRankMap.set(tech.id, index + 1)
+    })
+
+    // Add current rank, previous rank, rank change, and AI summary to each tech
+    result.forEach((tech, index) => {
+      const currentRank = index + 1
+      const previousRank = previousRankMap.get(tech.id) ?? null
+
+      tech.previous_rank = previousRank
+      tech.rank_change = previousRank !== null ? previousRank - currentRank : null
+      tech.ai_summary = generateTechSummary(tech)
     })
 
     return Response.json({

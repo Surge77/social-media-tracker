@@ -19,6 +19,12 @@ export type UseCase =
   | 'chat'
   | 'digest'
   | 'anomaly_explain'
+  | 'reasoning'
+  | 'summary'
+  | 'outlook'
+  | 'hype-analysis'
+  | 'negotiation'
+  | 'roadmap-summary'
 
 interface RouteConfig {
   preferredProvider: string
@@ -82,6 +88,43 @@ export const ROUTING_TABLE: Record<UseCase, RouteConfig> = {
     ],
     maxLatencyMs: 3000,
     temperature: 0.3,
+  },
+  // Quiz use cases - prioritize Gemini for cost and quality
+  reasoning: {
+    preferredProvider: 'gemini',
+    fallbackOrder: ['mistral', 'xai', 'openrouter', 'groq', 'huggingface'],
+    maxLatencyMs: 3000,
+    temperature: 0.7,
+  },
+  summary: {
+    preferredProvider: 'gemini',
+    fallbackOrder: ['mistral', 'xai', 'openrouter', 'groq', 'huggingface'],
+    maxLatencyMs: 2000,
+    temperature: 0.8,
+  },
+  outlook: {
+    preferredProvider: 'gemini',
+    fallbackOrder: ['xai', 'mistral', 'openrouter', 'groq', 'huggingface'],
+    maxLatencyMs: 3000,
+    temperature: 0.7,
+  },
+  'hype-analysis': {
+    preferredProvider: 'gemini',
+    fallbackOrder: ['xai', 'mistral', 'openrouter', 'groq', 'huggingface'],
+    maxLatencyMs: 3000,
+    temperature: 0.7,
+  },
+  negotiation: {
+    preferredProvider: 'gemini',
+    fallbackOrder: ['mistral', 'xai', 'openrouter', 'groq', 'huggingface'],
+    maxLatencyMs: 2000,
+    temperature: 0.6,
+  },
+  'roadmap-summary': {
+    preferredProvider: 'gemini',
+    fallbackOrder: ['mistral', 'xai', 'openrouter', 'groq', 'huggingface'],
+    maxLatencyMs: 2000,
+    temperature: 0.8,
   },
 }
 

@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Lightbulb, ChevronDown, ChevronUp, Users, Briefcase, GraduationCap, Clock, AlertTriangle, RefreshCw, ShieldAlert, BookOpen, TrendingUp, ArrowRightLeft } from 'lucide-react'
+import { Lightbulb, Users, Briefcase, GraduationCap, Clock, AlertTriangle, RefreshCw, ShieldAlert, BookOpen, TrendingUp, ArrowRightLeft, CheckCircle2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { ComparisonInsight } from '@/lib/ai/generators/comparison-insight'
 
@@ -11,13 +11,17 @@ import type { ComparisonInsight } from '@/lib/ai/generators/comparison-insight'
 
 export function AIComparisonSkeleton() {
   return (
-    <div className="rounded-lg border border-border bg-card/30 p-5 animate-pulse">
+    <div className="rounded-lg border border-border bg-card/30 p-6 animate-pulse">
       <div className="flex items-start gap-3">
-        <div className="h-9 w-9 rounded-md bg-muted/50" />
-        <div className="flex-1 space-y-3">
-          <div className="h-4 w-2/3 rounded bg-muted/50" />
-          <div className="h-3 w-full rounded bg-muted/30" />
-          <div className="h-3 w-5/6 rounded bg-muted/30" />
+        <div className="h-10 w-10 rounded-md bg-muted/50" />
+        <div className="flex-1 space-y-4">
+          <div className="h-5 w-2/3 rounded bg-muted/50" />
+          <div className="h-4 w-full rounded bg-muted/30" />
+          <div className="h-4 w-5/6 rounded bg-muted/30" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="h-32 rounded bg-muted/30" />
+            <div className="h-32 rounded bg-muted/30" />
+          </div>
         </div>
       </div>
     </div>
@@ -80,7 +84,6 @@ export function AIComparisonCard({
   className,
 }: AIComparisonCardProps) {
   const prefersReducedMotion = useReducedMotion()
-  const [expanded, setExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<AudienceTab>('beginners')
 
   const careerAdviceMap: Record<AudienceTab, string> = {
@@ -89,298 +92,297 @@ export function AIComparisonCard({
     jobSeekers: comparison.careerAdvice.forJobSeekers,
   }
 
+  // Extract technology names for two-column layout
+  const technologies = comparison.winner.byUseCase?.map(uc => uc.recommendation) || []
+  const techNames = Array.from(new Set(technologies))
+
   return (
     <motion.div
       initial={prefersReducedMotion ? {} : { opacity: 0, y: 15 }}
-      animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-      transition={prefersReducedMotion ? {} : { duration: 0.4 }}
-      className={cn('rounded-lg border border-primary/20 bg-primary/5 p-5', className)}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className={cn('rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 p-6 shadow-lg', className)}
     >
-      {/* Header */}
-      <div className="flex items-start gap-3">
-        <div className="rounded-md bg-primary/10 p-2">
-          <Lightbulb className="h-5 w-5 text-primary" />
+      {/* Header with Big Verdict */}
+      <div className="mb-6 text-center">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5">
+          <Lightbulb className="h-4 w-4 text-primary" />
+          <span className="text-xs font-semibold uppercase tracking-wide text-primary">The Verdict</span>
         </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="mb-1 text-sm font-semibold text-foreground">
-            {comparison.headline}
-          </h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {comparison.verdict}
-          </p>
-        </div>
+
+        <h2 className="mb-3 text-xl font-bold text-foreground sm:text-2xl">
+          {comparison.headline}
+        </h2>
+
+        <p className="mx-auto max-w-3xl text-base leading-relaxed text-muted-foreground">
+          {comparison.verdict}
+        </p>
+
+        {/* Overall Winner Badge */}
+        {comparison.winner.overall && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full border-2 border-emerald-500/40 bg-emerald-500/15 px-4 py-2">
+            <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+            <span className="text-sm font-semibold text-emerald-400">
+              Overall winner: {comparison.winner.overall}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Winner badges */}
-      {comparison.winner.overall && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted-foreground">Overall:</span>
-          <span className="inline-flex items-center rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-400">
-            {comparison.winner.overall}
-          </span>
-          {Array.isArray(comparison.winner.byUseCase) && comparison.winner.byUseCase.slice(0, 3).map((uc) => (
-            <span
-              key={uc.useCase}
-              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground"
+      {/* Two-Column Strength Comparison */}
+      {Array.isArray(comparison.winner.byUseCase) && comparison.winner.byUseCase.length >= 2 && (
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+          {comparison.winner.byUseCase.slice(0, 2).map((uc, idx) => (
+            <div
+              key={idx}
+              className="rounded-lg border border-border bg-card/50 p-4"
             >
-              <span className="font-medium text-foreground/70">{uc.useCase}:</span>{' '}
-              {uc.recommendation}
-            </span>
+              <div className="mb-2 flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm font-semibold text-foreground">
+                  {uc.recommendation}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Best for:</span> {uc.useCase}
+              </p>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Expand/collapse for details */}
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-      >
-        {expanded ? (
-          <>
-            <ChevronUp size={14} />
-            Less detail
-          </>
-        ) : (
-          <>
-            <ChevronDown size={14} />
-            More detail
-          </>
-        )}
-      </button>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={prefersReducedMotion ? {} : { height: 0, opacity: 0 }}
-            animate={prefersReducedMotion ? {} : { height: 'auto', opacity: 1 }}
-            exit={prefersReducedMotion ? {} : { height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden"
-          >
-            {/* Dimension analysis */}
-            <div className="mt-4 grid gap-2 sm:grid-cols-2">
-              {Object.entries(comparison.dimensionAnalysis).map(([key, text]) => (
-                <div
-                  key={key}
-                  className="rounded-md border border-border/50 bg-card/30 p-3"
-                >
-                  <div className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-                    {key}
-                  </div>
-                  <p className="text-xs leading-relaxed text-muted-foreground">{text}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Surprising finding */}
-            {comparison.surprisingFinding && (
-              <div className="mt-3 rounded-md border border-amber-500/20 bg-amber-500/5 p-3">
-                <p className="text-xs text-amber-300/90">
-                  <span className="font-semibold">Surprising:</span>{' '}
-                  {comparison.surprisingFinding}
-                </p>
-              </div>
-            )}
-
-            {/* Career advice tabs */}
-            <div className="mt-4">
-              <div className="mb-2 flex gap-1">
-                {AUDIENCE_TABS.map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={cn(
-                      'inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-                      activeTab === tab.key
-                        ? 'bg-primary/15 text-primary'
-                        : 'text-muted-foreground hover:text-foreground'
-                    )}
-                  >
-                    {tab.icon}
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                {careerAdviceMap[activeTab]}
+      {/* Surprising Finding - Always Visible */}
+      {comparison.surprisingFinding && (
+        <div className="mb-6 rounded-lg border-2 border-amber-500/30 bg-amber-500/10 p-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 shrink-0 text-amber-400" />
+            <div>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-amber-400">
+                Surprising Finding
+              </p>
+              <p className="text-sm leading-relaxed text-foreground">
+                {comparison.surprisingFinding}
               </p>
             </div>
+          </div>
+        </div>
+      )}
 
-            {/* Time horizon */}
-            <div className="mt-3 flex gap-3">
-              <div className="flex-1 rounded-md border border-border/50 bg-card/30 p-2.5">
-                <div className="mb-1 flex items-center gap-1 text-[11px] font-medium text-muted-foreground/70">
-                  <Clock size={11} />
-                  Short term
-                </div>
-                <p className="text-xs text-muted-foreground">{comparison.timeHorizon.shortTerm}</p>
+      {/* Dimension Analysis Grid */}
+      <div className="mb-6">
+        <h3 className="mb-3 text-sm font-semibold text-foreground">Dimension Breakdown</h3>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {Object.entries(comparison.dimensionAnalysis).map(([key, text]) => (
+            <div
+              key={key}
+              className="rounded-lg border border-border bg-card/30 p-3"
+            >
+              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
+                {key}
               </div>
-              <div className="flex-1 rounded-md border border-border/50 bg-card/30 p-2.5">
-                <div className="mb-1 flex items-center gap-1 text-[11px] font-medium text-muted-foreground/70">
-                  <Clock size={11} />
-                  Long term
-                </div>
-                <p className="text-xs text-muted-foreground">{comparison.timeHorizon.longTerm}</p>
-              </div>
+              <p className="text-xs leading-relaxed text-muted-foreground">{text}</p>
             </div>
+          ))}
+        </div>
+      </div>
 
-            {/* Risk Analysis */}
-            {comparison.riskAnalysis && comparison.riskAnalysis.risks.length > 0 && (
-              <div className="mt-4">
-                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                  <ShieldAlert size={13} className="text-destructive" />
-                  Risk Analysis
+      {/* Career Advice Tabs */}
+      <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <h3 className="mb-3 text-sm font-semibold text-foreground">Career Guidance</h3>
+        <div className="mb-3 flex gap-1">
+          {AUDIENCE_TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
+                activeTab === tab.key
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-primary/10 hover:text-foreground'
+              )}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {careerAdviceMap[activeTab]}
+        </p>
+      </div>
+
+      {/* Time Horizon */}
+      <div className="mb-6 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-lg border border-border bg-card/30 p-4">
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <Clock size={13} />
+            Short Term (3-6 months)
+          </div>
+          <p className="text-sm text-foreground">{comparison.timeHorizon.shortTerm}</p>
+        </div>
+        <div className="rounded-lg border border-border bg-card/30 p-4">
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <Clock size={13} />
+            Long Term (1-2 years)
+          </div>
+          <p className="text-sm text-foreground">{comparison.timeHorizon.longTerm}</p>
+        </div>
+      </div>
+
+      {/* Risk Analysis */}
+      {comparison.riskAnalysis && comparison.riskAnalysis.risks.length > 0 && (
+        <div className="mb-6">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+            <ShieldAlert size={16} className="text-destructive" />
+            Risk Analysis
+          </div>
+          <div className="space-y-2">
+            {comparison.riskAnalysis.risks.map((risk, idx) => (
+              <div
+                key={idx}
+                className={cn(
+                  'rounded-lg border p-3',
+                  risk.severity === 'high' && 'border-destructive/40 bg-destructive/10',
+                  risk.severity === 'medium' && 'border-warning/40 bg-warning/10',
+                  risk.severity === 'low' && 'border-border bg-card/30'
+                )}
+              >
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground">{risk.technology}</span>
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                      risk.severity === 'high' && 'bg-destructive/20 text-destructive',
+                      risk.severity === 'medium' && 'bg-warning/20 text-warning',
+                      risk.severity === 'low' && 'bg-muted text-muted-foreground'
+                    )}
+                  >
+                    {risk.severity}
+                  </span>
                 </div>
-                <div className="space-y-2">
-                  {comparison.riskAnalysis.risks.map((risk, idx) => (
-                    <div
-                      key={idx}
+                <p className="text-xs text-muted-foreground">{risk.risk}</p>
+                {risk.mitigation && (
+                  <p className="mt-1.5 text-xs text-foreground">
+                    <span className="font-semibold">Mitigation:</span> {risk.mitigation}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Learning Curve */}
+      {comparison.learningCurve && comparison.learningCurve.comparisons.length > 0 && (
+        <div className="mb-6">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+            <BookOpen size={16} className="text-primary" />
+            Learning Investment
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {comparison.learningCurve.comparisons.map((item, idx) => (
+              <div key={idx} className="rounded-lg border border-border bg-card/30 p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground">{item.technology}</span>
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                      item.difficulty === 'easy' && 'bg-success/20 text-success',
+                      item.difficulty === 'moderate' && 'bg-warning/20 text-warning',
+                      item.difficulty === 'steep' && 'bg-destructive/20 text-destructive'
+                    )}
+                  >
+                    {item.difficulty}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold">Time:</span> {item.timeToProductivity}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold">Prerequisites:</span> {item.prerequisites}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Market Outlook */}
+      {comparison.marketOutlook && comparison.marketOutlook.predictions.length > 0 && (
+        <div className="mb-6">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+            <TrendingUp size={16} className="text-primary" />
+            Market Outlook (1 Year)
+          </div>
+          <div className="space-y-2">
+            {comparison.marketOutlook.predictions.map((pred, idx) => (
+              <div key={idx} className="rounded-lg border border-border bg-card/30 p-3">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground">{pred.technology}</span>
+                  <div className="flex items-center gap-2">
+                    <span
                       className={cn(
-                        'rounded-md border p-2.5',
-                        risk.severity === 'high' && 'border-destructive/30 bg-destructive/5',
-                        risk.severity === 'medium' && 'border-warning/30 bg-warning/5',
-                        risk.severity === 'low' && 'border-border/50 bg-card/30'
+                        'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                        pred.outlook === 'growing' && 'bg-success/20 text-success',
+                        pred.outlook === 'stable' && 'bg-primary/20 text-primary',
+                        pred.outlook === 'declining' && 'bg-destructive/20 text-destructive'
                       )}
                     >
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs font-medium text-foreground">{risk.technology}</span>
-                        <span
-                          className={cn(
-                            'text-[10px] font-semibold uppercase tracking-wide',
-                            risk.severity === 'high' && 'text-destructive',
-                            risk.severity === 'medium' && 'text-warning',
-                            risk.severity === 'low' && 'text-muted-foreground'
-                          )}
-                        >
-                          {risk.severity}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{risk.risk}</p>
-                      {risk.mitigation && (
-                        <p className="mt-1 text-[11px] text-muted-foreground/80">
-                          <span className="font-medium">Mitigation:</span> {risk.mitigation}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                      {pred.outlook}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      ({pred.confidence} confidence)
+                    </span>
+                  </div>
                 </div>
+                <p className="text-xs text-muted-foreground">{pred.reasoning}</p>
               </div>
-            )}
+            ))}
+          </div>
+        </div>
+      )}
 
-            {/* Learning Curve */}
-            {comparison.learningCurve && comparison.learningCurve.comparisons.length > 0 && (
-              <div className="mt-4">
-                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                  <BookOpen size={13} className="text-primary" />
-                  Learning Investment
+      {/* Migration Advice */}
+      {comparison.migrationAdvice && comparison.migrationAdvice.paths.length > 0 && (
+        <div className="mb-6">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
+            <ArrowRightLeft size={16} className="text-primary" />
+            Migration Paths
+          </div>
+          <div className="space-y-2">
+            {comparison.migrationAdvice.paths.map((path, idx) => (
+              <div key={idx} className="rounded-lg border border-border bg-card/30 p-3">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground">
+                    {path.from} → {path.to}
+                  </span>
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                      path.difficulty === 'easy' && 'bg-success/20 text-success',
+                      path.difficulty === 'moderate' && 'bg-warning/20 text-warning',
+                      path.difficulty === 'hard' && 'bg-destructive/20 text-destructive'
+                    )}
+                  >
+                    {path.difficulty}
+                  </span>
                 </div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {comparison.learningCurve.comparisons.map((item, idx) => (
-                    <div key={idx} className="rounded-md border border-border/50 bg-card/30 p-2.5">
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs font-medium text-foreground">{item.technology}</span>
-                        <span
-                          className={cn(
-                            'text-[10px] font-semibold uppercase tracking-wide',
-                            item.difficulty === 'easy' && 'text-success',
-                            item.difficulty === 'moderate' && 'text-warning',
-                            item.difficulty === 'steep' && 'text-destructive'
-                          )}
-                        >
-                          {item.difficulty}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">
-                        <span className="font-medium">Time:</span> {item.timeToProductivity}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        <span className="font-medium">Prerequisites:</span> {item.prerequisites}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold">Effort:</span> {path.effort}
+                </p>
+                {path.gotchas && (
+                  <p className="mt-1.5 text-xs text-warning">
+                    <span className="font-semibold">⚠️ Gotchas:</span> {path.gotchas}
+                  </p>
+                )}
               </div>
-            )}
-
-            {/* Market Outlook */}
-            {comparison.marketOutlook && comparison.marketOutlook.predictions.length > 0 && (
-              <div className="mt-4">
-                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                  <TrendingUp size={13} className="text-primary" />
-                  Market Outlook (1 Year)
-                </div>
-                <div className="space-y-2">
-                  {comparison.marketOutlook.predictions.map((pred, idx) => (
-                    <div key={idx} className="rounded-md border border-border/50 bg-card/30 p-2.5">
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs font-medium text-foreground">{pred.technology}</span>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={cn(
-                              'text-[10px] font-semibold uppercase tracking-wide',
-                              pred.outlook === 'growing' && 'text-success',
-                              pred.outlook === 'stable' && 'text-primary',
-                              pred.outlook === 'declining' && 'text-destructive'
-                            )}
-                          >
-                            {pred.outlook}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            ({pred.confidence} confidence)
-                          </span>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{pred.reasoning}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Migration Advice */}
-            {comparison.migrationAdvice && comparison.migrationAdvice.paths.length > 0 && (
-              <div className="mt-4">
-                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-foreground">
-                  <ArrowRightLeft size={13} className="text-primary" />
-                  Migration Paths
-                </div>
-                <div className="space-y-2">
-                  {comparison.migrationAdvice.paths.map((path, idx) => (
-                    <div key={idx} className="rounded-md border border-border/50 bg-card/30 p-2.5">
-                      <div className="mb-1 flex items-center justify-between">
-                        <span className="text-xs font-medium text-foreground">
-                          {path.from} → {path.to}
-                        </span>
-                        <span
-                          className={cn(
-                            'text-[10px] font-semibold uppercase tracking-wide',
-                            path.difficulty === 'easy' && 'text-success',
-                            path.difficulty === 'moderate' && 'text-warning',
-                            path.difficulty === 'hard' && 'text-destructive'
-                          )}
-                        >
-                          {path.difficulty}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-muted-foreground">
-                        <span className="font-medium">Effort:</span> {path.effort}
-                      </p>
-                      {path.gotchas && (
-                        <p className="mt-1 text-[11px] text-warning">
-                          <span className="font-medium">Gotchas:</span> {path.gotchas}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Feedback slot */}
-      {children && <div className="mt-3 border-t border-border/30 pt-3">{children}</div>}
+      {children && <div className="border-t border-border/30 pt-4">{children}</div>}
     </motion.div>
   )
 }

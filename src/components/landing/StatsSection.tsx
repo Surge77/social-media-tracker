@@ -7,9 +7,9 @@ import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 
 const stats = [
-  { value: 200, suffix: '+', label: 'Technologies', description: 'Tracked in real-time' },
-  { value: 7, suffix: '', label: 'Data Sources', description: 'Aggregated daily' },
-  { value: 4, suffix: 'hrs', label: 'Refresh Rate', description: 'Always up to date' },
+  { value: 100, suffix: '+', label: 'Technologies', description: 'Tracked in real-time' },
+  { value: 8, suffix: '+', label: 'Data Sources', description: 'Aggregated daily' },
+  { value: 24, suffix: 'hrs', label: 'Data Freshness', description: 'Updated daily' },
   { value: 100, suffix: '%', label: 'Free', description: 'No credit card needed' },
 ];
 

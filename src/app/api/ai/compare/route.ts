@@ -1,8 +1,9 @@
 /**
- * GET /api/ai/compare?slugs=react,vue
+ * GET /api/ai/compare?slugs=react,vue&role=beginner&goal=learning
  *
  * Returns AI-generated comparison insight.
  * Cache-first with sorted slug key (react+vue === vue+react).
+ * Optionally personalized with role and goal context.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -15,7 +16,7 @@ import {
   enforceComparisonCacheLimit,
 } from '@/lib/ai/cache-strategy'
 import { generateComparisonInsight } from '@/lib/ai/generators/comparison-insight'
-import type { ComparisonInsight } from '@/lib/ai/generators/comparison-insight'
+import type { ComparisonInsight, UserContext } from '@/lib/ai/generators/comparison-insight'
 import { logTelemetry } from '@/lib/ai/telemetry'
 import { checkRateLimit, rateLimitHeaders } from '@/lib/ai/rate-limiter'
 
@@ -36,6 +37,12 @@ export async function GET(req: NextRequest) {
     )
   }
 
+  // Get optional personalization context
+  const role = req.nextUrl.searchParams.get('role') as UserContext['role'] | null
+  const goal = req.nextUrl.searchParams.get('goal') as UserContext['goal'] | null
+  const userContext: UserContext | undefined =
+    role && goal ? { role, goal } : undefined
+
   const supabase = createSupabaseAdminClient()
 
   // Rate limit
@@ -49,7 +56,9 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  const cacheKey = comparisonCacheKey(slugs)
+  // Include role/goal in cache key for personalized comparisons
+  const cacheKeySuffix = userContext ? `_${userContext.role}_${userContext.goal}` : ''
+  const cacheKey = comparisonCacheKey(slugs) + cacheKeySuffix
   const startTime = Date.now()
 
   // Check cache
@@ -195,7 +204,7 @@ export async function GET(req: NextRequest) {
     const keyManager = createKeyManager()
     const comparison = await resilientAICall<ComparisonInsight>(
       'comparison',
-      (provider) => generateComparisonInsight(contexts, provider, supabase),
+      (provider) => generateComparisonInsight(contexts, provider, supabase, userContext),
       keyManager
     )
 

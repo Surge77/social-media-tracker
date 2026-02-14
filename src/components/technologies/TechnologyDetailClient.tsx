@@ -15,6 +15,7 @@ import { LifecycleBadge } from '@/components/shared/LifecycleBadge'
 import { DataFreshness } from '@/components/shared/DataFreshness'
 import { MomentumBadge } from '@/components/technologies/MomentumBadge'
 import { ScoreBreakdown } from '@/components/technologies/ScoreBreakdown'
+import { TechRadarChart } from '@/components/technologies/TechRadarChart'
 import { TrendChart } from '@/components/technologies/TrendChart'
 import { SourceSignalCard } from '@/components/technologies/SourceSignalCard'
 import { RelatedTechnologies } from '@/components/technologies/RelatedTechnologies'
@@ -259,7 +260,7 @@ export function TechnologyDetailClient() {
         )}
       </motion.section>
 
-      {/* Score Breakdown */}
+      {/* Score Breakdown with Radar Chart */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
@@ -267,12 +268,26 @@ export function TechnologyDetailClient() {
         className="mb-8"
       >
         <h2 className="mb-4 text-xl font-semibold text-foreground">Score Breakdown</h2>
-        <ScoreBreakdown
-          githubScore={current_scores?.github_score ?? null}
-          communityScore={current_scores?.community_score ?? null}
-          jobsScore={current_scores?.jobs_score ?? null}
-          ecosystemScore={current_scores?.ecosystem_score ?? null}
-        />
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Radar Chart */}
+          <TechRadarChart
+            githubScore={current_scores?.github_score ?? null}
+            communityScore={current_scores?.community_score ?? null}
+            jobsScore={current_scores?.jobs_score ?? null}
+            ecosystemScore={current_scores?.ecosystem_score ?? null}
+            compositeScore={current_scores?.composite_score ?? null}
+            techColor={technology.color}
+          />
+          {/* Bar Breakdown */}
+          <div>
+            <ScoreBreakdown
+              githubScore={current_scores?.github_score ?? null}
+              communityScore={current_scores?.community_score ?? null}
+              jobsScore={current_scores?.jobs_score ?? null}
+              ecosystemScore={current_scores?.ecosystem_score ?? null}
+            />
+          </div>
+        </div>
       </motion.section>
 
       {/* Trend Chart */}
@@ -317,9 +332,9 @@ export function TechnologyDetailClient() {
               title="Hacker News"
               icon={<MessageSquare size={16} />}
               signals={[
-                { label: 'Mentions (30d)', value: latest_signals.hackernews.mentions },
-                { label: 'Avg Upvotes', value: latest_signals.hackernews.avg_upvotes.toFixed(1) },
-                { label: 'Sentiment', value: `${(latest_signals.hackernews.sentiment * 100).toFixed(0)}%` },
+                { label: 'Mentions (30d)', value: latest_signals.hackernews.mentions ?? 0 },
+                { label: 'Avg Upvotes', value: latest_signals.hackernews.avg_upvotes?.toFixed(1) ?? '0.0' },
+                { label: 'Sentiment', value: latest_signals.hackernews.sentiment ? `${(latest_signals.hackernews.sentiment * 100).toFixed(0)}%` : '0%' },
               ]}
             />
           )}

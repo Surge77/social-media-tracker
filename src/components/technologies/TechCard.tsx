@@ -10,7 +10,7 @@ import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { MomentumBadge } from '@/components/technologies/MomentumBadge'
 import { Sparkline } from '@/components/technologies/Sparkline'
-import { getScoreLabel, getMomentumInsight, getJobInsight } from '@/lib/insights'
+import { RankChangeBadge } from '@/components/technologies/RankChangeBadge'
 import type { TechnologyWithScore } from '@/types'
 
 interface TechCardProps {
@@ -43,9 +43,12 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
             <div className="mb-3 flex items-start justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 {rank && (
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted/50 font-mono text-sm font-semibold text-muted-foreground">
-                    {rank}
-                  </span>
+                  <div className="flex shrink-0 flex-col items-center gap-0.5">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/50 font-mono text-sm font-semibold text-muted-foreground">
+                      {rank}
+                    </span>
+                    <RankChangeBadge rankChange={technology.rank_change} />
+                  </div>
                 )}
                 <div
                   className="h-3 w-3 shrink-0 rounded-full"
@@ -71,17 +74,9 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
               <MomentumBadge momentum={technology.momentum} />
             </div>
 
-            {/* Insight text */}
+            {/* AI Summary */}
             <p className="mb-3 text-xs text-muted-foreground">
-              {getScoreLabel(technology.composite_score)} overall
-              {' · '}
-              {getMomentumInsight(technology.momentum).split(' — ')[0]}
-              {technology.jobs_score !== null && technology.jobs_score > 0 && (
-                <>
-                  {' · '}
-                  {getJobInsight(technology.jobs_score, technology.momentum).split(' — ')[0]}
-                </>
-              )}
+              {technology.ai_summary}
             </p>
 
             {/* Sparkline */}

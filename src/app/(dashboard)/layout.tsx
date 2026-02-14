@@ -2,6 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
+import MinimalFooter from '@/components/MinimalFooter'
 
 export default function DashboardLayout({
   children,
@@ -31,6 +32,12 @@ export default function DashboardLayout({
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               Compare
+            </Link>
+            <Link
+              href="/quiz"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Quizzes
             </Link>
             <Link
               href="/digest"
@@ -67,29 +74,7 @@ export default function DashboardLayout({
       <main>{children}</main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-muted/30 py-8">
-        <div className="container mx-auto max-w-7xl px-4">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <p className="text-sm text-muted-foreground">
-              © 2026 DevTrends. Data updated daily.
-            </p>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/methodology"
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                How it works
-              </Link>
-              <Link
-                href="/"
-                className="text-sm text-muted-foreground hover:text-foreground"
-              >
-                About
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <MinimalFooter />
     </div>
   )
 }

@@ -14,6 +14,11 @@ import type { PromptSection } from '@/lib/ai/token-budget'
 
 // ---- Types ----
 
+export interface UserContext {
+  role: 'beginner' | 'mid-level' | 'senior' | 'tech-lead'
+  goal: 'learning' | 'side-project' | 'production' | 'job-hunting' | 'migration'
+}
+
 export interface ComparisonInsight {
   headline: string
   verdict: string
@@ -77,9 +82,10 @@ export interface ComparisonInsight {
 export async function generateComparisonInsight(
   contexts: TechInsightContext[],
   provider: AIProvider,
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
+  userContext?: UserContext
 ): Promise<ComparisonInsight> {
-  const prompt = buildComparisonPrompt(contexts)
+  const prompt = buildComparisonPrompt(contexts, userContext)
 
   // Load system prompt from database
   const systemPrompt = await getActivePrompt(supabase, 'comparison-system')
@@ -99,18 +105,43 @@ export async function generateComparisonInsight(
 
 // ---- Prompt builder ----
 
-function buildComparisonPrompt(contexts: TechInsightContext[]): string {
+function buildComparisonPrompt(
+  contexts: TechInsightContext[],
+  userContext?: UserContext
+): string {
   const names = contexts.map((c) => c.name).join(' vs ')
   const sharedCategory =
     new Set(contexts.map((c) => c.category)).size === 1
       ? contexts[0].category
       : null
 
+  // Build personalization context
+  const roleLabels = {
+    beginner: 'a beginner developer',
+    'mid-level': 'a mid-level developer',
+    senior: 'a senior developer',
+    'tech-lead': 'a tech lead',
+  }
+  const goalLabels = {
+    learning: 'learning new skills',
+    'side-project': 'building a side project',
+    production: 'choosing for production use',
+    'job-hunting': 'maximizing job opportunities',
+    migration: 'migrating from an existing technology',
+  }
+
+  const personalization = userContext
+    ? `\n\nPERSONALIZATION CONTEXT:
+The user is ${roleLabels[userContext.role]} focused on ${goalLabels[userContext.goal]}.
+Tailor the verdict, career advice, and recommendations specifically for this context.
+The careerAdvice.forBeginners/forExperienced/forJobSeekers should still be included, but emphasize the advice that matches the user's profile.`
+    : ''
+
   const sections: PromptSection[] = [
     {
       key: 'instruction',
       priority: 1,
-      content: `Compare these technologies and generate a ComparisonInsight JSON with ALL fields:
+      content: `Compare these technologies and generate a ComparisonInsight JSON with ALL fields:${personalization}
 
 REQUIRED FIELDS:
 - headline: string

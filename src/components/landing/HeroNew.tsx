@@ -136,7 +136,7 @@ export default function HeroNew() {
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 border-2 border-background" />
             </div>
             <span className="font-medium">
-              <span className="text-foreground">10,000+</span> developers tracking their careers
+              <span className="text-foreground">100+ technologies</span> tracked with live data
             </span>
           </motion.div>
 
@@ -159,7 +159,7 @@ export default function HeroNew() {
             <span className="hidden sm:inline text-border">•</span>
             <span className="flex items-center gap-2">
               <Database className="h-4 w-4 text-amber-500" />
-              <span className="font-medium">50M+ data points</span>
+              <span className="font-medium">8+ data sources</span>
             </span>
             <span className="hidden sm:inline text-border">•</span>
             <span className="flex items-center gap-2">
@@ -167,7 +167,7 @@ export default function HeroNew() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
               </span>
-              <span className="font-medium">Updated 3 min ago</span>
+              <span className="font-medium">Updated daily</span>
             </span>
           </motion.div>
 

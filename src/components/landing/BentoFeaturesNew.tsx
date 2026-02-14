@@ -29,26 +29,26 @@ function LeaderboardMockup() {
   );
 }
 
-function VelocityMockup() {
+function CompareMockup() {
+  const techs = [
+    { name: 'React', score: 95, color: '#61DAFB' },
+    { name: 'Vue', score: 78, color: '#42B883' },
+    { name: 'Angular', score: 65, color: '#DD0031' },
+  ];
   return (
-    <div className="mt-4 flex items-center justify-center">
-      <div className="relative w-32 h-20">
-        <svg viewBox="0 0 120 70" className="w-full h-full">
-          <defs>
-            <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path d="M0,60 L15,55 L30,45 L45,50 L60,35 L75,25 L90,20 L105,10 L120,5"
-                stroke="hsl(var(--primary))" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <path d="M0,60 L15,55 L30,45 L45,50 L60,35 L75,25 L90,20 L105,10 L120,5 L120,70 L0,70 Z"
-                fill="url(#areaGrad)" />
-        </svg>
-        <div className="absolute bottom-0 right-0 text-xs font-bold text-green-500 flex items-center gap-0.5">
-          <ArrowUpRight className="w-3 h-3" /> +20%
+    <div className="mt-4 space-y-2">
+      {techs.map((tech) => (
+        <div key={tech.name} className="flex items-center gap-2">
+          <div className="w-12 text-[10px] font-medium text-foreground">{tech.name}</div>
+          <div className="flex-1 h-4 rounded-full bg-muted/50 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-1000"
+              style={{ width: `${tech.score}%`, backgroundColor: tech.color, opacity: 0.8 }}
+            />
+          </div>
+          <div className="w-6 text-[10px] font-bold text-primary text-right">{tech.score}</div>
         </div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -71,35 +71,40 @@ function JobDemandMockup() {
   );
 }
 
-function AlertsMockup() {
+function AIInsightsMockup() {
   return (
     <div className="mt-4 space-y-2">
-      <div className="flex items-start gap-2 px-2 py-1.5 rounded bg-background/50 border border-border/30">
-        <Bell className="w-3 h-3 text-orange-500 mt-0.5 flex-shrink-0" />
-        <span className="text-[10px] text-muted-foreground">New feature pushed at <span className="text-foreground font-medium">Google</span></span>
+      <div className="flex items-start gap-2 px-2 py-1.5 rounded bg-primary/5 border border-primary/20">
+        <Zap className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
+        <span className="text-[10px] text-muted-foreground">
+          <span className="text-foreground font-medium">React</span> shows strong momentum in enterprise
+        </span>
       </div>
       <div className="flex items-start gap-2 px-2 py-1.5 rounded bg-background/50 border border-border/30">
-        <Zap className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" />
-        <span className="text-[10px] text-muted-foreground">Rust crossed <span className="text-foreground font-medium">10,000+ jobs</span></span>
+        <TrendingUp className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+        <span className="text-[10px] text-muted-foreground">
+          <span className="text-foreground font-medium">TypeScript</span> job demand +28% this quarter
+        </span>
       </div>
     </div>
   );
 }
 
-function RoadmapMockup() {
-  const items = [
-    { text: 'Master Next.js 14 Basics', done: true },
-    { text: 'Understand Server Actions', done: false, active: true },
-    { text: 'Optimize for Web Vitals', done: false },
-  ];
+function AskAIMockup() {
   return (
     <div className="mt-4 space-y-2">
-      {items.map((item) => (
-        <div key={item.text} className={`flex items-center gap-2 px-2 py-1.5 rounded text-[10px] ${item.active ? 'bg-primary/10 border border-primary/20' : 'bg-background/50 border border-border/30'}`}>
-          <CheckCircle2 className={`w-3 h-3 flex-shrink-0 ${item.done ? 'text-green-500' : item.active ? 'text-primary' : 'text-muted-foreground/40'}`} />
-          <span className={item.done ? 'text-muted-foreground line-through' : 'text-foreground'}>{item.text}</span>
+      <div className="flex items-start gap-2 px-2 py-1.5 rounded bg-muted/30 border border-border/30">
+        <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+          <span className="text-[8px] font-bold text-primary">Q</span>
         </div>
-      ))}
+        <span className="text-[10px] text-muted-foreground italic">Should I learn React or Vue?</span>
+      </div>
+      <div className="flex items-start gap-2 px-2 py-1.5 rounded bg-primary/5 border border-primary/20">
+        <Zap className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" />
+        <span className="text-[10px] text-foreground">
+          React has 3x more jobs and stronger momentum...
+        </span>
+      </div>
     </div>
   );
 }
@@ -112,9 +117,9 @@ function RealtimeMockup() {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
         </span>
-        <span className="text-[11px] font-medium text-green-500">Live</span>
+        <span className="text-[11px] font-medium text-green-500">Active</span>
       </div>
-      <span className="text-[10px] text-muted-foreground">Updated 3 min ago · Next refresh in 12 min</span>
+      <span className="text-[10px] text-muted-foreground">Fresh data · Updated daily</span>
     </div>
   );
 }
@@ -128,36 +133,36 @@ const features = [
     mockup: LeaderboardMockup,
   },
   {
-    title: 'Skill Velocity',
-    description: 'Personal growth tracking vs industry averages.',
+    title: 'Compare Technologies',
+    description: 'Side-by-side analysis across job demand, momentum, and ecosystem maturity.',
     gradient: 'from-purple-500/10 via-pink-500/10 to-transparent',
     large: true,
-    mockup: VelocityMockup,
+    mockup: CompareMockup,
   },
   {
-    title: 'Job Demand',
-    description: 'Active hiring signals for your tech stack.',
+    title: 'Job Market Intel',
+    description: 'Track hiring demand across 100+ technologies in real-time.',
     gradient: 'from-orange-500/10 via-amber-500/10 to-transparent',
     large: false,
     mockup: JobDemandMockup,
   },
   {
-    title: 'Alerts',
-    description: 'Know when markets shift or trends emerge.',
+    title: 'AI Insights',
+    description: 'GPT-powered analysis of trends, momentum, and career impact.',
     gradient: 'from-red-500/10 via-orange-500/10 to-transparent',
     large: false,
-    mockup: AlertsMockup,
+    mockup: AIInsightsMockup,
   },
   {
-    title: 'Learning Roadmap',
-    description: 'Personalized recommendations based on market data.',
+    title: 'Ask AI',
+    description: 'Get instant answers about technology choices and career decisions.',
     gradient: 'from-green-500/10 via-emerald-500/10 to-transparent',
     large: false,
-    mockup: RoadmapMockup,
+    mockup: AskAIMockup,
   },
   {
-    title: 'Real-Time Updates',
-    description: 'Continuously refreshed from top developer communities.',
+    title: 'Daily Updates',
+    description: 'Fresh data aggregated from 8+ sources including GitHub, HN, and Stack Overflow.',
     gradient: 'from-yellow-500/10 via-lime-500/10 to-transparent',
     large: false,
     mockup: RealtimeMockup,

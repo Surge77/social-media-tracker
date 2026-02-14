@@ -12,7 +12,7 @@ interface MomentumBadgeProps {
 type MomentumDirection = 'up' | 'down' | 'flat'
 
 const getMomentumDirection = (momentum: number | null): MomentumDirection => {
-  if (momentum === null || Math.abs(momentum) < 2) return 'flat'
+  if (momentum == null || Math.abs(momentum) < 2) return 'flat'
   return momentum > 0 ? 'up' : 'down'
 }
 
@@ -40,10 +40,10 @@ export const MomentumBadge = React.forwardRef<HTMLDivElement, MomentumBadgeProps
           config.color,
           className
         )}
-        title={`Momentum: ${momentum !== null ? momentum.toFixed(1) : 'N/A'}%`}
+        title={`Momentum: ${momentum != null ? momentum.toFixed(1) : 'N/A'}%`}
       >
         <Icon size={iconSize} strokeWidth={2.5} />
-        {showValue && momentum !== null && (
+        {showValue && momentum != null && (
           <span className="font-mono">
             {momentum > 0 ? '+' : ''}
             {Math.round(momentum)}%
