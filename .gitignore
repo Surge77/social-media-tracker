@@ -5,6 +5,12 @@
 
 # testing
 /coverage
+test-*.js
+test-*.ts
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
 
 # next.js
 /.next/
@@ -16,6 +22,11 @@
 # misc
 .DS_Store
 *.pem
+.claude/
+
+# documentation - ignore all markdown files except README
+*.md
+!README.md
 
 # debug
 npm-debug.log*

@@ -33,6 +33,24 @@ export default function DashboardLayout({
               Compare
             </Link>
             <Link
+              href="/digest"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Digest
+            </Link>
+            <Link
+              href="/ask"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Ask AI
+            </Link>
+            <Link
+              href="/monitoring"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Monitoring
+            </Link>
+            <Link
               href="/methodology"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >

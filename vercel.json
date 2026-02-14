@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/fetch-weekly",
       "schedule": "0 3 * * 1"
+    },
+    {
+      "path": "/api/ai/digest/generate",
+      "schedule": "0 3 * * 1"
     }
   ]
 }

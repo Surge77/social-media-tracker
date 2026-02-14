@@ -6,9 +6,12 @@ import { motion } from 'framer-motion'
 import { Share2, Copy, Check, Lightbulb } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useAIComparison } from '@/hooks/useAIComparison'
 import { TechSelector } from '@/components/compare/TechSelector'
 import { CompareChart } from '@/components/compare/CompareChart'
 import { CompareTable } from '@/components/compare/CompareTable'
+import { AIComparisonCard, AIComparisonSkeleton, AIComparisonError } from '@/components/ai/AIComparisonCard'
+import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
 import { getComparisonSummary } from '@/lib/insights'
 import type { TechnologyWithScore, CompareData } from '@/types'
 
@@ -45,6 +48,9 @@ function ComparePageContent() {
   // Get selected slugs from URL
   const techsParam = searchParams?.get('techs')
   const selectedSlugs = techsParam ? techsParam.split(',').filter(Boolean) : []
+
+  // AI comparison hook
+  const aiComparison = useAIComparison(selectedSlugs.length >= 2 ? selectedSlugs : [])
 
   // Fetch all technologies for selector
   useEffect(() => {
@@ -246,37 +252,55 @@ function ComparePageContent() {
       {/* Comparison content */}
       {!isLoading && compareData && compareData.technologies.length >= 2 && (
         <>
-          {/* Comparison Summary */}
+          {/* AI Comparison Summary */}
           <motion.section
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.15 }}
             className="mb-8"
           >
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-5">
-              <div className="flex items-start gap-3">
-                <div className="rounded-md bg-primary/10 p-2">
-                  <Lightbulb className="h-5 w-5 text-primary" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h2 className="mb-1 text-sm font-semibold text-foreground">Bottom Line</h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {getComparisonSummary(
-                      compareData.technologies.map((t) => ({
-                        name: t.name,
-                        compositeScore: t.composite_score,
-                        momentum: t.momentum,
-                        githubScore: t.github_score,
-                        communityScore: t.community_score,
-                        jobsScore: t.jobs_score,
-                        ecosystemScore: t.ecosystem_score,
-                        dataCompleteness: t.data_completeness,
-                      }))
-                    )}
-                  </p>
+            {aiComparison.isLoading && <AIComparisonSkeleton />}
+
+            {aiComparison.error && !aiComparison.comparison && (
+              <AIComparisonError error={aiComparison.error} onRetry={aiComparison.refetch} />
+            )}
+
+            {aiComparison.comparison && (
+              <AIComparisonCard
+                comparison={aiComparison.comparison}
+                cached={aiComparison.cached}
+              >
+                <FeedbackButtons insightId={`compare_${selectedSlugs.sort().join('+')}`} />
+              </AIComparisonCard>
+            )}
+
+            {/* Fallback: template summary if AI unavailable */}
+            {!aiComparison.isLoading && !aiComparison.comparison && !aiComparison.error && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-5">
+                <div className="flex items-start gap-3">
+                  <div className="rounded-md bg-primary/10 p-2">
+                    <Lightbulb className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="mb-1 text-sm font-semibold text-foreground">Bottom Line</h2>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                      {getComparisonSummary(
+                        compareData.technologies.map((t) => ({
+                          name: t.name,
+                          compositeScore: t.composite_score,
+                          momentum: t.momentum,
+                          githubScore: t.github_score,
+                          communityScore: t.community_score,
+                          jobsScore: t.jobs_score,
+                          ecosystemScore: t.ecosystem_score,
+                          dataCompleteness: t.data_completeness,
+                        }))
+                      )}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </motion.section>
 
           {/* Trend Chart */}

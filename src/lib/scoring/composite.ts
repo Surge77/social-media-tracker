@@ -1,13 +1,10 @@
 import { zScoreTo100, minMaxNormalize } from '@/lib/scoring/normalize'
+import type { WeightProfile } from '@/lib/scoring/adaptive-weights'
+import { DEFAULT_WEIGHTS } from '@/lib/scoring/adaptive-weights'
 
 // ---- Sub-score weights within the composite ----
 
-const COMPOSITE_WEIGHTS = {
-  github: 0.25,
-  community: 0.20,
-  jobs: 0.25,
-  ecosystem: 0.30,
-}
+const COMPOSITE_WEIGHTS = DEFAULT_WEIGHTS
 
 // ---- Sub-score functions ----
 
@@ -116,18 +113,25 @@ export interface CompositeResult {
  *
  * If a sub-score is null (no data for that dimension), its weight
  * is redistributed proportionally among available sub-scores.
+ *
+ * @param subScores - The four sub-scores (null = no data for that dimension)
+ * @param weights - Optional adaptive weights. Falls back to DEFAULT_WEIGHTS.
  */
-export function computeCompositeScore(subScores: SubScores): CompositeResult {
+export function computeCompositeScore(
+  subScores: SubScores,
+  weights?: WeightProfile
+): CompositeResult {
+  const w = weights ?? COMPOSITE_WEIGHTS
   const available: { score: number; weight: number }[] = []
 
   if (subScores.github !== null)
-    available.push({ score: subScores.github, weight: COMPOSITE_WEIGHTS.github })
+    available.push({ score: subScores.github, weight: w.github })
   if (subScores.community !== null)
-    available.push({ score: subScores.community, weight: COMPOSITE_WEIGHTS.community })
+    available.push({ score: subScores.community, weight: w.community })
   if (subScores.jobs !== null)
-    available.push({ score: subScores.jobs, weight: COMPOSITE_WEIGHTS.jobs })
+    available.push({ score: subScores.jobs, weight: w.jobs })
   if (subScores.ecosystem !== null)
-    available.push({ score: subScores.ecosystem, weight: COMPOSITE_WEIGHTS.ecosystem })
+    available.push({ score: subScores.ecosystem, weight: w.ecosystem })
 
   if (available.length === 0) return { composite: 0, completeness: 0 }
 

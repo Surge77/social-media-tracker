@@ -3,18 +3,24 @@
 import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package, Lightbulb } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package } from 'lucide-react'
 import Link from 'next/link'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useAIInsight } from '@/hooks/useAIInsight'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { ConfidenceBadge } from '@/components/shared/ConfidenceBadge'
+import { LifecycleBadge } from '@/components/shared/LifecycleBadge'
 import { DataFreshness } from '@/components/shared/DataFreshness'
 import { MomentumBadge } from '@/components/technologies/MomentumBadge'
 import { ScoreBreakdown } from '@/components/technologies/ScoreBreakdown'
 import { TrendChart } from '@/components/technologies/TrendChart'
 import { SourceSignalCard } from '@/components/technologies/SourceSignalCard'
 import { RelatedTechnologies } from '@/components/technologies/RelatedTechnologies'
+import { AIInsightCard, AIInsightSkeleton, AIInsightError } from '@/components/ai/AIInsightCard'
+import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
+import { AnomalyBanner } from '@/components/technologies/AnomalyBanner'
 import { getRecommendation, getMomentumInsight } from '@/lib/insights'
 import type { TechnologyDetail } from '@/types'
 
@@ -27,6 +33,9 @@ export function TechnologyDetailClient() {
   const [data, setData] = React.useState<TechnologyDetail | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+
+  // AI insight hook — fetches from /api/ai/insights/[slug]
+  const ai = useAIInsight(slug ?? null)
 
   React.useEffect(() => {
     if (!slug) return
@@ -89,6 +98,17 @@ export function TechnologyDetailClient() {
 
   const { technology, current_scores, chart_data, latest_signals, related_technologies } = data
 
+  // Extract lifecycle stage from raw_sub_scores
+  const lifecycleStage =
+    current_scores?.raw_sub_scores &&
+    typeof current_scores.raw_sub_scores === 'object' &&
+    'lifecycle' in current_scores.raw_sub_scores &&
+    typeof current_scores.raw_sub_scores.lifecycle === 'object' &&
+    current_scores.raw_sub_scores.lifecycle !== null &&
+    'stage' in current_scores.raw_sub_scores.lifecycle
+      ? String(current_scores.raw_sub_scores.lifecycle.stage)
+      : null
+
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       {/* Back Button */}
@@ -121,7 +141,13 @@ export function TechnologyDetailClient() {
             </h1>
             <p className="text-muted-foreground">{technology.description}</p>
           </div>
-          <ScoreBadge score={current_scores?.composite_score ?? null} size="lg" />
+          <div className="flex items-center gap-2">
+            <ConfidenceBadge
+              completeness={current_scores?.data_completeness ?? null}
+              size="md"
+            />
+            <ScoreBadge score={current_scores?.composite_score ?? null} size="lg" />
+          </div>
         </div>
 
         {/* Badges & Meta */}
@@ -132,6 +158,9 @@ export function TechnologyDetailClient() {
             dataCompleteness={current_scores?.data_completeness ?? null}
             size="md"
           />
+          {lifecycleStage && (
+            <LifecycleBadge stage={lifecycleStage} size="md" />
+          )}
           <CategoryBadge category={technology.category} size="md" />
           <MomentumBadge momentum={current_scores?.momentum ?? null} size="md" />
           {technology.website_url && (
@@ -160,37 +189,74 @@ export function TechnologyDetailClient() {
         </div>
       </motion.div>
 
-      {/* Recommendation Card */}
+      {/* Anomaly Banner (if anomalies detected) */}
+      {data.anomalies && data.anomalies.length > 0 && (
+        <motion.section
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.05 }}
+          className="mb-8"
+        >
+          <AnomalyBanner
+            anomalies={data.anomalies.map(a => ({
+              type: a.type as any,
+              severity: a.severity as any,
+              metric: a.metric,
+              deviationSigma: a.deviationSigma,
+              explanation: a.explanation
+            }))}
+            techSlug={slug}
+          />
+        </motion.section>
+      )}
+
+      {/* AI Insight Card (replaces template recommendation) */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.1 }}
         className="mb-8"
       >
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-5 backdrop-blur-sm">
-          <div className="flex items-start gap-3">
-            <div className="rounded-md bg-primary/10 p-2">
-              <Lightbulb className="h-5 w-5 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h2 className="mb-1 text-sm font-semibold text-foreground">Career Insight</h2>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {getRecommendation(
-                  current_scores?.composite_score ?? null,
-                  current_scores?.momentum ?? null,
-                  current_scores?.jobs_score ?? null,
-                  current_scores?.community_score ?? null,
-                  current_scores?.data_completeness ?? null
-                )}
-              </p>
-              {current_scores?.momentum !== null && current_scores?.momentum !== undefined && (
-                <p className="mt-2 text-xs text-muted-foreground/80">
-                  Momentum: {getMomentumInsight(current_scores.momentum)}
+        {ai.isLoading && <AIInsightSkeleton />}
+
+        {ai.error && !ai.insight && (
+          <AIInsightError error={ai.error} onRetry={ai.refetch} />
+        )}
+
+        {ai.insight && (
+          <AIInsightCard
+            insight={ai.insight}
+            freshness={ai.freshness}
+            age={ai.age}
+          >
+            <FeedbackButtons insightId={`tech_${slug}`} />
+          </AIInsightCard>
+        )}
+
+        {/* Fallback: template insight if AI unavailable and not loading */}
+        {!ai.isLoading && !ai.insight && !ai.error && (
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-5 backdrop-blur-sm">
+            <div className="flex items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <h2 className="mb-1 text-sm font-semibold text-foreground">Career Insight</h2>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {getRecommendation(
+                    current_scores?.composite_score ?? null,
+                    current_scores?.momentum ?? null,
+                    current_scores?.jobs_score ?? null,
+                    current_scores?.community_score ?? null,
+                    current_scores?.data_completeness ?? null
+                  )}
                 </p>
-              )}
+                {current_scores?.momentum !== null && current_scores?.momentum !== undefined && (
+                  <p className="mt-2 text-xs text-muted-foreground/80">
+                    Momentum: {getMomentumInsight(current_scores.momentum)}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </motion.section>
 
       {/* Score Breakdown */}

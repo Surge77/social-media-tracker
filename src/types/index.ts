@@ -1,3 +1,21 @@
+// ---- Re-exports from scoring/intelligence modules ----
+
+export type { WeightProfile } from '@/lib/scoring/adaptive-weights'
+export type {
+  MomentumTrend,
+  MomentumAnalysis,
+} from '@/lib/scoring/enhanced-momentum'
+export type {
+  ConfidenceGrade,
+  ConfidenceBreakdown,
+} from '@/lib/scoring/confidence'
+export type { TechSentimentResult } from '@/lib/intelligence/tech-sentiment'
+export type { PromptSection } from '@/lib/ai/token-budget'
+export type {
+  LifecycleStage,
+  LifecycleClassification,
+} from '@/lib/analysis/lifecycle'
+
 // ---- Core database types ----
 
 export interface Technology {
@@ -114,6 +132,13 @@ export interface TechnologyDetail {
   chart_data: ChartDataPoint[]
   latest_signals: LatestSignals
   related_technologies: TechnologyWithScore[]
+  anomalies?: Array<{
+    type: string
+    severity: string
+    metric: string
+    deviationSigma: number
+    explanation: string | null
+  }>
 }
 
 export interface ChartDataPoint {

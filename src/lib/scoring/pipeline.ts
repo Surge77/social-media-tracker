@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { TechnologyCategory } from '@/types'
 import { zScoreNormalize } from '@/lib/scoring/normalize'
 import {
   computeGitHubScore,
@@ -8,7 +9,10 @@ import {
   computeCompositeScore,
 } from '@/lib/scoring/composite'
 import { bayesianSmooth } from '@/lib/scoring/bayesian'
-import { computeMomentum } from '@/lib/scoring/momentum'
+import { getAdaptiveWeights } from '@/lib/scoring/adaptive-weights'
+import { analyzeMomentum, computeLegacyMomentum } from '@/lib/scoring/enhanced-momentum'
+import { computeConfidence } from '@/lib/scoring/confidence'
+import { classifyLifecycle } from '@/lib/analysis/lifecycle'
 
 interface TechDataPoints {
   technologyId: string
@@ -61,10 +65,10 @@ export async function runScoringPipeline(
 ): Promise<{ scored: number; errors: string[] }> {
   const errors: string[] = []
 
-  // Step 1: Fetch all active technology IDs
+  // Step 1: Fetch all active technologies (with category for adaptive weights)
   const { data: technologies, error: techError } = await supabase
     .from('technologies')
-    .select('id')
+    .select('id, category, created_at')
     .eq('is_active', true)
 
   if (techError || !technologies) {
@@ -72,6 +76,12 @@ export async function runScoringPipeline(
   }
 
   const techIds = technologies.map((t) => t.id as string)
+  const techCategoryMap = new Map<string, TechnologyCategory>()
+  const techCreatedMap = new Map<string, string>()
+  for (const t of technologies) {
+    techCategoryMap.set(t.id as string, t.category as TechnologyCategory)
+    techCreatedMap.set(t.id as string, t.created_at as string)
+  }
 
   // Step 2: Fetch today's data_points for all technologies
   const { data: dataPoints, error: dpError } = await supabase
@@ -185,20 +195,29 @@ export async function runScoringPipeline(
   const downloadsZ = zScoreNormalize(downloadsArr)
   const soZ = zScoreNormalize(soArr)
 
-  // Step 5: Fetch scores from 30 days ago for momentum
-  const date30DaysAgo = new Date(date)
-  date30DaysAgo.setDate(date30DaysAgo.getDate() - 30)
-  const date30Str = date30DaysAgo.toISOString().split('T')[0]
+  // Step 5: Fetch historical scores for enhanced momentum (up to 90 days)
+  const date90DaysAgo = new Date(date)
+  date90DaysAgo.setDate(date90DaysAgo.getDate() - 90)
+  const date90Str = date90DaysAgo.toISOString().split('T')[0]
 
-  const { data: oldScores } = await supabase
+  const { data: historicalScores } = await supabase
     .from('daily_scores')
-    .select('technology_id, composite_score')
-    .eq('score_date', date30Str)
+    .select('technology_id, score_date, composite_score')
+    .gte('score_date', date90Str)
+    .lt('score_date', date)
+    .in('technology_id', techIds)
+    .order('score_date', { ascending: true })
 
-  const oldScoreMap = new Map<string, number>()
-  if (oldScores) {
-    for (const s of oldScores) {
-      oldScoreMap.set(s.technology_id, Number(s.composite_score))
+  // Group historical scores by technology
+  const historyMap = new Map<string, Array<{ date: string; score: number }>>()
+  if (historicalScores) {
+    for (const s of historicalScores) {
+      const techId = s.technology_id as string
+      if (!historyMap.has(techId)) historyMap.set(techId, [])
+      historyMap.get(techId)!.push({
+        date: s.score_date as string,
+        score: Number(s.composite_score),
+      })
     }
   }
 
@@ -246,15 +265,28 @@ export async function runScoringPipeline(
       ecosystemScore = computeEcosystemScore(downloadsZ[i], 0, soZ[i])
     }
 
-    const { composite, completeness } = computeCompositeScore({
-      github: githubScore,
-      community: communityScore,
-      jobs: jobsScore,
-      ecosystem: ecosystemScore,
-    })
+    // Compute adaptive weights based on category and maturity
+    const category = techCategoryMap.get(tech.technologyId) ?? 'language'
+    const createdAt = techCreatedMap.get(tech.technologyId)
+    const dataAgeDays = createdAt
+      ? Math.floor((new Date(date).getTime() - new Date(createdAt).getTime()) / 86400000)
+      : 365
 
     // Count how many data points this tech has today
     const dpCount = dataPoints.filter((dp) => dp.technology_id === tech.technologyId).length
+    const dpCompleteness = dpCount / 12 // 12 is max possible metrics
+
+    const adaptiveWeights = getAdaptiveWeights(category, dataAgeDays, dpCompleteness)
+
+    const { composite, completeness } = computeCompositeScore(
+      {
+        github: githubScore,
+        community: communityScore,
+        jobs: jobsScore,
+        ecosystem: ecosystemScore,
+      },
+      adaptiveWeights
+    )
 
     rawComposites.push(composite)
     dataPointCounts.push(dpCount)
@@ -291,13 +323,100 @@ export async function runScoringPipeline(
     row.composite_score = Math.round(bayesianSmooth(row.composite_score, dpCount, globalMean) * 100) / 100
   }
 
-  // Step 8: Momentum
+  // Step 8: Enhanced momentum + confidence scoring
+  const momentumRows: Array<Record<string, unknown>> = []
+
   for (const row of scoredRows) {
-    const old = oldScoreMap.get(row.technology_id) ?? null
-    row.momentum = computeMomentum(row.composite_score, old)
+    // Build score history for this tech (historical + today's score)
+    const history = historyMap.get(row.technology_id) ?? []
+    history.push({ date, score: row.composite_score })
+
+    // Enhanced momentum analysis
+    const momentum = analyzeMomentum(history)
+    row.momentum = computeLegacyMomentum(momentum)
+
+    // Confidence scoring
+    const category = techCategoryMap.get(row.technology_id) ?? 'language'
+    const activeSources = new Set(
+      dataPoints
+        .filter((dp) => dp.technology_id === row.technology_id)
+        .map((dp) => dp.source)
+    ).size
+    const latestDpAge = 0 // Today's data is 0 hours old
+    const historyDays = history.length
+
+    const confidence = computeConfidence(
+      category,
+      activeSources,
+      latestDpAge,
+      historyDays,
+      {
+        github: row.github_score,
+        community: row.community_score,
+        jobs: row.jobs_score,
+        ecosystem: row.ecosystem_score,
+      }
+    )
+
+    // Lifecycle classification
+    const recentScores = history.slice(-30).map((h) => h.score)
+    const createdAt = techCreatedMap.get(row.technology_id)
+    const dataAgeDays = createdAt
+      ? Math.floor((new Date(date).getTime() - new Date(createdAt).getTime()) / 86400000)
+      : 365
+
+    const lifecycle = classifyLifecycle({
+      compositeScore: row.composite_score,
+      momentum,
+      confidence,
+      dataAgeDays,
+      category,
+      recentScores,
+    })
+
+    // Store enhanced momentum + confidence + lifecycle in raw_sub_scores
+    row.raw_sub_scores = {
+      ...row.raw_sub_scores,
+      momentum_detail: {
+        shortTerm: momentum.shortTerm,
+        mediumTerm: momentum.mediumTerm,
+        longTerm: momentum.longTerm,
+        trend: momentum.trend,
+        acceleration: momentum.acceleration,
+        volatility: momentum.volatility,
+        streak: momentum.streak,
+      },
+      confidence: {
+        overall: confidence.overall,
+        grade: confidence.grade,
+        sourceCoverage: confidence.sourceCoverage,
+        signalAgreement: confidence.signalAgreement,
+      },
+      lifecycle: {
+        stage: lifecycle.stage,
+        confidence: lifecycle.confidence,
+        reasoning: lifecycle.reasoning,
+        daysInStage: lifecycle.daysInStage,
+        transitionProbability: lifecycle.stageTransitionProbability,
+      },
+    }
+
+    // Prepare momentum_analysis row for upsert
+    momentumRows.push({
+      technology_id: row.technology_id,
+      analysis_date: date,
+      short_term: momentum.shortTerm,
+      medium_term: momentum.mediumTerm,
+      long_term: momentum.longTerm,
+      acceleration: momentum.acceleration,
+      volatility: momentum.volatility,
+      trend: momentum.trend,
+      confidence: momentum.confidence,
+      streak: momentum.streak,
+    })
   }
 
-  // Step 9: Upsert into daily_scores
+  // Step 9: Upsert into daily_scores + momentum_analysis
   const BATCH_SIZE = 500
   let upsertedTotal = 0
 
@@ -315,6 +434,18 @@ export async function runScoringPipeline(
   }
 
   console.log(`[Scoring] Upserted ${upsertedTotal} daily scores`)
+
+  // Upsert momentum_analysis rows
+  for (let i = 0; i < momentumRows.length; i += BATCH_SIZE) {
+    const batch = momentumRows.slice(i, i + BATCH_SIZE)
+    const { error: momError } = await supabase
+      .from('momentum_analysis')
+      .upsert(batch, { onConflict: 'technology_id,analysis_date' })
+
+    if (momError) {
+      errors.push(`Momentum upsert batch ${Math.floor(i / BATCH_SIZE) + 1}: ${momError.message}`)
+    }
+  }
 
   return { scored: upsertedTotal, errors }
 }
