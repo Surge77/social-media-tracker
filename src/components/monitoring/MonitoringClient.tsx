@@ -9,6 +9,7 @@ import { ProviderStatus } from '@/components/monitoring/ProviderStatus'
 import { QualityChart } from '@/components/monitoring/QualityChart'
 import { FeedbackAnalysis } from '@/components/monitoring/FeedbackAnalysis'
 import { CostTracking } from '@/components/monitoring/CostTracking'
+import { Loading } from '@/components/ui/loading'
 import type { FeedbackAnalysis as FeedbackAnalysisType } from '@/lib/ai/feedback-analyzer'
 import type { CostSummary } from '@/lib/ai/cost-tracker'
 
@@ -91,7 +92,7 @@ export function MonitoringClient() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
-          <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+          <Loading size="lg" text="Loading monitoring data..." />
         </div>
       </div>
     )

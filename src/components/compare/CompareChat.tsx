@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Send, Loader2, MessageCircle, X, Sparkles } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ChatMessage } from '@/components/ask/ChatMessage'
+import { LoadingSpinner } from '@/components/ui/loading'
 import { cn } from '@/lib/utils'
 import type { CompareData } from '@/types'
 import { v4 as uuidv4 } from 'uuid'
@@ -308,7 +309,7 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
                   className="absolute bottom-2 right-2 rounded-md bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <LoadingSpinner size="sm" className="!border-primary-foreground/20 !border-t-primary-foreground" />
                   ) : (
                     <Send className="h-4 w-4" />
                   )}

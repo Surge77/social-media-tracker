@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Target, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
+import { Target, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Loading, LoadingSpinner } from '@/components/ui/loading'
 import { QuizContainer } from '@/components/quiz/QuizContainer'
 import { QuizProgress } from '@/components/quiz/QuizProgress'
 import { QuizQuestion } from '@/components/quiz/QuizQuestion'
@@ -218,8 +219,7 @@ export default function LearnNextQuizPage() {
         gradient="from-blue-500 via-indigo-500 to-blue-400"
       >
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-          <p className="text-sm text-muted-foreground">Loading technologies...</p>
+          <Loading size="md" text="Loading technologies..." />
         </div>
       </QuizContainer>
     )
@@ -304,7 +304,7 @@ export default function LearnNextQuizPage() {
         >
           {isGenerating ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <LoadingSpinner size="sm" className="mr-2" />
               Generating...
             </>
           ) : isLastQuestion ? (

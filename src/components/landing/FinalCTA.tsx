@@ -13,9 +13,16 @@ export default function FinalCTA() {
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_60%)]" />
 
+      {/* Animated gradient mesh */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-blob" />
+        <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000" />
+      </div>
+
       {/* Glow orbs */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" />
+      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse animation-delay-1000" />
 
       <div className="container mx-auto px-6 relative">
         <div className="max-w-3xl mx-auto text-center">
@@ -47,25 +54,15 @@ export default function FinalCTA() {
             whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6"
+            className="flex items-center justify-center mb-6"
           >
             <AnimatedCTA
-              href="/dashboard"
+              href="/technologies"
               size="lg"
-              className="px-10 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] transition-shadow duration-300"
+              className="px-12 py-5 text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-[1.05] active:scale-[0.98] transition-all duration-300"
               delay={150}
             >
               Get Started Free →
-            </AnimatedCTA>
-
-            <AnimatedCTA
-              href="/dashboard"
-              variant="outline"
-              size="lg"
-              className="px-8 py-4 text-lg font-medium rounded-full border-2 border-border hover:border-primary/50 hover:bg-primary/5"
-              delay={100}
-            >
-              View Live Demo
             </AnimatedCTA>
           </motion.div>
 

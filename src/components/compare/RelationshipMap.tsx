@@ -60,6 +60,14 @@ export function RelationshipMap({ compareData, className }: RelationshipMapProps
   const prefersReducedMotion = useReducedMotion()
   const relationships = compareData.relationships || []
 
+  // DEBUG: Log what we're receiving
+  console.log('RelationshipMap DEBUG:', {
+    hasCompareData: !!compareData,
+    relationshipsFromData: compareData.relationships,
+    relationshipsLength: relationships.length,
+    technologies: compareData.technologies?.map(t => t.slug)
+  })
+
   // Build tech lookup
   const techBySlug = new Map(
     compareData.technologies.map((tech) => [tech.slug, tech])
@@ -71,7 +79,7 @@ export function RelationshipMap({ compareData, className }: RelationshipMapProps
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className={cn('rounded-xl border border-border bg-card/30 p-6', className)}
+        className={cn('rounded-xl border border-border bg-card/30 p-5', className)}
       >
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-foreground">Technology Relationships</h3>
@@ -94,7 +102,7 @@ export function RelationshipMap({ compareData, className }: RelationshipMapProps
       initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={cn('rounded-xl border border-border bg-card/30 p-6', className)}
+      className={cn('rounded-xl border border-border bg-card/30 p-5', className)}
     >
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-foreground">Technology Relationships</h3>
@@ -104,7 +112,7 @@ export function RelationshipMap({ compareData, className }: RelationshipMapProps
       </div>
 
       {/* Relationship list */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {relationships.map((rel, idx) => {
           const sourceTech = techBySlug.get(rel.source)
           const targetTech = techBySlug.get(rel.target)
@@ -176,7 +184,7 @@ export function RelationshipMap({ compareData, className }: RelationshipMapProps
       </div>
 
       {/* Legend */}
-      <div className="mt-6 rounded-lg border border-border bg-card/50 p-4">
+      <div className="mt-4 rounded-lg border border-border bg-card/50 p-3">
         <p className="mb-2 text-xs font-semibold text-foreground">Relationship Types</p>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {Object.entries(RELATIONSHIP_CONFIG).map(([key, config]) => (

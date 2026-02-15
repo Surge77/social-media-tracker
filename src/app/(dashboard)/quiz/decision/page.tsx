@@ -8,6 +8,7 @@ import { QuizProgress } from '@/components/quiz/QuizProgress'
 import { QuizQuestion } from '@/components/quiz/QuizQuestion'
 import { DecisionResult } from '@/components/quiz/results/DecisionResult'
 import { Button } from '@/components/ui/button'
+import { Loading, LoadingSpinner } from '@/components/ui/loading'
 import type { QuizQuestion as QuizQuestionType, QuizAnswer, QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 import { generateTechnologyDecision } from '@/lib/quiz/decision-engine'
@@ -234,8 +235,7 @@ export default function DecisionQuizPage() {
         gradient="from-orange-500 via-red-500 to-orange-400"
       >
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-          <p className="text-sm text-muted-foreground">Loading technologies...</p>
+          <Loading size="md" text="Loading technologies..." />
         </div>
       </QuizContainer>
     )
@@ -291,7 +291,7 @@ export default function DecisionQuizPage() {
         >
           {isGenerating ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <LoadingSpinner size="sm" className="mr-2" />
               Analyzing...
             </>
           ) : isLastQuestion ? (

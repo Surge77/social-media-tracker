@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { DigestHeader } from '@/components/digest/DigestHeader'
 import { DigestCard } from '@/components/digest/DigestCard'
+import { Loading } from '@/components/ui/loading'
 import type { WeeklyDigest } from '@/lib/ai/generators/weekly-digest'
 
 export function DigestPageClient() {
@@ -41,7 +42,7 @@ export function DigestPageClient() {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <Loading size="lg" text="Loading weekly digest..." />
         </div>
       </div>
     )

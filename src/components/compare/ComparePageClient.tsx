@@ -9,7 +9,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAIComparison } from '@/hooks/useAIComparison'
 import { TechSelector } from '@/components/compare/TechSelector'
 import { TrendChart } from '@/components/compare/TrendChart'
-import { CompetitiveBreakdown } from '@/components/compare/CompetitiveBreakdown'
+import { DimensionBattle } from '@/components/compare/DimensionBattle'
 import { CareerScorecard } from '@/components/compare/CareerScorecard'
 import { CompareChat } from '@/components/compare/CompareChat'
 import { TrendChartSkeleton, DimensionBreakdownSkeleton, CareerScorecardSkeleton } from '@/components/compare/CompareSkeleton'
@@ -18,8 +18,8 @@ import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
 import { ContextSelector, type UserRole, type UserGoal } from '@/components/compare/ContextSelector'
 import { SmartEmptyState } from '@/components/compare/SmartEmptyState'
 import { LifecycleTimeline } from '@/components/compare/LifecycleTimeline'
-import { DimensionBattle } from '@/components/compare/DimensionBattle'
 import { RelationshipMap } from '@/components/compare/RelationshipMap'
+import { Loading } from '@/components/ui/loading'
 import { getComparisonSummary } from '@/lib/insights'
 import type { TechnologyWithScore, CompareData } from '@/types'
 
@@ -29,10 +29,7 @@ export function ComparePageClient() {
       fallback={
         <div className="container mx-auto max-w-7xl px-4 py-8">
           <div className="flex min-h-[600px] items-center justify-center">
-            <div className="text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-              <p className="mt-4 text-sm text-muted-foreground">Loading comparison...</p>
-            </div>
+            <Loading size="lg" text="Loading comparison..." />
           </div>
         </div>
       }
@@ -110,6 +107,13 @@ function ComparePageContent() {
         }
 
         const data = await response.json()
+        console.log('ComparePageClient: Fetched data:', {
+          hasRelationships: !!data.relationships,
+          relationshipsCount: data.relationships?.length || 0,
+          hasLifecycle: !!data.lifecycle_data,
+          lifecycleKeys: Object.keys(data.lifecycle_data || {}),
+          technologies: data.technologies?.map((t: any) => t.slug)
+        })
         setCompareData(data)
         setIsLoading(false)
       } catch (err) {
@@ -344,36 +348,37 @@ function ComparePageContent() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.25 }}
-            className="mb-8"
+            className="mb-6"
           >
             <LifecycleTimeline compareData={compareData} />
           </motion.section>
 
-          {/* Dimension Battle & Relationship Map - Side by Side */}
-          <div className="mb-8 grid gap-6 lg:grid-cols-2">
-            <motion.section
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.3 }}
-            >
-              <DimensionBattle compareData={compareData} />
-            </motion.section>
+          {/* Dimension Battles */}
+          <motion.section
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.3 }}
+            className="mb-6"
+          >
+            <DimensionBattle compareData={compareData} />
+          </motion.section>
 
-            <motion.section
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.35 }}
-            >
-              <RelationshipMap compareData={compareData} />
-            </motion.section>
-          </div>
+          {/* Technology Relationships */}
+          <motion.section
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.35 }}
+            className="mb-6"
+          >
+            <RelationshipMap compareData={compareData} />
+          </motion.section>
 
           {/* Trend Chart with Forecast */}
           <motion.section
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.4 }}
-            className="mb-8"
+            className="mb-6"
           >
             <h2 className="mb-4 text-xl font-semibold text-foreground">90-Day Trend + Forecast</h2>
             <div className="rounded-lg border border-border bg-card/30 p-4">
@@ -384,22 +389,12 @@ function ComparePageContent() {
             </div>
           </motion.section>
 
-          {/* Competitive Breakdown */}
-          <motion.section
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.45 }}
-            className="mb-8"
-          >
-            <CompetitiveBreakdown compareData={compareData} />
-          </motion.section>
-
           {/* Career Impact Scorecard */}
           <motion.section
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.5 }}
-            className="mb-8"
+            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.45 }}
+            className="mb-6"
           >
             <h2 className="mb-4 text-xl font-semibold text-foreground">Career Impact Analysis</h2>
             <CareerScorecard compareData={compareData} />
@@ -409,7 +404,7 @@ function ComparePageContent() {
           <motion.section
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.55 }}
+            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.5 }}
           >
             <h2 className="mb-4 text-xl font-semibold text-foreground">Ask Questions</h2>
             <CompareChat compareData={compareData} />

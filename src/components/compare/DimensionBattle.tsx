@@ -59,16 +59,16 @@ export function DimensionBattle({ compareData, className }: DimensionBattleProps
       initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={cn('rounded-xl border border-border bg-card/30 p-6', className)}
+      className={cn('rounded-xl border border-border bg-card/30 p-5', className)}
     >
-      <div className="mb-6">
+      <div className="mb-4">
         <h3 className="text-lg font-semibold text-foreground">Dimension Battles</h3>
         <p className="text-sm text-muted-foreground">
           Head-to-head showdown across all 4 core metrics
         </p>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {DIMENSIONS.map((dimension, dimIdx) => {
           const Icon = dimension.icon
 
@@ -92,7 +92,7 @@ export function DimensionBattle({ compareData, className }: DimensionBattleProps
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: dimIdx * 0.1 }}
               className={cn(
-                'rounded-lg border p-4',
+                'rounded-lg border p-3',
                 dimension.borderColor,
                 dimension.bgColor
               )}
@@ -195,7 +195,7 @@ export function DimensionBattle({ compareData, className }: DimensionBattleProps
       </div>
 
       {/* Summary */}
-      <div className="mt-6 rounded-lg border border-primary/30 bg-primary/5 p-4">
+      <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3">
         <div className="flex items-start gap-3">
           <TrendingUp className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div className="min-w-0 flex-1">

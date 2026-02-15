@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Activity, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
+import { Activity, ArrowLeft, ArrowRight } from 'lucide-react'
+import { Loading, LoadingSpinner } from '@/components/ui/loading'
 import { QuizContainer } from '@/components/quiz/QuizContainer'
 import { QuizProgress } from '@/components/quiz/QuizProgress'
 import { QuizQuestion } from '@/components/quiz/QuizQuestion'
@@ -187,8 +188,7 @@ export default function StackHealthQuizPage() {
         gradient="from-green-500 via-emerald-500 to-green-400"
       >
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-          <p className="text-sm text-muted-foreground">Loading technologies...</p>
+          <Loading size="md" text="Loading technologies..." />
         </div>
       </QuizContainer>
     )
@@ -273,7 +273,7 @@ export default function StackHealthQuizPage() {
         >
           {isGenerating ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <LoadingSpinner size="sm" className="mr-2" />
               Analyzing...
             </>
           ) : isLastQuestion ? (

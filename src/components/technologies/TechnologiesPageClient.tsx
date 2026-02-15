@@ -11,6 +11,7 @@ import { ViewToggle, type ViewMode } from '@/components/technologies/ViewToggle'
 import { StrategicOverview } from '@/components/technologies/StrategicOverview'
 import { TechTable } from '@/components/technologies/TechTable'
 import { TechCard } from '@/components/technologies/TechCard'
+import { Loading } from '@/components/ui/loading'
 import type { TechnologyCategory, TechnologyWithScore } from '@/types'
 import { CATEGORY_LABELS } from '@/types'
 
@@ -86,10 +87,7 @@ export function TechnologiesPageClient() {
     return (
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <div className="flex min-h-[600px] items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-            <p className="mt-4 text-sm text-muted-foreground">Loading technologies...</p>
-          </div>
+          <Loading size="lg" text="Loading technologies..." />
         </div>
       </div>
     )

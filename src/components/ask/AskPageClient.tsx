@@ -7,6 +7,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAIChat } from '@/hooks/useAIChat'
 import { ChatMessage } from '@/components/ask/ChatMessage'
 import { SuggestedQuestions } from '@/components/ask/SuggestedQuestions'
+import { LoadingSpinner } from '@/components/ui/loading'
 import { v4 as uuidv4 } from 'uuid'
 
 export function AskPageClient() {
@@ -120,7 +121,7 @@ export function AskPageClient() {
               className="absolute bottom-3 right-3 p-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isStreaming ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <LoadingSpinner size="sm" className="!border-primary-foreground/20 !border-t-primary-foreground" />
               ) : (
                 <Send className="w-4 h-4" />
               )}

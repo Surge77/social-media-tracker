@@ -22,6 +22,7 @@ import { RelatedTechnologies } from '@/components/technologies/RelatedTechnologi
 import { AIInsightCard, AIInsightSkeleton, AIInsightError } from '@/components/ai/AIInsightCard'
 import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
 import { AnomalyBanner } from '@/components/technologies/AnomalyBanner'
+import { Loading } from '@/components/ui/loading'
 import { getRecommendation, getMomentumInsight } from '@/lib/insights'
 import type { TechnologyDetail } from '@/types'
 
@@ -70,10 +71,7 @@ export function TechnologyDetailClient() {
     return (
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <div className="flex min-h-[600px] items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-            <p className="mt-4 text-sm text-muted-foreground">Loading technology...</p>
-          </div>
+          <Loading size="lg" text="Loading technology..." />
         </div>
       </div>
     )

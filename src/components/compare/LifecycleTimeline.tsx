@@ -90,6 +90,14 @@ export function LifecycleTimeline({ compareData, className }: LifecycleTimelineP
   const prefersReducedMotion = useReducedMotion()
   const lifecycleData = compareData.lifecycle_data || {}
 
+  // DEBUG: Log what we're receiving
+  console.log('LifecycleTimeline DEBUG:', {
+    hasCompareData: !!compareData,
+    lifecycleDataFromCompare: compareData.lifecycle_data,
+    lifecycleDataKeys: Object.keys(lifecycleData),
+    technologies: compareData.technologies?.map(t => t.slug)
+  })
+
   // Build tech positions with lifecycle info
   const techPositions = compareData.technologies
     .map((tech) => {

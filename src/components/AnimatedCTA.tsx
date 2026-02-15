@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { LoadingSpinner } from '@/components/ui/loading';
 
 const animatedCTAVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 transform-gpu will-change-transform",
@@ -125,11 +126,7 @@ const AnimatedCTA = React.forwardRef<HTMLAnchorElement, AnimatedCTAProps>(
               animate={{ opacity: 1 }}
               transition={{ duration: prefersReducedMotion ? 0.1 : 0.2 }}
             >
-              <motion.span 
-                className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"
-                animate={prefersReducedMotion ? {} : { rotate: 360 }}
-                transition={prefersReducedMotion ? {} : { duration: 1, repeat: Infinity, ease: "linear" }}
-              />
+              <LoadingSpinner size="sm" className="!border-current/20 !border-t-current" />
               <span className="opacity-70">Loading...</span>
             </motion.div>
           ) : (

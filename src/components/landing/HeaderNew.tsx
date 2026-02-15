@@ -34,13 +34,6 @@ export default function HeaderNew() {
           {/* Actions */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
-            <AnimatedCTA
-              href="/technologies"
-              size="sm"
-              className="rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 hover:shadow-[0_0_25px_rgba(249,115,22,0.5)] shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:scale-105 active:scale-95 transition-all duration-200"
-            >
-              Get Started →
-            </AnimatedCTA>
           </div>
         </div>
       </div>

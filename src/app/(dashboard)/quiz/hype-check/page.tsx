@@ -7,6 +7,7 @@ import { QuizContainer } from '@/components/quiz/QuizContainer'
 import { TechMultiSelect } from '@/components/quiz/TechMultiSelect'
 import { HypeCheckResult } from '@/components/quiz/results/HypeCheckResult'
 import { Button } from '@/components/ui/button'
+import { Loading, LoadingSpinner } from '@/components/ui/loading'
 import type { QuizAnswer, QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 import { analyzeHype } from '@/lib/quiz/hype-check-engine'
@@ -105,8 +106,7 @@ export default function HypeCheckQuizPage() {
         gradient="from-yellow-500 via-amber-500 to-yellow-400"
       >
         <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-          <p className="text-sm text-muted-foreground">Loading technologies...</p>
+          <Loading size="md" text="Loading technologies..." />
         </div>
       </QuizContainer>
     )
@@ -209,7 +209,7 @@ export default function HypeCheckQuizPage() {
           >
             {isAnalyzing ? (
               <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <LoadingSpinner size="sm" className="mr-2" />
                 Analyzing...
               </>
             ) : (
