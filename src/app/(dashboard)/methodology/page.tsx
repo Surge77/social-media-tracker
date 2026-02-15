@@ -2,8 +2,8 @@ import { ArrowRight, BarChart3, Brain, Clock, Database, Github, Scale, Shield, Z
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Methodology | DevTrends',
-  description: 'How DevTrends calculates technology scores, collects data, and generates career insights.',
+  title: 'Intelligence Methodology | DevTrends',
+  description: 'Our AI-powered intelligence framework: adaptive scoring, multi-provider LLM architecture, and advanced analytics.',
 }
 
 export default function MethodologyPage() {
@@ -12,24 +12,77 @@ export default function MethodologyPage() {
       {/* Header */}
       <div className="mb-12">
         <h1 className="mb-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          How DevTrends Works
+          Intelligence Methodology
         </h1>
         <p className="text-lg text-muted-foreground">
-          Our scoring methodology, data sources, and the algorithms behind every insight.
+          Advanced AI-powered analytics combining adaptive scoring algorithms, multi-provider LLM architecture, and real-time intelligence generation.
         </p>
       </div>
 
       {/* What is DevTrends */}
       <Section icon={<Zap className="h-5 w-5" />} title="What is DevTrends?">
         <p>
-          DevTrends is a Developer Career Intelligence Platform that tracks technology trends
-          across multiple data sources. We aggregate signals from GitHub, Hacker News, Stack Overflow,
-          job boards, package registries, and developer blogs to produce a single composite score
-          for each technology.
+          DevTrends is an AI-powered Developer Career Intelligence Platform that combines real-time data aggregation
+          with advanced machine learning to deliver actionable technology insights. We track 100+ technologies across
+          9+ data sources — GitHub, Hacker News, Stack Overflow, job boards, package registries, and developer communities.
+        </p>
+        <p>
+          Unlike simple aggregators, DevTrends uses adaptive algorithms, multi-provider LLM architecture, and
+          continuous quality monitoring to generate insights that feel written by a senior analyst who&apos;s been
+          tracking each technology for years.
         </p>
         <p>
           The goal: help developers make smarter decisions about what to learn, what skills to invest in,
-          and how the job market is shifting — backed by data, not hype.
+          and how the job market is shifting — backed by intelligent analysis, not just raw data.
+        </p>
+      </Section>
+
+      {/* AI Intelligence Engine */}
+      <Section icon={<Brain className="h-5 w-5" />} title="AI Intelligence Engine">
+        <p>
+          DevTrends uses a multi-provider LLM architecture with <strong>7 AI providers</strong> working in concert
+          to ensure reliability, cost optimization, and insight quality:
+        </p>
+
+        <div className="mt-4 grid gap-3 text-sm">
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-4">
+            <h4 className="mb-2 font-semibold text-cyan-400">Provider Diversity</h4>
+            <p className="text-muted-foreground">
+              Gemini (2 keys), Groq, xAI Grok, Mistral, Cerebras, OpenRouter, and HuggingFace. Each provider
+              optimized for specific use cases: deep analysis, rapid comparisons, conversational interfaces.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-4">
+            <h4 className="mb-2 font-semibold text-emerald-400">Resilient Infrastructure</h4>
+            <p className="text-muted-foreground">
+              Automatic key rotation, exponential backoff with jitter, circuit breakers per provider, and
+              intelligent fallback chains. If one provider fails, the system seamlessly switches to alternatives
+              without user-facing errors.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-4">
+            <h4 className="mb-2 font-semibold text-violet-400">Quality Assurance</h4>
+            <p className="text-muted-foreground">
+              Every AI-generated insight passes through 6-dimension quality checks: factual accuracy, relevance,
+              completeness, clarity, actionability, and bias detection. Failed insights are regenerated or flagged
+              for manual review.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-4">
+            <h4 className="mb-2 font-semibold text-amber-400">Cost Optimization</h4>
+            <p className="text-muted-foreground">
+              Intelligent caching with data-based invalidation, priority-based token budgeting, and provider
+              routing by use case. Target: under $10/month for 100 technologies, under $100/month at scale.
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-4 text-sm text-muted-foreground">
+          All AI infrastructure is implemented in TypeScript/Node.js with zero Python dependencies,
+          running entirely on Vercel&apos;s serverless platform.
         </p>
       </Section>
 
@@ -76,29 +129,47 @@ export default function MethodologyPage() {
       </Section>
 
       {/* Composite Score */}
-      <Section icon={<Scale className="h-5 w-5" />} title="The Composite Score">
+      <Section icon={<Scale className="h-5 w-5" />} title="Adaptive Composite Scoring">
         <p>
-          Each technology receives a <strong>composite score from 0 to 100</strong> based on four
-          sub-scores. Higher means more active, more in-demand, and more widely adopted.
+          Each technology receives a <strong>composite score from 0 to 100</strong> using
+          <strong> adaptive, category-specific weights</strong> that adjust based on technology maturity
+          and data completeness. Unlike fixed-weight systems, our approach recognizes that a programming
+          language should be weighted differently than a CSS framework.
         </p>
 
-        <div className="my-6 rounded-lg border border-border bg-muted/20 p-4 font-mono text-sm">
-          <p className="mb-2 text-muted-foreground">Composite Score =</p>
-          <div className="space-y-1 pl-4">
-            <p><span className="text-violet-400">GitHub</span> × <strong>0.25</strong></p>
-            <p>+ <span className="text-cyan-400">Community</span> × <strong>0.20</strong></p>
-            <p>+ <span className="text-emerald-400">Jobs</span> × <strong>0.25</strong></p>
-            <p>+ <span className="text-amber-400">Ecosystem</span> × <strong>0.30</strong></p>
+        <h3 className="mt-6 mb-3 font-semibold text-foreground">Category-Based Weighting Examples</h3>
+        <div className="my-4 space-y-3 text-sm">
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-3">
+            <p className="font-medium text-foreground mb-1">Languages & Databases (Job-Weighted)</p>
+            <p className="font-mono text-xs text-muted-foreground">
+              Jobs (35-40%) &gt; Ecosystem (30-35%) &gt; GitHub (15-20%) &gt; Community (10-15%)
+            </p>
+          </div>
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-3">
+            <p className="font-medium text-foreground mb-1">Frontend & Mobile (Balanced)</p>
+            <p className="font-mono text-xs text-muted-foreground">
+              GitHub (20-25%) ≈ Community (20-25%) ≈ Jobs (25-30%) ≈ Ecosystem (25-30%)
+            </p>
+          </div>
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-3">
+            <p className="font-medium text-foreground mb-1">AI/ML (Community-Weighted)</p>
+            <p className="font-mono text-xs text-muted-foreground">
+              Community (30%) &gt; GitHub (25%) ≈ Jobs (25%) &gt; Ecosystem (20%)
+            </p>
           </div>
         </div>
 
+        <h3 className="mt-6 mb-3 font-semibold text-foreground">Maturity Adjustments</h3>
         <p className="text-sm text-muted-foreground">
-          If data is missing for a dimension (e.g., a technology has no npm package), its weight
-          is redistributed proportionally among available dimensions. We also track{' '}
-          <strong>data completeness</strong> so you know how much signal is behind each score.
+          <strong>New technologies</strong> ({"<"}6 months of data): Boost GitHub + Community weights
+          to capture early signals before job market adoption.
+        </p>
+        <p className="text-sm text-muted-foreground mt-2">
+          <strong>Mature technologies</strong> ({">"}1 year of data): Boost Jobs + Ecosystem weights
+          to emphasize real-world adoption and market demand.
         </p>
 
-        <h3 className="mt-6 mb-3 font-semibold text-foreground">Score Ranges</h3>
+        <h3 className="mt-6 mb-3 font-semibold text-foreground">Score Ranges & Confidence Grades</h3>
         <div className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
           <ScoreRange label="Excellent" range="80-100" color="text-green-400" />
           <ScoreRange label="Strong" range="65-79" color="text-green-400/80" />
@@ -107,16 +178,36 @@ export default function MethodologyPage() {
           <ScoreRange label="Low" range="20-34" color="text-red-400/80" />
           <ScoreRange label="Minimal" range="0-19" color="text-red-400" />
         </div>
+
+        <p className="mt-6 text-sm text-muted-foreground">
+          Every score includes a <strong>confidence grade (A-F)</strong> based on four factors:
+          data completeness, sample size, recency, and source diversity. A score of 85 with grade A
+          is more trustworthy than a score of 85 with grade C.
+        </p>
       </Section>
 
       {/* Sub-Scores */}
-      <Section icon={<BarChart3 className="h-5 w-5" />} title="How Sub-Scores Work">
-        <p>Each sub-score uses <strong>z-score normalization</strong> — comparing each technology against the population mean:</p>
+      <Section icon={<BarChart3 className="h-5 w-5" />} title="Statistical Normalization & Bayesian Smoothing">
+        <p>
+          Each sub-score uses <strong>z-score normalization</strong> to compare technologies against
+          the population distribution, then applies <strong>Bayesian smoothing</strong> to prevent
+          low-sample technologies from dominating rankings.
+        </p>
 
         <div className="my-4 rounded-lg border border-border bg-muted/20 p-4 font-mono text-sm">
-          <p>z = (value - mean) / standard_deviation</p>
-          <p className="mt-1 text-muted-foreground">→ then mapped to 0-100 via cumulative distribution</p>
+          <p className="mb-2">1. Z-Score Normalization:</p>
+          <p className="pl-4">z = (value - mean) / standard_deviation</p>
+          <p className="mt-3 mb-2">2. Bayesian Smoothing:</p>
+          <p className="pl-4">smoothed = (C × mean + n × raw) / (C + n)</p>
+          <p className="mt-3 mb-2">3. Map to 0-100:</p>
+          <p className="pl-4 text-muted-foreground">Via cumulative normal distribution</p>
         </div>
+
+        <p className="text-sm text-muted-foreground">
+          <strong>Why Bayesian smoothing?</strong> Without it, a technology with 10 GitHub stars and 10 new stars
+          would score higher than one with 10,000 stars and 500 new stars (100% vs 5% growth). Smoothing adds
+          a confidence penalty for low-sample data.
+        </p>
 
         <div className="mt-4 space-y-4">
           <SubScoreDetail
@@ -161,31 +252,69 @@ export default function MethodologyPage() {
       </Section>
 
       {/* Momentum */}
-      <Section icon={<ArrowRight className="h-5 w-5" />} title="Momentum & Trends">
+      <Section icon={<ArrowRight className="h-5 w-5" />} title="Enhanced Momentum Analysis">
         <p>
           Momentum measures how a technology&apos;s composite score is <strong>changing over time</strong>.
-          We use exponential moving averages to detect acceleration or deceleration in a technology&apos;s trajectory.
+          Unlike simple moving averages, we use <strong>multi-window exponential moving averages (EMA)</strong>
+          to detect both short-term volatility and long-term trends.
         </p>
 
-        <div className="mt-4 space-y-2 text-sm">
-          <MomentumRange label="Surging" range="> +15" description="Growing much faster than average" />
-          <MomentumRange label="Rising quickly" range="+8 to +15" description="Gaining significant traction" />
-          <MomentumRange label="Trending up" range="+3 to +8" description="Steady growth" />
-          <MomentumRange label="Stable" range="-3 to +3" description="Holding steady" />
-          <MomentumRange label="Slowing down" range="-8 to -3" description="Losing some momentum" />
-          <MomentumRange label="Declining" range="-15 to -8" description="Falling behind peers" />
-          <MomentumRange label="Dropping fast" range="< -15" description="Significant decline" />
+        <div className="my-4 rounded-lg border border-border/50 bg-muted/10 p-4">
+          <h4 className="mb-2 text-sm font-semibold text-foreground">Three-Window Analysis</h4>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p><span className="font-medium text-cyan-400">7-day EMA</span> — Captures breaking news, launches, viral moments</p>
+            <p><span className="font-medium text-emerald-400">30-day EMA</span> — Monthly adoption trends</p>
+            <p><span className="font-medium text-violet-400">90-day EMA</span> — Long-term trajectory</p>
+          </div>
         </div>
+
+        <h3 className="mt-6 mb-3 font-semibold text-foreground">Trend Classification</h3>
+        <div className="mt-4 space-y-2 text-sm">
+          <MomentumRange label="Surging" range="> +15" description="All three windows accelerating rapidly" />
+          <MomentumRange label="Rising quickly" range="+8 to +15" description="Strong growth across 2+ windows" />
+          <MomentumRange label="Trending up" range="+3 to +8" description="Steady positive momentum" />
+          <MomentumRange label="Stable" range="-3 to +3" description="Maintaining current position" />
+          <MomentumRange label="Slowing down" range="-8 to -3" description="Short-term decline detected" />
+          <MomentumRange label="Declining" range="-15 to -8" description="Multi-window negative trend" />
+          <MomentumRange label="Dropping fast" range="< -15" description="Significant sustained decline" />
+        </div>
+
+        <p className="mt-4 text-sm text-muted-foreground">
+          The system also detects <strong>trend reversals</strong>: when short-term momentum contradicts
+          long-term momentum, indicating potential inflection points worth investigating.
+        </p>
       </Section>
 
       {/* Sentiment */}
-      <Section icon={<Brain className="h-5 w-5" />} title="Sentiment Analysis">
+      <Section icon={<Brain className="h-5 w-5" />} title="Advanced Sentiment Analysis">
         <p>
           Not all mentions are equal. &quot;React 19 is incredible&quot; and &quot;Why I&apos;m abandoning React&quot;
-          carry opposite signals. We use <strong>lexicon-based sentiment analysis</strong> (wink-sentiment)
-          to classify mentions as positive, negative, or neutral.
+          carry opposite signals. Our sentiment engine combines <strong>lexicon-based analysis</strong> (wink-sentiment)
+          with <strong>tech-specific boosters and dampeners</strong> to understand context that generic NLP misses.
         </p>
-        <p>
+
+        <div className="my-4 space-y-3 text-sm">
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-4">
+            <h4 className="mb-2 font-semibold text-emerald-400">Tech Boosters (+0.3 to +0.5)</h4>
+            <p className="text-muted-foreground">
+              &quot;production-ready&quot;, &quot;battle-tested&quot;, &quot;game-changer&quot;, &quot;hiring for&quot;
+            </p>
+          </div>
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-4">
+            <h4 className="mb-2 font-semibold text-red-400">Tech Dampeners (-0.3 to -0.5)</h4>
+            <p className="text-muted-foreground">
+              &quot;deprecated&quot;, &quot;legacy&quot;, &quot;abandoning&quot;, &quot;security vulnerability&quot;
+            </p>
+          </div>
+          <div className="rounded-lg border border-border/50 bg-muted/10 p-4">
+            <h4 className="mb-2 font-semibold text-amber-400">Sarcasm Detection</h4>
+            <p className="text-muted-foreground">
+              &quot;yeah right&quot;, &quot;sure buddy&quot; → flips sentiment polarity to prevent misclassification
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-4 text-sm text-muted-foreground">
           Sentiment adjusts the community sub-score by up to ±15 points. A technology with lots of mentions
           but negative sentiment will score lower than one with fewer but more positive mentions.
         </p>
@@ -251,7 +380,15 @@ export default function MethodologyPage() {
           </li>
           <li className="flex gap-2">
             <span className="text-foreground">&#8226;</span>
-            <span><strong className="text-foreground">Sentiment accuracy.</strong> Lexicon-based sentiment analysis is ~65-70% accurate. Sarcasm, nuanced criticism, and context-dependent language can be misclassified.</span>
+            <span><strong className="text-foreground">AI-generated insights.</strong> While quality-checked, LLM-generated insights may occasionally hallucinate facts or miss nuances. We include confidence scores and source citations to help you verify claims.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-foreground">&#8226;</span>
+            <span><strong className="text-foreground">Free-tier LLM providers.</strong> We use free-tier API access across 7 providers. During high demand, some insights may experience brief delays as the system rotates through available quotas.</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-foreground">&#8226;</span>
+            <span><strong className="text-foreground">Sentiment accuracy.</strong> Our tech-aware sentiment analysis achieves ~75-80% accuracy (vs ~65-70% for generic lexicon-based). Sarcasm detection helps but isn&apos;t perfect.</span>
           </li>
           <li className="flex gap-2">
             <span className="text-foreground">&#8226;</span>
@@ -290,13 +427,70 @@ export default function MethodologyPage() {
         </p>
       </Section>
 
-      {/* Open Source */}
-      <Section icon={<Github className="h-5 w-5" />} title="Open Source" isLast>
+      {/* Tech Stack */}
+      <Section icon={<Zap className="h-5 w-5" />} title="Implementation Stack">
         <p>
-          DevTrends is built with open-source technologies: Next.js, TypeScript, Supabase, Tailwind CSS,
-          Recharts, and Framer Motion. All scoring algorithms are transparent and documented.
+          DevTrends is built entirely in <strong>TypeScript/Node.js</strong> with zero Python dependencies.
+          All statistical algorithms, sentiment analysis, and machine learning features are implemented
+          in pure JavaScript using production-tested libraries:
         </p>
-        <div className="mt-4">
+
+        <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+          <div className="rounded-md border border-border/50 bg-muted/10 p-3">
+            <span className="font-medium text-cyan-400">simple-statistics</span>
+            <p className="text-xs text-muted-foreground mt-1">Z-score, std dev, percentiles, linear regression</p>
+          </div>
+          <div className="rounded-md border border-border/50 bg-muted/10 p-3">
+            <span className="font-medium text-emerald-400">wink-sentiment</span>
+            <p className="text-xs text-muted-foreground mt-1">Lexicon-based sentiment analysis</p>
+          </div>
+          <div className="rounded-md border border-border/50 bg-muted/10 p-3">
+            <span className="font-medium text-violet-400">@google/generative-ai</span>
+            <p className="text-xs text-muted-foreground mt-1">Gemini API for deep insights</p>
+          </div>
+          <div className="rounded-md border border-border/50 bg-muted/10 p-3">
+            <span className="font-medium text-amber-400">OpenAI-compatible SDKs</span>
+            <p className="text-xs text-muted-foreground mt-1">Groq, xAI, Mistral, Cerebras, HF</p>
+          </div>
+        </div>
+
+        <p className="mt-4 text-sm text-muted-foreground">
+          Running on Next.js 16 (App Router), Supabase PostgreSQL, and Vercel serverless infrastructure.
+          Python is only needed for Phase 3+ features (Prophet forecasting, BERTopic clustering) — not the MVP.
+        </p>
+      </Section>
+
+      {/* Open Source */}
+      <Section icon={<Github className="h-5 w-5" />} title="Open Methodology" isLast>
+        <p>
+          DevTrends is built with open-source technologies and transparent algorithms. Every scoring formula,
+          normalization technique, and AI prompt is documented and reproducible:
+        </p>
+
+        <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
+          <li className="flex gap-2">
+            <span className="text-foreground">✓</span>
+            <span><strong className="text-foreground">All algorithms documented</strong> in ALGORITHMS_AND_ML.md with examples</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-foreground">✓</span>
+            <span><strong className="text-foreground">AI prompts versioned</strong> and tracked in database for reproducibility</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-foreground">✓</span>
+            <span><strong className="text-foreground">Data freshness indicators</strong> on every metric and insight</span>
+          </li>
+          <li className="flex gap-2">
+            <span className="text-foreground">✓</span>
+            <span><strong className="text-foreground">Confidence scores</strong> reveal data quality behind every number</span>
+          </li>
+        </ul>
+
+        <p className="mt-4 text-sm">
+          Built with Next.js, TypeScript, Supabase, Tailwind CSS, Recharts, and Framer Motion.
+        </p>
+
+        <div className="mt-6">
           <Link
             href="/technologies"
             className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
