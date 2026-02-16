@@ -132,64 +132,35 @@ export function Loading({
     )
   }
 
-  // Default: Orbital loader (most visually appealing)
+  // Default: Bars Loader (professional, modern, clean)
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
-      <div className={cn('relative', sizeClasses[size])}>
-        {/* Central core */}
-        <motion.div
-          className="absolute inset-0 m-auto w-1/3 h-1/3 rounded-full bg-gradient-to-r from-orange-500 to-amber-500"
-          animate={prefersReducedMotion ? {} : {
-            scale: [1, 1.2, 1],
-          }}
-          transition={prefersReducedMotion ? {} : {
-            duration: 1.5,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-
-        {/* Orbiting dots */}
-        {[0, 1, 2].map((i) => (
+      <div className={cn('flex items-center justify-center gap-1', sizeClasses[size])}>
+        {[0, 1, 2, 3, 4].map((i) => (
           <motion.div
             key={i}
-            className="absolute inset-0"
-            animate={prefersReducedMotion ? {} : { rotate: 360 }}
-            transition={prefersReducedMotion ? {} : {
-              duration: 2.5,
-              repeat: Infinity,
-              ease: 'linear',
-              delay: i * 0.3,
+            className={cn(
+              'rounded-full bg-primary',
+              size === 'sm' && 'w-0.5',
+              size === 'md' && 'w-1',
+              size === 'lg' && 'w-1.5',
+              size === 'xl' && 'w-2'
+            )}
+            style={{ height: '60%' }}
+            animate={prefersReducedMotion ? {} : {
+              scaleY: [1, 1.8, 1],
+              opacity: [0.5, 1, 0.5],
             }}
-          >
-            <div
-              className={cn(
-                'absolute top-0 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500',
-                size === 'sm' && 'w-1 h-1',
-                size === 'md' && 'w-1.5 h-1.5',
-                size === 'lg' && 'w-2 h-2',
-                size === 'xl' && 'w-3 h-3'
-              )}
-              style={{ opacity: 1 - i * 0.25 }}
-            />
-          </motion.div>
+            transition={prefersReducedMotion ? {} : {
+              duration: 1,
+              repeat: Infinity,
+              delay: i * 0.1,
+              ease: 'easeInOut',
+            }}
+          />
         ))}
-
-        {/* Outer ring with gradient */}
-        <motion.div
-          className="absolute inset-0 rounded-full"
-          style={{
-            background: 'conic-gradient(from 0deg, transparent 0%, rgba(249, 115, 22, 0.3) 50%, transparent 100%)',
-          }}
-          animate={prefersReducedMotion ? {} : { rotate: 360 }}
-          transition={prefersReducedMotion ? {} : {
-            duration: 1.5,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-        />
       </div>
-      {text && <p className={cn('text-muted-foreground font-medium animate-pulse', textSizes[size])}>{text}</p>}
+      {text && <p className={cn('text-muted-foreground font-medium', textSizes[size])}>{text}</p>}
     </div>
   )
 }
@@ -201,15 +172,30 @@ export function LoadingSpinner({ size = 'sm', className }: Pick<LoadingProps, 's
   const prefersReducedMotion = useReducedMotion()
 
   return (
-    <motion.div
-      className={cn('rounded-full border-2 border-primary/20 border-t-primary', sizeClasses[size], className)}
-      animate={prefersReducedMotion ? {} : { rotate: 360 }}
-      transition={prefersReducedMotion ? {} : {
-        duration: 0.8,
-        repeat: Infinity,
-        ease: 'linear',
-      }}
-    />
+    <div className={cn('flex items-center gap-0.5', className)}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <motion.div
+          key={i}
+          className={cn(
+            'rounded-full bg-current',
+            size === 'sm' && 'w-0.5 h-2',
+            size === 'md' && 'w-0.5 h-3',
+            size === 'lg' && 'w-1 h-4',
+            size === 'xl' && 'w-1 h-5'
+          )}
+          animate={prefersReducedMotion ? {} : {
+            scaleY: [1, 1.8, 1],
+            opacity: [0.5, 1, 0.5],
+          }}
+          transition={prefersReducedMotion ? {} : {
+            duration: 1,
+            repeat: Infinity,
+            delay: i * 0.1,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+    </div>
   )
 }
 

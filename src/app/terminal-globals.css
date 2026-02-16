@@ -1,0 +1,258 @@
+/* DevTrends Terminal Aesthetic */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Terminal Color System */
+  --terminal-bg: #0a0e14;
+  --terminal-surface: #131921;
+  --terminal-border: #1f2937;
+
+  --terminal-text: #e6edf3;
+  --terminal-text-dim: #8b949e;
+  --terminal-text-muted: #6e7681;
+
+  /* Electric Accents - Terminal inspired */
+  --terminal-cyan: #00d9ff;
+  --terminal-green: #00ff9f;
+  --terminal-amber: #ffb800;
+  --terminal-red: #ff4757;
+
+  /* Glow effects */
+  --glow-cyan: 0 0 20px rgba(0, 217, 255, 0.3);
+  --glow-green: 0 0 20px rgba(0, 255, 159, 0.3);
+  --glow-amber: 0 0 20px rgba(255, 184, 0, 0.3);
+
+  /* Scan line animation */
+  --scan-line: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+
+  /* Grid pattern */
+  --grid-pattern:
+    linear-gradient(rgba(31, 41, 55, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31, 41, 55, 0.3) 1px, transparent 1px);
+  --grid-size: 20px 20px;
+
+  /* Typography scale */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--terminal-bg);
+  color: var(--terminal-text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Cursor blink animation */
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background: var(--terminal-cyan);
+  margin-left: 2px;
+  animation: cursor-blink 1s infinite;
+  box-shadow: var(--glow-cyan);
+}
+
+/* Scan line effect */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scan-lines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--scan-line);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.05;
+}
+
+.scan-lines::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 217, 255, 0.03),
+    transparent
+  );
+  animation: scan 8s linear infinite;
+}
+
+/* Grid background */
+.grid-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: var(--grid-pattern);
+  background-size: var(--grid-size);
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glow text utilities */
+.glow-cyan {
+  color: var(--terminal-cyan);
+  text-shadow: var(--glow-cyan);
+}
+
+.glow-green {
+  color: var(--terminal-green);
+  text-shadow: var(--glow-green);
+}
+
+.glow-amber {
+  color: var(--terminal-amber);
+  text-shadow: var(--glow-amber);
+}
+
+/* Terminal window effect */
+.terminal-window {
+  background: var(--terminal-surface);
+  border: 1px solid var(--terminal-border);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.terminal-header {
+  height: 36px;
+  background: var(--terminal-border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.terminal-dot-red { background: var(--terminal-red); }
+.terminal-dot-amber { background: var(--terminal-amber); }
+.terminal-dot-green { background: var(--terminal-green); }
+
+.terminal-content {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* Typing animation */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+.typing-text {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--terminal-cyan);
+  animation:
+    typing 2s steps(40, end),
+    cursor-blink 0.75s step-end infinite;
+}
+
+/* Data stream animation */
+@keyframes stream {
+  0% { transform: translateY(-10px); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(10px); opacity: 0; }
+}
+
+.data-stream span {
+  display: inline-block;
+  animation: stream 3s ease-in-out infinite;
+}
+
+/* Hover glow effect */
+.hover-glow {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.hover-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    var(--terminal-cyan),
+    var(--terminal-green)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hover-glow:hover::before {
+  opacity: 1;
+}
+
+/* Mono number styling */
+.mono-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* ASCII Art styling */
+.ascii-art {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1;
+  color: var(--terminal-text-muted);
+  white-space: pre;
+  opacity: 0.3;
+}

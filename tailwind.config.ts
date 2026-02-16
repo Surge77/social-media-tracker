@@ -65,9 +65,13 @@ export default {
   		},
   		fontFamily: {
   			sans: [
-  				'Inter',
+  				'var(--font-sans)',
   				'system-ui',
   				'sans-serif'
+  			],
+  			mono: [
+  				'var(--font-mono)',
+  				'monospace'
   			]
   		},
   		borderRadius: {
