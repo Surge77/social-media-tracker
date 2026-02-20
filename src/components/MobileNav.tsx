@@ -9,8 +9,8 @@ const navLinks = [
   { href: '/compare', label: 'Compare' },
   { href: '/quiz', label: 'Quizzes' },
   { href: '/digest', label: 'Digest' },
-  { href: '/ask', label: 'Ask AI' },
-  { href: '/monitoring', label: 'Monitoring' },
+  { href: '/repos', label: 'Repos' },
+  { href: '/languages', label: 'Languages' },
   { href: '/methodology', label: 'Methodology' },
 ]
 

@@ -19,6 +19,8 @@ import { TechRadarChart } from '@/components/technologies/TechRadarChart'
 import { TrendChart } from '@/components/technologies/TrendChart'
 import { SourceSignalCard } from '@/components/technologies/SourceSignalCard'
 import { RelatedTechnologies } from '@/components/technologies/RelatedTechnologies'
+import { StarHistoryChart } from '@/components/technologies/StarHistoryChart'
+import { AlternativesPanel } from '@/components/technologies/AlternativesPanel'
 import { AIInsightCard, AIInsightSkeleton, AIInsightError } from '@/components/ai/AIInsightCard'
 import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
 import { AnomalyBanner } from '@/components/technologies/AnomalyBanner'
@@ -301,6 +303,21 @@ export function TechnologyDetailClient() {
         </div>
       </motion.section>
 
+      {/* Star History */}
+      {technology.github_repo && (
+        <motion.section
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.35 }}
+          className="mb-8"
+        >
+          <h2 className="mb-4 text-xl font-semibold text-foreground">Star History</h2>
+          <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm">
+            <StarHistoryChart slug={slug} techColor={technology.color} />
+          </div>
+        </motion.section>
+      )}
+
       {/* Latest Signals */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -374,6 +391,17 @@ export function TechnologyDetailClient() {
             />
           )}
         </div>
+      </motion.section>
+
+      {/* Alternatives */}
+      <motion.section
+        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.45 }}
+        className="mb-8"
+      >
+        <h2 className="mb-4 text-xl font-semibold text-foreground">Alternatives</h2>
+        <AlternativesPanel slug={slug} />
       </motion.section>
 
       {/* Related Technologies */}

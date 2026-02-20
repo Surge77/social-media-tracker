@@ -2,7 +2,6 @@
 
 import { Badge } from '@/components/ui/badge';
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo';
-import AnimatedCTA from '../AnimatedCTA';
 import { ThemeToggle } from '../ThemeToggle';
 
 export default function HeaderNew() {
@@ -17,19 +16,6 @@ export default function HeaderNew() {
               BETA
             </Badge>
           </div>
-
-          {/* Nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="/technologies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Technologies
-            </a>
-            <a href="/technologies?sort=momentum" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Trending
-            </a>
-            <a href="/methodology" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Methodology
-            </a>
-          </nav>
 
           {/* Actions */}
           <div className="flex items-center gap-3">

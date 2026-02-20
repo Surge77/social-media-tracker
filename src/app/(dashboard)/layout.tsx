@@ -4,6 +4,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
 import { MobileNav } from '@/components/MobileNav'
 import MinimalFooter from '@/components/MinimalFooter'
+import { AskAIWidget } from '@/components/ask/AskAIWidget'
 
 export default function DashboardLayout({
   children,
@@ -47,16 +48,16 @@ export default function DashboardLayout({
               Digest
             </Link>
             <Link
-              href="/ask"
+              href="/repos"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Ask AI
+              Repos
             </Link>
             <Link
-              href="/monitoring"
+              href="/languages"
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Monitoring
+              Languages
             </Link>
             <Link
               href="/methodology"
@@ -79,6 +80,9 @@ export default function DashboardLayout({
 
       {/* Footer */}
       <MinimalFooter />
+
+      {/* Floating Ask AI widget — visible on all dashboard pages */}
+      <AskAIWidget />
     </div>
   )
 }
