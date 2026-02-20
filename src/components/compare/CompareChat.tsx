@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Loader2, MessageCircle, X, Sparkles } from 'lucide-react'
+import { Send, MessageCircle, X, Sparkles, RotateCcw } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ChatMessage } from '@/components/ask/ChatMessage'
 import { LoadingSpinner } from '@/components/ui/loading'
@@ -15,7 +15,8 @@ interface CompareChatProps {
   className?: string
 }
 
-interface ChatMessage {
+interface LocalChatMessage {
+  id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: string
@@ -32,7 +33,6 @@ const SUGGESTED_QUESTIONS = [
 export function CompareChat({ compareData, className }: CompareChatProps) {
   const prefersReducedMotion = useReducedMotion()
   const [sessionId] = useState(() => {
-    // Generate session ID for this comparison chat
     if (typeof window !== 'undefined') {
       const techSlugs = compareData.technologies.map((t) => t.slug).sort().join('-')
       const storageKey = `devtrends_compare_chat_${techSlugs}`
@@ -45,12 +45,19 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
     return uuidv4()
   })
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<LocalChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const lastUserMessageRef = useRef<string | null>(null)
+
+  // Cancel stream on unmount
+  useEffect(() => {
+    return () => { abortControllerRef.current?.abort() }
+  }, [])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -66,13 +73,21 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
     }
   }, [isOpen])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
+  const doSend = useCallback(async (question: string) => {
+    if (!question.trim() || isLoading) return
 
-    const userMessage: ChatMessage = {
+    abortControllerRef.current?.abort()
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
+
+    const techNames = compareData.technologies.map((t) => t.name).join(' vs ')
+    const enhancedQuestion = `Comparing ${techNames}: ${question}`
+    lastUserMessageRef.current = question
+
+    const userMessage: LocalChatMessage = {
+      id: crypto.randomUUID(),
       role: 'user',
-      content: input,
+      content: question,
       timestamp: new Date().toISOString(),
     }
 
@@ -81,18 +96,14 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
     setIsLoading(true)
     setError(null)
 
-    try {
-      // Enhance question with technology names for context
-      const techNames = compareData.technologies.map((t) => t.name).join(' vs ')
-      const enhancedQuestion = `Comparing ${techNames}: ${input}`
+    const assistantId = crypto.randomUUID()
 
+    try {
       const response = await fetch('/api/ai/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: enhancedQuestion,
-          sessionId,
-        }),
+        body: JSON.stringify({ question: enhancedQuestion, sessionId }),
+        signal: abortController.signal,
       })
 
       if (!response.ok) {
@@ -100,28 +111,32 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
         throw new Error(errorData.error || 'Failed to get response')
       }
 
-      // Handle SSE stream
       const reader = response.body?.getReader()
       if (!reader) throw new Error('No response stream')
 
       const decoder = new TextDecoder()
       let assistantContent = ''
+      let buffer = ''
 
-      // Add placeholder for assistant message
-      const assistantMessage: ChatMessage = {
+      const assistantPlaceholder: LocalChatMessage = {
+        id: assistantId,
         role: 'assistant',
         content: '',
         timestamp: new Date().toISOString(),
       }
 
-      setMessages((prev) => [...prev, assistantMessage])
+      setMessages((prev) => [...prev, assistantPlaceholder])
+
+      let streamDone = false
 
       while (true) {
         const { done, value } = await reader.read()
-        if (done) break
+        if (done || streamDone) break
 
-        const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split('\n')
+        // Buffer incomplete lines across network reads
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
@@ -131,45 +146,60 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
             try {
               const parsed = JSON.parse(data)
 
-              if (parsed.done) {
-                break
-              }
-
               if (parsed.error) {
                 throw new Error(parsed.error)
               }
 
               if (parsed.chunk) {
                 assistantContent += parsed.chunk
-                setMessages((prev) => {
-                  const newMessages = [...prev]
-                  newMessages[newMessages.length - 1] = {
-                    ...newMessages[newMessages.length - 1],
-                    content: assistantContent,
-                  }
-                  return newMessages
-                })
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantId
+                      ? { ...msg, content: assistantContent }
+                      : msg
+                  )
+                )
+              }
+
+              if (parsed.done) {
+                streamDone = true
+                reader.cancel()
+                break
               }
             } catch (e) {
-              if (e instanceof Error && e.message !== 'Unexpected end of JSON input') {
-                console.error('Failed to parse SSE data:', e)
-              }
+              if ((e as Error).name === 'SyntaxError') continue // incomplete JSON chunk
+              throw e
             }
           }
         }
       }
     } catch (err) {
+      if ((err as Error).name === 'AbortError') return
+
       setError(err instanceof Error ? err.message : 'Failed to send message')
-      // Remove the placeholder assistant message on error
-      setMessages((prev) => prev.slice(0, -1))
+      setMessages((prev) => {
+        const last = prev[prev.length - 1]
+        if (last?.id === assistantId && !last.content) return prev.slice(0, -1)
+        return prev
+      })
     } finally {
       setIsLoading(false)
     }
+  }, [compareData.technologies, isLoading, sessionId])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await doSend(input)
   }
 
   const handleSuggestedQuestion = (question: string) => {
-    setInput(question)
-    inputRef.current?.focus()
+    doSend(question)
+  }
+
+  const handleRetry = () => {
+    if (lastUserMessageRef.current) {
+      doSend(lastUserMessageRef.current)
+    }
   }
 
   const techNames = compareData.technologies.map((t) => t.name).join(' vs ')
@@ -224,6 +254,7 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
               </div>
               <button
                 onClick={() => setIsOpen(false)}
+                aria-label="Close chat"
                 className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 <X size={16} />
@@ -251,7 +282,8 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
                         transition={{ duration: 0.2, delay: idx * 0.05 }}
                         whileHover={prefersReducedMotion ? {} : { x: 4 }}
                         onClick={() => handleSuggestedQuestion(q)}
-                        className="block w-full rounded-md border border-border bg-card/50 px-3 py-2 text-left text-xs text-foreground transition-all hover:border-primary/50 hover:bg-card"
+                        disabled={isLoading}
+                        className="block w-full rounded-md border border-border bg-card/50 px-3 py-2 text-left text-xs text-foreground transition-all hover:border-primary/50 hover:bg-card disabled:opacity-50"
                       >
                         {q}
                       </motion.button>
@@ -260,24 +292,40 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
                 </motion.div>
               )}
 
-              {messages.map((message, index) => (
+              {messages.map((message) => (
                 <ChatMessage
-                  key={index}
+                  key={message.id}
                   role={message.role}
                   content={message.content}
                   timestamp={message.timestamp}
                 />
               ))}
 
+              {isLoading && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <LoadingSpinner size="sm" />
+                  <span>Thinking...</span>
+                </div>
+              )}
+
               {error && (
                 <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3">
                   <p className="text-xs text-destructive">{error}</p>
-                  <button
-                    onClick={() => setError(null)}
-                    className="mt-1 text-xs text-destructive hover:underline"
-                  >
-                    Dismiss
-                  </button>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      onClick={handleRetry}
+                      className="flex items-center gap-1 text-xs text-destructive hover:underline"
+                    >
+                      <RotateCcw size={12} />
+                      Retry
+                    </button>
+                    <button
+                      onClick={() => setError(null)}
+                      className="text-xs text-destructive hover:underline"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -298,6 +346,7 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
                     }
                   }}
                   placeholder="Ask a question..."
+                  aria-label="Ask a question about this comparison"
                   className="w-full resize-none rounded-lg border bg-background px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
                   rows={2}
                   disabled={isLoading}
@@ -306,6 +355,7 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
+                  aria-label="Send message"
                   className="absolute bottom-2 right-2 rounded-md bg-primary p-2 text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isLoading ? (
@@ -317,7 +367,7 @@ export function CompareChat({ compareData, className }: CompareChatProps) {
               </form>
 
               <p className="mt-2 text-xs text-muted-foreground">
-                Answers are based on real-time comparison data. Press Enter to send.
+                Press Enter to send · Shift+Enter for new line
               </p>
             </div>
           </motion.div>
