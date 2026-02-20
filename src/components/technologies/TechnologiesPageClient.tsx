@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useTechnologies } from '@/hooks/useTechnologies'
 import { MoversShakers } from '@/components/technologies/MoversShakers'
 import { StackCheckCTA } from '@/components/technologies/StackCheckCTA'
 import { SmartFilters, applySmartFilter, getFilterEmptyMessage, type SmartFilter } from '@/components/technologies/SmartFilters'
@@ -12,15 +13,11 @@ import { StrategicOverview } from '@/components/technologies/StrategicOverview'
 import { TechTable } from '@/components/technologies/TechTable'
 import { TechCard } from '@/components/technologies/TechCard'
 import { Loading } from '@/components/ui/loading'
-import type { TechnologyCategory, TechnologyWithScore } from '@/types'
+import type { TechnologyCategory } from '@/types'
 import { CATEGORY_LABELS } from '@/types'
 
 export function TechnologiesPageClient() {
   const prefersReducedMotion = useReducedMotion()
-  const [technologies, setTechnologies] = React.useState<TechnologyWithScore[]>([])
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
-  const [lastUpdated, setLastUpdated] = React.useState<string | null>(null)
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
@@ -28,25 +25,8 @@ export function TechnologiesPageClient() {
   const [smartFilter, setSmartFilter] = useState<SmartFilter>('all')
   const [viewMode, setViewMode] = useState<ViewMode>('table')
 
-  // Fetch technologies
-  React.useEffect(() => {
-    async function fetchTechnologies() {
-      try {
-        const response = await fetch('/api/technologies')
-        if (!response.ok) throw new Error('Failed to fetch technologies')
-
-        const data = await response.json()
-        setTechnologies(data.technologies || [])
-        setLastUpdated(data.last_updated)
-        setIsLoading(false)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
-        setIsLoading(false)
-      }
-    }
-
-    fetchTechnologies()
-  }, [])
+  // Use React Query hook — handles caching, dedup, and refetch (OPT-04)
+  const { technologies: allTechnologies, lastUpdated, isLoading, isError, error, refetch } = useTechnologies()
 
   // Handle smart filter change
   const handleSmartFilterChange = useCallback((filter: SmartFilter) => {
@@ -59,7 +39,7 @@ export function TechnologiesPageClient() {
 
   // Filter and sort technologies
   const filteredAndSorted = useMemo(() => {
-    let result = [...technologies]
+    let result = [...allTechnologies]
 
     // Apply smart filter first
     result = applySmartFilter(result, smartFilter)
@@ -81,7 +61,7 @@ export function TechnologiesPageClient() {
     }
 
     return result
-  }, [technologies, searchQuery, selectedCategory, smartFilter])
+  }, [allTechnologies, searchQuery, selectedCategory, smartFilter])
 
   if (isLoading) {
     return (
@@ -93,14 +73,16 @@ export function TechnologiesPageClient() {
     )
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <div className="flex min-h-[600px] items-center justify-center">
           <div className="text-center">
-            <p className="text-sm text-destructive">Error: {error}</p>
+            <p className="text-sm text-destructive">
+              Error: {error instanceof Error ? error.message : 'Failed to load technologies'}
+            </p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => refetch()}
               className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Retry
@@ -124,7 +106,7 @@ export function TechnologiesPageClient() {
           Technology Intelligence
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Track {technologies.length} technologies across 8 categories
+          Track {allTechnologies.length} technologies across 8 categories
           {lastUpdated && (
             <span className="ml-2 text-xs">
               • Last updated:{' '}
@@ -142,7 +124,7 @@ export function TechnologiesPageClient() {
       <MoversShakers />
 
       {/* Stack Check CTA */}
-      <StackCheckCTA technologies={technologies} />
+      <StackCheckCTA technologies={allTechnologies} />
 
       {/* Smart Filters */}
       <SmartFilters activeFilter={smartFilter} onFilterChange={handleSmartFilterChange} />
@@ -234,12 +216,9 @@ export function TechnologiesPageClient() {
             </div>
           )}
 
-          {/* Overview mobile fallback */}
+          {/* Overview mobile fallback — just show cards, no confusing message */}
           {viewMode === 'overview' && (
             <div className="grid gap-4 sm:hidden">
-              <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-                Overview is best experienced on larger screens. Try table or cards view instead.
-              </p>
               {filteredAndSorted.slice(0, 10).map((tech, index) => (
                 <TechCard key={tech.id} technology={tech} index={index} />
               ))}

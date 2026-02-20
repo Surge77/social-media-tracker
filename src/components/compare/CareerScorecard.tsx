@@ -124,14 +124,16 @@ export function CareerScorecard({ compareData, className }: CareerScorecardProps
 
               {/* Metrics Grid */}
               <div className="grid gap-2 grid-cols-2 lg:grid-cols-4">
-                {/* Job Volume */}
+                {/* Job Demand Score */}
                 <div className="rounded-md border border-border bg-background/50 p-2.5">
                   <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Briefcase size={12} />
-                    Job Volume
+                    Job Demand
                   </div>
                   <div className="text-sm font-semibold text-foreground">
-                    {tech.jobVolume ? `${tech.jobVolume.toLocaleString()}` : 'N/A'}
+                    {tech.jobs_score
+                      ? `${Math.round(tech.jobs_score)}/100`
+                      : 'N/A'}
                   </div>
                 </div>
 
@@ -221,7 +223,8 @@ export function CareerScorecard({ compareData, className }: CareerScorecardProps
         <p className="text-xs font-semibold text-foreground">💡 Overall Recommendation</p>
         <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
           Based on current job market data, <span className="font-semibold text-primary">{sorted[0].name}</span> offers
-          the strongest career opportunity with {sorted[0].jobVolume ? `${sorted[0].jobVolume.toLocaleString()} job postings` : 'strong demand'} and{' '}
+          the strongest career opportunity with a job demand score of{' '}
+          <span className="font-semibold text-primary">{sorted[0].jobs_score ? `${Math.round(sorted[0].jobs_score)}/100` : 'N/A'}</span> and{' '}
           {sorted[0].demandTrend} trajectory. {sorted.length > 1 && (
             <>Learning {sorted[0].skillsAdjacency[0]} alongside {sorted[0].name} maximizes career flexibility.</>
           )}

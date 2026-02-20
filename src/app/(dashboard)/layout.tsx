@@ -2,6 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
+import { MobileNav } from '@/components/MobileNav'
 import MinimalFooter from '@/components/MinimalFooter'
 
 export default function DashboardLayout({
@@ -65,8 +66,11 @@ export default function DashboardLayout({
             </Link>
           </nav>
 
-          {/* Theme Toggle */}
-          <ThemeToggle />
+          {/* Right side: theme toggle + mobile menu */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <MobileNav />
+          </div>
         </div>
       </header>
 

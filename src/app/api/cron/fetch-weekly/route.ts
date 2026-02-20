@@ -1,6 +1,5 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { fetchJobsData } from '@/lib/api/jobs'
-import { fetchNewsData } from '@/lib/api/news'
 import type { Technology, FetcherResult } from '@/types'
 
 export const maxDuration = 60 // Maximum duration in seconds (Vercel hobby plan limit)
@@ -46,12 +45,6 @@ export async function GET(request: Request) {
     const jobsResult = await fetchJobsData(technologies as Technology[])
     results.push(jobsResult)
     fetcherNames.push('jobs')
-
-    // NewsAPI
-    console.log('[Weekly Cron] Fetching news data...')
-    const newsResult = await fetchNewsData(technologies as Technology[])
-    results.push(newsResult)
-    fetcherNames.push('news')
 
     // Step 3: Aggregate all data points
     const allDataPoints = results.flatMap((r) => r.dataPoints)

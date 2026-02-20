@@ -89,11 +89,11 @@ export function getTechStatus(
   const score = compositeScore ?? 0
   const mom = momentum ?? 0
 
+  // High demand: extreme momentum regardless of score (check before strong-growth)
+  if (mom > 12) return 'high-demand'
+
   // Strong growth: good score AND strong positive momentum
   if (score >= 50 && mom > 8) return 'strong-growth'
-
-  // High demand: high momentum regardless of score
-  if (mom > 12) return 'high-demand'
 
   // Established: high score, stable momentum (industry standard)
   if (score >= 60 && Math.abs(mom) <= 5) return 'established'
@@ -192,7 +192,8 @@ export function getPercentileRank(
   if (score === null || allScores.length === 0) return 'Unranked'
 
   const sorted = [...allScores].sort((a, b) => b - a)
-  const rank = sorted.findIndex((s) => s <= score) + 1
+  // Count how many scores are strictly greater to get correct rank (avoids off-by-one for top score)
+  const rank = sorted.filter((s) => s > score).length + 1
   const percentile = Math.round((rank / sorted.length) * 100)
 
   if (percentile <= 5) return 'Top 5%'

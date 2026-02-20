@@ -5,7 +5,7 @@ import type { TechnologyWithScore, TechnologyCategory } from '@/types'
 
 interface TechnologiesResponse {
   technologies: TechnologyWithScore[]
-  total: number
+  last_updated: string | null
 }
 
 interface UseTechnologiesOptions {
@@ -54,7 +54,7 @@ export function useTechnologies(options: UseTechnologiesOptions = {}) {
 
   return {
     technologies: filtered ?? [],
-    total: query.data?.total ?? 0,
+    lastUpdated: query.data?.last_updated ?? null,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,

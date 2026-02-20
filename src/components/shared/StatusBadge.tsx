@@ -24,18 +24,19 @@ export const StatusBadge = React.forwardRef<HTMLDivElement, StatusBadgeProps>(
         className={cn('inline-flex flex-col', className)}
         title={info.description}
       >
-        <div
+        <span
           className={cn(
-            'inline-flex items-center justify-center rounded-md border font-semibold',
-            size === 'sm' && 'h-6 px-2.5 text-xs',
-            size === 'md' && 'h-7 px-3 text-sm',
+            'inline-flex items-center gap-1 rounded-md border font-semibold whitespace-nowrap leading-none',
+            size === 'sm' && 'px-2 py-1 text-[11px]',
+            size === 'md' && 'px-2.5 py-1.5 text-xs',
             info.color,
             info.bgColor,
             info.borderColor
           )}
         >
+          <StatusDot status={status} size={size} />
           {info.label}
-        </div>
+        </span>
         {showDescription && (
           <span className="mt-1 text-xs text-muted-foreground">{info.description}</span>
         )}
@@ -45,3 +46,25 @@ export const StatusBadge = React.forwardRef<HTMLDivElement, StatusBadgeProps>(
 )
 
 StatusBadge.displayName = 'StatusBadge'
+
+function StatusDot({ status, size }: { status: TechStatus; size: 'sm' | 'md' }) {
+  const dotColors: Record<TechStatus, string> = {
+    'strong-growth': 'bg-emerald-400',
+    'high-demand':   'bg-orange-400',
+    'established':   'bg-blue-400',
+    'emerging':      'bg-cyan-400',
+    'slowing':       'bg-amber-400',
+    'low-demand':    'bg-red-400',
+    'collecting-data': 'bg-slate-400',
+  }
+
+  return (
+    <span
+      className={cn(
+        'shrink-0 rounded-full',
+        size === 'sm' ? 'h-1.5 w-1.5' : 'h-2 w-2',
+        dotColors[status]
+      )}
+    />
+  )
+}

@@ -110,8 +110,8 @@ export function analyzeMomentum(
         break
       }
     }
-    // Negative streak for downward movement
-    streak = streak * (lastSign || 1)
+    // Negative streak for downward movement; 0 for flat days
+    streak = lastSign === 0 ? 0 : streak * lastSign
   }
 
   // Classify trend

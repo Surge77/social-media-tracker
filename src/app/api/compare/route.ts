@@ -48,15 +48,25 @@ export async function GET(request: NextRequest) {
     const techIds = technologies.map((t) => t.id)
     const techIdToSlug = new Map(technologies.map((t) => [t.id, t.slug]))
 
-    // Fetch latest scores
-    const { data: latestDate } = await supabase
-      .from('daily_scores')
-      .select('score_date')
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
+    // Fetch latest score date and latest data_point date in parallel
+    const [latestDateResult, latestDpResult] = await Promise.all([
+      supabase
+        .from('daily_scores')
+        .select('score_date')
+        .order('score_date', { ascending: false })
+        .limit(1)
+        .single(),
+      supabase
+        .from('data_points')
+        .select('measured_at')
+        .order('measured_at', { ascending: false })
+        .limit(1)
+        .single(),
+    ])
 
-    const scoreDate = latestDate?.score_date ?? null
+    const scoreDate = latestDateResult.data?.score_date ?? null
+    // Use the most recent measured_at date, not today — cron may not have run today
+    const dpDate = latestDpResult.data?.measured_at ?? new Date().toISOString().split('T')[0]
 
     const scoreMap = new Map<string, Record<string, unknown>>()
     if (scoreDate) {
@@ -73,13 +83,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Fetch latest raw signals for comparison table
-    const today = new Date().toISOString().split('T')[0]
+    // Fetch latest raw signals using the most recent data_points date
     const { data: dataPoints } = await supabase
       .from('data_points')
       .select('technology_id, source, metric, value')
       .in('technology_id', techIds)
-      .eq('measured_at', today)
+      .eq('measured_at', dpDate)
 
     const signalMap = new Map<string, Map<string, number>>()
     if (dataPoints) {
@@ -109,9 +118,14 @@ export async function GET(request: NextRequest) {
         github_stars: signals?.get('github:stars') ?? null,
         npm_downloads: signals?.get('npm:downloads') ?? null,
         so_questions: signals?.get('stackoverflow:questions') ?? null,
-        job_postings: (signals?.get('adzuna:job_postings') ?? 0) +
-          (signals?.get('jsearch:job_postings') ?? 0) +
-          (signals?.get('remotive:job_postings') ?? 0) || null,
+        // Sum job postings across all sources — only null if none of the sources have data
+        job_postings: (() => {
+          const adzuna = signals?.get('adzuna:job_postings') ?? null
+          const jsearch = signals?.get('jsearch:job_postings') ?? null
+          const remotive = signals?.get('remotive:job_postings') ?? null
+          if (adzuna === null && jsearch === null && remotive === null) return null
+          return (adzuna ?? 0) + (jsearch ?? 0) + (remotive ?? 0)
+        })(),
         hn_mentions: signals?.get('hackernews:mentions') ?? null,
       }
     })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -23,6 +23,14 @@ export function useAIChat(sessionId: string): UseAIChatReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
+
+  // Cancel any in-progress stream on unmount
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort()
+    }
+  }, [])
 
   const clearError = useCallback(() => {
     setError(null)
@@ -32,6 +40,11 @@ export function useAIChat(sessionId: string): UseAIChatReturn {
     async (question: string) => {
       if (!question.trim()) return
       if (isStreaming) return
+
+      // Cancel any previous in-flight request
+      abortControllerRef.current?.abort()
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
 
       setIsStreaming(true)
       setError(null)
@@ -54,7 +67,8 @@ export function useAIChat(sessionId: string): UseAIChatReturn {
           body: JSON.stringify({
             question,
             sessionId
-          })
+          }),
+          signal: abortController.signal,
         })
 
         if (!response.ok) {
@@ -70,6 +84,7 @@ export function useAIChat(sessionId: string): UseAIChatReturn {
 
         const decoder = new TextDecoder()
         let assistantContent = ''
+        let buffer = ''
 
         // Add placeholder for assistant message
         const assistantMessage: ChatMessage = {
@@ -85,8 +100,10 @@ export function useAIChat(sessionId: string): UseAIChatReturn {
 
           if (done) break
 
-          const chunk = decoder.decode(value)
-          const lines = chunk.split('\n')
+          // Buffer incomplete lines across chunks (fixes split SSE events)
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() ?? '' // Keep last incomplete line for next iteration
 
           for (const line of lines) {
             if (line.startsWith('data: ')) {
@@ -126,6 +143,9 @@ export function useAIChat(sessionId: string): UseAIChatReturn {
           }
         }
       } catch (err) {
+        // Ignore abort errors — user navigated away intentionally
+        if ((err as Error).name === 'AbortError') return
+
         setError((err as Error).message)
 
         // Remove the placeholder assistant message if it failed

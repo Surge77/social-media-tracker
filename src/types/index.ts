@@ -40,6 +40,11 @@ export interface Technology {
   is_active: boolean
   created_at: string
   updated_at: string
+  // Source 4: Extended package registries
+  packagist_package: string | null
+  rubygems_package: string | null
+  nuget_package: string | null
+  pubdev_package: string | null
 }
 
 export type TechnologyCategory =
@@ -77,14 +82,20 @@ export interface DataPoint {
 export type DataSource =
   | 'github' | 'hackernews' | 'stackoverflow' | 'npm' | 'pypi' | 'crates'
   | 'reddit' | 'devto' | 'adzuna' | 'jsearch' | 'remotive' | 'arbeitnow'
-  | 'newsapi' | 'rss'
+  | 'rss' | 'jobs' | 'packages'
+  | 'librariesio'                                      // Source 2
+  | 'npms'                                             // Source 5
+  | 'packagist' | 'rubygems' | 'nuget' | 'pubdev'     // Source 4
 
 export type DataMetric =
   | 'stars' | 'forks' | 'open_issues' | 'contributors' | 'watchers'
   | 'mentions' | 'upvotes' | 'comments' | 'sentiment'
   | 'questions' | 'answer_rate' | 'views'
-  | 'downloads' | 'dependents'
+  | 'downloads' | 'dependents' | 'likes'
   | 'job_postings' | 'articles' | 'posts'
+  | 'active_contributors' | 'commit_velocity' | 'closed_issues'             // Source 1
+  | 'dependents_count' | 'dependent_repos_count' | 'sourcerank' | 'latest_release_age'  // Source 2
+  | 'quality_score' | 'popularity_score' | 'maintenance_score'              // Source 5
 
 export interface DailyScore {
   id: number
@@ -160,13 +171,36 @@ export interface ChartDataPoint {
 }
 
 export interface LatestSignals {
-  github: { stars: number; forks: number; open_issues: number } | null
+  github: {
+    stars: number
+    forks: number
+    open_issues: number
+    active_contributors?: number    // Source 1
+    commit_velocity?: number        // Source 1 (avg commits/week, last 4 weeks)
+  } | null
   hackernews: { mentions: number; avg_upvotes: number; sentiment: number; top_stories: HNStory[] } | null
   stackoverflow: { questions_30d: number; total_questions: number } | null
   npm: { weekly_downloads: number } | null
   reddit: { posts: number; avg_upvotes: number; sentiment: number } | null
   devto: { articles: number; reactions: number } | null
   jobs: { adzuna: number; jsearch: number; remotive: number; total: number } | null
+  // Source 2: Libraries.io adoption signal
+  librariesio: {
+    dependents_count: number
+    dependent_repos_count: number
+    latest_release_age_days: number | null
+  } | null
+  // Source 4: Extended package registries (conditional by tech ecosystem)
+  packagist: { monthly_downloads: number } | null
+  rubygems: { total_downloads: number } | null
+  nuget: { total_downloads: number } | null
+  pubdev: { likes: number } | null
+  // Source 5: npms.io quality dimensions (npm packages only)
+  npms: {
+    quality: number      // 0-1 code quality, tests, docs
+    popularity: number   // 0-1 downloads, stars, dependents
+    maintenance: number  // 0-1 release frequency, issue response
+  } | null
 }
 
 export interface HNStory {

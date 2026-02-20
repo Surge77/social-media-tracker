@@ -20,14 +20,14 @@ export interface ConfidenceBreakdown {
  * Not every tech will have all sources (e.g., a database won't have npm downloads).
  */
 const MAX_SOURCES: Record<TechnologyCategory, number> = {
-  language: 9,   // github, hn, reddit, devto, so, npm/pypi/crates, adzuna, jsearch, remotive
-  frontend: 9,
-  backend: 9,
-  database: 7,   // less likely to have npm/pypi/crates
-  devops: 7,
-  cloud: 6,      // fewer OSS signals
-  mobile: 7,
-  ai_ml: 8,
+  language: 14,  // +github_stats, +librariesio, +npms, +extended_registry
+  frontend: 14,
+  backend: 13,   // not all backend techs have npm
+  database: 10,  // +librariesio
+  devops: 10,    // +librariesio
+  cloud: 9,      // +librariesio
+  mobile: 11,    // +librariesio, +pubdev for Flutter/Dart
+  ai_ml: 12,     // +librariesio, +npms for Python ML packages
 }
 
 // ---- Main function ----

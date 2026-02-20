@@ -74,7 +74,7 @@ export async function fetchPackageDownloads(
     }
   }
 
-  return { source: 'npm', dataPoints, errors }
+  return { source: 'packages', dataPoints, errors }
 }
 
 /**

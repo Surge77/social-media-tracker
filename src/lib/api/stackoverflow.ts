@@ -24,6 +24,9 @@ export async function fetchStackOverflowData(
   for (let i = 0; i < technologies.length; i++) {
     const tech = technologies[i]
 
+    // Skip technologies without a SO tag — avoids encoding "undefined" as a tag
+    if (!tech.stackoverflow_tag) continue
+
     try {
       const tag = tech.stackoverflow_tag
       const encodedTag = encodeURIComponent(tag)

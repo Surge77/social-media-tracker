@@ -22,74 +22,70 @@ export async function GET() {
 
     const lastUpdated = latestDate?.score_date ?? null
 
-    // Fetch all active technologies with their latest scores
-    let query = supabase
-      .from('technologies')
-      .select('id, slug, name, description, category, color')
-      .eq('is_active', true)
+    // Compute date ranges upfront
+    const sevenDaysAgo = lastUpdated ? new Date(lastUpdated) : null
+    if (sevenDaysAgo) sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    const previousDate = sevenDaysAgo?.toISOString().split('T')[0]
 
-    const { data: technologies, error: techError } = await query
+    const thirtyDaysAgo = lastUpdated ? new Date(lastUpdated) : null
+    if (thirtyDaysAgo) thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const thirtyDaysAgoStr = thirtyDaysAgo?.toISOString().split('T')[0]
+
+    // Run all queries in parallel (OPT-02)
+    const [techResult, scoresResult, previousScoresResult, sparklineResult] = await Promise.all([
+      supabase
+        .from('technologies')
+        .select('id, slug, name, description, category, color')
+        .eq('is_active', true),
+      lastUpdated
+        ? supabase
+            .from('daily_scores')
+            .select('technology_id, composite_score, github_score, community_score, jobs_score, ecosystem_score, momentum, data_completeness')
+            .eq('score_date', lastUpdated)
+        : Promise.resolve({ data: null }),
+      lastUpdated && previousDate
+        ? supabase
+            .from('daily_scores')
+            .select('technology_id, composite_score')
+            .eq('score_date', previousDate)
+        : Promise.resolve({ data: null }),
+      lastUpdated && thirtyDaysAgoStr
+        ? supabase
+            .from('daily_scores')
+            .select('technology_id, score_date, composite_score')
+            .gte('score_date', thirtyDaysAgoStr)
+            .order('score_date', { ascending: true })
+        : Promise.resolve({ data: null }),
+    ])
+
+    const { data: technologies, error: techError } = techResult
 
     if (techError) {
       throw new Error(`Failed to fetch technologies: ${techError.message}`)
     }
 
-    // Fetch latest scores for all technologies
+    // Build score maps
     const scoreMap = new Map<string, Record<string, unknown>>()
-
-    if (lastUpdated) {
-      const { data: scores } = await supabase
-        .from('daily_scores')
-        .select('technology_id, composite_score, github_score, community_score, jobs_score, ecosystem_score, momentum, data_completeness')
-        .eq('score_date', lastUpdated)
-
-      if (scores) {
-        for (const s of scores) {
-          scoreMap.set(s.technology_id, s)
-        }
+    if (scoresResult.data) {
+      for (const s of scoresResult.data) {
+        scoreMap.set(s.technology_id, s)
       }
     }
 
-    // Fetch scores from 7 days ago for rank change calculation
     const previousScoreMap = new Map<string, Record<string, unknown>>()
-
-    if (lastUpdated) {
-      const sevenDaysAgo = new Date(lastUpdated)
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-      const previousDate = sevenDaysAgo.toISOString().split('T')[0]
-
-      const { data: previousScores } = await supabase
-        .from('daily_scores')
-        .select('technology_id, composite_score')
-        .eq('score_date', previousDate)
-
-      if (previousScores) {
-        for (const s of previousScores) {
-          previousScoreMap.set(s.technology_id, s)
-        }
+    if (previousScoresResult.data) {
+      for (const s of previousScoresResult.data) {
+        previousScoreMap.set(s.technology_id, s)
       }
     }
 
-    // Fetch sparkline data (last 30 days of composite scores)
     const sparklineMap = new Map<string, number[]>()
-
-    if (lastUpdated) {
-      const thirtyDaysAgo = new Date(lastUpdated)
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-
-      const { data: sparklineData } = await supabase
-        .from('daily_scores')
-        .select('technology_id, score_date, composite_score')
-        .gte('score_date', thirtyDaysAgo.toISOString().split('T')[0])
-        .order('score_date', { ascending: true })
-
-      if (sparklineData) {
-        for (const row of sparklineData) {
-          if (!sparklineMap.has(row.technology_id)) {
-            sparklineMap.set(row.technology_id, [])
-          }
-          sparklineMap.get(row.technology_id)!.push(Number(row.composite_score))
+    if (sparklineResult.data) {
+      for (const row of sparklineResult.data) {
+        if (!sparklineMap.has(row.technology_id)) {
+          sparklineMap.set(row.technology_id, [])
         }
+        sparklineMap.get(row.technology_id)!.push(Number(row.composite_score))
       }
     }
 
@@ -152,10 +148,11 @@ export async function GET() {
       tech.ai_summary = generateTechSummary(tech)
     })
 
-    return Response.json({
-      technologies: result,
-      last_updated: lastUpdated,
-    })
+    // Cache for 1 hour — data only changes after the daily cron (OPT-03)
+    return Response.json(
+      { technologies: result, last_updated: lastUpdated },
+      { headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400' } }
+    )
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     return Response.json({ error: errorMsg }, { status: 500 })

@@ -83,8 +83,9 @@ function chiSquareTest(
 
   // Degrees of freedom = 1 for 2x2 table
   // Approximate p-value using chi-square distribution
-  // For df=1, critical value at p=0.05 is 3.841
-  const pValue = chiSquare > 3.841 ? 0.05 : chiSquare > 6.635 ? 0.01 : 0.1
+  // For df=1: critical value at p=0.01 is 6.635, at p=0.05 is 3.841
+  // Check higher threshold first to avoid misclassifying p=0.01 as p=0.05
+  const pValue = chiSquare > 6.635 ? 0.01 : chiSquare > 3.841 ? 0.05 : 0.1
 
   return { pValue, significant: pValue < 0.05 }
 }

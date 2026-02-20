@@ -152,21 +152,17 @@ function findTechnologyMentions(
 ): string[] {
   const mentions: string[] = []
 
-  // Build search patterns (case-insensitive)
-  const searchTerms = [tech.name.toLowerCase(), ...tech.aliases.map((a) => a.toLowerCase())]
+  // Use word-boundary patterns to avoid false positives
+  // e.g. "Go" should not match "Google", "good"
+  const patterns = [tech.name, ...tech.aliases].map((term) => {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return new RegExp(`\\b${escaped}\\b`, 'i')
+  })
 
   for (const item of feedItems) {
-    const titleLower = item.title.toLowerCase()
-    const contentLower = item.content.toLowerCase()
-
-    // Check if any search term appears in title or content
-    const mentioned = searchTerms.some(
-      (term) => titleLower.includes(term) || contentLower.includes(term)
-    )
-
-    if (mentioned) {
-      mentions.push(item.title)
-    }
+    const text = `${item.title} ${item.content}`
+    const mentioned = patterns.some((pattern) => pattern.test(text))
+    if (mentioned) mentions.push(item.title)
   }
 
   return mentions

@@ -15,7 +15,7 @@ const COMPOSITE_WEIGHTS = DEFAULT_WEIGHTS
  *   - starVelocityZ: z-scored star gain (or raw stars on day 1)
  *   - forkVelocityZ: z-scored fork count
  *   - issueCloseRate: closed / (closed + open), 0 to 1
- *   - contributorGrowthZ: z-scored (not available in MVP — use 0)
+ *   - contributorGrowthZ: z-scored active contributors (last 4 weeks)
  */
 export function computeGitHubScore(
   starVelocityZ: number,
@@ -23,10 +23,10 @@ export function computeGitHubScore(
   issueCloseRate: number,
   contributorGrowthZ: number = 0
 ): number {
-  const starComponent = zScoreTo100(starVelocityZ) * 0.40
-  const forkComponent = zScoreTo100(forkVelocityZ) * 0.20
-  const issueComponent = (issueCloseRate * 100) * 0.20
-  const contributorComponent = zScoreTo100(contributorGrowthZ) * 0.20
+  const starComponent        = zScoreTo100(starVelocityZ)      * 0.35
+  const forkComponent        = zScoreTo100(forkVelocityZ)      * 0.15
+  const issueComponent       = (issueCloseRate * 100)           * 0.20
+  const contributorComponent = zScoreTo100(contributorGrowthZ) * 0.30
   return starComponent + forkComponent + issueComponent + contributorComponent
 }
 
@@ -37,21 +37,28 @@ export function computeGitHubScore(
  *   - hnMentionsZ: z-scored HN mention count
  *   - hnSentiment: 0 to 1 (0 = negative, 1 = positive)
  *   - redditPostsZ: z-scored Reddit post count
+ *   - redditSentiment: 0 to 1 (0 = negative, 1 = positive)
  *   - devtoArticlesZ: z-scored Dev.to article count
+ *   - rssMentionsZ: z-scored RSS mention count across tech news feeds
  */
 export function computeCommunityScore(
   hnMentionsZ: number,
   hnSentiment: number,
   redditPostsZ: number,
-  devtoArticlesZ: number
+  devtoArticlesZ: number,
+  redditSentiment: number = 0.5,
+  rssMentionsZ: number = 0
 ): number {
-  const hnComponent = zScoreTo100(hnMentionsZ) * 0.35
-  const redditComponent = zScoreTo100(redditPostsZ) * 0.25
-  const devtoComponent = zScoreTo100(devtoArticlesZ) * 0.25
-  const sentimentAdjustment = (hnSentiment - 0.5) * 30 // -15 to +15
+  const hnComponent = zScoreTo100(hnMentionsZ) * 0.30
+  const redditComponent = zScoreTo100(redditPostsZ) * 0.20
+  const devtoComponent = zScoreTo100(devtoArticlesZ) * 0.20
+  const rssComponent = zScoreTo100(rssMentionsZ) * 0.15
+  // Combined sentiment from HN (60% weight) and Reddit (40% weight)
+  const combinedSentiment = hnSentiment * 0.6 + redditSentiment * 0.4
+  const sentimentAdjustment = (combinedSentiment - 0.5) * 30 // -15 to +15
   return Math.max(
     0,
-    Math.min(100, hnComponent + redditComponent + devtoComponent + sentimentAdjustment)
+    Math.min(100, hnComponent + redditComponent + devtoComponent + rssComponent + sentimentAdjustment)
   )
 }
 
@@ -79,19 +86,25 @@ export function computeJobsScore(
  * Ecosystem Score (0-100)
  *
  * Components:
- *   - downloadsZ: z-scored within same ecosystem (JS vs JS, Py vs Py)
- *   - downloadGrowthRate: percentage change (e.g., 0.15 for +15%)
- *   - soQuestionsZ: z-scored SO question count
+ *   - downloadsZ: z-scored across all package registries
+ *   - downloadGrowthRate: week-over-week percentage change (clamped -0.5 to 1.0)
+ *   - soQuestionsZ: z-scored SO all-time question count (maturity/depth signal)
+ *   - soMentionsZ: z-scored SO 30-day question count (recent activity signal)
+ *   - dependentsZ: z-scored Libraries.io dependents_count (production adoption signal)
  */
 export function computeEcosystemScore(
   downloadsZ: number,
   downloadGrowthRate: number,
-  soQuestionsZ: number
+  soQuestionsZ: number,
+  soMentionsZ: number = 0,
+  dependentsZ: number = 0
 ): number {
-  const downloadComponent = zScoreTo100(downloadsZ) * 0.40
-  const growthComponent = minMaxNormalize(downloadGrowthRate, -0.5, 1.0) * 0.25
-  const soComponent = zScoreTo100(soQuestionsZ) * 0.35
-  return downloadComponent + growthComponent + soComponent
+  const downloadComponent   = zScoreTo100(downloadsZ)                         * 0.20
+  const growthComponent     = minMaxNormalize(downloadGrowthRate, -0.5, 1.0)  * 0.15
+  const soComponent         = zScoreTo100(soQuestionsZ)                       * 0.15
+  const soMentionsComponent = zScoreTo100(soMentionsZ)                        * 0.15
+  const dependentsComponent = zScoreTo100(dependentsZ)                        * 0.35
+  return downloadComponent + growthComponent + soComponent + soMentionsComponent + dependentsComponent
 }
 
 // ---- Composite score ----

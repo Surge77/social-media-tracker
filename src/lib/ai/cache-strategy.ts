@@ -10,6 +10,7 @@
  * Key principle: NEVER show blank. Something is always better than nothing.
  */
 
+import { createHash } from 'crypto'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type CacheFreshness = 'fresh' | 'stale' | 'expired' | 'none'
@@ -100,18 +101,12 @@ export function queueRegeneration(
 // ---- Data hash computation ----
 
 /**
- * Compute a simple hash of the input data for cache invalidation.
- * Uses a string-based hash — not cryptographic, just for change detection.
+ * Compute a SHA-256 hash of the input data for cache invalidation.
+ * Uses Node.js crypto — collision-resistant, no 32-bit overflow risk.
  */
 export function computeDataHash(data: Record<string, unknown>): string {
   const str = JSON.stringify(data)
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash |= 0 // Convert to 32bit integer
-  }
-  return hash.toString(36)
+  return createHash('sha256').update(str).digest('hex').slice(0, 16)
 }
 
 // ---- Comparison cache helpers ----

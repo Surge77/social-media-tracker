@@ -31,12 +31,14 @@ export async function GET(request: Request) {
   try {
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000'
+      : process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 
     const fetcherBatches = [
       `${baseUrl}/api/cron/fetch-daily/batch-1`,
       `${baseUrl}/api/cron/fetch-daily/batch-2`,
       `${baseUrl}/api/cron/fetch-daily/batch-3`,
+      `${baseUrl}/api/cron/fetch-daily/batch-4a`,
+      `${baseUrl}/api/cron/fetch-daily/batch-4b`,
     ]
     const scoringRoute = `${baseUrl}/api/cron/fetch-daily/batch-scoring`
 
@@ -45,16 +47,25 @@ export async function GET(request: Request) {
       headers['x-internal-cron'] = process.env.CRON_SECRET
     }
 
-    // Fire all 3 fetcher batches (fire-and-forget)
-    for (const url of fetcherBatches) {
-      fetch(url, { headers }).catch((err) => {
-        console.error(`[Daily Cron] Failed to fire ${url}:`, err)
-      })
+    // Fire all 5 fetcher batches and wait for results
+    const fetchResults = await Promise.allSettled(
+      fetcherBatches.map((url) => fetch(url, { headers }))
+    )
+
+    // Retry once for any failed batches
+    const failedIndexes = fetchResults
+      .map((r, i) => ({ r, i }))
+      .filter((x) => x.r.status === 'rejected')
+      .map((x) => x.i)
+
+    if (failedIndexes.length > 0) {
+      console.warn(`[Daily Cron] Retrying ${failedIndexes.length} failed batches`)
+      await Promise.allSettled(
+        failedIndexes.map((i) => fetch(fetcherBatches[i], { headers }))
+      )
     }
 
-    // Wait 55s for fetchers to finish, then fire scoring
-    await new Promise((resolve) => setTimeout(resolve, 55_000))
-
+    // Fire scoring after all fetchers complete
     fetch(scoringRoute, { headers }).catch((err) => {
       console.error('[Daily Cron] Failed to fire scoring:', err)
     })
@@ -75,7 +86,7 @@ export async function GET(request: Request) {
 
     return Response.json({
       success: true,
-      message: 'Fired 3 fetcher batches + scoring (after 55s delay)',
+      message: 'Fired 5 fetcher batches + scoring',
       batches: [...fetcherBatches, scoringRoute],
       duration: `${duration}ms`,
     })

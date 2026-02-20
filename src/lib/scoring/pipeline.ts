@@ -20,11 +20,17 @@ interface TechDataPoints {
   stars: number | null
   forks: number | null
   openIssues: number | null
+  // GitHub Stats (Source 1)
+  activeContributors: number | null
+  commitVelocity: number | null
+  closedIssues: number | null
   // Community metrics
   hnMentions: number | null
   hnSentiment: number | null
   redditPosts: number | null
+  redditSentiment: number | null
   devtoArticles: number | null
+  rssMentions: number | null
   // Jobs metrics
   adzunaJobs: number | null
   jsearchJobs: number | null
@@ -32,6 +38,15 @@ interface TechDataPoints {
   // Ecosystem metrics
   downloads: number | null
   soQuestions: number | null
+  soMentions: number | null
+  // Libraries.io (Source 2)
+  dependentsCount: number | null
+  dependentRepos: number | null
+  sourcerank: number | null
+  // npms.io (Source 5)
+  npmsQuality: number | null
+  npmsPopularity: number | null
+  npmsMaintenance: number | null
 }
 
 interface ScoredTechnology {
@@ -109,15 +124,27 @@ export async function runScoringPipeline(
       stars: null,
       forks: null,
       openIssues: null,
+      activeContributors: null,
+      commitVelocity: null,
+      closedIssues: null,
       hnMentions: null,
       hnSentiment: null,
       redditPosts: null,
+      redditSentiment: null,
       devtoArticles: null,
+      rssMentions: null,
       adzunaJobs: null,
       jsearchJobs: null,
       remotiveJobs: null,
       downloads: null,
       soQuestions: null,
+      soMentions: null,
+      dependentsCount: null,
+      dependentRepos: null,
+      sourcerank: null,
+      npmsQuality: null,
+      npmsPopularity: null,
+      npmsMaintenance: null,
     })
   }
 
@@ -146,8 +173,14 @@ export async function runScoringPipeline(
       case 'reddit:posts':
         tech.redditPosts = value
         break
+      case 'reddit:sentiment':
+        tech.redditSentiment = value
+        break
       case 'devto:articles':
         tech.devtoArticles = value
+        break
+      case 'rss:mentions':
+        tech.rssMentions = value
         break
       case 'adzuna:job_postings':
         tech.adzunaJobs = value
@@ -161,12 +194,70 @@ export async function runScoringPipeline(
       case 'npm:downloads':
       case 'pypi:downloads':
       case 'crates:downloads':
-        // Use whichever download source is available
-        tech.downloads = value
+      case 'packagist:downloads':
+      case 'rubygems:downloads':
+      case 'nuget:downloads':
+        // Accumulate downloads from all available package registries
+        tech.downloads = (tech.downloads ?? 0) + value
         break
       case 'stackoverflow:questions':
         tech.soQuestions = value
         break
+      case 'stackoverflow:mentions':
+        tech.soMentions = value
+        break
+      // GitHub Stats (Source 1)
+      case 'github:active_contributors':
+        tech.activeContributors = value
+        break
+      case 'github:commit_velocity':
+        tech.commitVelocity = value
+        break
+      case 'github:closed_issues':
+        tech.closedIssues = value
+        break
+      // Libraries.io (Source 2)
+      case 'librariesio:dependents_count':
+        tech.dependentsCount = value
+        break
+      case 'librariesio:dependent_repos_count':
+        tech.dependentRepos = value
+        break
+      case 'librariesio:sourcerank':
+        tech.sourcerank = value
+        break
+      // npms.io (Source 5)
+      case 'npms:quality_score':
+        tech.npmsQuality = value
+        break
+      case 'npms:popularity_score':
+        tech.npmsPopularity = value
+        break
+      case 'npms:maintenance_score':
+        tech.npmsMaintenance = value
+        break
+    }
+  }
+
+  // Step 3b: Fetch downloads from 7 days ago for weekly growth rate (Source 3)
+  const sevenDaysAgo = new Date(date)
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+  const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0]
+
+  const { data: priorDownloadsData } = await supabase
+    .from('data_points')
+    .select('technology_id, value')
+    .eq('measured_at', sevenDaysAgoStr)
+    .eq('metric', 'downloads')
+    .in('technology_id', techIds)
+
+  const priorDownloadMap = new Map<string, number>()
+  if (priorDownloadsData) {
+    for (const dp of priorDownloadsData) {
+      priorDownloadMap.set(
+        dp.technology_id,
+        (priorDownloadMap.get(dp.technology_id) ?? 0) + Number(dp.value)
+      )
     }
   }
 
@@ -175,25 +266,33 @@ export async function runScoringPipeline(
 
   const starsArr = allTechs.map((t) => t.stars ?? 0)
   const forksArr = allTechs.map((t) => t.forks ?? 0)
+  const contributorsArr = allTechs.map((t) => t.activeContributors ?? 0)
   const hnArr = allTechs.map((t) => t.hnMentions ?? 0)
   const redditArr = allTechs.map((t) => t.redditPosts ?? 0)
   const devtoArr = allTechs.map((t) => t.devtoArticles ?? 0)
+  const rssArr = allTechs.map((t) => t.rssMentions ?? 0)
   const adzunaArr = allTechs.map((t) => t.adzunaJobs ?? 0)
   const jsearchArr = allTechs.map((t) => t.jsearchJobs ?? 0)
   const remotiveArr = allTechs.map((t) => t.remotiveJobs ?? 0)
   const downloadsArr = allTechs.map((t) => t.downloads ?? 0)
   const soArr = allTechs.map((t) => t.soQuestions ?? 0)
+  const soMentionsArr = allTechs.map((t) => t.soMentions ?? 0)
+  const dependentsArr = allTechs.map((t) => t.dependentsCount ?? 0)
 
   const starsZ = zScoreNormalize(starsArr)
   const forksZ = zScoreNormalize(forksArr)
+  const contributorsZ = zScoreNormalize(contributorsArr)
   const hnZ = zScoreNormalize(hnArr)
   const redditZ = zScoreNormalize(redditArr)
   const devtoZ = zScoreNormalize(devtoArr)
+  const rssZ = zScoreNormalize(rssArr)
   const adzunaZ = zScoreNormalize(adzunaArr)
   const jsearchZ = zScoreNormalize(jsearchArr)
   const remotiveZ = zScoreNormalize(remotiveArr)
   const downloadsZ = zScoreNormalize(downloadsArr)
   const soZ = zScoreNormalize(soArr)
+  const soMentionsZ = zScoreNormalize(soMentionsArr)
+  const dependentsZ = zScoreNormalize(dependentsArr)
 
   // Step 5: Fetch historical scores for enhanced momentum (up to 90 days)
   const date90DaysAgo = new Date(date)
@@ -222,6 +321,13 @@ export async function runScoringPipeline(
   }
 
   // Step 6: Compute sub-scores and composite for each technology
+
+  // Pre-build dpCount map to avoid O(n²) filter inside the loop (OPT-01)
+  const dpCountMap = new Map<string, number>()
+  for (const dp of dataPoints) {
+    dpCountMap.set(dp.technology_id, (dpCountMap.get(dp.technology_id) ?? 0) + 1)
+  }
+
   const scoredRows: ScoredTechnology[] = []
   const rawComposites: number[] = []
   const dataPointCounts: number[] = []
@@ -232,37 +338,71 @@ export async function runScoringPipeline(
     // GitHub score — null if no GitHub data at all
     let githubScore: number | null = null
     if (tech.stars !== null || tech.forks !== null) {
+      // Real issueCloseRate: closed / (closed + open). Falls back to 0 if not yet fetched.
+      const closedIssues = tech.closedIssues ?? null
+      const openIssues = tech.openIssues ?? null
       const issueCloseRate =
-        tech.openIssues !== null && tech.openIssues > 0
-          ? 0.5 // Approximate — we don't have closed issues count in MVP
-          : tech.openIssues === 0
-            ? 1.0
-            : 0.5
-      githubScore = computeGitHubScore(starsZ[i], forksZ[i], issueCloseRate)
+        closedIssues !== null && openIssues !== null && (closedIssues + openIssues) > 0
+          ? closedIssues / (closedIssues + openIssues)
+          : openIssues === 0 ? 1.0 : 0
+      githubScore = computeGitHubScore(starsZ[i], forksZ[i], issueCloseRate, contributorsZ[i])
     }
 
     // Community score — null if no community data
     let communityScore: number | null = null
-    if (tech.hnMentions !== null || tech.redditPosts !== null || tech.devtoArticles !== null) {
+    if (
+      tech.hnMentions !== null ||
+      tech.redditPosts !== null ||
+      tech.devtoArticles !== null ||
+      tech.rssMentions !== null
+    ) {
       communityScore = computeCommunityScore(
         hnZ[i],
         tech.hnSentiment ?? 0.5,
         redditZ[i],
-        devtoZ[i]
+        devtoZ[i],
+        tech.redditSentiment ?? 0.5,
+        rssZ[i]
       )
     }
 
     // Jobs score — null if no job data
+    // Each source is now stored separately, so z-score arrays are independent.
     let jobsScore: number | null = null
     if (tech.adzunaJobs !== null || tech.jsearchJobs !== null || tech.remotiveJobs !== null) {
       jobsScore = computeJobsScore(adzunaZ[i], jsearchZ[i], remotiveZ[i])
     }
 
-    // Ecosystem score — null if no download/SO data
+    // Ecosystem score — null if no download/SO/dependents data
     let ecosystemScore: number | null = null
-    if (tech.downloads !== null || tech.soQuestions !== null) {
-      // No download growth rate on day 1, use 0
-      ecosystemScore = computeEcosystemScore(downloadsZ[i], 0, soZ[i])
+    if (
+      tech.downloads !== null ||
+      tech.soQuestions !== null ||
+      tech.soMentions !== null ||
+      tech.dependentsCount !== null
+    ) {
+      // Source 3: compute real download growth rate (week-over-week)
+      let downloadGrowthRate = 0
+      const todayDl = tech.downloads
+      const priorDl = priorDownloadMap.get(tech.technologyId)
+      if (todayDl !== null && priorDl && priorDl > 0) {
+        downloadGrowthRate = (todayDl - priorDl) / priorDl
+        // Clamp to reasonable range (-50% to +100% weekly)
+        downloadGrowthRate = Math.max(-0.5, Math.min(1.0, downloadGrowthRate))
+      }
+
+      ecosystemScore = computeEcosystemScore(
+        downloadsZ[i],
+        downloadGrowthRate,
+        soZ[i],
+        soMentionsZ[i],
+        dependentsZ[i]
+      )
+
+      // Source 5: optional maintenance penalty for abandoned npm packages
+      if (tech.npmsMaintenance !== null && tech.npmsMaintenance < 0.3) {
+        ecosystemScore = Math.round(ecosystemScore * 0.85 * 100) / 100
+      }
     }
 
     // Compute adaptive weights based on category and maturity
@@ -272,8 +412,8 @@ export async function runScoringPipeline(
       ? Math.floor((new Date(date).getTime() - new Date(createdAt).getTime()) / 86400000)
       : 365
 
-    // Count how many data points this tech has today
-    const dpCount = dataPoints.filter((dp) => dp.technology_id === tech.technologyId).length
+    // Count how many data points this tech has today (O(1) via pre-built map)
+    const dpCount = dpCountMap.get(tech.technologyId) ?? 0
     const dpCompleteness = dpCount / 12 // 12 is max possible metrics
 
     const adaptiveWeights = getAdaptiveWeights(category, dataAgeDays, dpCompleteness)
@@ -306,6 +446,22 @@ export async function runScoringPipeline(
         community: communityScore,
         jobs: jobsScore,
         ecosystem: ecosystemScore,
+        // Libraries.io signals (Source 2)
+        librariesio: tech.sourcerank !== null || tech.dependentsCount !== null
+          ? {
+              sourcerank: tech.sourcerank ?? null,
+              dependents_count: tech.dependentsCount ?? null,
+              latest_release_age_days: null, // populated from librariesio API metadata
+            }
+          : undefined,
+        // npms.io signals (Source 5)
+        npms: tech.npmsQuality !== null || tech.npmsMaintenance !== null
+          ? {
+              quality: tech.npmsQuality ?? null,
+              popularity: tech.npmsPopularity ?? null,
+              maintenance: tech.npmsMaintenance ?? null,
+            }
+          : undefined,
       },
       computed_at: new Date().toISOString(),
     })

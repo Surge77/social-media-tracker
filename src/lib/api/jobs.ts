@@ -16,21 +16,21 @@ export async function fetchJobsData(
   const allJobs: Array<{ title: string; description: string }> = []
 
   // Remotive (public API, no auth)
+  let remotiveJobs: Array<{ title: string; description: string }> = []
   try {
-    const remotiveJobs = await fetchRemotiveJobs()
-    allJobs.push(...remotiveJobs)
+    remotiveJobs = await fetchRemotiveJobs()
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     errors.push(`Remotive: ${errorMsg}`)
   }
 
   // Adzuna (requires credentials)
+  let adzunaJobs: Array<{ title: string; description: string }> = []
   const adzunaAppId = process.env.ADZUNA_APP_ID
   const adzunaApiKey = process.env.ADZUNA_API_KEY
   if (adzunaAppId && adzunaApiKey) {
     try {
-      const adzunaJobs = await fetchAdzunaJobs(adzunaAppId, adzunaApiKey)
-      allJobs.push(...adzunaJobs)
+      adzunaJobs = await fetchAdzunaJobs(adzunaAppId, adzunaApiKey)
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       errors.push(`Adzuna: ${errorMsg}`)
@@ -40,11 +40,11 @@ export async function fetchJobsData(
   }
 
   // JSearch (RapidAPI, requires key)
+  let jsearchJobs: Array<{ title: string; description: string }> = []
   const rapidApiKey = process.env.RAPIDAPI_KEY
   if (rapidApiKey) {
     try {
-      const jsearchJobs = await fetchJSearchJobs(rapidApiKey)
-      allJobs.push(...jsearchJobs)
+      jsearchJobs = await fetchJSearchJobs(rapidApiKey)
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       errors.push(`JSearch: ${errorMsg}`)
@@ -53,21 +53,43 @@ export async function fetchJobsData(
     errors.push('JSearch: RAPIDAPI_KEY not configured')
   }
 
-  // Count job mentions for each technology
+  // Count job mentions per source separately so the pipeline can z-score them independently
   for (const tech of technologies) {
-    const jobCount = countTechnologyMentions(tech, allJobs)
+    if (adzunaJobs.length > 0) {
+      dataPoints.push({
+        technology_id: tech.id,
+        source: 'adzuna',
+        metric: 'job_postings',
+        value: countTechnologyMentions(tech, adzunaJobs),
+        metadata: {},
+        measured_at: today,
+      })
+    }
 
-    dataPoints.push({
-      technology_id: tech.id,
-      source: 'adzuna', // Use one source name for aggregated job data
-      metric: 'job_postings',
-      value: jobCount,
-      metadata: {},
-      measured_at: today,
-    })
+    if (jsearchJobs.length > 0) {
+      dataPoints.push({
+        technology_id: tech.id,
+        source: 'jsearch',
+        metric: 'job_postings',
+        value: countTechnologyMentions(tech, jsearchJobs),
+        metadata: {},
+        measured_at: today,
+      })
+    }
+
+    if (remotiveJobs.length > 0) {
+      dataPoints.push({
+        technology_id: tech.id,
+        source: 'remotive',
+        metric: 'job_postings',
+        value: countTechnologyMentions(tech, remotiveJobs),
+        metadata: {},
+        measured_at: today,
+      })
+    }
   }
 
-  return { source: 'adzuna', dataPoints, errors }
+  return { source: 'jobs', dataPoints, errors }
 }
 
 /**
@@ -191,20 +213,17 @@ function countTechnologyMentions(
   jobs: Array<{ title: string; description: string }>
 ): number {
   let count = 0
-  const searchTerms = [tech.name.toLowerCase(), ...tech.aliases.map((a) => a.toLowerCase())]
+  // Use word-boundary patterns to avoid false positives
+  // e.g. "Go" should not match "Google", "good", "Django"
+  const patterns = [tech.name, ...tech.aliases].map((term) => {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return new RegExp(`\\b${escaped}\\b`, 'i')
+  })
 
   for (const job of jobs) {
-    const titleLower = job.title.toLowerCase()
-    const descLower = job.description.toLowerCase()
-
-    // Check if any search term appears in title or description
-    const mentioned = searchTerms.some(
-      (term) => titleLower.includes(term) || descLower.includes(term)
-    )
-
-    if (mentioned) {
-      count++
-    }
+    const text = `${job.title} ${job.description}`
+    const mentioned = patterns.some((pattern) => pattern.test(text))
+    if (mentioned) count++
   }
 
   return count

@@ -63,27 +63,27 @@ export const SMART_FILTERS: SmartFilterConfig[] = [
     id: 'safe-bets',
     label: 'Safe Bets',
     icon: Shield,
-    description: 'High scores, stable, strong job market — reliable skills',
+    description: 'Strong job demand + stable momentum — reliable career skill',
     filter: (t) =>
-      (t.composite_score ?? 0) >= 55 &&
-      Math.abs(t.momentum ?? 0) <= 5 &&
-      (t.jobs_score ?? 0) >= 45,
-    sort: (a, b) => (b.composite_score ?? 0) - (a.composite_score ?? 0),
+      (t.jobs_score ?? 0) >= 55 &&
+      Math.abs(t.momentum ?? 0) <= 8 &&
+      (t.composite_score ?? 0) >= 50,
+    sort: (a, b) => (b.jobs_score ?? 0) - (a.jobs_score ?? 0),
     emptyMessage: 'No technologies match safe-bet criteria right now.',
   },
   {
     id: 'hidden-gems',
     label: 'Hidden Gems',
     icon: Gem,
-    description: 'Rising ecosystem + low community awareness → less competition',
+    description: 'Strong job demand but undervalued overall score — less competition',
     filter: (t) =>
-      (t.ecosystem_score ?? 0) >= 40 &&
-      (t.community_score ?? 0) < 40 &&
+      (t.jobs_score ?? 0) >= 60 &&
+      (t.composite_score ?? 0) < 52 &&
       (t.momentum ?? 0) > 0,
     sort: (a, b) => {
-      // Sort by ecosystem - community gap (biggest gap = most hidden)
-      const gapA = (a.ecosystem_score ?? 0) - (a.community_score ?? 0)
-      const gapB = (b.ecosystem_score ?? 0) - (b.community_score ?? 0)
+      // Sort by jobs vs composite gap (high jobs but low overall = most hidden)
+      const gapA = (a.jobs_score ?? 0) - (a.composite_score ?? 0)
+      const gapB = (b.jobs_score ?? 0) - (b.composite_score ?? 0)
       return gapB - gapA
     },
     emptyMessage: 'No hidden gems found right now.',
@@ -92,17 +92,12 @@ export const SMART_FILTERS: SmartFilterConfig[] = [
     id: 'overhyped',
     label: 'Overhyped?',
     icon: AlertTriangle,
-    description: 'High community buzz but low job demand — proceed with caution',
+    description: 'Established tech losing momentum — may be past its peak',
     filter: (t) =>
-      (t.community_score ?? 0) >= 45 &&
-      (t.jobs_score ?? 0) < 35,
-    sort: (a, b) => {
-      // Sort by community - jobs gap (biggest gap = most overhyped)
-      const gapA = (a.community_score ?? 0) - (a.jobs_score ?? 0)
-      const gapB = (b.community_score ?? 0) - (b.jobs_score ?? 0)
-      return gapB - gapA
-    },
-    emptyMessage: 'No technologies show signs of being overhyped right now.',
+      (t.composite_score ?? 0) >= 50 &&
+      (t.momentum ?? 0) < -5,
+    sort: (a, b) => (a.momentum ?? 0) - (b.momentum ?? 0), // Most negative first
+    emptyMessage: 'No technologies show signs of declining momentum right now.',
   },
 ]
 

@@ -1,14 +1,14 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { fetchPackageDownloads } from '@/lib/api/packages'
-import { fetchDevToData } from '@/lib/api/devto'
-import { fetchExtendedPackageDownloads } from '@/lib/api/packages-extended'
-import type { Technology, FetcherResult } from '@/types'
+import { fetchGitHubStats } from '@/lib/api/github-stats'
+import type { Technology } from '@/types'
 
 export const maxDuration = 60
 
 /**
- * Batch 2: Packages (npm/PyPI/crates) + Dev.to
- * Called by the daily cron orchestrator. Can also be triggered manually.
+ * Batch 4a: GitHub Stats (active contributors, commit velocity, closed issues)
+ * Runs in parallel with batch-4b. Called by the daily cron orchestrator.
+ *
+ * Separate from batch-1 because contributor/commit stats need 202 retry delays.
  */
 export async function GET(request: Request) {
   const startTime = Date.now()
@@ -33,51 +33,31 @@ export async function GET(request: Request) {
       throw new Error(`Failed to fetch technologies: ${fetchError?.message}`)
     }
 
-    console.log(`[Batch 2] Fetched ${technologies.length} technologies`)
+    console.log(`[Batch 4a] Fetching GitHub Stats for ${technologies.length} technologies`)
 
-    const results: FetcherResult[] = []
-    const fetcherNames: string[] = []
+    const result = await fetchGitHubStats(technologies as Technology[])
+    const allErrors = result.errors.map((e) => `[github-stats] ${e}`)
 
-    console.log('[Batch 2] Fetching package download data...')
-    results.push(await fetchPackageDownloads(technologies as Technology[]))
-    fetcherNames.push('packages')
-
-    console.log('[Batch 2] Fetching Dev.to data...')
-    results.push(await fetchDevToData(technologies as Technology[]))
-    fetcherNames.push('devto')
-
-    console.log('[Batch 2] Fetching extended package registry data...')
-    results.push(await fetchExtendedPackageDownloads(technologies as Technology[]))
-    fetcherNames.push('packages-extended')
-
-    // Aggregate and upsert
-    const allDataPoints = results.flatMap((r) => r.dataPoints)
-    const allErrors = results.flatMap((r, i) =>
-      r.errors.map((e) => `[${fetcherNames[i]}] ${e}`)
-    )
-
-    console.log(`[Batch 2] Generated ${allDataPoints.length} data points`)
-
-    if (allDataPoints.length > 0) {
+    if (result.dataPoints.length > 0) {
       const BATCH_SIZE = 500
-      for (let i = 0; i < allDataPoints.length; i += BATCH_SIZE) {
-        const batch = allDataPoints.slice(i, i + BATCH_SIZE)
+      for (let i = 0; i < result.dataPoints.length; i += BATCH_SIZE) {
+        const batch = result.dataPoints.slice(i, i + BATCH_SIZE)
         const { error: insertError } = await supabase
           .from('data_points')
           .upsert(batch, { onConflict: 'technology_id,source,metric,measured_at' })
 
         if (insertError) {
-          throw new Error(`Failed to upsert data points (batch ${Math.floor(i / BATCH_SIZE) + 1}): ${insertError.message}`)
+          throw new Error(`Failed to upsert data points: ${insertError.message}`)
         }
       }
     }
 
     const duration = Date.now() - startTime
     await supabase.from('fetch_logs').insert({
-      source: 'daily_batch_2',
+      source: 'daily_batch_4a',
       status: allErrors.length === 0 ? 'success' : 'partial',
       technologies_processed: technologies.length,
-      data_points_created: allDataPoints.length,
+      data_points_created: result.dataPoints.length,
       error_message: allErrors.length > 0 ? allErrors.join('; ') : null,
       duration_ms: duration,
       started_at: new Date(startTime).toISOString(),
@@ -86,24 +66,19 @@ export async function GET(request: Request) {
 
     return Response.json({
       success: true,
-      batch: 2,
+      batch: '4a',
       duration: `${duration}ms`,
-      dataPointsCreated: allDataPoints.length,
+      dataPointsCreated: result.dataPoints.length,
       errors: allErrors,
-      summary: results.map((r, i) => ({
-        source: fetcherNames[i],
-        dataPoints: r.dataPoints.length,
-        errors: r.errors.length,
-      })),
     })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
-    console.error('[Batch 2] Error:', errorMsg)
+    console.error('[Batch 4a] Error:', errorMsg)
 
     const duration = Date.now() - startTime
     const supabase = createSupabaseAdminClient()
     await supabase.from('fetch_logs').insert({
-      source: 'daily_batch_2',
+      source: 'daily_batch_4a',
       status: 'failed',
       technologies_processed: 0,
       data_points_created: 0,
@@ -114,7 +89,7 @@ export async function GET(request: Request) {
     })
 
     return Response.json(
-      { success: false, batch: 2, error: errorMsg, duration: `${duration}ms` },
+      { success: false, batch: '4a', error: errorMsg, duration: `${duration}ms` },
       { status: 500 }
     )
   }
