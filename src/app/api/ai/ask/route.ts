@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { ConversationManager } from '@/lib/ai/conversation-manager'
 import { sanitizeUserInput, buildSafeUserPrompt } from '@/lib/ai/safety'
-import { resilientAICall } from '@/lib/ai/resilient-call'
+import { resilientAIStreamCall } from '@/lib/ai/resilient-call'
 import { createKeyManager } from '@/lib/ai/key-manager'
 import { logTelemetry } from '@/lib/ai/telemetry'
 import { z, ZodError } from 'zod'
@@ -122,39 +122,27 @@ Guidelines:
     }
     await conversationManager.addMessageWithConversation(conversation, userMsg, supabase)
 
-    // 7. Start AI generation in background
+    // 7. Start AI generation in background using real provider streaming
     let fullResponse = ''
+    let timeToFirstToken: number | null = null
 
     ;(async () => {
       try {
-        // For streaming, we need to use a provider that supports it
-        // For MVP, we'll use Groq (supports streaming) or Cerebras
-        const response = await resilientAICall(
+        const { providerUsed } = await resilientAIStreamCall(
           'chat',
-          async (provider) => {
-            return await provider.generateText(safePrompt, {
-              maxTokens: 500,
-              temperature: 0.7,
-              systemPrompt
-            })
-          },
-          keyManager
+          safePrompt,
+          { maxTokens: 500, temperature: 0.7, systemPrompt },
+          keyManager,
+          async (chunk) => {
+            if (timeToFirstToken === null) {
+              timeToFirstToken = Date.now() - startTime
+            }
+            fullResponse += chunk
+            await writer.write(
+              encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)
+            )
+          }
         )
-
-        // Simulate streaming by chunking the response
-        // In a real implementation, we'd use the provider's streaming API
-        const words = response.split(' ')
-        for (let i = 0; i < words.length; i++) {
-          const chunk = words[i] + (i < words.length - 1 ? ' ' : '')
-          fullResponse += chunk
-
-          await writer.write(
-            encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)
-          )
-
-          // Small delay to simulate streaming
-          await new Promise(resolve => setTimeout(resolve, 30))
-        }
 
         // Send done signal
         await writer.write(
@@ -173,7 +161,7 @@ Guidelines:
         logTelemetry(
           {
             event: 'generation',
-            provider: 'mixed',
+            provider: providerUsed,
             model: 'mixed',
             use_case: 'chat',
             latency_ms: Date.now() - startTime,
@@ -181,7 +169,11 @@ Guidelines:
             token_output: null,
             quality_score: null,
             error: null,
-            metadata: { session_id: sessionId }
+            metadata: {
+              session_id: sessionId,
+              ttft_ms: timeToFirstToken,
+              stream_chunks: fullResponse.length,
+            }
           },
           supabase
         )

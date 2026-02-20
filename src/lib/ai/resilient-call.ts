@@ -6,7 +6,7 @@
  * Only throws if ALL providers are exhausted.
  */
 
-import type { AIProvider } from '@/lib/ai/provider'
+import type { AIProvider, GenerateOptions } from '@/lib/ai/provider'
 import type { KeyManager } from '@/lib/ai/key-manager'
 import type { UseCase } from '@/lib/ai/router'
 import { ROUTING_TABLE, getProviderForUseCase } from '@/lib/ai/router'
@@ -89,4 +89,86 @@ export async function resilientAICall<T>(
 
   // All providers exhausted
   throw new AllProvidersExhaustedError(useCase)
+}
+
+/**
+ * Resilient AI streaming wrapper.
+ *
+ * Iterates provider.generateStream() and calls onChunk for each text chunk.
+ * Falls back to generateText (no artificial delay) if all providers fail streaming.
+ * Uses the same key rotation / circuit breaker / retry chain as resilientAICall.
+ */
+export async function resilientAIStreamCall(
+  useCase: UseCase,
+  prompt: string,
+  options: GenerateOptions,
+  keyManager: KeyManager,
+  onChunk: (chunk: string) => Promise<void>
+): Promise<{ providerUsed: string }> {
+  const tryStream = async (
+    provider: AIProvider,
+    keyConfig: import('@/lib/ai/key-manager').APIKeyConfig
+  ): Promise<string> => {
+    let chunkCount = 0
+    for await (const chunk of provider.generateStream(prompt, options)) {
+      await onChunk(chunk)
+      chunkCount++
+    }
+    keyManager.recordSuccess(keyConfig, 0)
+    return keyConfig.provider
+  }
+
+  // Try preferred provider
+  const primary = getProviderForUseCase(useCase, keyManager)
+  if (primary) {
+    try {
+      const breaker =
+        circuitBreakers[primary.keyConfig.provider] ?? circuitBreakers.openrouter
+      const used = await breaker.execute(() => tryStream(primary.provider, primary.keyConfig))
+      return { providerUsed: used }
+    } catch (error) {
+      keyManager.recordFailure(
+        primary.keyConfig,
+        (error as { status?: number })?.status
+      )
+      console.error(
+        `[AI Stream] Primary provider failed for ${useCase}:`,
+        (error as Error).message
+      )
+    }
+  }
+
+  // Try each fallback provider
+  const route = ROUTING_TABLE[useCase]
+  for (const fallbackProvider of route.fallbackOrder) {
+    const fallbackKey = keyManager.getKey(fallbackProvider)
+    if (!fallbackKey) continue
+
+    try {
+      const provider = createProviderFromKey(fallbackKey)
+      const breaker =
+        circuitBreakers[fallbackProvider] ?? circuitBreakers.openrouter
+      const used = await breaker.execute(() => tryStream(provider, fallbackKey))
+      return { providerUsed: used }
+    } catch (error) {
+      keyManager.recordFailure(
+        fallbackKey,
+        (error as { status?: number })?.status
+      )
+      console.error(
+        `[AI Stream] Fallback ${fallbackProvider} failed for ${useCase}:`,
+        (error as Error).message
+      )
+    }
+  }
+
+  // All streaming providers exhausted — fall back to generateText (no delay)
+  console.warn(`[AI Stream] All streaming failed for ${useCase}, falling back to generateText`)
+  const text = await resilientAICall(
+    useCase,
+    (provider) => provider.generateText(prompt, options),
+    keyManager
+  )
+  await onChunk(text)
+  return { providerUsed: 'text-fallback' }
 }
