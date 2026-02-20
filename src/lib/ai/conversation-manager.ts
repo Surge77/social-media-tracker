@@ -23,19 +23,25 @@ export class ConversationManager {
   constructor(private maxMessages: number = 10) {}
 
   /**
-   * Get or create a conversation for a session
+   * Get or create a conversation for a session.
+   * Uses maybeSingle() so missing rows return null rather than throwing.
+   * Uses upsert to prevent race condition on concurrent first-requests.
    */
   async getOrCreateConversation(
     sessionId: string,
     supabase: SupabaseClient
   ): Promise<Conversation> {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('conversations')
       .select('*')
       .eq('session_id', sessionId)
       .order('updated_at', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
+
+    if (error) {
+      console.error('[ConversationManager] Failed to fetch conversation:', error.message)
+    }
 
     if (data) {
       return {
@@ -47,26 +53,67 @@ export class ConversationManager {
       }
     }
 
-    // Create new conversation
-    const newConversation: Conversation = {
+    // Create new conversation — upsert prevents duplicate-key errors on concurrent requests
+    const { error: upsertError } = await supabase.from('conversations').upsert(
+      {
+        session_id: sessionId,
+        messages: [],
+        technologies_discussed: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      { onConflict: 'session_id', ignoreDuplicates: true }
+    )
+
+    if (upsertError) {
+      console.error('[ConversationManager] Failed to create conversation:', upsertError.message)
+    }
+
+    return {
       sessionId,
       messages: [],
       technologiesDiscussed: []
     }
-
-    await supabase.from('conversations').insert({
-      session_id: sessionId,
-      messages: [],
-      technologies_discussed: [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    })
-
-    return newConversation
   }
 
   /**
-   * Add a message to the conversation
+   * Add a message using a pre-fetched conversation (avoids redundant round-trip).
+   * Prefer this over addMessage when the caller already has the Conversation object.
+   */
+  async addMessageWithConversation(
+    conversation: Conversation,
+    message: ChatMessage,
+    supabase: SupabaseClient
+  ): Promise<void> {
+    const updatedMessages = [...conversation.messages, message]
+
+    const mentionedTechs = this.extractTechnologies(message.content)
+    const allTechs = Array.from(
+      new Set([...conversation.technologiesDiscussed, ...mentionedTechs])
+    )
+
+    const { error } = await supabase
+      .from('conversations')
+      .update({
+        messages: updatedMessages,
+        technologies_discussed: allTechs,
+        updated_at: new Date().toISOString()
+      })
+      .eq('session_id', conversation.sessionId)
+
+    if (error) {
+      console.error('[ConversationManager] Failed to save message:', error.message)
+    }
+
+    // Mutate the in-memory conversation so subsequent addMessageWithConversation
+    // calls in the same request see the latest state
+    conversation.messages = updatedMessages
+    conversation.technologiesDiscussed = allTechs
+  }
+
+  /**
+   * Add a message to the conversation (re-fetches conversation from DB).
+   * Use addMessageWithConversation when the Conversation object is already available.
    */
   async addMessage(
     sessionId: string,
@@ -74,28 +121,12 @@ export class ConversationManager {
     supabase: SupabaseClient
   ): Promise<void> {
     const conversation = await this.getOrCreateConversation(sessionId, supabase)
-
-    const updatedMessages = [...conversation.messages, message]
-
-    // Extract technologies from the message
-    const mentionedTechs = this.extractTechnologies(message.content)
-    const allTechs = Array.from(
-      new Set([...conversation.technologiesDiscussed, ...mentionedTechs])
-    )
-
-    await supabase
-      .from('conversations')
-      .update({
-        messages: updatedMessages,
-        technologies_discussed: allTechs,
-        updated_at: new Date().toISOString()
-      })
-      .eq('session_id', sessionId)
+    await this.addMessageWithConversation(conversation, message, supabase)
   }
 
   /**
-   * Build context prompt from conversation history
-   * Keeps last N messages, summarizes older ones if needed
+   * Build context prompt from conversation history.
+   * When currentQuestion is empty, returns only the prior turns block.
    */
   buildContextPrompt(conversation: Conversation, currentQuestion: string): string {
     const messages = conversation.messages
@@ -113,41 +144,46 @@ export class ConversationManager {
       context += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n\n`
     }
 
-    context += `Current question: ${currentQuestion}`
+    if (currentQuestion) {
+      context += `Current question: ${currentQuestion}`
+    }
 
-    return context
+    return context.trimEnd()
   }
 
   /**
-   * Extract technology names from text
-   * Simple pattern matching for common tech names
+   * Extract technology names from text.
+   * Simple whole-word pattern matching for common tech names.
    */
   extractTechnologies(text: string): string[] {
     const lowerText = text.toLowerCase()
     const techs: string[] = []
 
-    // Common technologies to detect
+    // Common technologies to detect — ordered most-specific first to reduce false positives
     const techKeywords = [
-      'react', 'vue', 'angular', 'svelte', 'next', 'nuxt',
-      'node', 'express', 'nest', 'fastify',
-      'typescript', 'javascript', 'python', 'rust', 'go', 'java',
-      'postgres', 'mysql', 'mongodb', 'redis',
+      'typescript', 'javascript',
+      'react', 'vue', 'angular', 'svelte',
+      'nextjs', 'next.js', 'nuxt',
+      'nodejs', 'node.js', 'express', 'nestjs', 'fastify',
+      'python', 'rust', 'golang', 'java', 'kotlin', 'swift',
+      'postgres', 'postgresql', 'mysql', 'mongodb', 'redis',
       'docker', 'kubernetes', 'terraform',
       'aws', 'azure', 'gcp',
       'django', 'flask', 'fastapi', 'rails',
-      'graphql', 'rest',
+      'graphql',
       'webpack', 'vite', 'turbopack',
-      'tailwind', 'sass', 'css'
+      'tailwind', 'sass',
     ]
 
     for (const tech of techKeywords) {
-      // Check for whole word matches
-      const regex = new RegExp(`\\b${tech}\\b`, 'i')
+      const escaped = tech.replace('.', '\\.').replace('+', '\\+')
+      const regex = new RegExp(`\\b${escaped}\\b`, 'i')
       if (regex.test(lowerText)) {
-        techs.push(tech)
+        // Normalize to slug form
+        techs.push(tech.replace('.js', '').replace('.', '-').toLowerCase())
       }
     }
 
-    return techs
+    return [...new Set(techs)]
   }
 }

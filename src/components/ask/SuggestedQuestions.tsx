@@ -7,6 +7,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface SuggestedQuestionsProps {
   onSelectQuestion: (question: string) => void
+  disabled?: boolean
 }
 
 const SUGGESTED_QUESTIONS = [
@@ -32,7 +33,7 @@ const SUGGESTED_QUESTIONS = [
   }
 ]
 
-export function SuggestedQuestions({ onSelectQuestion }: SuggestedQuestionsProps) {
+export function SuggestedQuestions({ onSelectQuestion, disabled }: SuggestedQuestionsProps) {
   const prefersReducedMotion = useReducedMotion()
 
   return (
@@ -47,12 +48,13 @@ export function SuggestedQuestions({ onSelectQuestion }: SuggestedQuestionsProps
 
           return (
             <motion.button
-              key={index}
+              key={item.question}
               initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
               animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
               transition={prefersReducedMotion ? {} : { duration: 0.3, delay: index * 0.1 }}
               onClick={() => onSelectQuestion(item.question)}
-              className="text-left rounded-lg border bg-card p-4 hover:bg-accent hover:border-primary/50 transition-colors group"
+              disabled={disabled}
+              className="text-left rounded-lg border bg-card p-4 hover:bg-accent hover:border-primary/50 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="flex items-start gap-3">
                 <div className="shrink-0 w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">

@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { ConversationManager } from '@/lib/ai/conversation-manager'
 import { sanitizeUserInput, buildSafeUserPrompt } from '@/lib/ai/safety'
-import { resilientAICall } from '@/lib/ai/resilient-call'
+import { resilientAIStreamCall } from '@/lib/ai/resilient-call'
 import { createKeyManager } from '@/lib/ai/key-manager'
 import { logTelemetry } from '@/lib/ai/telemetry'
 import { z, ZodError } from 'zod'
@@ -81,10 +81,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Build context prompt
-    const contextPrompt = conversationManager.buildContextPrompt(
-      conversation,
-      sanitized.sanitized
-    )
+    // Only conversation history (no current question) — goes into assembled context
+    const historyBlock = conversationManager.buildContextPrompt(conversation, '')
 
     const systemPrompt = `You are DevTrends AI, an expert technology career advisor.
 
@@ -99,13 +97,16 @@ Guidelines:
 - Use data when available (scores, momentum, job market stats)
 - Acknowledge uncertainty when data is limited
 - Consider both current state and future trends
-- Focus on career impact, not just technical merits
+- Focus on career impact, not just technical merits`
 
-${techContext}
+    // Assembled context: system identity + tech data + prior conversation turns
+    // Only the current user question goes inside the injection-containment delimiters
+    const assembledContext = [systemPrompt, techContext, historyBlock]
+      .filter(Boolean)
+      .join('\n\n')
+      .trim()
 
-Answer the user's question based on the conversation context and available data.`
-
-    const safePrompt = buildSafeUserPrompt(contextPrompt, systemPrompt)
+    const safePrompt = buildSafeUserPrompt(sanitized.sanitized, assembledContext)
     const startTime = Date.now()
 
     // 5. Create a TransformStream for SSE
@@ -113,71 +114,54 @@ Answer the user's question based on the conversation context and available data.
     const writer = stream.writable.getWriter()
     const encoder = new TextEncoder()
 
-    // 6. Start AI generation in background
+    // 6. Save user message BEFORE generation so it persists even if generation fails
+    const userMsg = {
+      role: 'user' as const,
+      content: sanitized.sanitized,
+      timestamp: new Date().toISOString()
+    }
+    await conversationManager.addMessageWithConversation(conversation, userMsg, supabase)
+
+    // 7. Start AI generation in background using real provider streaming
     let fullResponse = ''
+    let timeToFirstToken: number | null = null
 
     ;(async () => {
       try {
-        // For streaming, we need to use a provider that supports it
-        // For MVP, we'll use Groq (supports streaming) or Cerebras
-        const response = await resilientAICall(
+        const { providerUsed } = await resilientAIStreamCall(
           'chat',
-          async (provider) => {
-            return await provider.generateText(safePrompt, {
-              maxTokens: 500,
-              temperature: 0.7,
-              systemPrompt
-            })
-          },
-          keyManager
+          safePrompt,
+          { maxTokens: 500, temperature: 0.7, systemPrompt },
+          keyManager,
+          async (chunk) => {
+            if (timeToFirstToken === null) {
+              timeToFirstToken = Date.now() - startTime
+            }
+            fullResponse += chunk
+            await writer.write(
+              encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)
+            )
+          }
         )
-
-        // Simulate streaming by chunking the response
-        // In a real implementation, we'd use the provider's streaming API
-        const words = response.split(' ')
-        for (let i = 0; i < words.length; i++) {
-          const chunk = words[i] + (i < words.length - 1 ? ' ' : '')
-          fullResponse += chunk
-
-          await writer.write(
-            encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`)
-          )
-
-          // Small delay to simulate streaming
-          await new Promise(resolve => setTimeout(resolve, 30))
-        }
 
         // Send done signal
         await writer.write(
           encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`)
         )
 
-        // 7. Save messages to conversation
-        await conversationManager.addMessage(
-          sessionId,
-          {
-            role: 'user',
-            content: sanitized.sanitized,
-            timestamp: new Date().toISOString()
-          },
-          supabase
-        )
-
-        await conversationManager.addMessage(
-          sessionId,
-          {
-            role: 'assistant',
-            content: fullResponse,
-            timestamp: new Date().toISOString()
-          },
-          supabase
-        )
+        // 8. Save assistant message after streaming completes
+        const assistantMsg = {
+          role: 'assistant' as const,
+          content: fullResponse,
+          timestamp: new Date().toISOString()
+        }
+        await conversationManager.addMessageWithConversation(conversation, assistantMsg, supabase)
 
         // Log telemetry
         logTelemetry(
           {
             event: 'generation',
-            provider: 'mixed',
+            provider: providerUsed,
             model: 'mixed',
             use_case: 'chat',
             latency_ms: Date.now() - startTime,
@@ -185,7 +169,11 @@ Answer the user's question based on the conversation context and available data.
             token_output: null,
             quality_score: null,
             error: null,
-            metadata: { session_id: sessionId }
+            metadata: {
+              session_id: sessionId,
+              ttft_ms: timeToFirstToken,
+              stream_chunks: fullResponse.length,
+            }
           },
           supabase
         )
@@ -212,7 +200,7 @@ Answer the user's question based on the conversation context and available data.
           supabase
         )
       } finally {
-        await writer.close()
+        try { await writer.close() } catch (_) {}
       }
     })()
 

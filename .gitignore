@@ -11,6 +11,8 @@ test-*.ts
 *.test.ts
 *.spec.js
 *.spec.ts
+!src/**/__tests__/**/*.test.ts
+!src/**/__tests__/**/*.spec.ts
 
 # next.js
 /.next/

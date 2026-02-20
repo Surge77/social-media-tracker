@@ -14,7 +14,7 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-background">
       {/* Dashboard Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+        <div className="container mx-auto flex h-16 items-center justify-between px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <DevTrendsLogo size="md" />
