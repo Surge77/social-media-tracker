@@ -93,22 +93,8 @@ export function TechnologiesPageClient() {
     )
   }
 
-  const daysSinceUpdate = lastUpdated
-    ? Math.floor((Date.now() - new Date(lastUpdated).getTime()) / 86_400_000)
-    : null
-
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
-      {/* Data staleness warning — shown when data is more than 2 days old */}
-      {daysSinceUpdate !== null && daysSinceUpdate > 2 && (
-        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-          <p className="text-xs text-amber-400">
-            Data was last updated {daysSinceUpdate} day{daysSinceUpdate !== 1 ? 's' : ''} ago.
-            Some insights may be outdated while we collect fresh data.
-          </p>
-        </div>
-      )}
-
       {/* Header */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
@@ -119,11 +105,17 @@ export function TechnologiesPageClient() {
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Technology Intelligence
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          Track {allTechnologies.length} technologies across 8 categories
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <p className="text-muted-foreground">
+            Track {allTechnologies.length} technologies across 8 categories
+          </p>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            Scores updated daily
+          </span>
           {lastUpdated && (
-            <span className="ml-2 text-xs">
-              • Last updated:{' '}
+            <span className="text-xs text-muted-foreground/60">
+              Last run:{' '}
               {new Date(lastUpdated).toLocaleDateString('en-US', {
                 month: 'short',
                 day: 'numeric',
@@ -131,7 +123,7 @@ export function TechnologiesPageClient() {
               })}
             </span>
           )}
-        </p>
+        </div>
       </motion.div>
 
       {/* Movers & Shakers Hero */}
