@@ -93,8 +93,22 @@ export function TechnologiesPageClient() {
     )
   }
 
+  const daysSinceUpdate = lastUpdated
+    ? Math.floor((Date.now() - new Date(lastUpdated).getTime()) / 86_400_000)
+    : null
+
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
+      {/* Data staleness warning — shown when data is more than 2 days old */}
+      {daysSinceUpdate !== null && daysSinceUpdate > 2 && (
+        <div className="mb-6 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3">
+          <p className="text-xs text-amber-400">
+            Data was last updated {daysSinceUpdate} day{daysSinceUpdate !== 1 ? 's' : ''} ago.
+            Some insights may be outdated while we collect fresh data.
+          </p>
+        </div>
+      )}
+
       {/* Header */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}

@@ -122,6 +122,26 @@ export interface CompositeResult {
 }
 
 /**
+ * How many dimensions are realistically achievable per category.
+ *
+ * Cloud platforms (AWS, Azure, GCP, Vercel, Railway) have no GitHub repo
+ * and no package downloads — penalizing them against 4 dims is unfair.
+ * DevOps tools often lack package downloads too.
+ */
+const MAX_POSSIBLE_DIMENSIONS: Record<string, number> = {
+  cloud:    2, // community + jobs only
+  devops:   3, // github + community + jobs (no package downloads)
+  language: 3, // github + community + jobs (languages distributed via OS, not pkg registries)
+  frontend: 4,
+  backend:  4,
+  database: 4,
+  mobile:   4,
+  ai_ml:    4,
+  testing:  4,
+  other:    4,
+}
+
+/**
  * Compute the final composite score with weight redistribution.
  *
  * If a sub-score is null (no data for that dimension), its weight
@@ -129,10 +149,13 @@ export interface CompositeResult {
  *
  * @param subScores - The four sub-scores (null = no data for that dimension)
  * @param weights - Optional adaptive weights. Falls back to DEFAULT_WEIGHTS.
+ * @param category - Technology category for category-relative completeness.
+ *                   Without it, completeness is computed against 4 dimensions.
  */
 export function computeCompositeScore(
   subScores: SubScores,
-  weights?: WeightProfile
+  weights?: WeightProfile,
+  category?: string
 ): CompositeResult {
   const w = weights ?? COMPOSITE_WEIGHTS
   const available: { score: number; weight: number }[] = []
@@ -153,7 +176,10 @@ export function computeCompositeScore(
     (sum, a) => sum + a.score * (a.weight / totalAvailableWeight),
     0
   )
-  const completeness = available.length / 4
+
+  // Use category-relative max so cloud/devops techs aren't unfairly penalized
+  const maxDims = category ? (MAX_POSSIBLE_DIMENSIONS[category] ?? 4) : 4
+  const completeness = Math.min(1, available.length / maxDims)
 
   return {
     composite: Math.round(composite * 100) / 100,

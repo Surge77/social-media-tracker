@@ -96,13 +96,13 @@ export async function GET() {
 
       return {
         ...tech,
-        composite_score: scores ? Number(scores.composite_score) : null,
-        github_score: scores ? Number(scores.github_score) : null,
-        community_score: scores ? Number(scores.community_score) : null,
-        jobs_score: scores ? Number(scores.jobs_score) : null,
-        ecosystem_score: scores ? Number(scores.ecosystem_score) : null,
-        momentum: scores ? Number(scores.momentum) : null,
-        data_completeness: scores ? Number(scores.data_completeness) : null,
+        composite_score: scores?.composite_score != null ? Number(scores.composite_score) : null,
+        github_score: scores?.github_score != null ? Number(scores.github_score) : null,
+        community_score: scores?.community_score != null ? Number(scores.community_score) : null,
+        jobs_score: scores?.jobs_score != null ? Number(scores.jobs_score) : null,
+        ecosystem_score: scores?.ecosystem_score != null ? Number(scores.ecosystem_score) : null,
+        momentum: scores?.momentum != null ? Number(scores.momentum) : null,
+        data_completeness: scores?.data_completeness != null ? Number(scores.data_completeness) : null,
         sparkline: sparklineMap.get(tech.id) ?? [],
         previous_rank: null, // Will be computed after sorting
         rank_change: null,   // Will be computed after sorting

@@ -425,7 +425,8 @@ export async function runScoringPipeline(
         jobs: jobsScore,
         ecosystem: ecosystemScore,
       },
-      adaptiveWeights
+      adaptiveWeights,
+      category
     )
 
     rawComposites.push(composite)

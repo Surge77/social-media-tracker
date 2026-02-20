@@ -3,6 +3,12 @@
  *
  * Generates opinionated one-liners from score data without LLM costs.
  * Tone: Friend who tells the truth, not a salesperson.
+ *
+ * Tiered insight generation:
+ *   Tier 1 (0 dimensions): "Just added — we'll have insights once data starts flowing"
+ *   Tier 2 (1 dimension):  Focused single-signal insight from whatever IS available
+ *   Tier 3 (2-3 dims):     Existing decision tree + "(based on partial data)" suffix
+ *   Tier 4 (4 dims):       Full multi-factor insight, no caveats
  */
 
 import type { TechnologyWithScore } from '@/types'
@@ -15,32 +21,115 @@ export function generateTechSummary(tech: TechnologyWithScore): string {
     community_score,
     jobs_score,
     ecosystem_score,
-    data_completeness,
     sparkline,
   } = tech
 
-  // Handle missing data
-  if ((data_completeness ?? 0) < 0.3) {
-    return "Too early to call — we're still gathering data on this one"
+  // Count which dimensions actually have real data (null = no data fetched yet)
+  const hasGithub    = github_score    != null
+  const hasCommunity = community_score != null
+  const hasJobs      = jobs_score      != null
+  const hasEcosystem = ecosystem_score != null
+  const availableDimensions = [hasGithub, hasCommunity, hasJobs, hasEcosystem].filter(Boolean).length
+
+  // --- TIER 1: Truly no data ---
+  if (availableDimensions === 0) {
+    return "Just added — we'll have insights once data starts flowing"
   }
 
-  // Identify strongest dimension
+  // --- TIER 2: Single dimension — generate focused insight from what we have ---
+  if (availableDimensions === 1) {
+    return generateSingleDimensionInsight(tech, { hasGithub, hasCommunity, hasJobs, hasEcosystem })
+  }
+
+  // --- TIER 3 & 4: Run the decision tree, then optionally append a partial-data note ---
+  const insight = generateDecisionTreeInsight(tech)
+  if (availableDimensions <= 2) {
+    return `${insight} (based on partial data)`
+  }
+  return insight
+}
+
+/**
+ * Focused insight when only one data dimension is available.
+ * Most common case: jobs-only (95%+ of partial-data techs get jobs data first).
+ */
+function generateSingleDimensionInsight(
+  tech: TechnologyWithScore,
+  dims: { hasGithub: boolean; hasCommunity: boolean; hasJobs: boolean; hasEcosystem: boolean }
+): string {
+  const mom  = tech.momentum ?? 0
+  const name = tech.name
+
+  // Jobs-only (most common — Adzuna/JSearch/Remotive runs weekly)
+  if (dims.hasJobs) {
+    const jobs = tech.jobs_score ?? 0
+    if (jobs >= 60) {
+      if (mom > 5)  return `Strong job demand and climbing — companies are actively hiring for ${name}`
+      if (mom < -5) return `Still plenty of jobs, but employer interest is cooling — watch this space`
+      return `Solid job market — employers reliably hire for ${name}`
+    }
+    if (jobs >= 40) {
+      if (mom > 5) return `Job demand is growing — ${name} is gaining employer attention`
+      return `Moderate job demand — opportunities available in specific sectors`
+    }
+    if (mom > 10) return `Niche job market but growing fast — early movers could benefit`
+    return `Limited job postings right now — more of a specialist skill`
+  }
+
+  // GitHub-only
+  if (dims.hasGithub) {
+    const gh = tech.github_score ?? 0
+    if (gh >= 60) return `Very active on GitHub — strong open-source community around ${name}`
+    if (gh >= 30) return `Moderate GitHub activity — development is ongoing`
+    return `Quiet on GitHub — may be early-stage or niche`
+  }
+
+  // Community-only
+  if (dims.hasCommunity) {
+    const comm = tech.community_score ?? 0
+    if (comm >= 60) return `Hot topic in developer communities — lots of buzz around ${name}`
+    if (comm >= 30) return `Getting some attention in the developer community`
+    return `Quiet community presence — not widely discussed yet`
+  }
+
+  // Ecosystem-only
+  if (dims.hasEcosystem) {
+    const eco = tech.ecosystem_score ?? 0
+    if (eco >= 60) return `Thriving ecosystem — well-supported with packages and tooling`
+    if (eco >= 30) return `Growing ecosystem — building up package support`
+    return `Small ecosystem — limited tooling available`
+  }
+
+  return `${getScoreLabel(tech.composite_score ?? 0)} overall — limited data available`
+}
+
+/**
+ * Full decision tree for 2-4 dimension techs.
+ * Unchanged from original except extracted to a named function.
+ */
+function generateDecisionTreeInsight(tech: TechnologyWithScore): string {
+  const {
+    composite_score,
+    momentum,
+    github_score,
+    community_score,
+    jobs_score,
+    ecosystem_score,
+    sparkline,
+  } = tech
+
   const dimensions = [
     { name: 'community', score: community_score ?? 0, label: 'community buzz' },
-    { name: 'jobs', score: jobs_score ?? 0, label: 'job demand' },
-    { name: 'github', score: github_score ?? 0, label: 'open source activity' },
+    { name: 'jobs',      score: jobs_score      ?? 0, label: 'job demand' },
+    { name: 'github',    score: github_score    ?? 0, label: 'open source activity' },
     { name: 'ecosystem', score: ecosystem_score ?? 0, label: 'ecosystem growth' },
   ]
   const strongest = dimensions.reduce((max, d) => (d.score > max.score ? d : max))
 
-  const mom = momentum ?? 0
+  const mom   = momentum        ?? 0
   const score = composite_score ?? 0
-  const comm = community_score ?? 0
-  const jobs = jobs_score ?? 0
-  const eco = ecosystem_score ?? 0
-  const gh = github_score ?? 0
-
-  // Decision tree for honest summaries
+  const comm  = community_score ?? 0
+  const jobs  = jobs_score      ?? 0
 
   // 1. Strong positive momentum (momentum > 10)
   if (mom > 10) {
@@ -103,10 +192,7 @@ export function generateTechSummary(tech: TechnologyWithScore): string {
   }
 
   // 9. Default: combine score label with momentum insight
-  const scoreLabel = getScoreLabel(score)
-  const momentumLabel = getMomentumLabel(mom)
-
-  return `${scoreLabel} overall — ${momentumLabel}`
+  return `${getScoreLabel(score)} overall — ${getMomentumLabel(mom)}`
 }
 
 function getScoreLabel(score: number): string {
@@ -118,8 +204,8 @@ function getScoreLabel(score: number): string {
 }
 
 function getMomentumLabel(momentum: number): string {
-  if (momentum > 5) return 'rising fast'
-  if (momentum > 0) return 'gaining traction'
+  if (momentum > 5)  return 'rising fast'
+  if (momentum > 0)  return 'gaining traction'
   if (momentum === 0) return 'holding steady'
   if (momentum > -5) return 'cooling off'
   return 'declining'
@@ -137,20 +223,19 @@ export function getPrimaryDriver(
   }
 ): string {
   const deltas = [
-    { name: 'github', value: Math.abs(scoreDeltas.github_delta), label: 'GitHub activity spiked' },
+    { name: 'github',    value: Math.abs(scoreDeltas.github_delta),    label: 'GitHub activity spiked' },
     { name: 'community', value: Math.abs(scoreDeltas.community_delta), label: 'Community buzz surged' },
-    { name: 'jobs', value: Math.abs(scoreDeltas.jobs_delta), label: 'Job demand increased' },
+    { name: 'jobs',      value: Math.abs(scoreDeltas.jobs_delta),      label: 'Job demand increased' },
     { name: 'ecosystem', value: Math.abs(scoreDeltas.ecosystem_delta), label: 'Ecosystem growth accelerated' },
   ]
 
   const largest = deltas.reduce((max, d) => (d.value > max.value ? d : max))
 
-  // If declining, adjust language
   if (scoreDeltas[`${largest.name}_delta` as keyof typeof scoreDeltas] < 0) {
     const negativeLabels: Record<string, string> = {
-      github: 'GitHub activity declined',
+      github:    'GitHub activity declined',
       community: 'Community interest waning',
-      jobs: 'Job postings decreased',
+      jobs:      'Job postings decreased',
       ecosystem: 'Ecosystem growth slowing',
     }
     return negativeLabels[largest.name]
