@@ -35,7 +35,7 @@ export async function resilientAICall<T>(
       const breaker =
         circuitBreakers[primary.keyConfig.provider] ??
         circuitBreakers.openrouter
-      return await breaker.execute(() =>
+      const result = await breaker.execute(() =>
         withRetry(
           () => generateFn(primary.provider),
           { maxRetries: 2 },
@@ -46,6 +46,8 @@ export async function resilientAICall<T>(
           }
         )
       )
+      keyManager.recordSuccess(primary.keyConfig, 0)
+      return result
     } catch (error) {
       keyManager.recordFailure(
         primary.keyConfig,
@@ -68,9 +70,11 @@ export async function resilientAICall<T>(
       const provider = createProviderFromKey(fallbackKey)
       const breaker =
         circuitBreakers[fallbackProvider] ?? circuitBreakers.openrouter
-      return await breaker.execute(() =>
+      const result = await breaker.execute(() =>
         withRetry(() => generateFn(provider), { maxRetries: 1 })
       )
+      keyManager.recordSuccess(fallbackKey, 0)
+      return result
     } catch (error) {
       keyManager.recordFailure(
         fallbackKey,

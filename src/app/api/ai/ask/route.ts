@@ -81,10 +81,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Build context prompt
-    const contextPrompt = conversationManager.buildContextPrompt(
-      conversation,
-      sanitized.sanitized
-    )
+    // Only conversation history (no current question) — goes into assembled context
+    const historyBlock = conversationManager.buildContextPrompt(conversation, '')
 
     const systemPrompt = `You are DevTrends AI, an expert technology career advisor.
 
@@ -99,13 +97,16 @@ Guidelines:
 - Use data when available (scores, momentum, job market stats)
 - Acknowledge uncertainty when data is limited
 - Consider both current state and future trends
-- Focus on career impact, not just technical merits
+- Focus on career impact, not just technical merits`
 
-${techContext}
+    // Assembled context: system identity + tech data + prior conversation turns
+    // Only the current user question goes inside the injection-containment delimiters
+    const assembledContext = [systemPrompt, techContext, historyBlock]
+      .filter(Boolean)
+      .join('\n\n')
+      .trim()
 
-Answer the user's question based on the conversation context and available data.`
-
-    const safePrompt = buildSafeUserPrompt(contextPrompt, systemPrompt)
+    const safePrompt = buildSafeUserPrompt(sanitized.sanitized, assembledContext)
     const startTime = Date.now()
 
     // 5. Create a TransformStream for SSE
@@ -113,7 +114,15 @@ Answer the user's question based on the conversation context and available data.
     const writer = stream.writable.getWriter()
     const encoder = new TextEncoder()
 
-    // 6. Start AI generation in background
+    // 6. Save user message BEFORE generation so it persists even if generation fails
+    const userMsg = {
+      role: 'user' as const,
+      content: sanitized.sanitized,
+      timestamp: new Date().toISOString()
+    }
+    await conversationManager.addMessageWithConversation(conversation, userMsg, supabase)
+
+    // 7. Start AI generation in background
     let fullResponse = ''
 
     ;(async () => {
@@ -152,26 +161,13 @@ Answer the user's question based on the conversation context and available data.
           encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`)
         )
 
-        // 7. Save messages to conversation
-        await conversationManager.addMessage(
-          sessionId,
-          {
-            role: 'user',
-            content: sanitized.sanitized,
-            timestamp: new Date().toISOString()
-          },
-          supabase
-        )
-
-        await conversationManager.addMessage(
-          sessionId,
-          {
-            role: 'assistant',
-            content: fullResponse,
-            timestamp: new Date().toISOString()
-          },
-          supabase
-        )
+        // 8. Save assistant message after streaming completes
+        const assistantMsg = {
+          role: 'assistant' as const,
+          content: fullResponse,
+          timestamp: new Date().toISOString()
+        }
+        await conversationManager.addMessageWithConversation(conversation, assistantMsg, supabase)
 
         // Log telemetry
         logTelemetry(
@@ -212,7 +208,7 @@ Answer the user's question based on the conversation context and available data.
           supabase
         )
       } finally {
-        await writer.close()
+        try { await writer.close() } catch (_) {}
       }
     })()
 
