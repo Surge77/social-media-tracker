@@ -1,30 +1,32 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, RotateCcw, Plus } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAIChat } from '@/hooks/useAIChat'
 import { ChatMessage } from '@/components/ask/ChatMessage'
 import { SuggestedQuestions } from '@/components/ask/SuggestedQuestions'
-import { LoadingSpinner } from '@/components/ui/loading'
 import { v4 as uuidv4 } from 'uuid'
+
+function getOrCreateSessionId(): string {
+  if (typeof window !== 'undefined') {
+    const stored = sessionStorage.getItem('devtrends_chat_session')
+    if (stored) return stored
+    const newId = uuidv4()
+    sessionStorage.setItem('devtrends_chat_session', newId)
+    return newId
+  }
+  return uuidv4()
+}
 
 export function AskPageClient() {
   const prefersReducedMotion = useReducedMotion()
-  const [sessionId] = useState(() => {
-    // Try to get session ID from sessionStorage, or create new one
-    if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('devtrends_chat_session')
-      if (stored) return stored
-      const newId = uuidv4()
-      sessionStorage.setItem('devtrends_chat_session', newId)
-      return newId
-    }
-    return uuidv4()
-  })
+  const [initialSessionId] = useState(getOrCreateSessionId)
 
-  const { messages, isStreaming, error, sendMessage, clearError } = useAIChat(sessionId)
+  const { messages, isStreaming, error, sendMessage, retryLastMessage, clearSession, clearError } =
+    useAIChat(initialSessionId)
+
   const [input, setInput] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -34,19 +36,38 @@ export function AskPageClient() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Auto-resize textarea to content (up to max height)
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const el = e.target
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`
+    setInput(el.value)
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isStreaming) return
-
-    await sendMessage(input)
+    const question = input
     setInput('')
+    // Reset textarea height
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto'
+    }
+    await sendMessage(question)
     inputRef.current?.focus()
   }
 
-  const handleSuggestedQuestion = (question: string) => {
-    setInput(question)
+  // Auto-send when a suggested question is clicked
+  const handleSuggestedQuestion = useCallback((question: string) => {
+    sendMessage(question)
+  }, [sendMessage])
+
+  const handleNewChat = useCallback(() => {
+    clearSession()
+    setInput('')
+    if (inputRef.current) inputRef.current.style.height = 'auto'
     inputRef.current?.focus()
-  }
+  }, [clearSession])
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -55,13 +76,27 @@ export function AskPageClient() {
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold mb-2">Ask DevTrends AI</h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-3xl font-bold">Ask DevTrends AI</h1>
+          {messages.length > 0 && (
+            <button
+              onClick={handleNewChat}
+              className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Plus size={13} />
+              New chat
+            </button>
+          )}
+        </div>
         <p className="text-muted-foreground mb-8">
           Get personalized career advice and technology insights powered by real-time trend data.
         </p>
 
         {messages.length === 0 && (
-          <SuggestedQuestions onSelectQuestion={handleSuggestedQuestion} />
+          <SuggestedQuestions
+            onSelectQuestion={handleSuggestedQuestion}
+            disabled={isStreaming}
+          />
         )}
 
         <div className="space-y-4">
@@ -73,9 +108,9 @@ export function AskPageClient() {
               </div>
             )}
 
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <ChatMessage
-                key={index}
+                key={message.id}
                 role={message.role}
                 content={message.content}
                 timestamp={message.timestamp}
@@ -85,12 +120,22 @@ export function AskPageClient() {
             {error && (
               <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4">
                 <p className="text-sm text-destructive">{error}</p>
-                <button
-                  onClick={clearError}
-                  className="mt-2 text-xs text-destructive hover:underline"
-                >
-                  Dismiss
-                </button>
+                <div className="mt-2 flex gap-3">
+                  <button
+                    onClick={retryLastMessage}
+                    disabled={isStreaming}
+                    className="flex items-center gap-1.5 text-xs text-destructive hover:underline disabled:opacity-50"
+                  >
+                    <RotateCcw size={12} />
+                    Retry
+                  </button>
+                  <button
+                    onClick={clearError}
+                    className="text-xs text-destructive hover:underline"
+                  >
+                    Dismiss
+                  </button>
+                </div>
               </div>
             )}
 
@@ -101,8 +146,9 @@ export function AskPageClient() {
           <form onSubmit={handleSubmit} className="relative">
             <textarea
               ref={inputRef}
+              id="chat-input"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
@@ -110,26 +156,26 @@ export function AskPageClient() {
                 }
               }}
               placeholder="Ask about technologies, career advice, or learning paths..."
-              className="w-full rounded-lg border bg-background px-4 py-3 pr-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
+              aria-label="Ask a question"
+              aria-describedby="chat-input-hint"
+              className="w-full rounded-lg border bg-background px-4 py-3 pr-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-hidden"
               rows={3}
+              style={{ minHeight: '72px' }}
               disabled={isStreaming}
             />
 
             <button
               type="submit"
               disabled={!input.trim() || isStreaming}
+              aria-label="Send message"
               className="absolute bottom-3 right-3 p-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isStreaming ? (
-                <LoadingSpinner size="sm" className="!border-primary-foreground/20 !border-t-primary-foreground" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
+              <Send className="w-4 h-4" />
             </button>
           </form>
 
-          <p className="text-xs text-muted-foreground text-center">
-            AI responses are based on current trend data. Always verify important career decisions.
+          <p id="chat-input-hint" className="text-xs text-muted-foreground text-center">
+            Press Enter to send · Shift+Enter for new line · AI responses are based on current trend data
           </p>
         </div>
       </motion.div>

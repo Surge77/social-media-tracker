@@ -41,7 +41,14 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
         )}
       >
         <div className="text-sm whitespace-pre-wrap break-words">
-          {content}
+          {content || (
+            // Typing indicator while waiting for first chunk
+            <span className="flex items-center gap-1">
+              <span className="animate-bounce delay-0 h-1.5 w-1.5 rounded-full bg-current opacity-60" />
+              <span className="animate-bounce delay-150 h-1.5 w-1.5 rounded-full bg-current opacity-60" />
+              <span className="animate-bounce delay-300 h-1.5 w-1.5 rounded-full bg-current opacity-60" />
+            </span>
+          )}
         </div>
 
         <div
