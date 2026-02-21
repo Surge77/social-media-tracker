@@ -263,6 +263,7 @@ export default function DecisionQuizPage() {
           value={answers[currentQuestion.id]}
           onChange={handleAnswerChange}
           error={errors[currentQuestion.id]}
+          onAutoAdvance={!isLastQuestion ? handleNext : undefined}
         />
       </div>
 

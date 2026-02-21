@@ -10,18 +10,17 @@ import {
   CheckCircle,
   Clock,
   ArrowRight,
-  RotateCcw,
-  Bookmark,
-  Share2,
-  ExternalLink
+  ExternalLink,
+  ShieldCheck,
 } from 'lucide-react'
 import Link from 'next/link'
 import { QuizContainer } from '@/components/quiz/QuizContainer'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { ResultActions } from '@/components/quiz/ResultActions'
+import { NextQuizCTA } from '@/components/quiz/NextQuizCTA'
 import type { QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 
@@ -120,6 +119,12 @@ export function LearnNextResult({
                   <span>{recommendation.primary.timeline}</span>
                 </div>
               )}
+
+              {/* Confidence signal */}
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                <span>High confidence · Based on {result.answers.length} answers + live market data</span>
+              </div>
 
               {/* Reasoning */}
               <div className="space-y-2">
@@ -252,43 +257,18 @@ export function LearnNextResult({
           </div>
         </motion.div>
 
+        {/* Next quiz suggestion */}
+        <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+          <NextQuizCTA currentQuiz="learn-next" />
+        </motion.div>
+
         {/* Actions */}
-        <motion.div
-          variants={prefersReducedMotion ? undefined : itemVariants}
-          className="flex flex-wrap items-center gap-3 pt-6 border-t border-border"
-        >
-          <Button
-            onClick={onRetake}
-            variant="outline"
-            className="flex-1 sm:flex-none"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Retake Quiz
-          </Button>
-
-          <Button
-            variant="ghost"
-            className="flex-1 sm:flex-none"
-            onClick={() => {
-              // TODO: Implement save to favorites
-              alert('Save feature coming soon!')
-            }}
-          >
-            <Bookmark className="w-4 h-4 mr-2" />
-            Save Result
-          </Button>
-
-          <Button
-            variant="ghost"
-            className="flex-1 sm:flex-none"
-            onClick={() => {
-              // TODO: Implement share
-              alert('Share feature coming soon!')
-            }}
-          >
-            <Share2 className="w-4 h-4 mr-2" />
-            Share
-          </Button>
+        <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+          <ResultActions
+            onRetake={onRetake}
+            retakeLabel="Retake Quiz"
+            shareText={`I just got my DevTrends learning recommendation: ${recommendation.primary.action}`}
+          />
         </motion.div>
       </motion.div>
     </QuizContainer>

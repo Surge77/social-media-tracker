@@ -14,13 +14,15 @@ interface QuizQuestionProps {
   value: unknown
   onChange: (value: unknown) => void
   error?: string
+  onAutoAdvance?: () => void
 }
 
 export function QuizQuestion({
   question,
   value,
   onChange,
-  error
+  error,
+  onAutoAdvance,
 }: QuizQuestionProps) {
   const prefersReducedMotion = useReducedMotion()
 
@@ -61,7 +63,12 @@ export function QuizQuestion({
           <SingleSelect
             options={question.options || []}
             value={value as string}
-            onChange={onChange}
+            onChange={(v) => {
+              onChange(v)
+              if (onAutoAdvance) {
+                setTimeout(onAutoAdvance, 220)
+              }
+            }}
           />
         )}
 
