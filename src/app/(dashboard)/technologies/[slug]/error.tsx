@@ -13,9 +13,9 @@ export default function TechnologyDetailError({
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="flex min-h-[600px] items-center justify-center">
         <div className="text-center">
-          <h2 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h2>
+          <h2 className="mb-2 text-lg font-semibold text-foreground">This page didn&apos;t load</h2>
           <p className="mb-6 text-sm text-muted-foreground">
-            {error.message || 'Failed to load technology details. Please try again.'}
+            {error.message || 'There was a problem loading the technology data. Try again or browse all technologies.'}
           </p>
           <div className="flex items-center justify-center gap-3">
             <button

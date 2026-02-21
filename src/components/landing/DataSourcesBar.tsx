@@ -25,7 +25,7 @@ export default function DataSourcesBar() {
           transition={{ duration: 0.5 }}
           className="text-xs uppercase tracking-[0.2em] text-muted-foreground text-center mb-8 font-medium"
         >
-          Data sources ingested from across the web
+          Scores built from
         </motion.p>
 
         <div className="flex items-center justify-center gap-8 md:gap-14 flex-wrap">

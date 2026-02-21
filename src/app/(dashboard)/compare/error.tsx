@@ -13,9 +13,9 @@ export default function CompareError({
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="flex min-h-[600px] items-center justify-center">
         <div className="text-center">
-          <h2 className="mb-2 text-lg font-semibold text-foreground">Comparison failed</h2>
+          <h2 className="mb-2 text-lg font-semibold text-foreground">Comparison didn&apos;t load</h2>
           <p className="mb-6 text-sm text-muted-foreground">
-            {error.message || 'Failed to load comparison data. Please try again.'}
+            {error.message || 'There was a problem loading the comparison data. Try again or pick different technologies.'}
           </p>
           <div className="flex items-center justify-center gap-3">
             <button

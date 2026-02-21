@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata = {
   title: 'Intelligence Methodology | DevTrends',
-  description: 'Our AI-powered intelligence framework: adaptive scoring, multi-provider LLM architecture, and advanced analytics.',
+  description: 'How DevTrends scores technologies: composite scoring from 8 data sources, multi-window momentum analysis, Bayesian smoothing, and 7-provider AI insights.',
 }
 
 export default function MethodologyPage() {

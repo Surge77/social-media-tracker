@@ -4,7 +4,7 @@ import { QuizHubClient } from '@/components/quiz/QuizHubClient'
 export const metadata: Metadata = {
   title: 'Career Quizzes | DevTrends',
   description:
-    'Make informed career decisions in 30 seconds with personalized technology recommendations.',
+    'Answer a few questions and get a technology recommendation backed by real market data. Takes under a minute.',
 }
 
 export default function QuizHubPage() {

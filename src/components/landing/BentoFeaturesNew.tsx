@@ -166,42 +166,42 @@ function RealtimeMockup() {
 const features = [
   {
     title: 'Tech Leaderboard',
-    description: 'Real-time rankings powered by GitHub stars, HN discussions, and community signals.',
+    description: 'Composite scores built from GitHub activity, HN velocity, Stack Overflow volume, and job demand — updated nightly.',
     gradient: 'from-blue-500/10 via-cyan-500/10 to-transparent',
     large: true,
     mockup: LeaderboardMockup,
   },
   {
     title: 'Compare Technologies',
-    description: 'Side-by-side analysis across job demand, momentum, and ecosystem maturity.',
+    description: 'Pick two to four technologies and see them side by side across jobs, momentum, community, and ecosystem health.',
     gradient: 'from-purple-500/10 via-pink-500/10 to-transparent',
     large: true,
     mockup: CompareMockup,
   },
   {
     title: 'Trending Repos',
-    description: 'Track rising open-source projects and community momentum before they become mainstream.',
+    description: 'Open-source projects gaining stars faster than usual — a reliable early signal of where the ecosystem is heading.',
     gradient: 'from-orange-500/10 via-amber-500/10 to-transparent',
     large: false,
     mockup: JobDemandMockup,
   },
   {
     title: 'AI Insights',
-    description: 'GPT-powered analysis of trends, momentum, and career impact.',
+    description: 'Per-technology AI analysis: what the score means, why it moved, and whether it matters for your career.',
     gradient: 'from-red-500/10 via-orange-500/10 to-transparent',
     large: false,
     mockup: AIInsightsMockup,
   },
   {
     title: 'Ask AI',
-    description: 'Get instant answers about technology choices and career decisions.',
+    description: 'Ask any career or technology question. Answers are grounded in real trend data, not general knowledge.',
     gradient: 'from-green-500/10 via-emerald-500/10 to-transparent',
     large: false,
     mockup: AskAIMockup,
   },
   {
-    title: 'Digest & Signals',
-    description: 'Review concise trend summaries and source-backed signals across the developer ecosystem.',
+    title: 'Weekly Digest',
+    description: "What moved this week, what didn't, and what's worth watching — delivered as a short, scannable report.",
     gradient: 'from-yellow-500/10 via-lime-500/10 to-transparent',
     large: false,
     mockup: RealtimeMockup,
@@ -225,7 +225,7 @@ export default function BentoFeaturesNew() {
           >
             <Badge variant="outline" className="mb-4 px-4 py-1.5 text-xs">
               <Star className="w-3 h-3 mr-1.5" />
-              Career Intelligence at a Glance
+              6 tools. One dashboard.
             </Badge>
           </motion.div>
 
@@ -236,9 +236,9 @@ export default function BentoFeaturesNew() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4"
           >
-            Your developer career,{' '}
+            Everything you need to{' '}
             <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent">
-              supercharged
+              make the call
             </span>
           </motion.h2>
 
@@ -249,7 +249,7 @@ export default function BentoFeaturesNew() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-muted-foreground max-w-2xl mx-auto"
           >
-            Explore rankings, compare technologies, watch repos and language trends, run quizzes, and ask AI for next-step guidance.
+            Rankings, comparisons, trending repos, language data, career quizzes, and AI answers — all in one place.
           </motion.p>
         </div>
 

@@ -33,9 +33,9 @@ export default function FinalCTA() {
             transition={{ duration: 0.6 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6"
           >
-            Ready to outpace the{' '}
+            Stop learning what{' '}
             <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent">
-              curve?
+              everyone already knows
             </span>
           </motion.h2>
 
@@ -46,7 +46,7 @@ export default function FinalCTA() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto"
           >
-            Jump into live rankings, compare your options, and choose your next learning move with confidence.
+            See what's rising, what's falling, and what's actually worth learning next.
           </motion.p>
 
           <motion.div
@@ -73,7 +73,7 @@ export default function FinalCTA() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="text-xs text-muted-foreground"
           >
-            No credit card required · Free forever · Cancel anytime
+            No account required · Free forever · No credit card
           </motion.p>
         </div>
       </div>

@@ -13,9 +13,9 @@ export default function AskError({
     <div className="container mx-auto max-w-7xl px-4 py-8">
       <div className="flex min-h-[600px] items-center justify-center">
         <div className="text-center">
-          <h2 className="mb-2 text-lg font-semibold text-foreground">Something went wrong</h2>
+          <h2 className="mb-2 text-lg font-semibold text-foreground">AI chat didn&apos;t load</h2>
           <p className="mb-6 text-sm text-muted-foreground">
-            {error.message || 'Failed to load Ask AI. Please try again.'}
+            {error.message || 'There was a problem connecting to the AI. Try again in a moment.'}
           </p>
           <div className="flex items-center justify-center gap-3">
             <button

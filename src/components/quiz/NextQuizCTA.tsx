@@ -31,7 +31,7 @@ const NEXT_QUIZ_MAP: Record<QuizType, NextQuizConfig> = {
   },
   'stack-health': {
     label: 'See What to Learn Next',
-    description: 'Get a personalized recommendation based on your gaps',
+    description: 'Find out what to add based on where your stack is weak',
     href: '/quiz/learn-next',
     icon: Target,
     gradient: 'from-blue-500 to-indigo-500',
@@ -52,14 +52,14 @@ const NEXT_QUIZ_MAP: Record<QuizType, NextQuizConfig> = {
   },
   'salary': {
     label: 'See What to Learn Next',
-    description: 'Skills that could increase your market value',
+    description: 'What to learn based on where job demand is actually growing',
     href: '/quiz/learn-next',
     icon: Target,
     gradient: 'from-blue-500 to-indigo-500',
   },
   'future-proof': {
     label: 'Build Your Career Roadmap',
-    description: 'Translate your future-proof plan into actionable steps',
+    description: 'Turn your plan into a step-by-step learning path',
     href: '/quiz/roadmap',
     icon: Map,
     gradient: 'from-teal-500 to-cyan-500',

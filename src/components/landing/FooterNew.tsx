@@ -36,7 +36,7 @@ export default function FooterNew() {
               <DevTrendsLogo size="sm" />
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              The intelligence layer for your technical career. Powered by real data, built for developers.
+              Technology trend data for developers who want to know what to learn before it becomes obvious.
             </p>
           </div>
 

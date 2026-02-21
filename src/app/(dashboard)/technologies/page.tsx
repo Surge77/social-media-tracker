@@ -4,7 +4,7 @@ import { TechnologiesPageClient } from '@/components/technologies/TechnologiesPa
 export const metadata: Metadata = {
   title: 'Technology Explorer',
   description:
-    'Track 100+ technologies across GitHub activity, community buzz, job market demand, and ecosystem health. Find rising stars and make data-driven career decisions.',
+    '100+ technologies scored daily from GitHub, Stack Overflow, job postings, and community signal. See what\'s rising, what\'s falling, and what\'s worth learning next.',
 }
 
 export default function TechnologiesPage() {
