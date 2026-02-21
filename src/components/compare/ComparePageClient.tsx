@@ -16,7 +16,7 @@ import { TrendChartSkeleton, DimensionBreakdownSkeleton, CareerScorecardSkeleton
 import { AIComparisonCard, AIComparisonSkeleton, AIComparisonError } from '@/components/ai/AIComparisonCard'
 import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
 import { ContextSelector, type UserRole, type UserGoal } from '@/components/compare/ContextSelector'
-import { SmartEmptyState } from '@/components/compare/SmartEmptyState'
+import { SmartEmptyState, saveRecentComparison } from '@/components/compare/SmartEmptyState'
 import { LifecycleTimeline } from '@/components/compare/LifecycleTimeline'
 import { RelationshipMap } from '@/components/compare/RelationshipMap'
 import { Loading } from '@/components/ui/loading'
@@ -124,6 +124,14 @@ function ComparePageContent() {
 
     fetchCompareData()
   }, [selectedSlugs.join(',')])
+
+  // Save to recent comparisons when data loads successfully
+  useEffect(() => {
+    if (!compareData || compareData.technologies.length < 2) return
+    const name = compareData.technologies.map((t) => t.name).join(' vs ')
+    const slugs = compareData.technologies.map((t) => t.slug)
+    saveRecentComparison(slugs, name)
+  }, [compareData])
 
   // Update URL when selections change
   const updateURL = (slugs: string[]) => {
