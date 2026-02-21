@@ -88,8 +88,8 @@ export default function HeroNew() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Track technology trends across GitHub, Hacker News, Stack Overflow, and 5+ sources.
-            Make career decisions backed by real data, not opinions.
+            Explore live technology rankings, compare stacks, analyze trending repos, and use AI to plan what to learn next.
+            Make career decisions backed by real data, not hype.
           </motion.p>
 
           {/* CTA button - Single, focused call-to-action */}
@@ -106,7 +106,7 @@ export default function HeroNew() {
               delay={150}
             >
               <span className="relative z-10 flex items-center gap-2">
-                Start Tracking Free
+                Explore Live Tech Rankings
                 <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </span>
             </AnimatedCTA>

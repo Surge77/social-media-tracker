@@ -46,7 +46,7 @@ export default function FinalCTA() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto"
           >
-            Join developers getting the weekly intelligence they need to stay ahead.
+            Jump into live rankings, compare your options, and choose your next learning move with confidence.
           </motion.p>
 
           <motion.div
@@ -62,7 +62,7 @@ export default function FinalCTA() {
               className="px-12 py-5 text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-[1.05] active:scale-[0.98] transition-all duration-300"
               delay={150}
             >
-              Get Started Free →
+              See What to Learn Next →
             </AnimatedCTA>
           </motion.div>
 

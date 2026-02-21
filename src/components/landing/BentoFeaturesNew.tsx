@@ -179,8 +179,8 @@ const features = [
     mockup: CompareMockup,
   },
   {
-    title: 'Job Market Intel',
-    description: 'Track hiring demand across 100+ technologies in real-time.',
+    title: 'Trending Repos',
+    description: 'Track rising open-source projects and community momentum before they become mainstream.',
     gradient: 'from-orange-500/10 via-amber-500/10 to-transparent',
     large: false,
     mockup: JobDemandMockup,
@@ -200,8 +200,8 @@ const features = [
     mockup: AskAIMockup,
   },
   {
-    title: 'Daily Updates',
-    description: 'Fresh data aggregated from 8+ sources including GitHub, HN, and Stack Overflow.',
+    title: 'Digest & Signals',
+    description: 'Review concise trend summaries and source-backed signals across the developer ecosystem.',
     gradient: 'from-yellow-500/10 via-lime-500/10 to-transparent',
     large: false,
     mockup: RealtimeMockup,
@@ -249,7 +249,7 @@ export default function BentoFeaturesNew() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg text-muted-foreground max-w-2xl mx-auto"
           >
-            Our bento dashboard aggregates millions of data points into actionable insights for developers.
+            Explore rankings, compare technologies, watch repos and language trends, run quizzes, and ask AI for next-step guidance.
           </motion.p>
         </div>
 
