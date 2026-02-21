@@ -11,7 +11,11 @@ export interface Verdict {
 
 /**
  * Generate a plain-language career verdict from raw scores.
- * momentum is 0–100 where 50 = neutral, >60 = positive, <40 = negative.
+ *
+ * Score ranges from actual pipeline data:
+ *   composite: ~45–49 (narrow band due to Bayesian smoothing)
+ *   momentum:  raw value, typically –25 to +25
+ *   jobsScore: 0–100 (widest spread, best differentiator)
  */
 export function generateVerdict(
   composite: number | null,
@@ -20,24 +24,30 @@ export function generateVerdict(
   name: string,
 ): Verdict {
   const c = composite ?? 0
-  const m = momentum ?? 50
+  const m = momentum ?? 0   // raw momentum, NOT 0–100 scale
   const j = jobsScore ?? 0
 
+  // Momentum label uses raw thresholds
   const momentumLabel: Verdict['momentumLabel'] =
-    m >= 60 ? 'Rising' : m <= 40 ? 'Declining' : 'Stable'
+    m > 5 ? 'Rising' : m < -5 ? 'Declining' : 'Stable'
 
   let recommendation: Recommendation
 
-  if (c >= 70 && j >= 65) {
+  // Calibrated to actual data ranges (composite 45–49, jobs 45–76, momentum –24 to +21)
+  if (j >= 65 && m > 5 && c >= 47.5) {
+    // Strong job market + rising momentum + above-median score
     recommendation = 'learn-it'
-  } else if (c >= 55 && m >= 60) {
+  } else if (m > 10 || (j >= 58 && m > 3)) {
+    // Either surging momentum or high demand + positive trend
     recommendation = 'watch-it'
-  } else if (c >= 55) {
+  } else if (j >= 50 || (c >= 46.5 && m > -8)) {
+    // Decent demand or stable/positive signal above median
     recommendation = 'maintain'
-  } else if (c >= 30) {
-    recommendation = 'caution'
-  } else {
+  } else if (m < -12 && j < 50) {
+    // Severe momentum decline with weak demand
     recommendation = 'declining'
+  } else {
+    recommendation = 'caution'
   }
 
   const riskLevel: Verdict['riskLevel'] =
@@ -51,7 +61,7 @@ export function generateVerdict(
     'learn-it': {
       badge: 'Learn It',
       headline: `${name} is a strong career investment right now`,
-      reasoning: `High job demand paired with solid community activity makes this a low-risk, high-reward addition to your stack.`,
+      reasoning: `High job demand paired with rising momentum makes this a low-risk, high-reward addition to your stack.`,
     },
     'watch-it': {
       badge: 'Watch It',
@@ -61,12 +71,12 @@ export function generateVerdict(
     'maintain': {
       badge: 'Maintain',
       headline: `${name} is stable — safe to keep but not urgent to learn`,
-      reasoning: `Solid but not accelerating. If it's already in your stack, maintain it. New learners should weigh alternatives first.`,
+      reasoning: `Solid demand but not accelerating. If it's already in your stack, maintain it. New learners should weigh alternatives first.`,
     },
     'caution': {
       badge: 'Caution',
       headline: `${name} shows mixed signals — invest carefully`,
-      reasoning: `Job demand, community activity, and growth signals are inconsistent. Consider your specific context before committing significant time.`,
+      reasoning: `Job demand and momentum signals are inconsistent. Consider your specific context before committing significant time.`,
     },
     'declining': {
       badge: 'Declining',

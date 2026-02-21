@@ -15,35 +15,56 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') === '30d' ? '30d' : '7d'
     const daysAgo = period === '7d' ? 7 : 30
 
-    // Get the most recent score date
-    const { data: latestDate } = await supabase
+    // Get the most recent score date (for display)
+    const { data: latestDateRow } = await supabase
       .from('daily_scores')
       .select('score_date')
       .order('score_date', { ascending: false })
       .limit(1)
       .single()
 
-    const lastUpdated = latestDate?.score_date ?? null
+    const lastUpdated = latestDateRow?.score_date ?? null
 
     if (!lastUpdated) {
-      return Response.json({
-        period,
-        risers: [],
-        fallers: [],
-        last_updated: null,
-      })
+      return Response.json({ period, risers: [], fallers: [], last_updated: null })
     }
 
-    // Calculate comparison date
-    const comparisonDate = new Date(lastUpdated)
-    comparisonDate.setDate(comparisonDate.getDate() - daysAgo)
-    const previousDate = comparisonDate.toISOString().split('T')[0]
+    // Use the most recent date with complete scores (non-null jobs_score)
+    const { data: completeDateRow } = await supabase
+      .from('daily_scores')
+      .select('score_date')
+      .not('jobs_score', 'is', null)
+      .order('score_date', { ascending: false })
+      .limit(1)
+      .single()
 
-    // Fetch latest scores
+    const scoringDate = completeDateRow?.score_date ?? lastUpdated
+
+    // Find nearest available date at least daysAgo before scoringDate
+    const targetDate = new Date(scoringDate)
+    targetDate.setDate(targetDate.getDate() - daysAgo)
+    const targetDateStr = targetDate.toISOString().split('T')[0]
+
+    const { data: prevDateRow } = await supabase
+      .from('daily_scores')
+      .select('score_date')
+      .lte('score_date', targetDateStr)
+      .not('jobs_score', 'is', null)
+      .order('score_date', { ascending: false })
+      .limit(1)
+      .single()
+
+    const previousDate = prevDateRow?.score_date ?? null
+
+    if (!previousDate) {
+      return Response.json({ period, risers: [], fallers: [], last_updated: lastUpdated })
+    }
+
+    // Fetch latest scores from the most recent complete date
     const { data: latestScores } = await supabase
       .from('daily_scores')
       .select('technology_id, composite_score, github_score, community_score, jobs_score, ecosystem_score, momentum')
-      .eq('score_date', lastUpdated)
+      .eq('score_date', scoringDate)
 
     // Fetch previous scores
     const { data: previousScores } = await supabase
@@ -57,13 +78,18 @@ export async function GET(request: NextRequest) {
       .select('id, slug, name, color, category')
       .eq('is_active', true)
 
-    if (!latestScores || !previousScores || !technologies) {
+    if (!latestScores || !technologies) {
       return Response.json({
         period,
         risers: [],
         fallers: [],
         last_updated: lastUpdated,
       })
+    }
+
+    // If previous scores are empty (no data for that date), return empty movers
+    if (!previousScores || previousScores.length === 0) {
+      return Response.json({ period, risers: [], fallers: [], last_updated: lastUpdated })
     }
 
     // Create maps for quick lookup
@@ -158,24 +184,30 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Build slug → id map for efficient sparkline lookup
+    const slugToId = new Map(technologies.map((t) => [t.slug, t.id]))
+
     // Add sparklines to movers
     movers.forEach(m => {
-      const tech = techMap.get(Array.from(techMap.entries()).find(([, t]) => t.slug === m.slug)?.[0] ?? '')
-      if (tech) {
-        m.sparkline = sparklineMap.get(tech.id) ?? []
+      const techId = slugToId.get(m.slug)
+      if (techId) {
+        m.sparkline = sparklineMap.get(techId) ?? []
       }
     })
 
-    // Get top 5 risers (biggest positive delta)
-    const risers = movers
-      .filter(m => m.score_delta > 0)
-      .sort((a, b) => b.score_delta - a.score_delta)
+    // Sort all movers by delta — take best performers as risers, worst as fallers
+    const sortedByDelta = [...movers].sort((a, b) => b.score_delta - a.score_delta)
+
+    // Risers: top 5 by delta, only show if delta > the median (i.e. genuinely better than average)
+    const medianDelta = sortedByDelta[Math.floor(sortedByDelta.length / 2)]?.score_delta ?? 0
+    const risers = sortedByDelta
+      .filter(m => m.score_delta > medianDelta)
       .slice(0, 5)
 
-    // Get top 5 fallers (biggest negative delta)
-    const fallers = movers
-      .filter(m => m.score_delta < 0)
-      .sort((a, b) => a.score_delta - b.score_delta)
+    // Fallers: bottom 5 by delta — only include if they dropped noticeably more than average
+    const fallers = sortedByDelta
+      .reverse()
+      .filter(m => m.score_delta < medianDelta)
       .slice(0, 5)
 
     return Response.json({

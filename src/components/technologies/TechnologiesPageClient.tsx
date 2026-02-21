@@ -5,9 +5,19 @@ import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useTechnologies } from '@/hooks/useTechnologies'
+import { useTechStats } from '@/hooks/useTechStats'
 import { MoversShakers } from '@/components/technologies/MoversShakers'
 import { SmartFilters, applySmartFilter, getFilterEmptyMessage, type SmartFilter } from '@/components/technologies/SmartFilters'
 import { TechCard } from '@/components/technologies/TechCard'
+import { TechTable } from '@/components/technologies/TechTable'
+import { ViewToggle, type ViewMode } from '@/components/technologies/ViewToggle'
+import { MarketBubbleMap } from '@/components/technologies/MarketBubbleMap'
+import { MarketPulse } from '@/components/technologies/MarketPulse'
+import { CategoryHealth } from '@/components/technologies/CategoryHealth'
+import { WeeklyDigest } from '@/components/technologies/WeeklyDigest'
+import { ScoreDistribution } from '@/components/technologies/ScoreDistribution'
+import PopularStacks from '@/components/technologies/PopularStacks'
+import MethodologyPanel from '@/components/technologies/MethodologyPanel'
 import { Loading } from '@/components/ui/loading'
 import type { TechnologyCategory, TechnologyWithScore } from '@/types'
 import { CATEGORY_LABELS } from '@/types'
@@ -30,19 +40,32 @@ function sortTechnologies(techs: TechnologyWithScore[], key: SortKey): Technolog
   })
 }
 
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+}
+
 export function TechnologiesPageClient() {
   const prefersReducedMotion = useReducedMotion()
 
-  const [searchQuery, setSearchQuery]       = useState('')
+  const [searchQuery, setSearchQuery]           = useState('')
   const [selectedCategory, setSelectedCategory] = useState<TechnologyCategory | 'all'>('all')
-  const [smartFilter, setSmartFilter]       = useState<SmartFilter>('all')
-  const [sortKey, setSortKey]               = useState<SortKey>('score')
+  const [smartFilter, setSmartFilter]           = useState<SmartFilter>('all')
+  const [sortKey, setSortKey]                   = useState<SortKey>('score')
+  const [viewMode, setViewMode]                 = useState<ViewMode>('cards')
 
   const { technologies: allTechnologies, lastUpdated, isLoading, isError, error, refetch } = useTechnologies()
+  const { stats, isLoading: statsLoading, isError: statsError } = useTechStats()
 
   const handleSmartFilterChange = useCallback((filter: SmartFilter) => {
     setSmartFilter(filter)
     if (filter !== 'all') setSelectedCategory('all')
+  }, [])
+
+  const handleCategoryClick = useCallback((category: TechnologyCategory) => {
+    setSelectedCategory(category)
+    setSmartFilter('all')
+    document.getElementById('tech-results')?.scrollIntoView({ behavior: 'smooth' })
   }, [])
 
   const filtered = useMemo(() => {
@@ -95,7 +118,7 @@ export function TechnologiesPageClient() {
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
 
-      {/* Header */}
+      {/* ① Page Header */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
@@ -122,83 +145,193 @@ export function TechnologiesPageClient() {
         </div>
       </motion.div>
 
-      {/* Movers & Shakers */}
+      {/* ② Market Pulse */}
+      <motion.div
+        variants={prefersReducedMotion ? {} : sectionVariants}
+        initial="hidden"
+        animate="visible"
+        className="mb-6"
+      >
+        <MarketPulse
+          data={stats?.market_pulse ?? null}
+          isLoading={statsLoading}
+          isError={statsError}
+        />
+      </motion.div>
+
+      {/* ③ Category Health */}
+      <motion.div
+        variants={prefersReducedMotion ? {} : sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        className="mb-8"
+      >
+        <CategoryHealth
+          data={stats?.category_health ?? null}
+          isLoading={statsLoading}
+          isError={statsError}
+          onCategoryClick={handleCategoryClick}
+        />
+      </motion.div>
+
+      {/* ④ Movers & Shakers */}
       <MoversShakers />
 
-      {/* Smart Filters */}
-      <SmartFilters activeFilter={smartFilter} onFilterChange={handleSmartFilterChange} />
+      {/* ⑤ Weekly Digest */}
+      <motion.div
+        variants={prefersReducedMotion ? {} : sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        className="mb-6"
+      >
+        <WeeklyDigest
+          data={stats?.weekly_digest ?? null}
+          isLoading={statsLoading}
+          isError={statsError}
+        />
+      </motion.div>
 
-      {/* Search + Category + Sort */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* Search */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search technologies..."
-            className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-          />
-        </div>
-
-        {/* Category */}
-        {smartFilter === 'all' && (
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as TechnologyCategory | 'all')}
-            className="rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="all">All Categories</option>
-            {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
-            ))}
-          </select>
-        )}
-
-        {/* Sort */}
-        <div className="flex items-center gap-2">
-          <span className="shrink-0 text-xs text-muted-foreground">Sort by</span>
-          <div className="flex rounded-lg border border-border overflow-hidden">
-            {SORT_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setSortKey(opt.value)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                  sortKey === opt.value
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-background text-muted-foreground hover:text-foreground hover:bg-muted/40'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* ⑥ Methodology Panel (collapsed by default) */}
+      <div className="mb-8">
+        <MethodologyPanel />
       </div>
 
-      {/* Result count */}
-      <p className="mb-4 text-sm text-muted-foreground">
-        {filtered.length} {filtered.length === 1 ? 'technology' : 'technologies'}
-      </p>
+      {/* ⑦ Smart Filters + Search + View Toggle */}
+      <div id="tech-results">
+        <SmartFilters activeFilter={smartFilter} onFilterChange={handleSmartFilterChange} />
 
-      {/* Empty state */}
-      {filtered.length === 0 && (
-        <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-dashed">
-          <p className="text-sm text-muted-foreground">
-            {searchQuery ? 'No technologies match your search' : getFilterEmptyMessage(smartFilter)}
-          </p>
-        </div>
-      )}
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search technologies..."
+                className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
 
-      {/* Cards grid */}
-      {filtered.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {filtered.map((tech, i) => (
-            <TechCard key={tech.id} technology={tech} rank={i + 1} index={i} />
-          ))}
+            {/* Category */}
+            {smartFilter === 'all' && (
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value as TechnologyCategory | 'all')}
+                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="all">All Categories</option>
+                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+            )}
+
+            {/* Sort */}
+            <div className="flex items-center gap-2">
+              <span className="shrink-0 text-xs text-muted-foreground">Sort by</span>
+              <div className="flex overflow-hidden rounded-lg border border-border">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setSortKey(opt.value)}
+                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                      sortKey === opt.value
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-background text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* View Toggle */}
+          <ViewToggle view={viewMode} onViewChange={setViewMode} />
         </div>
-      )}
+
+        {/* ⑧ Score Distribution (inline below filters) */}
+        <motion.div
+          variants={prefersReducedMotion ? {} : sectionVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          className="mb-4"
+        >
+          <ScoreDistribution
+            data={stats?.score_distribution ?? null}
+            isLoading={statsLoading}
+            isError={statsError}
+          />
+        </motion.div>
+
+        {/* ⑨ Result count */}
+        <p className="mb-4 text-sm text-muted-foreground">
+          {filtered.length} {filtered.length === 1 ? 'technology' : 'technologies'}
+        </p>
+
+        {/* Empty state */}
+        {filtered.length === 0 && (
+          <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-dashed">
+            <p className="text-sm text-muted-foreground">
+              {searchQuery ? 'No technologies match your search' : getFilterEmptyMessage(smartFilter)}
+            </p>
+          </div>
+        )}
+
+        {/* ⑩ Main Content — Cards / Table / Bubble Map */}
+        {filtered.length > 0 && (
+          <>
+            {viewMode === 'overview' && (
+              <div className="hidden md:block">
+                <MarketBubbleMap technologies={filtered} />
+              </div>
+            )}
+            {viewMode === 'overview' && (
+              <div className="md:hidden flex min-h-[200px] items-center justify-center rounded-lg border border-dashed">
+                <p className="text-sm text-muted-foreground">Switch to cards or table view on mobile</p>
+              </div>
+            )}
+            {viewMode === 'table' && (
+              <TechTable technologies={filtered} />
+            )}
+            {viewMode === 'cards' && (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filtered.map((tech, i) => (
+                  <TechCard
+                    key={tech.id}
+                    technology={tech}
+                    rank={i + 1}
+                    index={i}
+                    allTechnologies={filtered}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ⑪ Popular Stacks (bottom of page) */}
+      <motion.div
+        variants={prefersReducedMotion ? {} : sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        className="mt-16"
+      >
+        <PopularStacks
+          data={stats?.popular_stacks ?? null}
+          isLoading={statsLoading}
+          isError={statsError}
+        />
+      </motion.div>
+
     </div>
   )
 }

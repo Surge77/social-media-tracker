@@ -13,6 +13,7 @@ import { Sparkline } from '@/components/technologies/Sparkline'
 import { RankChangeBadge } from '@/components/technologies/RankChangeBadge'
 import { AISummaryTooltip } from '@/components/technologies/AISummaryTooltip'
 import { getScoreLabel, getMomentumInsight } from '@/lib/insights'
+import LifecycleBadge from '@/components/technologies/LifecycleBadge'
 import type { TechnologyWithScore } from '@/types'
 
 interface TechTableProps {
@@ -61,6 +62,9 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[130px]">
                   Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Stage
                 </th>
                 <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Score
@@ -132,6 +136,11 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                       momentum={tech.momentum}
                       dataCompleteness={tech.data_completeness}
                     />
+                  </td>
+
+                  {/* Lifecycle Stage */}
+                  <td className="px-4 py-3">
+                    <LifecycleBadge stage={tech.lifecycle_stage} />
                   </td>
 
                   {/* Score with label */}

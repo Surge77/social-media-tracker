@@ -16,6 +16,8 @@ export type {
   LifecycleClassification,
 } from '@/lib/analysis/lifecycle'
 
+import type { LifecycleStage } from '@/lib/analysis/lifecycle'
+
 // ---- Core database types ----
 
 export interface Technology {
@@ -138,6 +140,9 @@ export interface TechnologyWithScore extends Technology {
   previous_rank: number | null      // Rank 7 days ago
   rank_change: number | null        // Current rank - previous rank (positive = moved up)
   ai_summary: string                // Generated honest one-liner
+  // Lifecycle classification (added by technologies API)
+  lifecycle_stage?: LifecycleStage
+  lifecycle_label?: string          // Human-readable: "Early Growth", "Mainstream Adoption", etc.
   // Raw signals (optional, added by compare API)
   github_stars?: number | null
   npm_downloads?: number | null

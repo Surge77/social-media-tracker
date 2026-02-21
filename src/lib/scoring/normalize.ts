@@ -29,3 +29,51 @@ export function minMaxNormalize(value: number, min: number, max: number): number
   if (max === min) return 50
   return Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100))
 }
+
+/**
+ * Percentile-rank normalization.
+ *
+ * Returns values on a 0–100 scale where each value represents its
+ * position relative to all other values in the array.
+ *
+ * Unlike z-score (which clusters around 50), percentile ranks naturally
+ * spread from 0 to 100 — the lowest value gets 0, the highest gets 100,
+ * and every other value is proportionally in-between.
+ *
+ * Ties are handled by average rank so tied technologies share the same score.
+ *
+ * Edge cases:
+ *   - Empty array  → []
+ *   - Single value → [50]  (neutral, as if at median)
+ *   - All same     → all 50 (no information, treat as neutral)
+ */
+export function percentileRankNormalize(values: number[]): number[] {
+  if (values.length === 0) return []
+  if (values.length === 1) return [50]
+
+  const allSame = values.every((v) => v === values[0])
+  if (allSame) return values.map(() => 50)
+
+  // Pair each value with its original index, then sort ascending
+  const sorted = values
+    .map((v, i) => ({ value: v, index: i }))
+    .sort((a, b) => a.value - b.value)
+
+  const ranks = new Array<number>(values.length)
+  let i = 0
+
+  while (i < sorted.length) {
+    let j = i
+    // Find the end of the tie group
+    while (j < sorted.length && sorted[j].value === sorted[i].value) j++
+    // Average rank for ties (0-based), then map to 0-100
+    const avgRank = (i + j - 1) / 2
+    const percentile = (avgRank / (values.length - 1)) * 100
+    for (let k = i; k < j; k++) {
+      ranks[sorted[k].index] = Math.round(percentile * 100) / 100
+    }
+    i = j
+  }
+
+  return ranks
+}

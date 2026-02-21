@@ -60,12 +60,12 @@ function generateSingleDimensionInsight(
   // Jobs-only (most common case)
   if (dims.hasJobs) {
     const jobs = tech.jobs_score ?? 0
-    if (jobs >= 60) {
+    if (jobs >= 65) {
       if (mom > 5)  return `${name} job demand is climbing fast — companies are actively hiring right now`
       if (mom < -5) return `${name} still has strong job listings, but employer interest is cooling — watch this`
       return `Solid job market for ${name} — employers reliably hire for this skill`
     }
-    if (jobs >= 40) {
+    if (jobs >= 45) {
       if (mom > 5) return `${name} is gaining employer attention — job demand is on the rise`
       return `Moderate ${name} job demand — opportunities exist but aren't everywhere`
     }
@@ -150,22 +150,22 @@ function generateDecisionTreeInsight(tech: TechnologyWithScore): string {
   }
 
   // 3. High buzz, low jobs (overhyped)
-  if (comm >= 45 && jobs < 35) {
+  if (comm >= 55 && jobs < 35) {
     return `${name} has lots of hype but few job postings — great to learn, risky to bet your career on yet`
   }
 
   // 4. Low buzz, high jobs (hidden gem)
-  if (comm < 40 && jobs >= 40 && mom > 0) {
+  if (comm < 35 && jobs >= 50 && mom > 0) {
     return `${name} is under the radar but companies are actively hiring — less competition is your edge`
   }
 
   // 5. Stable workhorse
-  if (Math.abs(mom) <= 3 && score > 60) {
+  if (Math.abs(mom) <= 3 && score > 46) {
     return `${name} is a stable workhorse — not exciting, but employers reliably hire for it`
   }
 
   // 6. Declining but still pays
-  if (mom < -3 && mom >= -8 && jobs >= 40) {
+  if (mom < -3 && mom >= -8 && jobs >= 45) {
     return `${name} still pays the bills, but excitement is fading — good now, less certain long-term`
   }
 

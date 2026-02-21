@@ -204,7 +204,7 @@ function MoverRow({ mover, index, type }: MoverRowProps) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm font-medium text-muted-foreground">
               {index + 1}.
             </span>
@@ -219,6 +219,11 @@ function MoverRow({ mover, index, type }: MoverRowProps) {
               {rankChangeIcon}
               {Math.abs(mover.rank_change)}
             </span>
+            {Math.abs(mover.score_delta) > 10 && (
+              <span className="text-[10px] font-medium text-warning bg-warning/10 px-1.5 py-0.5 rounded-full">
+                ⚡ Significant
+              </span>
+            )}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
             {mover.primary_driver}

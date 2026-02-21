@@ -1,5 +1,8 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { generateTechSummary } from '@/lib/insights/ai-summaries'
+import { classifyLifecycle, getLifecycleDescription } from '@/lib/analysis/lifecycle'
+import { analyzeMomentum } from '@/lib/scoring/enhanced-momentum'
+import { computeConfidence } from '@/lib/scoring/confidence'
 import type { TechnologyWithScore } from '@/types'
 
 /**
@@ -12,22 +15,46 @@ export async function GET() {
   try {
     const supabase = createSupabaseAdminClient()
 
-    // Get the most recent score date
-    const { data: latestDate } = await supabase
+    // Get the most recent score date (for display)
+    const { data: latestDateRow } = await supabase
       .from('daily_scores')
       .select('score_date')
       .order('score_date', { ascending: false })
       .limit(1)
       .single()
 
-    const lastUpdated = latestDate?.score_date ?? null
+    const lastUpdated = latestDateRow?.score_date ?? null
 
-    // Compute date ranges upfront
-    const sevenDaysAgo = lastUpdated ? new Date(lastUpdated) : null
+    // Use the most recent date WITH complete scores (non-null jobs_score).
+    // If the latest run is incomplete (jobs failed), fall back to the previous complete run.
+    const { data: completeDateRow } = await supabase
+      .from('daily_scores')
+      .select('score_date')
+      .not('jobs_score', 'is', null)
+      .order('score_date', { ascending: false })
+      .limit(1)
+      .single()
+
+    const scoringDate = completeDateRow?.score_date ?? lastUpdated
+
+    // Compute date ranges from the scoring date
+    const sevenDaysAgo = scoringDate ? new Date(scoringDate) : null
     if (sevenDaysAgo) sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    const previousDate = sevenDaysAgo?.toISOString().split('T')[0]
+    const sevenDaysAgoStr = sevenDaysAgo?.toISOString().split('T')[0]
 
-    const thirtyDaysAgo = lastUpdated ? new Date(lastUpdated) : null
+    // Find nearest date with data at least 7 days back
+    const prevDateResult = sevenDaysAgoStr
+      ? await supabase
+          .from('daily_scores')
+          .select('score_date')
+          .lte('score_date', sevenDaysAgoStr)
+          .order('score_date', { ascending: false })
+          .limit(1)
+          .single()
+      : null
+    const previousDate = prevDateResult?.data?.score_date ?? null
+
+    const thirtyDaysAgo = scoringDate ? new Date(scoringDate) : null
     if (thirtyDaysAgo) thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
     const thirtyDaysAgoStr = thirtyDaysAgo?.toISOString().split('T')[0]
 
@@ -37,19 +64,19 @@ export async function GET() {
         .from('technologies')
         .select('id, slug, name, description, category, color')
         .eq('is_active', true),
-      lastUpdated
+      scoringDate
         ? supabase
             .from('daily_scores')
             .select('technology_id, composite_score, github_score, community_score, jobs_score, ecosystem_score, momentum, data_completeness')
-            .eq('score_date', lastUpdated)
+            .eq('score_date', scoringDate)
         : Promise.resolve({ data: null }),
-      lastUpdated && previousDate
+      previousDate
         ? supabase
             .from('daily_scores')
             .select('technology_id, composite_score')
             .eq('score_date', previousDate)
         : Promise.resolve({ data: null }),
-      lastUpdated && thirtyDaysAgoStr
+      scoringDate && thirtyDaysAgoStr
         ? supabase
             .from('daily_scores')
             .select('technology_id, score_date, composite_score')
@@ -138,7 +165,7 @@ export async function GET() {
       previousRankMap.set(tech.id, index + 1)
     })
 
-    // Add current rank, previous rank, rank change, and AI summary to each tech
+    // Add current rank, previous rank, rank change, AI summary, and lifecycle to each tech
     result.forEach((tech, index) => {
       const currentRank = index + 1
       const previousRank = previousRankMap.get(tech.id) ?? null
@@ -146,6 +173,35 @@ export async function GET() {
       tech.previous_rank = previousRank
       tech.rank_change = previousRank !== null ? previousRank - currentRank : null
       tech.ai_summary = generateTechSummary(tech)
+
+      // Lifecycle classification from sparkline history
+      const sparkline = tech.sparkline
+      if (sparkline.length >= 2) {
+        const history = sparkline.map((score, i) => ({ date: `day-${i}`, score }))
+        const momentum = analyzeMomentum(history)
+        const confidence = computeConfidence(
+          tech.category,
+          1, // conservative: 1 active source (we don't track this per-tech in the API response)
+          0, // latestDpAge: data is fresh (fetched today)
+          sparkline.length,
+          {
+            github: tech.github_score,
+            community: tech.community_score,
+            jobs: tech.jobs_score,
+            ecosystem: tech.ecosystem_score,
+          }
+        )
+        const lifecycle = classifyLifecycle({
+          compositeScore: tech.composite_score ?? 0,
+          momentum,
+          confidence,
+          dataAgeDays: sparkline.length, // proxy: days of data we have
+          category: tech.category,
+          recentScores: sparkline.slice(-30),
+        })
+        tech.lifecycle_stage = lifecycle.stage
+        tech.lifecycle_label = getLifecycleDescription(lifecycle.stage)
+      }
     })
 
     // Cache for 1 hour — data only changes after the daily cron (OPT-03)

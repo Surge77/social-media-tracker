@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { TechnologyCategory } from '@/types'
-import { zScoreNormalize } from '@/lib/scoring/normalize'
+import { percentileRankNormalize } from '@/lib/scoring/normalize'
 import {
   computeGitHubScore,
   computeCommunityScore,
@@ -279,20 +279,20 @@ export async function runScoringPipeline(
   const soMentionsArr = allTechs.map((t) => t.soMentions ?? 0)
   const dependentsArr = allTechs.map((t) => t.dependentsCount ?? 0)
 
-  const starsZ = zScoreNormalize(starsArr)
-  const forksZ = zScoreNormalize(forksArr)
-  const contributorsZ = zScoreNormalize(contributorsArr)
-  const hnZ = zScoreNormalize(hnArr)
-  const redditZ = zScoreNormalize(redditArr)
-  const devtoZ = zScoreNormalize(devtoArr)
-  const rssZ = zScoreNormalize(rssArr)
-  const adzunaZ = zScoreNormalize(adzunaArr)
-  const jsearchZ = zScoreNormalize(jsearchArr)
-  const remotiveZ = zScoreNormalize(remotiveArr)
-  const downloadsZ = zScoreNormalize(downloadsArr)
-  const soZ = zScoreNormalize(soArr)
-  const soMentionsZ = zScoreNormalize(soMentionsArr)
-  const dependentsZ = zScoreNormalize(dependentsArr)
+  const starsPct        = percentileRankNormalize(starsArr)
+  const forksPct        = percentileRankNormalize(forksArr)
+  const contributorsPct = percentileRankNormalize(contributorsArr)
+  const hnPct           = percentileRankNormalize(hnArr)
+  const redditPct       = percentileRankNormalize(redditArr)
+  const devtoPct        = percentileRankNormalize(devtoArr)
+  const rssPct          = percentileRankNormalize(rssArr)
+  const adzunaPct       = percentileRankNormalize(adzunaArr)
+  const jsearchPct      = percentileRankNormalize(jsearchArr)
+  const remotivePct     = percentileRankNormalize(remotiveArr)
+  const downloadsPct    = percentileRankNormalize(downloadsArr)
+  const soPct           = percentileRankNormalize(soArr)
+  const soMentionsPct   = percentileRankNormalize(soMentionsArr)
+  const dependentsPct   = percentileRankNormalize(dependentsArr)
 
   // Step 5: Fetch historical scores for enhanced momentum (up to 90 days)
   const date90DaysAgo = new Date(date)
@@ -345,7 +345,7 @@ export async function runScoringPipeline(
         closedIssues !== null && openIssues !== null && (closedIssues + openIssues) > 0
           ? closedIssues / (closedIssues + openIssues)
           : openIssues === 0 ? 1.0 : 0
-      githubScore = computeGitHubScore(starsZ[i], forksZ[i], issueCloseRate, contributorsZ[i])
+      githubScore = computeGitHubScore(starsPct[i], forksPct[i], issueCloseRate, contributorsPct[i])
     }
 
     // Community score — null if no community data
@@ -357,12 +357,12 @@ export async function runScoringPipeline(
       tech.rssMentions !== null
     ) {
       communityScore = computeCommunityScore(
-        hnZ[i],
+        hnPct[i],
         tech.hnSentiment ?? 0.5,
-        redditZ[i],
-        devtoZ[i],
+        redditPct[i],
+        devtoPct[i],
         tech.redditSentiment ?? 0.5,
-        rssZ[i]
+        rssPct[i]
       )
     }
 
@@ -370,7 +370,7 @@ export async function runScoringPipeline(
     // Each source is now stored separately, so z-score arrays are independent.
     let jobsScore: number | null = null
     if (tech.adzunaJobs !== null || tech.jsearchJobs !== null || tech.remotiveJobs !== null) {
-      jobsScore = computeJobsScore(adzunaZ[i], jsearchZ[i], remotiveZ[i])
+      jobsScore = computeJobsScore(adzunaPct[i], jsearchPct[i], remotivePct[i])
     }
 
     // Ecosystem score — null if no download/SO/dependents data
@@ -392,11 +392,11 @@ export async function runScoringPipeline(
       }
 
       ecosystemScore = computeEcosystemScore(
-        downloadsZ[i],
+        downloadsPct[i],
         downloadGrowthRate,
-        soZ[i],
-        soMentionsZ[i],
-        dependentsZ[i]
+        soPct[i],
+        soMentionsPct[i],
+        dependentsPct[i]
       )
 
       // Source 5: optional maintenance penalty for abandoned npm packages

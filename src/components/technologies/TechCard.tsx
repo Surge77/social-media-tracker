@@ -9,6 +9,8 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { Sparkline } from '@/components/technologies/Sparkline'
 import { RankChangeBadge } from '@/components/technologies/RankChangeBadge'
+import LifecycleBadge from '@/components/technologies/LifecycleBadge'
+import QuickCompareLinks from '@/components/technologies/QuickCompareLinks'
 import { generateVerdict, type Verdict } from '@/lib/insights/verdict'
 import type { TechnologyWithScore } from '@/types'
 
@@ -17,6 +19,7 @@ interface TechCardProps {
   rank?: number
   index?: number
   className?: string
+  allTechnologies?: TechnologyWithScore[]
 }
 
 const VERDICT_STYLES: Record<Verdict['recommendation'], {
@@ -30,7 +33,7 @@ const VERDICT_STYLES: Record<Verdict['recommendation'], {
 }
 
 export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
-  ({ technology, rank, index = 0, className }, ref) => {
+  ({ technology, rank, index = 0, className, allTechnologies = [] }, ref) => {
     const prefersReducedMotion = useReducedMotion()
 
     const verdict = generateVerdict(
@@ -55,7 +58,7 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.3, delay: Math.min(index * 0.04, 0.5) }}
-        className={cn(className)}
+        className={cn('flex flex-col gap-1.5', className)}
       >
         <Link
           href={`/technologies/${technology.slug}`}
@@ -63,13 +66,16 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
         >
           <div className={`rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm transition-all hover:bg-card/50 hover:shadow-md ${vstyle.border}`}>
 
-            {/* Top row: verdict + category */}
+            {/* Top row: verdict + lifecycle + category */}
             <div className="mb-3 flex items-center justify-between gap-2">
               <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${vstyle.badgeBg}`}>
                 {vstyle.icon}
                 {verdict.badge}
               </span>
-              <CategoryBadge category={technology.category} size="sm" />
+              <div className="flex items-center gap-1">
+                <LifecycleBadge stage={technology.lifecycle_stage} />
+                <CategoryBadge category={technology.category} size="sm" />
+              </div>
             </div>
 
             {/* Name + rank */}
@@ -93,9 +99,16 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
             </div>
 
             {/* Description */}
-            <p className="mb-4 line-clamp-1 text-xs text-muted-foreground">
+            <p className="mb-2 line-clamp-1 text-xs text-muted-foreground">
               {technology.description}
             </p>
+
+            {/* AI insight quote */}
+            {technology.ai_summary && (
+              <p className="mb-3 line-clamp-2 text-[11px] italic text-muted-foreground/70">
+                &ldquo;{technology.ai_summary}&rdquo;
+              </p>
+            )}
 
             {/* Job demand bar */}
             <div className="mb-3">
@@ -126,6 +139,13 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
             </div>
           </div>
         </Link>
+
+        {/* Compare links — outside the Link to prevent nav conflicts */}
+        {allTechnologies.length > 1 && (
+          <div className="px-1">
+            <QuickCompareLinks technology={technology} allTechnologies={allTechnologies} />
+          </div>
+        )}
       </motion.div>
     )
   }

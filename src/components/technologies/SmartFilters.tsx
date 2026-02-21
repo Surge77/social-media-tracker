@@ -39,9 +39,9 @@ export const SMART_FILTERS: SmartFilterConfig[] = [
     icon: Rocket,
     description: 'High jobs + rising momentum → learn this NOW',
     filter: (t) =>
-      (t.jobs_score ?? 0) >= 40 &&
-      (t.momentum ?? 0) > 3 &&
-      (t.composite_score ?? 0) >= 40,
+      (t.jobs_score ?? 0) >= 55 &&
+      (t.momentum ?? 0) > 5 &&
+      (t.composite_score ?? 0) >= 46.5,
     sort: (a, b) => {
       // Sort by (jobs_score * 0.6 + momentum * 0.4) — career impact score
       const scoreA = (a.jobs_score ?? 0) * 0.6 + (a.momentum ?? 0) * 0.4
@@ -55,7 +55,7 @@ export const SMART_FILTERS: SmartFilterConfig[] = [
     label: 'Rising Stars',
     icon: TrendingUp,
     description: 'Strong positive momentum — early adoption opportunity',
-    filter: (t) => (t.momentum ?? 0) > 8,
+    filter: (t) => (t.momentum ?? 0) > 10,
     sort: (a, b) => (b.momentum ?? 0) - (a.momentum ?? 0),
     emptyMessage: 'No technologies with strong upward momentum right now.',
   },
@@ -65,9 +65,9 @@ export const SMART_FILTERS: SmartFilterConfig[] = [
     icon: Shield,
     description: 'Strong job demand + stable momentum — reliable career skill',
     filter: (t) =>
-      (t.jobs_score ?? 0) >= 55 &&
-      Math.abs(t.momentum ?? 0) <= 8 &&
-      (t.composite_score ?? 0) >= 50,
+      (t.jobs_score ?? 0) >= 60 &&
+      Math.abs(t.momentum ?? 0) <= 5 &&
+      (t.composite_score ?? 0) >= 46,
     sort: (a, b) => (b.jobs_score ?? 0) - (a.jobs_score ?? 0),
     emptyMessage: 'No technologies match safe-bet criteria right now.',
   },
@@ -77,8 +77,8 @@ export const SMART_FILTERS: SmartFilterConfig[] = [
     icon: Gem,
     description: 'Strong job demand but undervalued overall score — less competition',
     filter: (t) =>
-      (t.jobs_score ?? 0) >= 60 &&
-      (t.composite_score ?? 0) < 52 &&
+      (t.jobs_score ?? 0) >= 50 &&
+      (t.composite_score ?? 0) < 46.5 &&
       (t.momentum ?? 0) > 0,
     sort: (a, b) => {
       // Sort by jobs vs composite gap (high jobs but low overall = most hidden)
@@ -94,8 +94,9 @@ export const SMART_FILTERS: SmartFilterConfig[] = [
     icon: AlertTriangle,
     description: 'Established tech losing momentum — may be past its peak',
     filter: (t) =>
-      (t.composite_score ?? 0) >= 50 &&
-      (t.momentum ?? 0) < -5,
+      (t.community_score ?? 0) >= 55 &&
+      (t.jobs_score ?? 0) < 35 &&
+      (t.momentum ?? 0) < -3,
     sort: (a, b) => (a.momentum ?? 0) - (b.momentum ?? 0), // Most negative first
     emptyMessage: 'No technologies show signs of declining momentum right now.',
   },
