@@ -5,7 +5,7 @@ import { TerminalHeader } from '@/components/TerminalHeader'
 import { TerminalHero } from '@/components/TerminalHero'
 import { ProcessList } from '@/components/ProcessList'
 import { DataStream } from '@/components/DataStream'
-import { TerminalFooter } from '@/components/TerminalFooter'
+import Footer from '@/components/Footer'
 
 export default function TerminalLandingPage() {
   return (
@@ -16,7 +16,7 @@ export default function TerminalLandingPage() {
         <ProcessList />
         <DataStream />
       </main>
-      <TerminalFooter />
+      <Footer />
     </div>
   )
 }

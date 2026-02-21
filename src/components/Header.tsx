@@ -4,10 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react";
 import AnimatedCTA from "./AnimatedCTA";
 import { ThemeToggle } from "./ThemeToggle";
+import { useScrolled } from "@/hooks/useScrolled";
 
 const Header = () => {
+  const isScrolled = useScrolled(8);
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-lg">
+    <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      isScrolled
+        ? "border-b border-border/50 bg-background/80 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
+        : "border-b border-transparent bg-transparent shadow-none backdrop-blur-0"
+    }`}>
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useScrolled } from '@/hooks/useScrolled'
 import { Terminal, Activity, TrendingUp, Menu, X } from 'lucide-react'
 
 const navLinks = [
@@ -13,18 +14,9 @@ const navLinks = [
 ]
 
 export function TerminalHeader() {
-  const [scrolled, setScrolled] = useState(false)
+  const scrolled = useScrolled(20)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const prefersReducedMotion = useReducedMotion()
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   return (
     <>

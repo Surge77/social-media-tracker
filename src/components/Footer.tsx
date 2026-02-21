@@ -14,25 +14,24 @@ const Footer = () => {
       links: [
         { name: 'Technologies', href: '/technologies' },
         { name: 'Compare', href: '/compare' },
-        { name: 'Quizzes', href: '/quiz' },
-        { name: 'Ask AI', href: '/ask' },
+        { name: 'Repos', href: '/repos' },
+        { name: 'Languages', href: '/languages' },
       ],
     },
     {
       title: 'Resources',
       links: [
+        { name: 'Quiz', href: '/quiz' },
+        { name: 'Ask AI', href: '/ask' },
         { name: 'Methodology', href: '/methodology' },
         { name: 'Digest', href: '/digest' },
-        { name: 'Monitoring', href: '/monitoring' },
-        { name: 'API', href: '/api/technologies' },
       ],
     },
     {
       title: 'Company',
       links: [
         { name: 'Home', href: '/' },
-        { name: 'Technologies', href: '/technologies' },
-        { name: 'Compare', href: '/compare' },
+        { name: 'Terminal', href: '/terminal-page' },
         { name: 'Contact', href: 'mailto:hello@devtrends.io' },
       ],
     },
@@ -47,8 +46,8 @@ const Footer = () => {
 
   return (
     <footer className="border-t border-border/60 bg-card/40">
-      <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-5">
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 gap-7 md:grid-cols-5">
           <div className="md:col-span-2">
             <Link href="/" className="mb-4 inline-flex items-center">
               <DevTrendsLogo size="sm" />
@@ -95,10 +94,9 @@ const Footer = () => {
           ))}
         </div>
 
-        <div className="mt-10 border-t border-border/50 pt-6">
-          <div className="flex flex-col items-center justify-between gap-2 text-sm text-muted-foreground sm:flex-row">
+        <div className="mt-6 border-t border-border/50 pt-4">
+          <div className="flex items-center justify-center text-sm text-muted-foreground">
             <p>© {currentYear} DevTrends. All rights reserved.</p>
-            <p className="text-xs">Data updated daily from multiple sources</p>
           </div>
         </div>
       </div>
