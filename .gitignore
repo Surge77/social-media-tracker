@@ -50,3 +50,6 @@ API_keys.txt
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Git worktrees
+.worktrees/
