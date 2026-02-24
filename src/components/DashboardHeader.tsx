@@ -17,7 +17,7 @@ export function DashboardHeader() {
           : 'border-b border-transparent bg-transparent shadow-none backdrop-blur-0'
       }`}
     >
-      <div className="container mx-auto flex h-16 items-center justify-between px-6">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center">
           <DevTrendsLogo size="md" />
         </Link>

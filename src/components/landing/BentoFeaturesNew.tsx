@@ -237,10 +237,10 @@ export default function BentoFeaturesNew() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <section id="features" className="py-20 md:py-32 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
+    <section id="features" className="py-16 sm:py-20 md:py-32 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px]" />
 
-      <div className="container mx-auto px-6 relative">
+      <div className="container mx-auto px-4 sm:px-6 relative">
         <div className="text-center mb-16 md:mb-20">
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -259,7 +259,7 @@ export default function BentoFeaturesNew() {
             whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4"
           >
             Everything you need to{' '}
             <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent">
@@ -272,7 +272,7 @@ export default function BentoFeaturesNew() {
             whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg text-muted-foreground max-w-2xl mx-auto"
+            className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto"
           >
             Rankings, comparisons, trending repos, language data, career quizzes, and AI answers — all in one place.
           </motion.p>
@@ -291,7 +291,7 @@ export default function BentoFeaturesNew() {
                   transition={{ duration: 0.5, delay: index * 0.08 }}
                   className={feature.large ? 'lg:col-span-2' : ''}
                 >
-                  <div className="group h-full border border-border/50 hover:border-primary/40 rounded-2xl p-5 transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden relative bg-card/50 backdrop-blur-sm elevation-2 hover:elevation-4">
+                  <div className="group h-full border border-border/50 hover:border-primary/40 rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden relative bg-card/50 backdrop-blur-sm elevation-2 hover:elevation-4">
                     <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                     <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 

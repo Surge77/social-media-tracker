@@ -234,9 +234,9 @@ export function TechnologiesPageClient() {
             )}
 
             {/* Sort */}
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="shrink-0 text-xs text-muted-foreground">Sort by</span>
-              <div className="flex overflow-hidden rounded-lg border border-border">
+              <div className="flex flex-wrap overflow-hidden rounded-lg border border-border">
                 {SORT_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}

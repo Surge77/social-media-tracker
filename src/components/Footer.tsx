@@ -52,10 +52,10 @@ const Footer = () => {
       {/* Orange gradient rule at top */}
       <div className="relative h-px w-full bg-gradient-to-r from-transparent via-orange-500/70 to-transparent" />
 
-      <div className="relative container mx-auto max-w-7xl px-6 pt-14 pb-0">
+      <div className="relative container mx-auto max-w-7xl px-4 sm:px-6 pt-12 sm:pt-14 pb-0">
 
         {/* Main content grid */}
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-6 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-6 lg:grid-cols-5">
 
           {/* Brand column — spans 2 cols */}
           <div className="col-span-2 lg:col-span-2">

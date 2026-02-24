@@ -71,16 +71,14 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-[-0.02em] mb-8"
-            style={{ fontFeatureSettings: '"ss01", "ss02"' }}
+            className="mb-8"
           >
-            <span className="text-foreground">Know What to</span>
-            <br />
-            <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent animate-gradient">
-              Learn Before
+            <span className="block text-3xl sm:text-5xl md:text-6xl font-bold tracking-[-0.02em] leading-[1.02] text-foreground">
+              Know what to learn
             </span>
-            <br />
-            <span className="text-foreground">Everyone Else</span>
+            <span className="mt-1.5 block text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.02em] leading-[1.04] bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent animate-gradient">
+              before the market shifts
+            </span>
           </motion.h1>
 
           {/* Magic UI — MorphingText data signal ticker */}

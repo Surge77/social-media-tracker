@@ -10,7 +10,7 @@ export default function FinalCTA() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <BackgroundBeamsCollision className="py-20 md:py-32">
+    <BackgroundBeamsCollision className="py-16 sm:py-20 md:py-32">
       {/* Magic UI — meteors */}
       {!prefersReducedMotion && <Meteors number={10} />}
 
@@ -29,14 +29,14 @@ export default function FinalCTA() {
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" />
       <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse animation-delay-1000" />
 
-      <div className="container mx-auto px-6 relative z-30">
+      <div className="container mx-auto px-4 sm:px-6 relative z-30">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-5 sm:mb-6"
           >
             Stop learning what{' '}
             <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent">
@@ -49,7 +49,7 @@ export default function FinalCTA() {
             whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto"
+            className="text-base sm:text-lg text-muted-foreground mb-8 sm:mb-10 max-w-xl mx-auto"
           >
             See what's rising, what's falling, and what's actually worth learning next.
           </motion.p>
@@ -64,7 +64,7 @@ export default function FinalCTA() {
             <AnimatedCTA
               href="/technologies"
               size="lg"
-              className="px-12 py-5 text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-[1.05] active:scale-[0.98] transition-all duration-300"
+              className="px-8 sm:px-12 py-4 sm:py-5 text-lg sm:text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-[1.05] active:scale-[0.98] transition-all duration-300"
               delay={150}
             >
               See What to Learn Next →

@@ -156,7 +156,7 @@ export function LanguageRankingsClient() {
       >
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Language Rankings</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Language Rankings</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {rankings.length || '40'} languages ranked by GitHub repos, Stack Overflow activity, and job demand
             </p>
@@ -240,14 +240,14 @@ export function LanguageRankingsClient() {
             {/* Row 1: search + trend */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Search */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="text"
                   placeholder="Search languages..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-8 w-52 rounded-md border border-border bg-background pl-8 pr-8 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="h-8 w-full sm:w-52 rounded-md border border-border bg-background pl-8 pr-8 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                 />
                 {search && (
                   <button
@@ -260,7 +260,7 @@ export function LanguageRankingsClient() {
               </div>
 
               {/* Trend filter */}
-              <div className="flex items-center gap-1 rounded-md border border-border bg-background p-0.5">
+              <div className="flex flex-wrap items-center gap-1 rounded-md border border-border bg-background p-0.5">
                 {TREND_OPTIONS.map(({ value, label, icon }) => (
                   <button
                     key={value}

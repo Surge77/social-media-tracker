@@ -43,25 +43,25 @@ export default function LandingFAQ() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <section className="relative overflow-hidden py-20 md:py-28 bg-gradient-to-b from-background via-muted/20 to-background">
+    <section className="relative overflow-hidden py-16 sm:py-20 md:py-28 bg-gradient-to-b from-background via-muted/20 to-background">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_65%)]" />
       <div className="absolute left-1/4 top-8 h-56 w-56 rounded-full bg-orange-500/10 blur-[90px] pointer-events-none" />
       <div className="absolute right-1/4 bottom-8 h-56 w-56 rounded-full bg-amber-500/10 blur-[90px] pointer-events-none" />
 
-      <div className="container relative mx-auto px-6">
+      <div className="container relative mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-3xl">
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 14 }}
             whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45 }}
-            className="mb-10 text-center"
+            className="mb-8 sm:mb-10 text-center"
           >
             <Badge variant="outline" className="mb-4 px-4 py-1.5 text-xs">
               <HelpCircle className="mr-1.5 h-3 w-3" />
               FAQ
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Questions, answered clearly</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">Questions, answered clearly</h2>
             <p className="text-muted-foreground">
               Everything people ask before trusting a data-driven learning roadmap.
             </p>
@@ -90,7 +90,7 @@ export default function LandingFAQ() {
                   >
                     {isOpen && <BorderBeam size={220} duration={9} colorFrom="#f97316" colorTo="#f59e0b" />}
                     <Collapsible open={isOpen} onOpenChange={(nextOpen) => setOpenItem(nextOpen ? itemId : '')}>
-                      <CollapsibleTrigger className="group flex w-full items-center justify-between gap-4 px-5 py-4 text-left">
+                      <CollapsibleTrigger className="group flex w-full items-center justify-between gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 sm:py-4 text-left">
                         <span
                           className={cn(
                             'text-sm md:text-base font-semibold transition-colors',
@@ -106,7 +106,7 @@ export default function LandingFAQ() {
                           )}
                         />
                       </CollapsibleTrigger>
-                      <CollapsibleContent className="px-5 pb-5 text-sm leading-relaxed text-muted-foreground">
+                      <CollapsibleContent className="px-4 sm:px-5 pb-4 sm:pb-5 text-sm leading-relaxed text-muted-foreground">
                         {item.answer}
                       </CollapsibleContent>
                     </Collapsible>

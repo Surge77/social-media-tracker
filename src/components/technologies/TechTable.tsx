@@ -50,7 +50,7 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
         )}
       >
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[980px]">
             <thead>
               <tr className="border-b border-border bg-muted/30">
                 <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">

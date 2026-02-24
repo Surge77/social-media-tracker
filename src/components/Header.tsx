@@ -15,12 +15,12 @@ const Header = () => {
         ? "border-b border-border/50 bg-background/80 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
         : "border-b border-transparent bg-transparent shadow-none backdrop-blur-0"
     }`}>
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto px-4 sm:px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="h-6 w-6 text-primary transition-colors" />
-              <h1 className="text-xl font-bold text-foreground transition-colors">DevTrends</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground transition-colors">DevTrends</h1>
             </div>
             <Badge variant="secondary" className="text-xs transition-colors">
               BETA
@@ -45,12 +45,12 @@ const Header = () => {
             </a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <ThemeToggle />
             <AnimatedCTA
               href="/technologies"
               size="sm"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="hidden sm:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               Get Started →
             </AnimatedCTA>

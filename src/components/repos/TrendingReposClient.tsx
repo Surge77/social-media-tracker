@@ -78,7 +78,7 @@ export function TrendingReposClient() {
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.1 }}
-        className="mb-6 flex items-center gap-3"
+        className="mb-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"
       >
         <div className="flex-1">
           <RepoFilters
@@ -90,7 +90,7 @@ export function TrendingReposClient() {
         </div>
 
         {/* View toggle */}
-        <div className="flex items-center rounded-lg border border-border bg-card/30 p-1">
+        <div className="self-end flex items-center rounded-lg border border-border bg-card/30 p-1">
           <button
             onClick={() => setView('grid')}
             aria-label="Grid view"
@@ -144,7 +144,7 @@ export function TrendingReposClient() {
 
           {/* Page label */}
           {totalPages > 1 && (
-            <div className="mb-3 flex items-center justify-between">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm text-muted-foreground">
                 Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, repos.length)} of {repos.length} repos
               </p>

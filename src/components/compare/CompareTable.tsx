@@ -91,8 +91,8 @@ export const CompareTable = React.forwardRef<HTMLDivElement, CompareTableProps>(
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
           transition={prefersReducedMotion ? {} : { duration: 0.4 }}
-          className="grid gap-3"
-          style={{ gridTemplateColumns: `repeat(${technologies.length}, 1fr)` }}
+          className="grid gap-3 overflow-x-auto pb-1 md:overflow-visible"
+          style={{ gridTemplateColumns: `repeat(${technologies.length}, minmax(160px, 1fr))` }}
         >
           {technologies.map((tech) => {
             const isHighest =

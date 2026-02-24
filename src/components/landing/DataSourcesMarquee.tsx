@@ -80,14 +80,14 @@ const sources: Source[] = [
 
 function SourceBadge({ source }: { source: Source }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-full border border-border/40 bg-card/50 px-3.5 py-2 backdrop-blur-sm">
+    <div className="flex items-center gap-2 rounded-full border border-border/40 bg-card/50 px-3 py-1.5 sm:px-3.5 sm:py-2 backdrop-blur-sm">
       <div
-        className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
+        className="w-4 h-4 sm:w-5 sm:h-5 rounded-md flex items-center justify-center shrink-0"
         style={{ backgroundColor: source.bg }}
       >
         {source.logo}
       </div>
-      <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+      <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
         {source.name}
       </span>
     </div>
@@ -96,12 +96,12 @@ function SourceBadge({ source }: { source: Source }) {
 
 export default function DataSourcesMarquee() {
   return (
-    <section className="relative overflow-hidden py-8 border-y border-border/30 bg-gradient-to-r from-background via-muted/10 to-background">
+    <section className="relative overflow-hidden py-6 sm:py-8 border-y border-border/30 bg-gradient-to-r from-background via-muted/10 to-background">
       {/* Fade edges */}
-      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-background to-transparent" />
-      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-background to-transparent" />
+      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 sm:w-24 bg-gradient-to-r from-background to-transparent" />
+      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 sm:w-24 bg-gradient-to-l from-background to-transparent" />
 
-      <Marquee pauseOnHover className="[--duration:28s]" repeat={3}>
+      <Marquee pauseOnHover className="[--duration:28s] sm:[--duration:24s]" repeat={3}>
         {sources.map(s => (
           <SourceBadge key={s.name} source={s} />
         ))}
