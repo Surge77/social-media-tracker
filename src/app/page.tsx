@@ -5,7 +5,7 @@ import HeroNew from '@/components/landing/HeroNew';
 const DataSourcesMarquee = dynamic(() => import('@/components/landing/DataSourcesMarquee'), { ssr: true });
 const BentoFeaturesNew   = dynamic(() => import('@/components/landing/BentoFeaturesNew'),   { ssr: true });
 const TechCloudSection   = dynamic(() => import('@/components/landing/TechCloudSection'),   { ssr: true });
-const StatsSection       = dynamic(() => import('@/components/landing/StatsSection'),       { ssr: true });
+const LandingFAQ         = dynamic(() => import('@/components/landing/LandingFAQ'),         { ssr: true });
 const FinalCTA           = dynamic(() => import('@/components/landing/FinalCTA'),           { ssr: true });
 const Footer             = dynamic(() => import('@/components/Footer'),                     { ssr: true });
 
@@ -17,7 +17,7 @@ export default function HomePage() {
       <DataSourcesMarquee />
       <BentoFeaturesNew />
       <TechCloudSection />
-      <StatsSection />
+      <LandingFAQ />
       <FinalCTA />
       <Footer />
     </div>

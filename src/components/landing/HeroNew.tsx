@@ -61,7 +61,7 @@ export default function HeroNew() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
               </span>
               <span className="bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 bg-clip-text text-transparent font-semibold tracking-wide">
-                FREE &amp; OPEN BETA
+                OPEN BETA
               </span>
             </AnimatedGradientText>
           </motion.div>
