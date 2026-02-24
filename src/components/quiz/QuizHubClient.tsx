@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
+import { MagicCard } from '@/components/ui/magic-card'
 import { getQuizResults } from '@/lib/quiz/storage'
 import type { QuizType } from '@/lib/quiz/types'
 
@@ -107,11 +108,11 @@ function QuizCard({ quiz, lastTaken }: { quiz: QuizMeta; lastTaken?: number }) {
 
   return (
     <Link href={quiz.href} className="group block h-full">
-      <Card className="relative h-full overflow-hidden border-2 border-border hover:border-primary/50 transition-all hover:shadow-lg">
+      <MagicCard className="h-full rounded-xl border-2 border-border hover:border-primary/50 transition-all hover:shadow-xl bg-card">
         {/* Gradient background */}
         <div
           className={cn(
-            'absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity bg-gradient-to-br',
+            'absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity bg-gradient-to-br rounded-[inherit]',
             quiz.gradient
           )}
         />
@@ -174,7 +175,7 @@ function QuizCard({ quiz, lastTaken }: { quiz: QuizMeta; lastTaken?: number }) {
             <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
-      </Card>
+      </MagicCard>
     </Link>
   )
 }

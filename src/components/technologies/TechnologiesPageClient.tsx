@@ -19,6 +19,8 @@ import { LiveContextStrip } from '@/components/technologies/LiveContextStrip'
 import PopularStacks from '@/components/technologies/PopularStacks'
 import MethodologyPanel from '@/components/technologies/MethodologyPanel'
 import { Loading } from '@/components/ui/loading'
+import { DotPattern } from '@/components/ui/dot-pattern'
+import { WordPullUp } from '@/components/ui/word-pull-up'
 import type { TechnologyCategory, TechnologyWithScore } from '@/types'
 import { CATEGORY_LABELS } from '@/types'
 
@@ -116,17 +118,18 @@ export function TechnologiesPageClient() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
+    <div className="relative container mx-auto max-w-7xl px-4 py-8">
+      <DotPattern className="opacity-40" />
 
       {/* ① Page Header */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4 }}
-        className="mb-8"
+        className="mb-8 relative"
       >
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Technology Explorer
+          <WordPullUp text="Technology Explorer" />
         </h1>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <p className="text-muted-foreground">

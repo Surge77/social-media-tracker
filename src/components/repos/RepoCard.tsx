@@ -1,5 +1,8 @@
+'use client'
+
 import React from 'react'
 import { Star, GitFork, AlertCircle, Clock, ExternalLink, MessageSquare } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import type { TrendingRepo } from '@/lib/api/github-trending'
 
 interface RepoCardProps {
@@ -25,13 +28,19 @@ function timeAgo(isoDate: string | null): string {
 
 export function RepoCard({ repo, rank }: RepoCardProps) {
   const [owner, repoName] = repo.full_name.split('/')
+  const isHot = repo.stars_gained >= 500
 
   return (
     <a
       href={repo.html_url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group flex flex-col rounded-xl border border-border bg-card/30 p-4 backdrop-blur-sm transition-all duration-200 hover:border-primary/40 hover:bg-card/60 hover:shadow-lg hover:shadow-primary/5"
+      className={cn(
+        'group flex flex-col rounded-xl border bg-card/30 p-4 backdrop-blur-sm transition-all duration-200 hover:bg-card/60 hover:shadow-lg',
+        isHot
+          ? 'border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-emerald-500/10'
+          : 'border-border hover:border-primary/40 hover:shadow-primary/5'
+      )}
     >
       {/* Header: avatar + owner/repo + rank + external link */}
       <div className="mb-3 flex items-start gap-3">

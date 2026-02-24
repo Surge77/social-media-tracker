@@ -6,6 +6,8 @@ import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown, Flame } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { Sparkline } from './Sparkline'
+import { BlurFade } from '@/components/ui/blur-fade'
+import { NumberTicker } from '@/components/ui/number-ticker'
 import { cn } from '@/lib/utils'
 
 interface MoverEntry {
@@ -144,12 +146,9 @@ export function MoversShakers() {
                 </p>
               ) : (
                 data.risers.map((mover, index) => (
-                  <MoverRow
-                    key={mover.slug}
-                    mover={mover}
-                    index={index}
-                    type="riser"
-                  />
+                  <BlurFade key={mover.slug} delay={index * 0.06} duration={0.35}>
+                    <MoverRow mover={mover} index={index} type="riser" />
+                  </BlurFade>
                 ))
               )}
             </div>
@@ -171,12 +170,9 @@ export function MoversShakers() {
                 </p>
               ) : (
                 data.fallers.map((mover, index) => (
-                  <MoverRow
-                    key={mover.slug}
-                    mover={mover}
-                    index={index}
-                    type="faller"
-                  />
+                  <BlurFade key={mover.slug} delay={index * 0.06} duration={0.35}>
+                    <MoverRow mover={mover} index={index} type="faller" />
+                  </BlurFade>
                 ))
               )}
             </div>
@@ -211,9 +207,9 @@ function MoverRow({ mover, index, type }: MoverRowProps) {
             <span className="font-semibold" style={{ color: mover.color }}>
               {mover.name}
             </span>
-            <span className={cn('text-sm font-medium', deltaColor)}>
-              {mover.score_delta > 0 ? '+' : ''}
-              {mover.score_delta.toFixed(1)}
+            <span className={cn('text-sm font-medium tabular-nums', deltaColor)}>
+              {mover.score_delta > 0 ? '+' : '-'}
+              <NumberTicker value={Math.abs(mover.score_delta)} decimalPlaces={1} className={deltaColor} />
             </span>
             <span className={cn('text-xs font-medium', deltaColor)}>
               {rankChangeIcon}

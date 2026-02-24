@@ -8,6 +8,7 @@ import { RepoCard } from '@/components/repos/RepoCard'
 import { RepoTable } from '@/components/repos/RepoTable'
 import { RepoFilters } from '@/components/repos/RepoFilters'
 import { RisingStarsSection } from '@/components/repos/RisingStarsSection'
+import { WordPullUp } from '@/components/ui/word-pull-up'
 import { Loading } from '@/components/ui/loading'
 import type { TrendingRepo } from '@/lib/api/github-trending'
 
@@ -66,7 +67,9 @@ export function TrendingReposClient() {
         transition={prefersReducedMotion ? {} : { duration: 0.4 }}
         className="mb-6"
       >
-        <h1 className="mb-1 text-3xl font-bold tracking-tight text-foreground">Trending Repos</h1>
+        <h1 className="mb-1 text-3xl font-bold tracking-tight text-foreground">
+          <WordPullUp text="Trending Repos" />
+        </h1>
         <p className="text-muted-foreground">Open-source repositories gaining momentum on GitHub</p>
       </motion.div>
 

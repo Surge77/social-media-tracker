@@ -227,6 +227,7 @@ export function TechnologyDetailClient() {
         {ai.insight && (
           <AIInsightCard
             insight={ai.insight}
+            score={current_scores?.composite_score ?? undefined}
             freshness={ai.freshness}
             age={ai.age}
           >

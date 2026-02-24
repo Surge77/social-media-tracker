@@ -80,6 +80,10 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		keyframes: {
+  			'shimmer-sweep': {
+  				'0%':   { transform: 'translateX(-100%)' },
+  				'100%': { transform: 'translateX(200%)' },
+  			},
   			'retro-grid': {
   				'0%':   { transform: 'translateY(-50%)' },
   				'100%': { transform: 'translateY(0)' },
@@ -153,7 +157,8 @@ export default {
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			'float': 'float 6s ease-in-out infinite',
   			'fade-in': 'fade-in 0.3s ease-out',
-  			'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+  			'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+  			'shimmer-sweep': 'shimmer-sweep 2s linear infinite',
   		}
   	}
   },

@@ -2,89 +2,101 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Github, Linkedin, Mail, Twitter } from 'lucide-react'
+import { Github, Twitter, Linkedin, Mail, Activity } from 'lucide-react'
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
+import { DotPattern } from '@/components/ui/dot-pattern'
+
+const NAV_SECTIONS = [
+  {
+    title: 'Product',
+    links: [
+      { name: 'Technologies', href: '/technologies' },
+      { name: 'Compare', href: '/compare' },
+      { name: 'Repos', href: '/repos' },
+      { name: 'Languages', href: '/languages' },
+    ],
+  },
+  {
+    title: 'Tools',
+    links: [
+      { name: 'Ask AI', href: '/ask' },
+      { name: 'Quiz', href: '/quiz' },
+      { name: 'Digest', href: '/digest' },
+      { name: 'Methodology', href: '/methodology' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { name: 'Home', href: '/' },
+      { name: 'Contact', href: 'mailto:hello@devtrends.io' },
+    ],
+  },
+]
+
+const SOCIALS = [
+  { name: 'GitHub',   href: 'https://github.com',   Icon: Github },
+  { name: 'Twitter',  href: 'https://twitter.com',   Icon: Twitter },
+  { name: 'LinkedIn', href: 'https://linkedin.com',  Icon: Linkedin },
+  { name: 'Email',    href: 'mailto:hello@devtrends.io', Icon: Mail },
+]
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear()
-
-  const footerSections = [
-    {
-      title: 'Product',
-      links: [
-        { name: 'Technologies', href: '/technologies' },
-        { name: 'Compare', href: '/compare' },
-        { name: 'Repos', href: '/repos' },
-        { name: 'Languages', href: '/languages' },
-      ],
-    },
-    {
-      title: 'Resources',
-      links: [
-        { name: 'Quiz', href: '/quiz' },
-        { name: 'Ask AI', href: '/ask' },
-        { name: 'Methodology', href: '/methodology' },
-        { name: 'Digest', href: '/digest' },
-      ],
-    },
-    {
-      title: 'Company',
-      links: [
-        { name: 'Home', href: '/' },
-        { name: 'Terminal', href: '/terminal-page' },
-        { name: 'Contact', href: 'mailto:hello@devtrends.io' },
-      ],
-    },
-  ]
-
-  const socialLinks = [
-    { name: 'GitHub', href: 'https://github.com', icon: Github },
-    { name: 'Twitter', href: 'https://twitter.com', icon: Twitter },
-    { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin },
-    { name: 'Email', href: 'mailto:hello@devtrends.io', icon: Mail },
-  ]
+  const year = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-border/60 bg-card/40">
-      <div className="container mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 gap-7 md:grid-cols-5">
-          <div className="md:col-span-2">
-            <Link href="/" className="mb-4 inline-flex items-center">
-              <DevTrendsLogo size="sm" />
+    <footer className="relative overflow-hidden border-t border-border/40 bg-background/95">
+      {/* Dot pattern background */}
+      <DotPattern className="opacity-30" />
+
+      {/* Orange gradient rule at top */}
+      <div className="relative h-px w-full bg-gradient-to-r from-transparent via-orange-500/70 to-transparent" />
+
+      <div className="relative container mx-auto max-w-7xl px-6 pt-14 pb-0">
+
+        {/* Main content grid */}
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-6 lg:grid-cols-5">
+
+          {/* Brand column — spans 2 cols */}
+          <div className="col-span-2 lg:col-span-2">
+            <Link href="/" className="inline-flex mb-5">
+              <DevTrendsLogo size="md" />
             </Link>
-            <p className="mb-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Developer Career Intelligence Platform. Track technology trends to make better
-              learning and career decisions.
+            <p className="max-w-[260px] text-sm leading-relaxed text-muted-foreground mb-6">
+              Developer Career Intelligence Platform. Know what to learn before the market moves.
             </p>
-            <div className="flex gap-3">
-              {socialLinks.map((social) => {
-                const Icon = social.icon
-                return (
-                  <a
-                    key={social.name}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-md border border-border/70 bg-background transition-colors duration-200 hover:border-primary/60 hover:bg-primary/5"
-                    aria-label={social.name}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </a>
-                )
-              })}
+
+            {/* Social icons */}
+            <div className="flex gap-2">
+              {SOCIALS.map(({ name, href, Icon }) => (
+                <a
+                  key={name}
+                  href={href}
+                  target={href.startsWith('http') ? '_blank' : undefined}
+                  rel="noopener noreferrer"
+                  aria-label={name}
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-border/50 bg-card/30 text-muted-foreground transition-all duration-200 hover:border-primary/50 hover:bg-primary/10 hover:text-foreground hover:scale-110"
+                >
+                  <Icon size={14} />
+                </a>
+              ))}
             </div>
           </div>
 
-          {footerSections.map((section) => (
-            <div key={section.title}>
-              <h3 className="mb-3 text-sm font-semibold">{section.title}</h3>
-              <ul className="space-y-2">
+          {/* Nav columns */}
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.title} className="col-span-1">
+              <p className="mb-4 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+                {section.title}
+              </p>
+              <ul className="space-y-2.5">
                 {section.links.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                      className="group flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
                     >
+                      <span className="h-px w-0 bg-primary transition-all duration-200 group-hover:w-3" />
                       {link.name}
                     </Link>
                   </li>
@@ -94,11 +106,43 @@ const Footer = () => {
           ))}
         </div>
 
-        <div className="mt-6 border-t border-border/50 pt-4">
-          <div className="flex items-center justify-center text-sm text-muted-foreground">
-            <p>© {currentYear} DevTrends. All rights reserved.</p>
+        {/* Bottom bar */}
+        <div className="relative mt-10 flex flex-col items-center justify-between gap-3 border-t border-border/30 py-4 sm:flex-row">
+          <p className="text-xs text-muted-foreground/60">
+            © {year} DevTrends. All rights reserved.
+          </p>
+          {/* Live data badge */}
+          <div className="flex items-center gap-4">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-[11px] font-medium text-emerald-400">
+              <Activity size={10} className="animate-pulse" />
+              14 live data sources
+            </span>
+            <span className="font-mono text-[11px] text-muted-foreground/40">
+              v0.1.0
+            </span>
           </div>
         </div>
+      </div>
+
+      {/* Giant decorative wordmark — fades bottom-to-transparent */}
+      <div
+        className="pointer-events-none select-none overflow-hidden"
+        aria-hidden
+      >
+        <p
+          className="text-center font-black uppercase leading-none tracking-tighter"
+          style={{
+            fontSize: 'clamp(3.5rem, 14vw, 9.5rem)',
+            background: 'linear-gradient(to bottom, hsl(var(--foreground)/0.06) 0%, transparent 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            marginTop: '-0.1em',
+            paddingBottom: '0.05em',
+          }}
+        >
+          DEVTRENDS
+        </p>
       </div>
     </footer>
   )

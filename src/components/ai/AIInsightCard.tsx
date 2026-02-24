@@ -14,6 +14,8 @@ import {
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { ScoreRing } from '@/components/ui/score-ring'
+import { TerminalCard } from '@/components/ui/terminal-card'
 import type { TechInsight } from '@/lib/ai/generators/tech-insight'
 
 // ---- Priority config ----
@@ -142,6 +144,7 @@ function StaleIndicator({ freshness, age }: { freshness: string; age: number | n
 
 interface AIInsightCardProps {
   insight: TechInsight
+  score?: number | null
   freshness?: 'fresh' | 'stale' | 'expired' | null
   age?: number | null
   children?: React.ReactNode // slot for FeedbackButtons
@@ -150,6 +153,7 @@ interface AIInsightCardProps {
 
 export function AIInsightCard({
   insight,
+  score,
   freshness,
   age,
   children,
@@ -160,24 +164,28 @@ export function AIInsightCard({
 
   const sections = [
     {
-      icon: <TrendingUp size={14} />,
+      icon: <TrendingUp size={13} />,
       title: 'Trend',
       content: insight.trendNarrative,
+      prompt: 'trend-narrative',
     },
     {
-      icon: <BookOpen size={14} />,
+      icon: <BookOpen size={13} />,
       title: 'Career Advice',
       content: insight.careerAdvice,
+      prompt: 'career-advice',
     },
     {
-      icon: <AlertTriangle size={14} />,
+      icon: <AlertTriangle size={13} />,
       title: 'Risk Factors',
       content: insight.riskFactors,
+      prompt: 'risk-factors',
     },
     {
-      icon: <BarChart3 size={14} />,
+      icon: <BarChart3 size={13} />,
       title: 'Score Breakdown',
       content: insight.scoreExplanation,
+      prompt: 'score-breakdown',
     },
   ]
 
@@ -190,9 +198,13 @@ export function AIInsightCard({
     >
       {/* Header */}
       <div className="flex items-start gap-3">
-        <div className="rounded-md bg-primary/10 p-2">
-          <Lightbulb className="h-5 w-5 text-primary" />
-        </div>
+        {score != null ? (
+          <ScoreRing score={score} size={64} strokeWidth={5} label="score" />
+        ) : (
+          <div className="rounded-md bg-primary/10 p-2 shrink-0">
+            <Lightbulb className="h-5 w-5 text-primary" />
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <h2 className="text-sm font-semibold text-foreground">
@@ -221,23 +233,24 @@ export function AIInsightCard({
         </div>
       </div>
 
-      {/* Detail sections */}
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {sections.map((section) => (
-          <div
-            key={section.title}
-            className="rounded-md border border-border/50 bg-card/30 p-3"
-          >
-            <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-foreground/80">
-              {section.icon}
-              {section.title}
+      {/* Detail sections in terminal card */}
+      <TerminalCard title="ai-analysis" className="mt-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {sections.map((section) => (
+            <div key={section.title} className="space-y-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-primary/70">{section.icon}</span>
+                <span className="font-mono text-[11px] font-semibold text-primary/80">
+                  {section.title}
+                </span>
+              </div>
+              <p className="font-mono text-[11px] leading-relaxed text-zinc-400">
+                {section.content}
+              </p>
             </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {section.content}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </TerminalCard>
 
       {/* Confidence + lifecycle note */}
       {insight.confidenceNote && (

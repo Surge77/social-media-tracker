@@ -11,6 +11,7 @@ import { SubScoreBars } from '@/components/technologies/SubScoreBars'
 import { RankChangeBadge } from '@/components/technologies/RankChangeBadge'
 import LifecycleBadge from '@/components/technologies/LifecycleBadge'
 import QuickCompareLinks from '@/components/technologies/QuickCompareLinks'
+import { NumberTicker } from '@/components/ui/number-ticker'
 import { generateVerdict, type Verdict } from '@/lib/insights/verdict'
 import type { TechnologyWithScore } from '@/types'
 
@@ -129,7 +130,7 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
                 {verdict.momentumLabel}
               </span>
               <span className="flex items-center gap-1">
-                Score <span className="font-medium text-foreground">{Math.round(technology.composite_score ?? 0)}</span>
+                Score <NumberTicker value={Math.round(technology.composite_score ?? 0)} className="font-medium text-foreground" />
               </span>
               <SubScoreBars
                 github={technology.github_score}

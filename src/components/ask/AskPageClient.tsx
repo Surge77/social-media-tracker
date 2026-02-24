@@ -7,6 +7,10 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAIChat } from '@/hooks/useAIChat'
 import { ChatMessage } from '@/components/ask/ChatMessage'
 import { SuggestedQuestions } from '@/components/ask/SuggestedQuestions'
+import { HyperText } from '@/components/ui/hyper-text'
+import { BorderBeam } from '@/components/ui/border-beam'
+import { BlurFade } from '@/components/ui/blur-fade'
+import { ShimmerButton } from '@/components/ui/shimmer-button'
 import { v4 as uuidv4 } from 'uuid'
 
 function getOrCreateSessionId(): string {
@@ -77,7 +81,7 @@ export function AskPageClient() {
         transition={prefersReducedMotion ? {} : { duration: 0.5 }}
       >
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold">Ask DevTrends AI</h1>
+          <h1 className="text-3xl font-bold"><HyperText text="Ask DevTrends AI" /></h1>
           {messages.length > 0 && (
             <button
               onClick={handleNewChat}
@@ -101,20 +105,22 @@ export function AskPageClient() {
 
         <div className="space-y-4">
           {/* Chat messages */}
-          <div className="min-h-[400px] max-h-[600px] overflow-y-auto rounded-lg border bg-card p-6 space-y-4">
+          <div className="relative min-h-[400px] max-h-[600px] overflow-y-auto rounded-lg border bg-card p-6 space-y-4">
+            {isStreaming && <BorderBeam size={400} duration={4} colorFrom="#f97316" colorTo="#f59e0b" />}
             {messages.length === 0 && (
               <div className="flex items-center justify-center h-full text-center text-muted-foreground">
                 <p>Start a conversation by asking a question below</p>
               </div>
             )}
 
-            {messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                role={message.role}
-                content={message.content}
-                timestamp={message.timestamp}
-              />
+            {messages.map((message, i) => (
+              <BlurFade key={message.id} delay={0} duration={0.35}>
+                <ChatMessage
+                  role={message.role}
+                  content={message.content}
+                  timestamp={message.timestamp}
+                />
+              </BlurFade>
             ))}
 
             {error && (
@@ -164,14 +170,14 @@ export function AskPageClient() {
               disabled={isStreaming}
             />
 
-            <button
+            <ShimmerButton
               type="submit"
               disabled={!input.trim() || isStreaming}
               aria-label="Send message"
-              className="absolute bottom-3 right-3 p-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="absolute bottom-3 right-3 p-2"
             >
               <Send className="w-4 h-4" />
-            </button>
+            </ShimmerButton>
           </form>
 
           <p id="chat-input-hint" className="text-xs text-muted-foreground text-center">
