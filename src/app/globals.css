@@ -9,27 +9,27 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Warm off-white base — no more pure white torch effect */
-    --background: 220 16% 96%;
+    --background: 220 16% 94%;
     --foreground: 222 25% 16%;
 
     /* Cards sit slightly lighter than the background so they read as surfaces */
-    --card: 220 20% 99%;
+    --card: 220 18% 97%;
     --card-foreground: 222 25% 16%;
 
-    --popover: 220 20% 99%;
+    --popover: 220 18% 97%;
     --popover-foreground: 222 25% 16%;
 
     /* Primary keeps its near-black feel but with a blue undertone */
     --primary: 222 25% 14%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 14% 91%;
+    --secondary: 220 14% 89%;
     --secondary-foreground: 222 20% 18%;
 
-    --muted: 220 14% 91%;
+    --muted: 220 14% 89%;
     --muted-foreground: 220 10% 46%;
 
-    --accent: 220 14% 91%;
+    --accent: 220 14% 89%;
     --accent-foreground: 222 20% 14%;
 
     --success: 158 64% 42%;
@@ -41,16 +41,16 @@ All colors MUST be HSL.
     --destructive: 0 72% 54%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 14% 86%;
-    --input: 220 14% 86%;
+    --border: 220 14% 83%;
+    --input: 220 14% 83%;
     --ring: 222 25% 16%;
 
     --radius: 0.5rem;
 
     --gradient-primary: linear-gradient(135deg, hsl(16 100% 60%), hsl(25 100% 58%));
-    --gradient-card: linear-gradient(135deg, hsl(220 20% 98%), hsl(220 20% 99%));
+    --gradient-card: linear-gradient(135deg, hsl(220 18% 96%), hsl(220 18% 97%));
     --shadow-glow: 0 0 40px hsl(16 100% 60% / 0.2);
-    --shadow-card: 0 4px 20px hsl(220 14% 0% / 0.08);
+    --shadow-card: 0 4px 20px hsl(220 14% 0% / 0.07);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --chart-1: 12 76% 55%;
     --chart-2: 173 58% 36%;

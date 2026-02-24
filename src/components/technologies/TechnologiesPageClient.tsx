@@ -15,7 +15,7 @@ import { MarketBubbleMap } from '@/components/technologies/MarketBubbleMap'
 import { MarketPulse } from '@/components/technologies/MarketPulse'
 import { CategoryHealth } from '@/components/technologies/CategoryHealth'
 import { WeeklyDigest } from '@/components/technologies/WeeklyDigest'
-import { ScoreDistribution } from '@/components/technologies/ScoreDistribution'
+import { LiveContextStrip } from '@/components/technologies/LiveContextStrip'
 import PopularStacks from '@/components/technologies/PopularStacks'
 import MethodologyPanel from '@/components/technologies/MethodologyPanel'
 import { Loading } from '@/components/ui/loading'
@@ -255,25 +255,8 @@ export function TechnologiesPageClient() {
           <ViewToggle view={viewMode} onViewChange={setViewMode} />
         </div>
 
-        {/* ⑧ Score Distribution (inline below filters) */}
-        <motion.div
-          variants={prefersReducedMotion ? {} : sectionVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-          className="mb-4"
-        >
-          <ScoreDistribution
-            data={stats?.score_distribution ?? null}
-            isLoading={statsLoading}
-            isError={statsError}
-          />
-        </motion.div>
-
-        {/* ⑨ Result count */}
-        <p className="mb-4 text-sm text-muted-foreground">
-          {filtered.length} {filtered.length === 1 ? 'technology' : 'technologies'}
-        </p>
+        {/* ⑧ Live context strip */}
+        <LiveContextStrip filtered={filtered} total={allTechnologies.length} />
 
         {/* Empty state */}
         {filtered.length === 0 && (

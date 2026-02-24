@@ -1,0 +1,68 @@
+export const LANG_COLORS: Record<string, string> = {
+  JavaScript:     '#f7df1e',
+  TypeScript:     '#3178c6',
+  Python:         '#3776ab',
+  Java:           '#ed8b00',
+  Rust:           '#dea584',
+  Go:             '#00add8',
+  'C++':          '#00599c',
+  'C#':           '#239120',
+  C:              '#a8b9cc',
+  PHP:            '#777bb4',
+  Ruby:           '#cc342d',
+  Swift:          '#f05138',
+  Kotlin:         '#7f52ff',
+  Scala:          '#dc322f',
+  R:              '#276dc3',
+  Dart:           '#00b4ab',
+  Shell:          '#89e051',
+  Lua:            '#000080',
+  Perl:           '#0298c3',
+  Haskell:        '#5e5086',
+  Elixir:         '#6e4a7e',
+  Groovy:         '#4298b8',
+  Julia:          '#9558b2',
+  'F#':           '#b845fc',
+  Clojure:        '#5881d8',
+  Zig:            '#f7a41d',
+  Crystal:        '#776791',
+  Nim:            '#ffe953',
+  'Objective-C':  '#438eff',
+  MATLAB:         '#e16737',
+  PowerShell:     '#012456',
+  Assembly:       '#6e4c13',
+  Erlang:         '#b83998',
+  OCaml:          '#ef7a08',
+  Prolog:         '#74283c',
+  Solidity:       '#363636',
+  Fortran:        '#4d41b1',
+  'Visual Basic':  '#945db7',
+  D:              '#ba595e',
+  Ada:            '#02f88c',
+}
+
+export const LANG_CATEGORIES: Record<string, string> = {
+  JavaScript: 'Web',    TypeScript: 'Web',    PHP: 'Web',
+  Ruby: 'Web',          Dart: 'Web',          'Visual Basic': 'Web',
+  Python: 'Data',       R: 'Data',            Julia: 'Data',
+  MATLAB: 'Data',       Scala: 'Data',
+  Rust: 'Systems',      C: 'Systems',         'C++': 'Systems',
+  Go: 'Systems',        Zig: 'Systems',       Assembly: 'Systems',
+  Ada: 'Systems',       Fortran: 'Systems',   D: 'Systems',
+  Nim: 'Systems',       Crystal: 'Systems',
+  Swift: 'Mobile',      Kotlin: 'Mobile',     'Objective-C': 'Mobile',
+  'C#': 'Mobile',
+  Java: 'JVM',          Groovy: 'JVM',
+  Shell: 'Scripting',   PowerShell: 'Scripting', Lua: 'Scripting', Perl: 'Scripting',
+  Haskell: 'Functional', Elixir: 'Functional', 'F#': 'Functional',
+  Clojure: 'Functional', OCaml: 'Functional', Erlang: 'Functional',
+  Solidity: 'Blockchain', Prolog: 'Logic',
+}
+
+export const CATEGORIES = ['All', 'Web', 'Systems', 'Data', 'Mobile', 'JVM', 'Scripting', 'Functional']
+
+export function fmt(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(0)}k`
+  return String(n)
+}
