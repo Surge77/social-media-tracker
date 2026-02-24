@@ -19,7 +19,7 @@ export async function GET(
     const { slug } = await params
     const supabase = createSupabaseAdminClient()
 
-    // Fetch the technology
+    // Fetch the technology first — need id/category for the parallel queries below
     const { data: technology, error: techError } = await supabase
       .from('technologies')
       .select('*')
@@ -31,27 +31,49 @@ export async function GET(
       return Response.json({ error: 'Technology not found' }, { status: 404 })
     }
 
-    // Fetch current scores (most recent date)
-    const { data: currentScores } = await supabase
-      .from('daily_scores')
-      .select('*')
-      .eq('technology_id', technology.id)
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
-
-    // Fetch 90-day chart data
     const ninetyDaysAgo = new Date()
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
 
-    const { data: chartRows } = await supabase
-      .from('daily_scores')
-      .select('score_date, composite_score, github_score, community_score, jobs_score, ecosystem_score')
-      .eq('technology_id', technology.id)
-      .gte('score_date', ninetyDaysAgo.toISOString().split('T')[0])
-      .order('score_date', { ascending: true })
+    // Run all independent queries in parallel
+    const [currentScoresResult, chartResult, signalsResult, relatedTechsResult] = await Promise.all([
+      // Most recent score row
+      supabase
+        .from('daily_scores')
+        .select('*')
+        .eq('technology_id', technology.id)
+        .order('score_date', { ascending: false })
+        .limit(1)
+        .single(),
 
-    const chart_data = (chartRows ?? []).map((row) => ({
+      // 90-day chart
+      supabase
+        .from('daily_scores')
+        .select('score_date, composite_score, github_score, community_score, jobs_score, ecosystem_score')
+        .eq('technology_id', technology.id)
+        .gte('score_date', ninetyDaysAgo.toISOString().split('T')[0])
+        .order('score_date', { ascending: true }),
+
+      // Latest signals from data_points_latest (indexed single-row lookup per metric)
+      supabase
+        .from('data_points_latest')
+        .select('source, metric, value')
+        .eq('technology_id', technology.id),
+
+      // Related techs in same category
+      supabase
+        .from('technologies')
+        .select('id, slug, name, color')
+        .eq('category', technology.category)
+        .eq('is_active', true)
+        .neq('id', technology.id),
+    ])
+
+    const currentScores = currentScoresResult.data
+    const chartRows = chartResult.data ?? []
+    const dataPoints = signalsResult.data ?? []
+    const relatedTechs = relatedTechsResult.data ?? []
+
+    const chart_data = chartRows.map((row) => ({
       date: row.score_date,
       composite: Number(row.composite_score),
       github: Number(row.github_score ?? 0),
@@ -60,28 +82,12 @@ export async function GET(
       ecosystem: Number(row.ecosystem_score ?? 0),
     }))
 
-    // Fetch latest signals from today's data_points
-    const today = new Date().toISOString().split('T')[0]
-    const { data: dataPoints } = await supabase
-      .from('data_points')
-      .select('source, metric, value')
-      .eq('technology_id', technology.id)
-      .eq('measured_at', today)
+    const latest_signals = buildLatestSignals(dataPoints)
 
-    const latest_signals = buildLatestSignals(dataPoints ?? [])
-
-    // Fetch related technologies (same category, top 6 by score, excluding self)
-    const { data: relatedTechs } = await supabase
-      .from('technologies')
-      .select('id, slug, name, color')
-      .eq('category', technology.category)
-      .eq('is_active', true)
-      .neq('id', technology.id)
-
-    // Get scores for related techs
+    // Fetch related tech scores (depends on relatedTechs result above)
     const relatedWithScores: Array<{ slug: string; name: string; color: string; composite_score: number }> = []
 
-    if (relatedTechs && relatedTechs.length > 0 && currentScores) {
+    if (relatedTechs.length > 0 && currentScores) {
       const relatedIds = relatedTechs.map((t) => t.id)
       const { data: relatedScores } = await supabase
         .from('daily_scores')
@@ -149,10 +155,13 @@ export async function GET(
 function buildLatestSignals(
   dataPoints: Array<{ source: string; metric: string; value: number }>
 ) {
-  const get = (source: string, metric: string): number | null => {
-    const dp = dataPoints.find((d) => d.source === source && d.metric === metric)
-    return dp ? Number(dp.value) : null
+  // O(1) lookup via Map instead of repeated .find() calls
+  const dpMap = new Map<string, number>()
+  for (const dp of dataPoints) {
+    dpMap.set(`${dp.source}:${dp.metric}`, Number(dp.value))
   }
+  const get = (source: string, metric: string): number | null =>
+    dpMap.get(`${source}:${metric}`) ?? null
 
   const stars = get('github', 'stars')
   const forks = get('github', 'forks')

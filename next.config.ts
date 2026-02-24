@@ -2,14 +2,21 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    // Only list actually installed Radix packages (OPT-06)
+    // All installed Radix packages + heavy libs — enables proper tree-shaking
     optimizePackageImports: [
       '@radix-ui/react-collapsible',
       '@radix-ui/react-label',
       '@radix-ui/react-progress',
       '@radix-ui/react-slot',
+      '@radix-ui/primitive',
+      '@radix-ui/react-compose-refs',
+      '@radix-ui/react-context',
+      '@radix-ui/react-id',
+      '@radix-ui/react-presence',
+      '@radix-ui/react-primitive',
       'lucide-react',
-      'framer-motion'
+      'framer-motion',
+      'recharts',
     ]
   },
   // Optimize bundle splitting

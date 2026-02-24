@@ -40,9 +40,11 @@ export async function resilientAICall<T>(
           () => generateFn(primary.provider),
           { maxRetries: 2 },
           (attempt, _err, delay) => {
-            console.warn(
-              `[AI] Retry ${attempt} for ${useCase} (${primary.keyConfig.provider}), waiting ${delay}ms`
-            )
+            if (process.env.NODE_ENV === 'development') {
+              console.warn(
+                `[AI] Retry ${attempt} for ${useCase} (${primary.keyConfig.provider}), waiting ${delay}ms`
+              )
+            }
           }
         )
       )
@@ -53,10 +55,9 @@ export async function resilientAICall<T>(
         primary.keyConfig,
         (error as { status?: number })?.status
       )
-      console.error(
-        `[AI] Primary provider failed for ${useCase}:`,
-        (error as Error).message
-      )
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`[AI] Primary provider failed for ${useCase}:`, (error as Error).message)
+      }
     }
   }
 
@@ -80,10 +81,9 @@ export async function resilientAICall<T>(
         fallbackKey,
         (error as { status?: number })?.status
       )
-      console.error(
-        `[AI] Fallback ${fallbackProvider} failed for ${useCase}:`,
-        (error as Error).message
-      )
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`[AI] Fallback ${fallbackProvider} failed for ${useCase}:`, (error as Error).message)
+      }
     }
   }
 
@@ -131,10 +131,9 @@ export async function resilientAIStreamCall(
         primary.keyConfig,
         (error as { status?: number })?.status
       )
-      console.error(
-        `[AI Stream] Primary provider failed for ${useCase}:`,
-        (error as Error).message
-      )
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`[AI Stream] Primary provider failed for ${useCase}:`, (error as Error).message)
+      }
     }
   }
 
@@ -155,15 +154,16 @@ export async function resilientAIStreamCall(
         fallbackKey,
         (error as { status?: number })?.status
       )
-      console.error(
-        `[AI Stream] Fallback ${fallbackProvider} failed for ${useCase}:`,
-        (error as Error).message
-      )
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`[AI Stream] Fallback ${fallbackProvider} failed for ${useCase}:`, (error as Error).message)
+      }
     }
   }
 
   // All streaming providers exhausted — fall back to generateText (no delay)
-  console.warn(`[AI Stream] All streaming failed for ${useCase}, falling back to generateText`)
+  if (process.env.NODE_ENV === 'development') {
+    console.warn(`[AI Stream] All streaming failed for ${useCase}, falling back to generateText`)
+  }
   const text = await resilientAICall(
     useCase,
     (provider) => provider.generateText(prompt, options),

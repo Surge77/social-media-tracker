@@ -1,7 +1,7 @@
 import React from 'react'
 import Footer from '@/components/Footer'
-import { AskAIWidget } from '@/components/ask/AskAIWidget'
 import { DashboardHeader } from '@/components/DashboardHeader'
+import { AskAIWidget } from '@/components/ask/AskAIWidget'
 
 export default function DashboardLayout({
   children,

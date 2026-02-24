@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowRight, TrendingUp, TrendingDown, Minus, CheckCircle2, Shield, AlertTriangle } from 'lucide-react'
@@ -36,11 +36,9 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
   ({ technology, rank, index = 0, className, allTechnologies = [] }, ref) => {
     const prefersReducedMotion = useReducedMotion()
 
-    const verdict = generateVerdict(
-      technology.composite_score,
-      technology.momentum,
-      technology.jobs_score,
-      technology.name,
+    const verdict = useMemo(
+      () => generateVerdict(technology.composite_score, technology.momentum, technology.jobs_score, technology.name),
+      [technology.composite_score, technology.momentum, technology.jobs_score, technology.name]
     )
 
     const vstyle = VERDICT_STYLES[verdict.recommendation]

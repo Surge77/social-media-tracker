@@ -1,10 +1,10 @@
 'use client';
 
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import CountUp from 'react-countup';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useInView } from 'framer-motion';
-import { useRef } from 'react';
 
 const stats = [
   { value: 100, suffix: '+', label: 'Technologies', description: 'GitHub, jobs, community, ecosystem' },
@@ -13,7 +13,7 @@ const stats = [
   { value: 100, suffix: '%', label: 'Free', description: 'No account or credit card needed' },
 ];
 
-function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
+const StatCard = React.memo(function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
   const prefersReducedMotion = useReducedMotion();
@@ -47,7 +47,7 @@ function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
       </div>
     </motion.div>
   );
-}
+})
 
 export default function StatsSection() {
   return (

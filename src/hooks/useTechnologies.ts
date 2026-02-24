@@ -27,8 +27,8 @@ export function useTechnologies(options: UseTechnologiesOptions = {}) {
   const query = useQuery({
     queryKey: ['technologies'],
     queryFn: fetchTechnologies,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 60 * 60 * 1000, // 1 hour — matches API Cache-Control s-maxage
+    gcTime: 2 * 60 * 60 * 1000, // 2 hours
     enabled,
   })
 

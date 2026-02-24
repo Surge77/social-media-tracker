@@ -1,9 +1,8 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { generateTechSummary } from '@/lib/insights/ai-summaries'
-import { classifyLifecycle, getLifecycleDescription } from '@/lib/analysis/lifecycle'
-import { analyzeMomentum } from '@/lib/scoring/enhanced-momentum'
-import { computeConfidence } from '@/lib/scoring/confidence'
+import { getLifecycleDescription } from '@/lib/analysis/lifecycle'
 import type { TechnologyWithScore } from '@/types'
+import type { LifecycleStage } from '@/lib/analysis/lifecycle'
 
 /**
  * GET /api/technologies
@@ -67,7 +66,7 @@ export async function GET() {
       scoringDate
         ? supabase
             .from('daily_scores')
-            .select('technology_id, composite_score, github_score, community_score, jobs_score, ecosystem_score, momentum, data_completeness')
+            .select('technology_id, composite_score, github_score, community_score, jobs_score, ecosystem_score, momentum, data_completeness, raw_sub_scores')
             .eq('score_date', scoringDate)
         : Promise.resolve({ data: null }),
       previousDate
@@ -174,33 +173,15 @@ export async function GET() {
       tech.rank_change = previousRank !== null ? previousRank - currentRank : null
       tech.ai_summary = generateTechSummary(tech)
 
-      // Lifecycle classification from sparkline history
-      const sparkline = tech.sparkline
-      if (sparkline.length >= 2) {
-        const history = sparkline.map((score, i) => ({ date: `day-${i}`, score }))
-        const momentum = analyzeMomentum(history)
-        const confidence = computeConfidence(
-          tech.category,
-          1, // conservative: 1 active source (we don't track this per-tech in the API response)
-          0, // latestDpAge: data is fresh (fetched today)
-          sparkline.length,
-          {
-            github: tech.github_score,
-            community: tech.community_score,
-            jobs: tech.jobs_score,
-            ecosystem: tech.ecosystem_score,
-          }
-        )
-        const lifecycle = classifyLifecycle({
-          compositeScore: tech.composite_score ?? 0,
-          momentum,
-          confidence,
-          dataAgeDays: sparkline.length, // proxy: days of data we have
-          category: tech.category,
-          recentScores: sparkline.slice(-30),
-        })
-        tech.lifecycle_stage = lifecycle.stage
-        tech.lifecycle_label = getLifecycleDescription(lifecycle.stage)
+      // Read lifecycle from raw_sub_scores — already computed by the scoring pipeline,
+      // no need to recompute analyzeMomentum + computeConfidence + classifyLifecycle here
+      const scores = scoreMap.get(tech.id) as Record<string, unknown> | undefined
+      const rawSub = scores?.raw_sub_scores as Record<string, unknown> | undefined
+      const storedLifecycle = rawSub?.lifecycle as Record<string, unknown> | undefined
+      if (storedLifecycle?.stage) {
+        const stage = storedLifecycle.stage as LifecycleStage
+        tech.lifecycle_stage = stage
+        tech.lifecycle_label = getLifecycleDescription(stage)
       }
     })
 

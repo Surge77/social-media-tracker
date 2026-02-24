@@ -1,9 +1,12 @@
+import dynamic from 'next/dynamic';
 import HeaderNew from '@/components/landing/HeaderNew';
 import HeroNew from '@/components/landing/HeroNew';
-import BentoFeaturesNew from '@/components/landing/BentoFeaturesNew';
-import StatsSection from '@/components/landing/StatsSection';
-import FinalCTA from '@/components/landing/FinalCTA';
-import Footer from '@/components/Footer';
+
+// Lazy-load below-the-fold sections — reduces initial JS parse/execute cost
+const BentoFeaturesNew = dynamic(() => import('@/components/landing/BentoFeaturesNew'), { ssr: true });
+const StatsSection = dynamic(() => import('@/components/landing/StatsSection'), { ssr: true });
+const FinalCTA = dynamic(() => import('@/components/landing/FinalCTA'), { ssr: true });
+const Footer = dynamic(() => import('@/components/Footer'), { ssr: true });
 
 export default function HomePage() {
   return (
