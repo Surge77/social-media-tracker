@@ -9,28 +9,28 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Warm off-white base — no more pure white torch effect */
-    --background: 220 16% 94%;
-    --foreground: 222 25% 16%;
+    --background: 222 14% 12%;
+    --foreground: 0 0% 95%;
 
     /* Cards sit slightly lighter than the background so they read as surfaces */
-    --card: 220 18% 97%;
-    --card-foreground: 222 25% 16%;
+    --card: 222 14% 16%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 220 18% 97%;
-    --popover-foreground: 222 25% 16%;
+    --popover: 222 14% 15%;
+    --popover-foreground: 0 0% 95%;
 
     /* Primary keeps its near-black feel but with a blue undertone */
-    --primary: 222 25% 14%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 24 96% 54%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 220 14% 89%;
-    --secondary-foreground: 222 20% 18%;
+    --secondary: 222 10% 22%;
+    --secondary-foreground: 0 0% 94%;
 
-    --muted: 220 14% 89%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 222 10% 20%;
+    --muted-foreground: 220 8% 66%;
 
-    --accent: 220 14% 89%;
-    --accent-foreground: 222 20% 14%;
+    --accent: 222 10% 22%;
+    --accent-foreground: 0 0% 94%;
 
     --success: 158 64% 42%;
     --success-foreground: 0 0% 100%;
@@ -41,16 +41,16 @@ All colors MUST be HSL.
     --destructive: 0 72% 54%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 14% 83%;
-    --input: 220 14% 83%;
-    --ring: 222 25% 16%;
+    --border: 222 10% 30%;
+    --input: 222 10% 30%;
+    --ring: 24 96% 54%;
 
     --radius: 0.5rem;
 
     --gradient-primary: linear-gradient(135deg, hsl(16 100% 60%), hsl(25 100% 58%));
-    --gradient-card: linear-gradient(135deg, hsl(220 18% 96%), hsl(220 18% 97%));
+    --gradient-card: linear-gradient(135deg, hsl(222 14% 14%), hsl(222 14% 18%));
     --shadow-glow: 0 0 40px hsl(16 100% 60% / 0.2);
-    --shadow-card: 0 4px 20px hsl(220 14% 0% / 0.07);
+    --shadow-card: 0 4px 20px hsl(220 14% 0% / 0.35);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --chart-1: 12 76% 55%;
     --chart-2: 173 58% 36%;
@@ -69,8 +69,8 @@ All colors MUST be HSL.
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 24 96% 54%;
+    --primary-foreground: 0 0% 10%;
 
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
@@ -102,6 +102,51 @@ All colors MUST be HSL.
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+
+  .light {
+    --background: 40 25% 96%;
+    --foreground: 222 28% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 28% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 28% 10%;
+
+    --primary: 24 96% 54%;
+    --primary-foreground: 0 0% 10%;
+
+    --secondary: 220 14% 90%;
+    --secondary-foreground: 222 20% 18%;
+
+    --muted: 220 14% 92%;
+    --muted-foreground: 220 10% 40%;
+
+    --accent: 220 14% 90%;
+    --accent-foreground: 222 20% 14%;
+
+    --success: 158 64% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 44%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 54%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 14% 82%;
+    --input: 220 14% 82%;
+    --ring: 24 96% 54%;
+
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(220 22% 97%));
+    --shadow-card: 0 4px 20px hsl(220 14% 0% / 0.08);
+    --shadow-glow: 0 0 40px hsl(24 96% 54% / 0.25);
+    --chart-1: 12 76% 55%;
+    --chart-2: 173 58% 36%;
+    --chart-3: 197 37% 28%;
+    --chart-4: 43 74% 58%;
+    --chart-5: 27 87% 60%;
   }
 }
 
@@ -363,6 +408,14 @@ All colors MUST be HSL.
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    /* Smooth color transitions during theme switch — wave overlay covers the page,
+       but this ensures any elements that peek through don't flash jarringly */
+    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .light body {
+    font-weight: 450;
   }
 }
 

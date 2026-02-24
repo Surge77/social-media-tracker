@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ThemeToggle } from '@/components/ThemeToggle'
+import { ThemePrismSwitch } from '@/components/ThemePrismSwitch'
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
 import { MobileNav } from '@/components/MobileNav'
 import { useScrolled } from '@/hooks/useScrolled'
@@ -68,10 +68,11 @@ export function DashboardHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <ThemeToggle />
+          <ThemePrismSwitch />
           <MobileNav />
         </div>
       </div>
     </header>
   )
 }
+

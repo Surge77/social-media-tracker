@@ -1,7 +1,12 @@
 import type { ReactNode } from 'react'
 import { Marquee } from '@/components/ui/marquee'
 
-type Source = { name: string; bg: string; logo: ReactNode }
+type Source = {
+  name: string
+  bg: string
+  logo?: ReactNode
+  logoUrl?: string
+}
 
 const sources: Source[] = [
   {
@@ -76,6 +81,16 @@ const sources: Source[] = [
       </svg>
     ),
   },
+  { name: 'Google', bg: '#ffffff', logoUrl: 'https://logo.clearbit.com/google.com?size=64' },
+  { name: 'Microsoft', bg: '#ffffff', logoUrl: 'https://logo.clearbit.com/microsoft.com?size=64' },
+  { name: 'Amazon', bg: '#ffffff', logoUrl: 'https://logo.clearbit.com/amazon.com?size=64' },
+  { name: 'Netflix', bg: '#0f0f0f', logoUrl: 'https://logo.clearbit.com/netflix.com?size=64' },
+  { name: 'Uber', bg: '#000000', logoUrl: 'https://logo.clearbit.com/uber.com?size=64' },
+  { name: 'Stripe', bg: '#ffffff', logoUrl: 'https://logo.clearbit.com/stripe.com?size=64' },
+  { name: 'Shopify', bg: '#95bf47', logoUrl: 'https://logo.clearbit.com/shopify.com?size=64' },
+  { name: 'Vercel', bg: '#000000', logoUrl: 'https://logo.clearbit.com/vercel.com?size=64' },
+  { name: 'Cloudflare', bg: '#ffffff', logoUrl: 'https://logo.clearbit.com/cloudflare.com?size=64' },
+  { name: 'OpenAI', bg: '#ffffff', logoUrl: 'https://logo.clearbit.com/openai.com?size=64' },
 ]
 
 function SourceBadge({ source }: { source: Source }) {
@@ -85,7 +100,18 @@ function SourceBadge({ source }: { source: Source }) {
         className="w-4 h-4 sm:w-5 sm:h-5 rounded-md flex items-center justify-center shrink-0"
         style={{ backgroundColor: source.bg }}
       >
-        {source.logo}
+        {source.logoUrl ? (
+          <img
+            src={source.logoUrl}
+            alt={`${source.name} logo`}
+            className="w-3.5 h-3.5 sm:w-4 sm:h-4 object-contain rounded-sm"
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          source.logo
+        )}
       </div>
       <span className="text-xs sm:text-sm font-medium text-muted-foreground whitespace-nowrap">
         {source.name}

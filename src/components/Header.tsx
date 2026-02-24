@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react";
 import AnimatedCTA from "./AnimatedCTA";
-import { ThemeToggle } from "./ThemeToggle";
+import { ThemePrismSwitch } from "./ThemePrismSwitch";
 import { useScrolled } from "@/hooks/useScrolled";
 
 const Header = () => {
@@ -46,7 +46,7 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <ThemeToggle />
+            <ThemePrismSwitch />
             <AnimatedCTA
               href="/technologies"
               size="sm"
@@ -62,3 +62,4 @@ const Header = () => {
 };
 
 export default Header;
+

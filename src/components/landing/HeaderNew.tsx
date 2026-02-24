@@ -7,7 +7,7 @@ import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo';
-import { ThemeToggle } from '../ThemeToggle';
+import { ThemePrismSwitch } from '../ThemePrismSwitch';
 import { useScrolled } from '@/hooks/useScrolled';
 
 const navItems = [
@@ -57,7 +57,7 @@ export default function HeaderNew() {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <ThemeToggle />
+              <ThemePrismSwitch />
               <Button
                 type="button"
                 variant="outline"
@@ -151,3 +151,4 @@ export default function HeaderNew() {
     </>
   );
 }
+

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeWaveTransition } from '@/components/ThemeWaveTransition';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -22,9 +21,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="midnight"
+        enableSystem={false}
+        themes={['midnight', 'dark', 'light']}
+      >
         {children}
-        <ThemeWaveTransition />
       </ThemeProvider>
     </QueryClientProvider>
   );
