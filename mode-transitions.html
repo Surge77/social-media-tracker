@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dark/Light Mode Transitions — All Types</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f0ece3;
+    --bg2: #e4dfd4;
+    --fg: #1a1612;
+    --fg2: #5c5248;
+    --accent: #c84b2f;
+    --accent2: #e87a5d;
+    --card: #faf8f4;
+    --border: rgba(0,0,0,0.1);
+    --shadow: rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    padding: 3rem 2rem 6rem;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* ─── HEADER ─────────────────────────────── */
+  header {
+    max-width: 900px;
+    margin: 0 auto 3.5rem;
+  }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--fg);
+    margin-bottom: 1rem;
+  }
+  .subtitle {
+    font-size: 0.82rem;
+    color: var(--fg2);
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  /* ─── GRID ────────────────────────────────── */
+  .grid {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
+  /* ─── CARD ────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: 0 2px 14px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .card-tag {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--fg);
+    line-height: 1.2;
+  }
+  .card-desc {
+    font-size: 0.72rem;
+    color: var(--fg2);
+    line-height: 1.65;
+    flex: 1;
+  }
+  .card-code {
+    font-size: 0.62rem;
+    background: var(--bg2);
+    border-radius: 6px;
+    padding: 0.6rem 0.8rem;
+    color: var(--fg2);
+    line-height: 1.6;
+    font-family: 'DM Mono', monospace;
+    border-left: 2px solid var(--accent);
+  }
+
+  /* ─── DEMO BUTTON ─────────────────────────── */
+  .demo-btn {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    transition: opacity 0.2s;
+    user-select: none;
+    position: relative;
+  }
+  .demo-btn:hover { opacity: 0.85; }
+  .demo-btn .icon { font-size: 1rem; transition: transform 0.2s; }
+  .demo-btn:hover .icon { transform: scale(1.3); }
+
+  /* ─── DEMO PREVIEW WINDOW ─────────────────── */
+  .preview {
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+  }
+  .preview-inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    gap: 0.6rem;
+    background: #f5f2ec;
+    color: #1a1612;
+  }
+  .preview-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.35;
+    flex-shrink: 0;
+  }
+  .preview-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: currentColor;
+    opacity: 0.2;
+    flex: 1;
+    border-radius: 4px;
+  }
+  .preview-bar.short { flex: 0 0 40%; }
+
+  /* ─────────────────────────────────────────────
+     OVERLAY ELEMENT for clip-path / wipe effects
+  ───────────────────────────────────────────── */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── GLOBAL DARK MODE ────────────────────── */
+  body.dark {
+    --bg: #0f0d0b;
+    --bg2: #1c1916;
+    --fg: #ede9e0;
+    --fg2: #9a9088;
+    --card: #181512;
+    --border: rgba(255,255,255,0.07);
+    --shadow: rgba(0,0,0,0.4);
+  }
+
+  /* ─────────────────────────────────────────
+     TRANSITION TYPES (applied to body)
+  ───────────────────────────────────────── */
+
+  /* 1. None */
+  body.t-none { transition: none !important; }
+  body.t-none * { transition: none !important; }
+
+  /* 2. Fade */
+  body.t-fade { transition: background 0.5s ease, color 0.5s ease; }
+
+  /* 3. Slide down */
+  body.t-slide-down { transition: none; }
+
+  /* 4. Blur */
+  body.t-blur { transition: background 0.4s ease, color 0.4s ease, filter 0.4s ease; }
+  body.t-blur.transitioning { filter: blur(12px); }
+
+  /* 5. Scale */
+  body.t-scale { transform-origin: center; transition: background 0.4s, color 0.4s, transform 0.35s cubic-bezier(.34,1.56,.64,1); }
+  body.t-scale.transitioning { transform: scale(0.96); }
+
+  /* 6. Clip-circle from center */
+  /* handled via overlay */
+
+  /* 7. Horizontal wipe */
+  /* handled via overlay */
+
+  /* 8. Diagonal wipe */
+  /* handled via overlay */
+
+  /* 9. Flip */
+  body.t-flip { perspective: 1200px; }
+  body.t-flip .flip-wrap { transition: transform 0.5s ease; transform-style: preserve-3d; }
+  body.t-flip .flip-wrap.flipping { transform: rotateX(90deg); }
+
+  /* 10. Ripple */
+  /* handled via overlay canvas */
+
+  /* 11. Color channel shift */
+  body.t-channel { transition: background 0.5s, color 0.5s; }
+  body.t-channel.r-shift { animation: chShift 0.5s ease forwards; }
+
+  /* 12. Curtain */
+  /* overlay */
+
+  @keyframes chShift {
+    0%   { filter: none; }
+    20%  { filter: saturate(3) hue-rotate(20deg); }
+    50%  { filter: saturate(0) brightness(1.5); }
+    80%  { filter: saturate(3) hue-rotate(-20deg); }
+    100% { filter: none; }
+  }
+
+  /* ─── NOTICE BAR ─────────────────────── */
+  .active-notice {
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    letter-spacing: 0.06em;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .active-notice.visible { display: flex; }
+
+  /* ─── RESET BTN ──────────────────────── */
+  .reset-bar {
+    max-width: 900px;
+    margin: 1.5rem auto 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  #reset-btn {
+    all: unset;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--fg2);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  #reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+  #reset-btn::before { content: "↺ "; }
+  .current-label {
+    font-size: 0.65rem;
+    color: var(--fg2);
+  }
+  #current-mode-text {
+    color: var(--accent);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body class="dark" id="root">
+
+<!-- Overlay for clip-path / wipe transitions -->
+<div id="overlay"></div>
+
+<header>
+  <p class="eyebrow">UI Engineering Reference</p>
+  <h1>Every Dark/Light<br>Mode Transition</h1>
+  <p class="subtitle">Click any card to trigger that transition on this very page. Each technique has different performance characteristics, browser support, and feel.</p>
+</header>
+
+<div class="active-notice" id="notice">
+  <span>●</span> <span id="notice-text">Active transition set</span>
+</div>
+
+<div class="reset-bar">
+  <button id="reset-btn" onclick="resetAll()">Reset to instant</button>
+  <span class="current-label">Current mode: <span id="current-mode-text">dark</span></span>
+</div>
+
+<br>
+
+<div class="grid" id="grid">
+
+  <!-- 1. Instant -->
+  <div class="card">
+    <p class="card-tag">01 — Baseline</p>
+    <p class="card-title">Instant / No Transition</p>
+    <div class="preview"><div class="preview-inner" id="p1">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">The simplest approach — CSS variables swap immediately with no animation. Jarring but technically zero-cost. This is the default behaviour before you add any CSS.</p>
+    <div class="card-code">transition: none;</div>
+    <button class="demo-btn" onclick="trigger('none')">Try it <span class="icon">⚡</span></button>
+  </div>
+
+  <!-- 2. Fade -->
+  <div class="card">
+    <p class="card-tag">02 — CSS Only</p>
+    <p class="card-title">Smooth Fade</p>
+    <div class="preview"><div class="preview-inner" id="p2">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">The most common approach. Add <code>transition</code> to background-color and color. Smooth, simple, and zero JS needed. Works on all browsers.</p>
+    <div class="card-code">body {
+  transition: background 0.5s ease,
+              color 0.5s ease;
+}</div>
+    <button class="demo-btn" onclick="trigger('fade')">Try it <span class="icon">🌫</span></button>
+  </div>
+
+  <!-- 3. Blur Fade -->
+  <div class="card">
+    <p class="card-tag">03 — CSS + JS</p>
+    <p class="card-title">Blur Out / In</p>
+    <div class="preview"><div class="preview-inner" id="p3">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">Content blurs mid-transition so the color swap is hidden. Feels like camera focus changing. Uses CSS filter + a tiny JS class toggle.</p>
+    <div class="card-code">body.transitioning {
+  filter: blur(12px);
+  transition: filter 0.4s ease;
+}</div>
+    <button class="demo-btn" onclick="trigger('blur')">Try it <span class="icon">👁</span></button>
+  </div>
+
+  <!-- 4. Scale -->
+  <div class="card">
+    <p class="card-tag">04 — CSS + JS</p>
+    <p class="card-title">Scale Pulse</p>
+    <div class="preview"><div class="preview-inner" id="p4">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">Page slightly scales down while swapping, then springs back. Uses cubic-bezier overshoot for a satisfying bounce. Feels physical and tactile.</p>
+    <div class="card-code">body.transitioning {
+  transform: scale(0.96);
+  transition: transform 0.35s
+    cubic-bezier(.34,1.56,.64,1);
+}</div>
+    <button class="demo-btn" onclick="trigger('scale')">Try it <span class="icon">🔭</span></button>
+  </div>
+
+  <!-- 5. Clip-circle from cursor -->
+  <div class="card">
+    <p class="card-tag">05 — View Transitions API</p>
+    <p class="card-title">Circle Ripple from Click</p>
+    <div class="preview"><div class="preview-inner" id="p5">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">A circle expands from wherever you clicked, revealing the new theme underneath. The gold standard of modern dark-mode UX. Uses the View Transitions API + clip-path.</p>
+    <div class="card-code">document.startViewTransition(toggle)
+::view-transition-new(root) {
+  clip-path: circle(0 at X Y);
+  animation: expand 0.5s ease;
+}</div>
+    <button class="demo-btn" onclick="trigger('clip-circle', event)">Try it <span class="icon">●</span></button>
+  </div>
+
+  <!-- 6. Clip-circle from center -->
+  <div class="card">
+    <p class="card-tag">06 — Clip Path</p>
+    <p class="card-title">Circle from Center</p>
+    <div class="preview"><div class="preview-inner" id="p6">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">Same circle expand but always originates from the viewport center. Clean and balanced. Good fallback when you don't have a click coordinate.</p>
+    <div class="card-code">::view-transition-new(root) {
+  clip-path: circle(0 at 50% 50%);
+  animation: expand 0.5s ease-out;
+}</div>
+    <button class="demo-btn" onclick="trigger('clip-center')">Try it <span class="icon">◎</span></button>
+  </div>
+
+  <!-- 7. Horizontal Wipe -->
+  <div class="card">
+    <p class="card-tag">07 — Overlay + JS</p>
+    <p class="card-title">Horizontal Wipe</p>
+    <div class="preview"><div class="preview-inner" id="p7">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">A colored curtain slides in from the left, swaps the theme while fully covering, then exits right. Classic page-turn feel. Great for editorial sites.</p>
+    <div class="card-code">overlay.animate([
+  {transform: 'translateX(-100%)'},
+  {transform: 'translateX(0)'},
+  {transform: 'translateX(100%)'}
+])</div>
+    <button class="demo-btn" onclick="trigger('wipe-h')">Try it <span class="icon">▶</span></button>
+  </div>
+
+  <!-- 8. Vertical Wipe -->
+  <div class="card">
+    <p class="card-tag">08 — Overlay + JS</p>
+    <p class="card-title">Vertical Curtain</p>
+    <div class="preview"><div class="preview-inner" id="p8">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">Same curtain technique but top-to-bottom, like pulling down a blind. Feels more like turning off a light — very thematically appropriate for dark mode.</p>
+    <div class="card-code">overlay.animate([
+  {transform: 'translateY(-100%)'},
+  {transform: 'translateY(0)'},
+  {transform: 'translateY(100%)'}
+])</div>
+    <button class="demo-btn" onclick="trigger('wipe-v')">Try it <span class="icon">▼</span></button>
+  </div>
+
+  <!-- 9. Diagonal Wipe -->
+  <div class="card">
+    <p class="card-tag">09 — Overlay + JS</p>
+    <p class="card-title">Diagonal Slash</p>
+    <div class="preview"><div class="preview-inner" id="p9">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">A skewed overlay sweeps diagonally across the screen. Dynamic and energetic. Commonly seen in gaming UIs and portfolio sites that want bold personality.</p>
+    <div class="card-code">overlay {
+  transform: skewX(-15deg);
+  animation: diag-sweep 0.5s ease;
+}</div>
+    <button class="demo-btn" onclick="trigger('wipe-diag')">Try it <span class="icon">⟋</span></button>
+  </div>
+
+  <!-- 10. Flip -->
+  <div class="card">
+    <p class="card-tag">10 — CSS 3D</p>
+    <p class="card-title">3D Page Flip</p>
+    <div class="preview"><div class="preview-inner" id="p10">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">The page rotates on its X axis like turning over a card. The swap happens when it's face-down (invisible). Very dramatic — best used sparingly.</p>
+    <div class="card-code">body {
+  perspective: 1200px;
+}
+.wrap.flipping {
+  transform: rotateX(90deg);
+}</div>
+    <button class="demo-btn" onclick="trigger('flip')">Try it <span class="icon">🃏</span></button>
+  </div>
+
+  <!-- 11. Color Channel Shift -->
+  <div class="card">
+    <p class="card-tag">11 — CSS Filter</p>
+    <p class="card-title">Color Channel Glitch</p>
+    <div class="preview"><div class="preview-inner" id="p11">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">Hue and saturation shift wildly during the transition before settling on the new palette. Cyberpunk / glitch aesthetic. Great for developer tools and dark-themed brands.</p>
+    <div class="card-code">@keyframes chShift {
+  0%  { filter: none; }
+  50% { filter: saturate(0)
+        brightness(1.5); }
+  100%{ filter: none; }
+}</div>
+    <button class="demo-btn" onclick="trigger('channel')">Try it <span class="icon">📡</span></button>
+  </div>
+
+  <!-- 12. Spotlight reveal -->
+  <div class="card">
+    <p class="card-tag">12 — Canvas + JS</p>
+    <p class="card-title">Spotlight Reveal</p>
+    <div class="preview"><div class="preview-inner" id="p12">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">A hard-edged spotlight sweeps across the page, revealing the new theme. Uses a canvas overlay with radial gradient masking. Very cinematic and theatrical.</p>
+    <div class="card-code">ctx.fillRect(0, 0, w, h);
+ctx.globalCompositeOperation
+  = 'destination-out';
+ctx.fillStyle = radialGradient;
+ctx.fillRect(...);</div>
+    <button class="demo-btn" onclick="trigger('spotlight')">Try it <span class="icon">🔦</span></button>
+  </div>
+
+  <!-- 13. Pixelate -->
+  <div class="card">
+    <p class="card-tag">13 — Canvas + JS</p>
+    <p class="card-title">Pixelate Dissolve</p>
+    <div class="preview"><div class="preview-inner" id="p13">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">Tiles fill in randomly one by one in the new color until the whole page is replaced. Like a retro mosaic reveal. Works well for retro/game-inspired UIs.</p>
+    <div class="card-code">// Shuffle tile order, draw
+// colored rect per tile each
+// RAF tick until all filled</div>
+    <button class="demo-btn" onclick="trigger('pixel')">Try it <span class="icon">🟦</span></button>
+  </div>
+
+  <!-- 14. View Transitions API native -->
+  <div class="card">
+    <p class="card-tag">14 — Native Browser API</p>
+    <p class="card-title">View Transitions (Native)</p>
+    <div class="preview"><div class="preview-inner" id="p14">
+      <div class="preview-dot"></div><div class="preview-bar"></div><div class="preview-bar short"></div>
+    </div></div>
+    <p class="card-desc">Uses <code>document.startViewTransition()</code> with no extra CSS. The browser captures a screenshot, swaps the DOM, then cross-fades. Zero-boilerplate, very smooth.</p>
+    <div class="card-code">document.startViewTransition(
+  () => toggleDarkMode()
+);</div>
+    <button class="demo-btn" onclick="trigger('view-transition')">Try it <span class="icon">🌐</span></button>
+  </div>
+
+</div>
+
+<script>
+// ── State ────────────────────────────────────────
+let isDark = true;
+let currentType = 'none';
+let isTransitioning = false;
+
+// ── Preview sync ─────────────────────────────────
+function syncPreviews() {
+  const light = { bg:'#f5f2ec', fg:'#1a1612', dot:'#1a1612' };
+  const dark  = { bg:'#181512', fg:'#ede9e0', dot:'#ede9e0' };
+  const pal = isDark ? dark : light;
+  document.querySelectorAll('.preview-inner').forEach(el => {
+    el.style.background = pal.bg;
+    el.style.color = pal.fg;
+  });
+}
+
+// ── Toggle dark class ─────────────────────────────
+function applyTheme() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  document.getElementById('current-mode-text').textContent = isDark ? 'dark' : 'light';
+  syncPreviews();
+}
+
+// ── Notice bar ────────────────────────────────────
+function showNotice(text) {
+  const n = document.getElementById('notice');
+  const t = document.getElementById('notice-text');
+  t.textContent = text;
+  n.classList.add('visible');
+  clearTimeout(n._timer);
+  n._timer = setTimeout(() => n.classList.remove('visible'), 3000);
+}
+
+// ── Reset ─────────────────────────────────────────
+function resetAll() {
+  cleanBodyClasses();
+  showNotice('Reset — next toggle will use Instant.');
+  currentType = 'none';
+}
+
+function cleanBodyClasses() {
+  ['t-none','t-fade','t-blur','t-scale','t-channel','t-flip',
+   'transitioning','r-shift','flipping'].forEach(c => document.body.classList.remove(c));
+}
+
+// ── Main trigger ──────────────────────────────────
+function trigger(type, event) {
+  if (isTransitioning) return;
+  currentType = type;
+  cleanBodyClasses();
+
+  const handlers = {
+    'none'            : doNone,
+    'fade'            : doFade,
+    'blur'            : doBlur,
+    'scale'           : doScale,
+    'clip-circle'     : (e) => doClipCircle(e, event),
+    'clip-center'     : doClipCenter,
+    'wipe-h'          : doWipeH,
+    'wipe-v'          : doWipeV,
+    'wipe-diag'       : doWipeDiag,
+    'flip'            : doFlip,
+    'channel'         : doChannel,
+    'spotlight'       : doSpotlight,
+    'pixel'           : doPixel,
+    'view-transition' : doViewTransition,
+  };
+  (handlers[type] || doNone)(event);
+}
+
+// ─────────────────────────────────────────────────
+// 1. Instant
+function doNone() {
+  document.body.classList.add('t-none');
+  applyTheme();
+  showNotice('Instant — no transition whatsoever.');
+}
+
+// 2. Fade
+function doFade() {
+  document.body.classList.add('t-fade');
+  applyTheme();
+  showNotice('Smooth Fade — just CSS transition on background/color.');
+}
+
+// 3. Blur
+function doBlur() {
+  isTransitioning = true;
+  document.body.classList.add('t-blur','transitioning');
+  setTimeout(() => {
+    applyTheme();
+    setTimeout(() => {
+      document.body.classList.remove('transitioning');
+      isTransitioning = false;
+    }, 420);
+  }, 220);
+  showNotice('Blur — content blurs mid-swap so the color change is hidden.');
+}
+
+// 4. Scale
+function doScale() {
+  isTransitioning = true;
+  document.body.classList.add('t-scale','transitioning');
+  setTimeout(() => {
+    applyTheme();
+    document.body.classList.remove('transitioning');
+    setTimeout(() => { isTransitioning = false; }, 400);
+  }, 200);
+  showNotice('Scale Pulse — page shrinks, swaps, then springs back.');
+}
+
+// 5. Clip-circle from click point
+function doClipCircle(_, event) {
+  if (!document.startViewTransition) { doClipCenter(); return; }
+  const x = event ? event.clientX : window.innerWidth/2;
+  const y = event ? event.clientY : window.innerHeight/2;
+  const maxR = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y)
+  );
+  isTransitioning = true;
+  const t = document.startViewTransition(() => applyTheme());
+  t.ready.then(() => {
+    const clip = [
+      `circle(0px at ${x}px ${y}px)`,
+      `circle(${maxR}px at ${x}px ${y}px)`
+    ];
+    document.documentElement.animate(
+      { clipPath: clip },
+      { duration: 550, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' }
+    );
+  });
+  t.finished.then(() => { isTransitioning = false; });
+  showNotice('Circle Ripple — expands from your click point via View Transitions API.');
+}
+
+// 6. Clip from center
+function doClipCenter() {
+  if (document.startViewTransition) {
+    isTransitioning = true;
+    const t = document.startViewTransition(() => applyTheme());
+    t.ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: ['circle(0px at 50% 50%)', 'circle(75vmax at 50% 50%)'] },
+        { duration: 550, easing: 'ease-out', pseudoElement: '::view-transition-new(root)' }
+      );
+    });
+    t.finished.then(() => { isTransitioning = false; });
+  } else {
+    overlayClip('circle(0px at 50% 50%)', 'circle(75vmax at 50% 50%)');
+  }
+  showNotice('Circle from Center — always originates from viewport midpoint.');
+}
+
+// ── Helper: overlay-based wipes ───────────────────
+function overlayWipe(keyframes, delay, options = {}) {
+  isTransitioning = true;
+  const ov = document.getElementById('overlay');
+  const accent = isDark ? '#e87a5d' : '#c84b2f';
+  ov.style.background = accent;
+  if (options.skew) ov.style.transform = `skewX(${options.skew}deg)`;
+  else ov.style.transform = '';
+  ov.style.width  = options.width  || '100%';
+  ov.style.height = options.height || '100%';
+  ov.style.top = '0'; ov.style.left = '0';
+  ov.style.position = 'fixed';
+
+  const anim = ov.animate(keyframes, { duration: 500, easing: 'cubic-bezier(.77,0,.175,1)', fill: 'both' });
+  setTimeout(() => applyTheme(), delay);
+  anim.onfinish = () => {
+    ov.style.background = '';
+    ov.style.transform = '';
+    isTransitioning = false;
+  };
+}
+
+// 7. Horizontal wipe
+function doWipeH() {
+  overlayWipe([
+    { transform: 'translateX(-102%)' },
+    { transform: 'translateX(0)',     offset: 0.45 },
+    { transform: 'translateX(102%)' }
+  ], 225);
+  showNotice('Horizontal Wipe — a curtain slides left-to-right.');
+}
+
+// 8. Vertical wipe
+function doWipeV() {
+  overlayWipe([
+    { transform: 'translateY(-102%)' },
+    { transform: 'translateY(0)',     offset: 0.45 },
+    { transform: 'translateY(102%)' }
+  ], 225);
+  showNotice('Vertical Curtain — like pulling down a blind.');
+}
+
+// 9. Diagonal wipe
+function doWipeDiag() {
+  isTransitioning = true;
+  const ov = document.getElementById('overlay');
+  const accent = isDark ? '#e87a5d' : '#c84b2f';
+  ov.style.cssText = `
+    position:fixed; inset:0; 
+    background:${accent};
+    width:130%; height:100%;
+    left:-15%;
+    transform:translateX(-115%) skewX(-12deg);
+  `;
+  const anim = ov.animate([
+    { transform: 'translateX(-115%) skewX(-12deg)' },
+    { transform: 'translateX(0)     skewX(-12deg)', offset: 0.45 },
+    { transform: 'translateX(115%)  skewX(-12deg)' }
+  ], { duration: 520, easing: 'cubic-bezier(.77,0,.175,1)', fill: 'both' });
+  setTimeout(() => applyTheme(), 235);
+  anim.onfinish = () => { ov.style.cssText = ''; isTransitioning = false; };
+  showNotice('Diagonal Slash — skewed overlay sweeps across.');
+}
+
+// 10. 3D Flip
+function doFlip() {
+  isTransitioning = true;
+  document.body.style.perspective = '1200px';
+  document.body.style.transition = 'none';
+  const inner = document.getElementById('root');
+
+  inner.style.transition = 'transform 0.3s ease-in';
+  inner.style.transformOrigin = 'center top';
+  inner.style.transform = 'rotateX(90deg)';
+
+  setTimeout(() => {
+    applyTheme();
+    inner.style.transition = 'transform 0.3s ease-out';
+    inner.style.transform = 'rotateX(0)';
+    setTimeout(() => {
+      inner.style.transition = '';
+      inner.style.transform = '';
+      document.body.style.perspective = '';
+      isTransitioning = false;
+    }, 320);
+  }, 310);
+  showNotice('3D Page Flip — rotates on X axis, swaps when face-down.');
+}
+
+// 11. Color channel glitch
+function doChannel() {
+  isTransitioning = true;
+  document.body.classList.add('t-channel');
+  document.body.style.animation = 'chShift 0.5s ease forwards';
+  setTimeout(() => {
+    applyTheme();
+    setTimeout(() => {
+      document.body.style.animation = '';
+      isTransitioning = false;
+    }, 300);
+  }, 250);
+  showNotice('Color Channel Glitch — hue and saturation shift wildly mid-swap.');
+}
+
+// 12. Spotlight via canvas
+function doSpotlight() {
+  isTransitioning = true;
+  const ov = document.getElementById('overlay');
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;';
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ov.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const accent = isDark ? '#e87a5d' : '#0f0d0b';
+  let x = -W * 0.3;
+  const speed = W / 20;
+  let swapped = false;
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = accent;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'destination-out';
+    const g = ctx.createRadialGradient(x, H/2, 0, x, H/2, W*0.45);
+    g.addColorStop(0, 'rgba(0,0,0,1)');
+    g.addColorStop(0.7, 'rgba(0,0,0,0.6)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+    x += speed;
+    if (!swapped && x > W * 0.4) { swapped = true; applyTheme(); }
+    if (x < W * 1.5) requestAnimationFrame(draw);
+    else { canvas.remove(); isTransitioning = false; }
+  }
+  draw();
+  showNotice('Spotlight — a hard-edged beam sweeps across, revealing the new theme.');
+}
+
+// 13. Pixelate dissolve
+function doPixel() {
+  isTransitioning = true;
+  const ov = document.getElementById('overlay');
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;';
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  ov.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const SIZE = 36;
+  const cols = Math.ceil(W / SIZE);
+  const rows = Math.ceil(H / SIZE);
+  const total = cols * rows;
+  const accent = isDark ? '#e87a5d' : '#1c1916';
+
+  // Create shuffled order
+  let order = Array.from({length: total}, (_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+
+  let filled = 0;
+  const perFrame = 8;
+  let swapped = false;
+  applyTheme(); swapped = true;
+
+  function fillTile(idx) {
+    const col = idx % cols;
+    const row = Math.floor(idx / cols);
+    ctx.fillStyle = accent;
+    ctx.fillRect(col * SIZE, row * SIZE, SIZE, SIZE);
+  }
+  function frame() {
+    for (let i = 0; i < perFrame && filled < total; i++) {
+      fillTile(order[filled++]);
+    }
+    if (filled < total) requestAnimationFrame(frame);
+    else {
+      setTimeout(() => {
+        ctx.clearRect(0, 0, W, H);
+        canvas.remove();
+        isTransitioning = false;
+      }, 80);
+    }
+  }
+  frame();
+  showNotice('Pixelate Dissolve — random tiles fill in to reveal the new theme.');
+}
+
+// 14. Native View Transition (default cross-fade)
+function doViewTransition() {
+  if (!document.startViewTransition) {
+    doFade();
+    showNotice('View Transitions API not supported — fell back to fade.');
+    return;
+  }
+  isTransitioning = true;
+  document.startViewTransition(() => {
+    applyTheme();
+  }).finished.then(() => { isTransitioning = false; });
+  showNotice('View Transitions API — the browser handles the cross-fade natively.');
+}
+
+// ── Init ──────────────────────────────────────────
+syncPreviews();
+</script>
+</body>
+</html>

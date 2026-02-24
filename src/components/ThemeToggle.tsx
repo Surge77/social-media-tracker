@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 export const THEME_TOGGLE_EVENT = 'theme-toggle-click';
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Prevent hydration mismatch
@@ -22,15 +22,17 @@ export function ThemeToggle() {
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
 
+    const currentTheme = resolvedTheme === 'dark' ? 'dark' : 'light';
+
     // Dispatch custom event with click coordinates and current theme
     window.dispatchEvent(
       new CustomEvent(THEME_TOGGLE_EVENT, {
-        detail: { x, y, currentTheme: theme },
+        detail: { x, y, currentTheme },
       })
     );
 
     // Change theme immediately
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
   };
 
   if (!mounted) {
@@ -48,7 +50,7 @@ export function ThemeToggle() {
       onClick={handleThemeToggle}
       className="h-9 w-9"
     >
-      {theme === 'dark' ? (
+      {resolvedTheme === 'dark' ? (
         <Sun className="h-4 w-4 transition-all text-yellow-400" />
       ) : (
         <Moon className="h-4 w-4 transition-all text-slate-700" />

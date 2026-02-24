@@ -8,9 +8,15 @@ export function ThemeWaveTransition() {
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
   const [oldTheme, setOldTheme] = useState<string>('dark');
   const mounted = useRef(false);
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     mounted.current = true;
+    return () => {
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -23,11 +29,13 @@ export function ThemeWaveTransition() {
       setIsAnimating(true);
       
       // Reset animation after it completes
-      const timer = setTimeout(() => {
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current);
+      }
+      timerRef.current = window.setTimeout(() => {
         setIsAnimating(false);
-      }, 600);
-
-      return () => clearTimeout(timer);
+        timerRef.current = null;
+      }, 520);
     };
 
     window.addEventListener(THEME_TOGGLE_EVENT, handleToggleClick);
@@ -52,7 +60,8 @@ export function ThemeWaveTransition() {
         style={{
           background: overlayColor,
           clipPath: `circle(${maxRadius * 2}px at ${clickPosition.x}px ${clickPosition.y}px)`,
-          animation: `circle-shrink 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards`,
+          willChange: 'clip-path, opacity',
+          animation: `circle-shrink 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards`,
         }}
       />
       
