@@ -1,16 +1,15 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
-import CountUp from 'react-countup';
+import { motion, useInView } from 'framer-motion';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { useInView } from 'framer-motion';
+import { NumberTicker } from '@/components/ui/number-ticker';
 
 const stats = [
   { value: 100, suffix: '+', label: 'Technologies', description: 'GitHub, jobs, community, ecosystem' },
-  { value: 8, suffix: '+', label: 'Data Sources', description: 'GitHub, HN, Stack Overflow, and more' },
-  { value: 24, suffix: 'hrs', label: 'Data Freshness', description: 'Scores refresh every night' },
-  { value: 100, suffix: '%', label: 'Free', description: 'No account or credit card needed' },
+  { value: 8,   suffix: '+', label: 'Data Sources',  description: 'GitHub, HN, Stack Overflow, and more' },
+  { value: 24,  suffix: 'h', label: 'Data Freshness', description: 'Scores refresh every night' },
+  { value: 100, suffix: '%', label: 'Free',           description: 'No account or credit card needed' },
 ];
 
 const StatCard = React.memo(function StatCard({ stat, index }: { stat: typeof stats[0]; index: number }) {
@@ -27,14 +26,16 @@ const StatCard = React.memo(function StatCard({ stat, index }: { stat: typeof st
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className="text-center"
     >
-      <div className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-2">
+      <div className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-2 tabular-nums">
         {isInView ? (
-          <CountUp
-            end={stat.value}
-            duration={2}
-            suffix={stat.suffix}
-            enableScrollSpy={false}
-          />
+          <>
+            <NumberTicker
+              value={stat.value}
+              delay={index * 0.1}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground"
+            />
+            <span>{stat.suffix}</span>
+          </>
         ) : (
           <span>0{stat.suffix}</span>
         )}
@@ -52,7 +53,6 @@ const StatCard = React.memo(function StatCard({ stat, index }: { stat: typeof st
 export default function StatsSection() {
   return (
     <section className="py-20 md:py-28 bg-gradient-to-b from-muted/10 to-background relative overflow-hidden">
-      {/* Subtle background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.04),transparent_60%)]" />
 
       <div className="container mx-auto px-6 relative">

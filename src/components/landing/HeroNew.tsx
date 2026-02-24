@@ -3,10 +3,14 @@
 import { motion } from 'framer-motion';
 import FloatingIcons from '../FloatingIcons';
 import AnimatedCTA from '../AnimatedCTA';
-import { Badge } from '@/components/ui/badge';
 import { ArrowUpRight, ArrowDownRight, Minus, Users, Database, Zap } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Sparkline } from '@/components/technologies/Sparkline';
+import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
+import { BorderBeam } from '@/components/ui/border-beam';
+import { Meteors } from '@/components/ui/meteors';
+import { RetroGrid } from '@/components/ui/retro-grid';
+import { MorphingText } from '@/components/ui/morphing-text';
 
 const MOCK_SPARKLINES = {
   up:     [52, 54, 51, 56, 58, 55, 62, 66, 70, 75, 78, 82, 86, 90, 94],
@@ -15,11 +19,11 @@ const MOCK_SPARKLINES = {
 };
 
 const mockLeaderboard = [
-  { rank: 1, name: 'React Server Components', score: 94, change: +45, trend: 'up' },
+  { rank: 1, name: 'TypeScript', score: 94, change: +12, trend: 'up' },
   { rank: 2, name: 'Rust', score: 89, change: +28, trend: 'up' },
-  { rank: 3, name: 'Vercel AI SDK', score: 85, change: +18, trend: 'up' },
-  { rank: 4, name: 'TypeScript', score: 82, change: +3, trend: 'stable' },
-  { rank: 5, name: 'Next.js', score: 80, change: -2, trend: 'down' },
+  { rank: 3, name: 'Python', score: 85, change: +9, trend: 'up' },
+  { rank: 4, name: 'Go', score: 78, change: +3, trend: 'stable' },
+  { rank: 5, name: 'React', score: 74, change: -4, trend: 'down' },
 ];
 
 export default function HeroNew() {
@@ -30,33 +34,39 @@ export default function HeroNew() {
       {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
 
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      {/* Magic UI — RetroGrid */}
+      <RetroGrid className="opacity-50" />
 
       {/* Radial glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Magic UI — meteors */}
+      {!prefersReducedMotion && <Meteors number={14} />}
 
       <FloatingIcons />
 
       <div className="container relative mx-auto px-6">
         <div className="text-center max-w-5xl mx-auto">
-          {/* Tracking badge */}
+
+          {/* Badge — Magic UI AnimatedGradientText */}
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8"
+            className="mb-8 flex justify-center"
           >
-            <Badge className="px-4 py-2 text-sm font-medium bg-primary/5 text-primary border border-primary/20 backdrop-blur-sm cursor-default">
+            <AnimatedGradientText>
               <span className="relative flex h-2 w-2 mr-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
               </span>
-              FREE & OPEN BETA
-            </Badge>
+              <span className="bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 bg-clip-text text-transparent font-semibold tracking-wide">
+                FREE &amp; OPEN BETA
+              </span>
+            </AnimatedGradientText>
           </motion.div>
 
-          {/* Main headline - Apple HIG typography */}
+          {/* Main headline */}
           <motion.h1
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
@@ -73,6 +83,22 @@ export default function HeroNew() {
             <span className="text-foreground">Everyone Else</span>
           </motion.h1>
 
+          {/* Magic UI — MorphingText data signal ticker */}
+          <motion.div
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 15 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="mb-4 flex justify-center"
+          >
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-xs">
+              <span className="text-muted-foreground font-medium shrink-0">Tracking:</span>
+              <MorphingText
+                texts={["GitHub stars", "Stack Overflow velocity", "job postings", "community sentiment", "npm downloads"]}
+                className="font-semibold text-primary"
+              />
+            </div>
+          </motion.div>
+
           {/* Subtitle */}
           <motion.p
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -80,11 +106,11 @@ export default function HeroNew() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            GitHub stars, Stack Overflow velocity, job postings, and community sentiment — aggregated into daily scores for 100+ technologies.
+            Aggregated into daily scores for 100+ technologies.
             Skip the guesswork. See what the data actually says.
           </motion.p>
 
-          {/* CTA button - Single, focused call-to-action */}
+          {/* CTA */}
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
@@ -104,7 +130,7 @@ export default function HeroNew() {
             </AnimatedCTA>
           </motion.div>
 
-          {/* Social Proof - Behavioral Product Design */}
+          {/* Social proof */}
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
@@ -112,7 +138,6 @@ export default function HeroNew() {
             className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-8"
           >
             <div className="flex -space-x-2">
-              {/* React Logo */}
               <div className="w-8 h-8 rounded-full bg-[#61DAFB]/10 border-2 border-background flex items-center justify-center p-1.5">
                 <svg viewBox="-11.5 -10.23174 23 20.46348" className="w-full h-full">
                   <circle cx="0" cy="0" r="2.05" fill="#61dafb"/>
@@ -123,34 +148,26 @@ export default function HeroNew() {
                   </g>
                 </svg>
               </div>
-
-              {/* TypeScript Logo */}
               <div className="w-8 h-8 rounded-full bg-[#3178C6]/10 border-2 border-background flex items-center justify-center p-1">
                 <svg viewBox="0 0 256 256" className="w-full h-full">
                   <rect width="256" height="256" fill="#3178C6" rx="28"/>
                   <path d="M150.518 200.475v27.62c4.492 2.302 9.805 4.028 15.938 5.179 6.133 1.151 12.597 1.726 19.393 1.726 6.622 0 12.914-.633 18.874-1.899 5.96-1.266 11.187-3.352 15.678-6.257 4.492-2.906 8.048-6.704 10.669-11.394 2.62-4.689 3.93-10.486 3.93-17.391 0-5.006-.749-9.394-2.246-13.163a30.748 30.748 0 0 0-6.479-10.055c-2.821-2.935-6.205-5.567-10.149-7.898-3.945-2.33-8.394-4.531-13.347-6.602-3.628-1.497-6.881-2.949-9.761-4.359-2.879-1.41-5.327-2.848-7.342-4.316-2.016-1.467-3.571-3.021-4.665-4.661-1.094-1.64-1.641-3.495-1.641-5.567 0-1.899.489-3.61 1.468-5.135s2.362-2.834 4.147-3.927c1.785-1.094 3.973-1.942 6.565-2.547 2.591-.604 5.471-.906 8.638-.906 2.304 0 4.737.173 7.299.518 2.563.345 5.14.877 7.732 1.597a53.669 53.669 0 0 1 7.558 2.719 41.7 41.7 0 0 1 6.781 3.797v-25.807c-4.204-1.611-8.797-2.805-13.778-3.582-4.981-.777-10.697-1.165-17.147-1.165-6.565 0-12.784.705-18.658 2.115-5.874 1.409-11.043 3.61-15.506 6.602-4.463 2.993-7.99 6.805-10.582 11.437-2.591 4.632-3.887 10.17-3.887 16.615 0 8.228 2.375 15.248 7.127 21.06 4.751 5.811 11.963 10.731 21.638 14.759a291.458 291.458 0 0 1 10.625 4.575c3.283 1.496 6.119 3.049 8.509 4.66 2.39 1.611 4.276 3.366 5.658 5.265 1.382 1.899 2.073 4.057 2.073 6.474a9.901 9.901 0 0 1-1.296 4.963c-.863 1.524-2.174 2.848-3.93 3.97-1.756 1.122-3.945 1.999-6.565 2.632-2.62.633-5.687.95-9.2.95-5.989 0-11.92-1.05-17.794-3.151-5.875-2.1-11.317-5.25-16.327-9.451Zm-46.036-68.733H140V109H41v22.742h35.345V233h28.137V131.742Z" fill="#FFF"/>
                 </svg>
               </div>
-
-              {/* Vue Logo */}
               <div className="w-8 h-8 rounded-full bg-[#41B883]/10 border-2 border-background flex items-center justify-center p-1.5">
                 <svg viewBox="0 0 256 221" className="w-full h-full">
                   <path d="M204.8 0H256L128 220.8 0 0h97.92L128 51.2 157.44 0h47.36Z" fill="#41B883"/>
                   <path d="M50.56 0 128 133.12 204.8 0h-47.36L128 51.2 97.92 0H50.56Z" fill="#35495E"/>
                 </svg>
               </div>
-
-              {/* Python Logo */}
               <div className="w-8 h-8 rounded-full bg-[#3776AB]/10 border-2 border-background flex items-center justify-center p-1">
                 <svg viewBox="16 16 32 32" className="w-full h-full">
                   <defs>
                     <linearGradient id="pyGrad1" x1="19.075" x2="34.898" y1="18.782" y2="34.658" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#387EB8"/>
-                      <stop offset="1" stopColor="#366994"/>
+                      <stop stopColor="#387EB8"/><stop offset="1" stopColor="#366994"/>
                     </linearGradient>
                     <linearGradient id="pyGrad2" x1="28.809" x2="45.803" y1="28.882" y2="45.163" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#FFE052"/>
-                      <stop offset="1" stopColor="#FFC331"/>
+                      <stop stopColor="#FFE052"/><stop offset="1" stopColor="#FFC331"/>
                     </linearGradient>
                   </defs>
                   <path fill="url(#pyGrad1)" d="M31.885 16c-8.124 0-7.617 3.523-7.617 3.523l.01 3.65h7.752v1.095H21.197S16 23.678 16 31.876c0 8.196 4.537 7.906 4.537 7.906h2.708v-3.804s-.146-4.537 4.465-4.537h7.688s4.32.07 4.32-4.175v-7.019S40.374 16 31.885 16zm-4.275 2.454a1.394 1.394 0 1 1 0 2.79 1.393 1.393 0 0 1-1.395-1.395c0-.771.624-1.395 1.395-1.395z"/>
@@ -163,7 +180,7 @@ export default function HeroNew() {
             </span>
           </motion.div>
 
-          {/* Trust indicators - Behavioral Design (Risk Reduction) */}
+          {/* Trust indicators */}
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
@@ -194,19 +211,20 @@ export default function HeroNew() {
             </span>
           </motion.div>
 
-          {/* Dashboard mockup - Material Design 3 + Stripe UI */}
+          {/* Dashboard mockup */}
           <motion.div
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 60 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="relative max-w-3xl mx-auto group"
           >
-            {/* Material Design 3 elevation + Stripe glow */}
             <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 rounded-3xl blur-3xl group-hover:blur-2xl transition-all duration-500" />
             <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl blur-2xl opacity-50" />
 
-            {/* Mockup card - Apple glassmorphism */}
-            <div className="relative bg-card/90 backdrop-blur-2xl border border-border/50 rounded-2xl p-6 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] transition-shadow duration-500">
+            {/* Card with Magic UI BorderBeam */}
+            <div className="relative bg-card/90 backdrop-blur-2xl border border-border/50 rounded-2xl p-6 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] transition-shadow duration-500 overflow-hidden">
+              <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="#f59e0b" />
+
               {/* Mockup header */}
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
@@ -232,7 +250,7 @@ export default function HeroNew() {
                 <span className="text-right">7D</span>
               </div>
 
-              {/* Table rows - Stripe UI quality */}
+              {/* Table rows */}
               <div className="space-y-1">
                 {mockLeaderboard.map((item, index) => (
                   <motion.div

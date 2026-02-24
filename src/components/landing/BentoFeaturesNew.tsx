@@ -1,12 +1,20 @@
 'use client';
 
+import { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, TrendingUp, ArrowUpRight, Zap, Bell, CheckCircle2, BarChart3, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { AnimatedBeam } from '@/components/ui/animated-beam';
 
 // Mini mockup components for inside the cards
 function LeaderboardMockup() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const ghRef = useRef<HTMLDivElement>(null);
+  const hnRef = useRef<HTMLDivElement>(null);
+  const soRef = useRef<HTMLDivElement>(null);
+  const scoreRef = useRef<HTMLDivElement>(null);
+
   const items = [
     {
       name: 'Next.js',
@@ -31,21 +39,38 @@ function LeaderboardMockup() {
     },
   ];
   return (
-    <div className="mt-4 space-y-2">
-      {items.map((item) => (
-        <div key={item.name} className="flex items-center justify-between px-3 py-2 rounded-lg bg-background/50 border border-border/30 hover:bg-background/80 transition-colors group">
-          <div className="flex items-center gap-2">
-            <div className="opacity-70 group-hover:opacity-100 transition-opacity">{item.logo}</div>
-            <span className="text-xs font-medium text-foreground">{item.name}</span>
+    <div>
+      <div className="mt-4 space-y-2">
+        {items.map((item) => (
+          <div key={item.name} className="flex items-center justify-between px-3 py-2 rounded-lg bg-background/50 border border-border/30 hover:bg-background/80 transition-colors group">
+            <div className="flex items-center gap-2">
+              <div className="opacity-70 group-hover:opacity-100 transition-opacity">{item.logo}</div>
+              <span className="text-xs font-medium text-foreground">{item.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] font-semibold ${item.color}`}>{item.metric}</span>
+              {item.badge && (
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-500 animate-pulse">{item.badge}</span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className={`text-[10px] font-semibold ${item.color}`}>{item.metric}</span>
-            {item.badge && (
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-500 animate-pulse">{item.badge}</span>
-            )}
-          </div>
+        ))}
+      </div>
+
+      {/* AnimatedBeam: data sources → score */}
+      <div ref={containerRef} className="relative mt-3 h-10 flex items-center justify-between px-1">
+        <div className="flex flex-col justify-between h-full py-0.5">
+          <div ref={ghRef} className="text-[8px] font-mono text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded w-fit">GH</div>
+          <div ref={hnRef} className="text-[8px] font-mono text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded w-fit">HN</div>
+          <div ref={soRef} className="text-[8px] font-mono text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded w-fit">SO</div>
         </div>
-      ))}
+        <div ref={scoreRef} className="w-8 h-8 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0">
+          <span className="text-[8px] font-bold text-primary">▲</span>
+        </div>
+        <AnimatedBeam containerRef={containerRef} fromRef={ghRef} toRef={scoreRef} duration={2} curvature={8} />
+        <AnimatedBeam containerRef={containerRef} fromRef={hnRef} toRef={scoreRef} duration={3} curvature={0} />
+        <AnimatedBeam containerRef={containerRef} fromRef={soRef} toRef={scoreRef} duration={2.5} curvature={-8} />
+      </div>
     </div>
   );
 }

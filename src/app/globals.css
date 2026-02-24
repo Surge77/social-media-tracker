@@ -224,6 +224,12 @@ All colors MUST be HSL.
     100% { stroke-dashoffset: 0; opacity: 0; }
   }
 
+  /* Magic UI — AnimatedGradientText border animation */
+  @keyframes agt-border {
+    0%, 100% { background-position: 0% 50%; }
+    50%       { background-position: 100% 50%; }
+  }
+
   /* Apple-style gradient animation */
   .animate-gradient {
     background-size: 200% 200%;

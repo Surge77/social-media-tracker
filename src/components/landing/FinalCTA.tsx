@@ -3,12 +3,17 @@
 import { motion } from 'framer-motion';
 import AnimatedCTA from '../AnimatedCTA';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { Meteors } from '@/components/ui/meteors';
+import { BackgroundBeamsCollision } from '@/components/ui/background-beams-collision';
 
 export default function FinalCTA() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <section className="py-20 md:py-32 relative overflow-hidden">
+    <BackgroundBeamsCollision className="py-20 md:py-32">
+      {/* Magic UI — meteors */}
+      {!prefersReducedMotion && <Meteors number={10} />}
+
       {/* Background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_60%)]" />
@@ -24,7 +29,7 @@ export default function FinalCTA() {
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" />
       <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse animation-delay-1000" />
 
-      <div className="container mx-auto px-6 relative">
+      <div className="container mx-auto px-6 relative z-30">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -77,6 +82,6 @@ export default function FinalCTA() {
           </motion.p>
         </div>
       </div>
-    </section>
+    </BackgroundBeamsCollision>
   );
 }

@@ -80,6 +80,26 @@ export default {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		keyframes: {
+  			'retro-grid': {
+  				'0%':   { transform: 'translateY(-50%)' },
+  				'100%': { transform: 'translateY(0)' },
+  			},
+  			'marquee': {
+  				'0%':   { transform: 'translateX(0)' },
+  				'100%': { transform: 'translateX(calc(-100% - var(--gap)))' },
+  			},
+  			'marquee-vertical': {
+  				'0%':   { transform: 'translateY(0)' },
+  				'100%': { transform: 'translateY(calc(-100% - var(--gap)))' },
+  			},
+  			'border-beam': {
+  				'100%': { 'offset-distance': '100%' },
+  			},
+  			'meteor': {
+  				'0%': { transform: 'rotate(215deg) translateX(0)', opacity: '1' },
+  				'70%': { opacity: '1' },
+  				'100%': { transform: 'rotate(215deg) translateX(-500px)', opacity: '0' },
+  			},
   			'accordion-down': {
   				from: {
   					height: '0'
@@ -124,6 +144,11 @@ export default {
   			}
   		},
   		animation: {
+  			'retro-grid':        'retro-grid 20s linear infinite',
+  			'marquee':           'marquee var(--duration) linear infinite',
+  			'marquee-vertical':  'marquee-vertical var(--duration) linear infinite',
+  			'border-beam':       'border-beam calc(var(--duration)*1s) infinite linear',
+  			'meteor':            'meteor 5s linear infinite',
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			'float': 'float 6s ease-in-out infinite',
