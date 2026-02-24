@@ -197,6 +197,24 @@ All colors MUST be HSL.
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
 
+  /* TechTable row hover — CSS-only, zero React re-renders */
+  .tech-row {
+    transition: background 150ms ease, box-shadow 150ms ease;
+  }
+
+  .tech-row:hover {
+    background: linear-gradient(to right, color-mix(in srgb, var(--tech-color) 8%, transparent) 0%, transparent 50%);
+    box-shadow: inset 3px 0 0 var(--tech-color);
+  }
+
+  .tech-row:hover .tech-dot {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--tech-color) 50%, transparent);
+  }
+
+  .tech-row:hover .tech-name {
+    color: var(--tech-color);
+  }
+
   /* Apple-style hover lift with spring physics */
   .hover-lift {
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -24,6 +25,7 @@ interface TechTableProps {
 export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
   ({ technologies, className }, ref) => {
     const prefersReducedMotion = useReducedMotion()
+    const router = useRouter()
 
     if (technologies.length === 0) {
       return (
@@ -91,7 +93,9 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                       ? {}
                       : { duration: 0.2, delay: Math.min(index * 0.02, 0.3) }
                   }
-                  className="group cursor-pointer transition-colors hover:bg-muted/20"
+                  className="tech-row group cursor-pointer"
+                  onClick={() => router.push(`/technologies/${tech.slug}`)}
+                  style={{ '--tech-color': tech.color } as React.CSSProperties}
                 >
                   {/* Rank */}
                   <td className="px-4 py-3 text-center">
@@ -109,16 +113,16 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                   <td className="px-4 py-3">
                     <Link
                       href={`/technologies/${tech.slug}`}
-                      className="block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                      className="block focus:outline-none"
                     >
                       <div className="flex items-center gap-3">
                         {/* Color dot */}
                         <div
-                          className="h-3 w-3 shrink-0 rounded-full"
+                          className="tech-dot h-3 w-3 shrink-0 rounded-full transition-shadow duration-150"
                           style={{ backgroundColor: tech.color }}
                         />
                         <div className="flex flex-col gap-0.5 min-w-0">
-                          <span className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                          <span className="tech-name font-semibold transition-colors duration-150">
                             {tech.name}
                           </span>
                           <span className="flex items-center gap-2">

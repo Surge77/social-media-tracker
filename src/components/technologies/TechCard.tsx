@@ -7,7 +7,7 @@ import { ArrowRight, TrendingUp, TrendingDown, Minus, CheckCircle2, Shield, Aler
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
-import { Sparkline } from '@/components/technologies/Sparkline'
+import { SubScoreBars } from '@/components/technologies/SubScoreBars'
 import { RankChangeBadge } from '@/components/technologies/RankChangeBadge'
 import LifecycleBadge from '@/components/technologies/LifecycleBadge'
 import QuickCompareLinks from '@/components/technologies/QuickCompareLinks'
@@ -60,9 +60,9 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
       >
         <Link
           href={`/technologies/${technology.slug}`}
-          className="group block focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+          className="group block rounded-lg focus:outline-none"
         >
-          <div className={`rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm transition-all hover:bg-card/50 hover:shadow-md ${vstyle.border}`}>
+          <div className={`rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-card/60 hover:shadow-lg active:translate-y-0 active:shadow-md ${vstyle.border}`}>
 
             {/* Top row: verdict + lifecycle + category */}
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -89,11 +89,11 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ backgroundColor: technology.color }}
                 />
-                <h3 className="truncate font-semibold text-foreground group-hover:text-primary transition-colors">
+                <h3 className="truncate font-semibold text-foreground transition-colors duration-200 group-hover:text-primary">
                   {technology.name}
                 </h3>
               </div>
-              <ArrowRight size={14} className="shrink-0 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+              <ArrowRight size={14} className="shrink-0 text-muted-foreground/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
             </div>
 
             {/* Description */}
@@ -131,9 +131,12 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
               <span className="flex items-center gap-1">
                 Score <span className="font-medium text-foreground">{Math.round(technology.composite_score ?? 0)}</span>
               </span>
-              {technology.sparkline && technology.sparkline.length > 0 && (
-                <Sparkline data={technology.sparkline} width={64} height={20} />
-              )}
+              <SubScoreBars
+                github={technology.github_score}
+                community={technology.community_score}
+                jobs={technology.jobs_score}
+                ecosystem={technology.ecosystem_score}
+              />
             </div>
           </div>
         </Link>
