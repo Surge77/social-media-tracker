@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Zap, Loader2 } from 'lucide-react'
+import { Zap } from 'lucide-react'
 import { QuizContainer } from '@/components/quiz/QuizContainer'
 import { TechMultiSelect } from '@/components/quiz/TechMultiSelect'
 import { HypeCheckResult } from '@/components/quiz/results/HypeCheckResult'

@@ -2,6 +2,7 @@ import React from 'react'
 import Footer from '@/components/Footer'
 import { DashboardHeader } from '@/components/DashboardHeader'
 import { AskAIWidget } from '@/components/ask/AskAIWidget'
+import { PageTransition } from '@/components/PageTransition'
 
 export default function DashboardLayout({
   children,
@@ -9,11 +10,12 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <DashboardHeader />
 
-      {/* Main Content */}
-      <main>{children}</main>
+      <main className="flex-1">
+        <PageTransition>{children}</PageTransition>
+      </main>
 
       <Footer />
 

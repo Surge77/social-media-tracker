@@ -235,6 +235,7 @@ function MoverRow({ mover, index, type }: MoverRowProps) {
             width={60}
             height={24}
             color={type === 'riser' ? 'hsl(var(--success))' : 'hsl(var(--destructive))'}
+            showDelta={false}
           />
         </div>
       </div>

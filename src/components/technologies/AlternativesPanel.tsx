@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Star, Briefcase, MessageSquare, TrendingUp } from 'lucide-react'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
+import { LoadingSpinner } from '@/components/ui/loading'
 import type { TechnologyCategory } from '@/types'
 
 interface Alternative {
@@ -79,7 +80,7 @@ export function AlternativesPanel({ slug }: AlternativesPanelProps) {
   if (isLoading) {
     return (
       <div className="flex h-24 items-center justify-center rounded-lg border border-border bg-muted/20">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <LoadingSpinner size="sm" />
       </div>
     )
   }

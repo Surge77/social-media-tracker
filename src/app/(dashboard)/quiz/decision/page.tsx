@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { GitCompare, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react'
+import { GitCompare, ArrowLeft, ArrowRight } from 'lucide-react'
 import { QuizContainer } from '@/components/quiz/QuizContainer'
 import { QuizProgress } from '@/components/quiz/QuizProgress'
 import { QuizQuestion } from '@/components/quiz/QuizQuestion'

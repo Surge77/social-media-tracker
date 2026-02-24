@@ -6,6 +6,13 @@ import AnimatedCTA from '../AnimatedCTA';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpRight, ArrowDownRight, Minus, Users, Database, Zap } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { Sparkline } from '@/components/technologies/Sparkline';
+
+const MOCK_SPARKLINES = {
+  up:     [52, 54, 51, 56, 58, 55, 62, 66, 70, 75, 78, 82, 86, 90, 94],
+  down:   [88, 85, 87, 82, 79, 80, 75, 71, 68, 65, 62, 60, 58, 55, 52],
+  stable: [72, 74, 71, 75, 73, 76, 72, 74, 73, 75, 72, 74, 73, 75, 74],
+};
 
 const mockLeaderboard = [
   { rank: 1, name: 'React Server Components', score: 94, change: +45, trend: 'up' },
@@ -14,21 +21,6 @@ const mockLeaderboard = [
   { rank: 4, name: 'TypeScript', score: 82, change: +3, trend: 'stable' },
   { rank: 5, name: 'Next.js', score: 80, change: -2, trend: 'down' },
 ];
-
-function MiniSparkline({ trend }: { trend: string }) {
-  const paths = {
-    up: 'M0,20 L5,18 L10,15 L15,16 L20,12 L25,10 L30,6 L35,3',
-    down: 'M0,5 L5,7 L10,8 L15,10 L20,14 L25,16 L30,18 L35,20',
-    stable: 'M0,12 L5,11 L10,13 L15,11 L20,12 L25,10 L30,11 L35,12',
-  };
-  const color = trend === 'up' ? '#22c55e' : trend === 'down' ? '#ef4444' : '#eab308';
-
-  return (
-    <svg width="40" height="24" viewBox="0 0 40 24" fill="none">
-      <path d={paths[trend as keyof typeof paths]} stroke={color} strokeWidth="2" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
 
 export default function HeroNew() {
   const prefersReducedMotion = useReducedMotion();
@@ -266,7 +258,12 @@ export default function HeroNew() {
                       {item.change > 0 ? '+' : ''}{item.change}%
                     </span>
                     <div className="flex justify-end">
-                      <MiniSparkline trend={item.trend} />
+                      <Sparkline
+                        data={MOCK_SPARKLINES[item.trend as keyof typeof MOCK_SPARKLINES]}
+                        width={60}
+                        height={24}
+                        showDelta={false}
+                      />
                     </div>
                   </motion.div>
                 ))}

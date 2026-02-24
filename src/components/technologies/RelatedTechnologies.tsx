@@ -68,7 +68,7 @@ export const RelatedTechnologies = React.forwardRef<HTMLDivElement, RelatedTechn
                 </div>
 
                 {/* Sparkline */}
-                <Sparkline data={tech.sparkline} width={100} height={20} />
+                <Sparkline data={tech.sparkline} width={80} height={24} showDelta={true} />
               </div>
             </Link>
           </motion.div>

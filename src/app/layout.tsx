@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { NavigationProgress } from "@/components/NavigationProgress";
 
 const manrope = Manrope({
   variable: "--font-sans",
@@ -60,7 +61,10 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <NavigationProgress />
+          {children}
+        </Providers>
       </body>
     </html>
   );

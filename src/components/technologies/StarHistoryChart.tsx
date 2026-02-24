@@ -12,6 +12,7 @@ import {
 } from 'recharts'
 import { Star } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { LoadingSpinner } from '@/components/ui/loading'
 
 interface StarDataPoint {
   date: string
@@ -95,7 +96,7 @@ export function StarHistoryChart({ slug, techColor }: StarHistoryChartProps) {
   if (isLoading) {
     return (
       <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-border bg-muted/20">
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <LoadingSpinner size="sm" />
       </div>
     )
   }

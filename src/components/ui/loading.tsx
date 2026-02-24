@@ -1,9 +1,25 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
+
+const BINARY_FRAMES = [
+  '010010', '001100', '100101', '111010', '111101',
+  '010111', '101011', '111000', '110011', '110101',
+]
+const BINARY_INTERVAL = 80
+
+function useBinaryFrame(paused = false) {
+  const [frame, setFrame] = useState(0)
+  useEffect(() => {
+    if (paused) return
+    const id = setInterval(() => setFrame(f => (f + 1) % BINARY_FRAMES.length), BINARY_INTERVAL)
+    return () => clearInterval(id)
+  }, [paused])
+  return BINARY_FRAMES[frame]
+}
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -12,11 +28,11 @@ interface LoadingProps {
   text?: string
 }
 
-const sizeClasses = {
-  sm: 'w-4 h-4',
-  md: 'w-8 h-8',
-  lg: 'w-12 h-12',
-  xl: 'w-16 h-16',
+const binaryFontSizes = {
+  sm: '0.6rem',
+  md: '0.85rem',
+  lg: '1.15rem',
+  xl: '1.5rem',
 }
 
 const textSizes = {
@@ -28,21 +44,21 @@ const textSizes = {
 
 /**
  * DevTrends branded loading animation
- * Replaces boring spinners with beautiful, on-brand loaders
+ * Default variant: binary spinner (ora/cli-spinners)
  */
 export function Loading({
   size = 'md',
   variant = 'default',
   className,
-  text
+  text,
 }: LoadingProps) {
   const prefersReducedMotion = useReducedMotion()
+  const binaryFrame = useBinaryFrame(variant !== 'default')
 
   if (variant === 'minimal') {
     return (
       <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
-        <div className={cn('relative', sizeClasses[size])}>
-          {/* Minimal ring loader */}
+        <div className="relative w-8 h-8">
           <motion.div
             className="absolute inset-0 rounded-full border-2 border-primary/20"
             initial={{ opacity: 0 }}
@@ -99,8 +115,7 @@ export function Loading({
   if (variant === 'pulse') {
     return (
       <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
-        <div className={cn('relative', sizeClasses[size])}>
-          {/* Pulsing gradient circle */}
+        <div className="relative w-12 h-12">
           <motion.div
             className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 to-amber-500"
             animate={prefersReducedMotion ? {} : {
@@ -113,7 +128,6 @@ export function Loading({
               ease: 'easeInOut',
             }}
           />
-          {/* Inner glow */}
           <motion.div
             className="absolute inset-2 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 blur-sm"
             animate={prefersReducedMotion ? {} : {
@@ -132,34 +146,23 @@ export function Loading({
     )
   }
 
-  // Default: Bars Loader (professional, modern, clean)
+  // Default: binary spinner
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
-      <div className={cn('flex items-center justify-center gap-1', sizeClasses[size])}>
-        {[0, 1, 2, 3, 4].map((i) => (
-          <motion.div
-            key={i}
-            className={cn(
-              'rounded-full bg-primary',
-              size === 'sm' && 'w-0.5',
-              size === 'md' && 'w-1',
-              size === 'lg' && 'w-1.5',
-              size === 'xl' && 'w-2'
-            )}
-            style={{ height: '60%' }}
-            animate={prefersReducedMotion ? {} : {
-              scaleY: [1, 1.8, 1],
-              opacity: [0.5, 1, 0.5],
-            }}
-            transition={prefersReducedMotion ? {} : {
-              duration: 1,
-              repeat: Infinity,
-              delay: i * 0.1,
-              ease: 'easeInOut',
-            }}
-          />
-        ))}
-      </div>
+      <span
+        style={{
+          fontFamily: 'var(--font-geist-mono), monospace',
+          fontSize: binaryFontSizes[size],
+          color: 'hsl(var(--primary))',
+          letterSpacing: '0.12em',
+          display: 'block',
+          lineHeight: 1,
+        }}
+        aria-label="Loading"
+        aria-live="polite"
+      >
+        {prefersReducedMotion ? '010010' : binaryFrame}
+      </span>
       {text && <p className={cn('text-muted-foreground font-medium', textSizes[size])}>{text}</p>}
     </div>
   )
@@ -170,32 +173,30 @@ export function Loading({
  */
 export function LoadingSpinner({ size = 'sm', className }: Pick<LoadingProps, 'size' | 'className'>) {
   const prefersReducedMotion = useReducedMotion()
+  const binaryFrame = useBinaryFrame(false)
+
+  const inlineFontSizes = {
+    sm: '0.55rem',
+    md: '0.7rem',
+    lg: '0.85rem',
+    xl: '1rem',
+  }
 
   return (
-    <div className={cn('flex items-center gap-0.5', className)}>
-      {[0, 1, 2, 3, 4].map((i) => (
-        <motion.div
-          key={i}
-          className={cn(
-            'rounded-full bg-current',
-            size === 'sm' && 'w-0.5 h-2',
-            size === 'md' && 'w-0.5 h-3',
-            size === 'lg' && 'w-1 h-4',
-            size === 'xl' && 'w-1 h-5'
-          )}
-          animate={prefersReducedMotion ? {} : {
-            scaleY: [1, 1.8, 1],
-            opacity: [0.5, 1, 0.5],
-          }}
-          transition={prefersReducedMotion ? {} : {
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.1,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-    </div>
+    <span
+      style={{
+        fontFamily: 'var(--font-geist-mono), monospace',
+        fontSize: inlineFontSizes[size],
+        color: 'currentColor',
+        letterSpacing: '0.1em',
+        lineHeight: 1,
+        display: 'inline-block',
+      }}
+      className={className}
+      aria-label="Loading"
+    >
+      {prefersReducedMotion ? '0101' : binaryFrame.slice(0, 4)}
+    </span>
   )
 }
 
