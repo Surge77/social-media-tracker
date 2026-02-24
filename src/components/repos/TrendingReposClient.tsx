@@ -2,26 +2,28 @@
 
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LayoutGrid, List } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { RepoCard } from '@/components/repos/RepoCard'
+import { RepoTable } from '@/components/repos/RepoTable'
 import { RepoFilters } from '@/components/repos/RepoFilters'
 import { RisingStarsSection } from '@/components/repos/RisingStarsSection'
-import { CommunityBuzzSection } from '@/components/repos/CommunityBuzzSection'
 import { Loading } from '@/components/ui/loading'
-import type { TrendingRepo, BuzzItem } from '@/lib/api/github-trending'
+import type { TrendingRepo } from '@/lib/api/github-trending'
 
 const PAGE_SIZE = 30
+
+type ViewMode = 'grid' | 'table'
 
 export function TrendingReposClient() {
   const prefersReducedMotion = useReducedMotion()
   const [language, setLanguage] = React.useState('all')
   const [period, setPeriod] = React.useState('7d')
   const [repos, setRepos] = React.useState<TrendingRepo[]>([])
-  const [buzz, setBuzz] = React.useState<BuzzItem[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [page, setPage] = React.useState(1)
+  const [view, setView] = React.useState<ViewMode>('grid')
 
   // Reset to page 1 whenever filters change
   React.useEffect(() => {
@@ -39,7 +41,6 @@ export function TrendingReposClient() {
       })
       .then((data) => {
         setRepos(data.repos ?? [])
-        setBuzz(data.buzz ?? [])
         setIsLoading(false)
       })
       .catch((err) => {
@@ -69,19 +70,47 @@ export function TrendingReposClient() {
         <p className="text-muted-foreground">Open-source repositories gaining momentum on GitHub</p>
       </motion.div>
 
-      {/* Filters */}
+      {/* Filters + view toggle */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.1 }}
-        className="mb-6"
+        className="mb-6 flex items-center gap-3"
       >
-        <RepoFilters
-          language={language}
-          period={period}
-          onLanguageChange={(l) => { setLanguage(l); setPage(1) }}
-          onPeriodChange={(p) => { setPeriod(p); setPage(1) }}
-        />
+        <div className="flex-1">
+          <RepoFilters
+            language={language}
+            period={period}
+            onLanguageChange={(l) => { setLanguage(l); setPage(1) }}
+            onPeriodChange={(p) => { setPeriod(p); setPage(1) }}
+          />
+        </div>
+
+        {/* View toggle */}
+        <div className="flex items-center rounded-lg border border-border bg-card/30 p-1">
+          <button
+            onClick={() => setView('grid')}
+            aria-label="Grid view"
+            className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
+              view === 'grid'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <LayoutGrid size={14} />
+          </button>
+          <button
+            onClick={() => setView('table')}
+            aria-label="Table view"
+            className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
+              view === 'table'
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <List size={14} />
+          </button>
+        </div>
       </motion.div>
 
       {isLoading && (
@@ -98,17 +127,6 @@ export function TrendingReposClient() {
 
       {!isLoading && !error && (
         <>
-          {/* Community Buzz — only on page 1 */}
-          {page === 1 && buzz.length > 0 && (
-            <motion.div
-              initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-              transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.12 }}
-            >
-              <CommunityBuzzSection buzz={buzz} />
-            </motion.div>
-          )}
-
           {/* Rising Stars — only on page 1 */}
           {page === 1 && (
             <motion.div
@@ -131,26 +149,31 @@ export function TrendingReposClient() {
             </div>
           )}
 
-          {/* Repo Grid */}
+          {/* Grid or Table */}
           <AnimatePresence mode="wait">
             <motion.div
-              key={`${language}-${period}-${page}`}
+              key={`${language}-${period}-${page}-${view}`}
               initial={prefersReducedMotion ? {} : { opacity: 0 }}
               animate={prefersReducedMotion ? {} : { opacity: 1 }}
               exit={prefersReducedMotion ? {} : { opacity: 0 }}
               transition={prefersReducedMotion ? {} : { duration: 0.2 }}
-              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
             >
-              {pageRepos.map((repo, i) => (
-                <motion.div
-                  key={repo.github_id}
-                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
-                  animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-                  transition={prefersReducedMotion ? {} : { duration: 0.25, delay: i * 0.03 }}
-                >
-                  <RepoCard repo={repo} rank={(page - 1) * PAGE_SIZE + i + 1} />
-                </motion.div>
-              ))}
+              {view === 'grid' ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {pageRepos.map((repo, i) => (
+                    <motion.div
+                      key={repo.github_id}
+                      initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
+                      animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                      transition={prefersReducedMotion ? {} : { duration: 0.25, delay: i * 0.03 }}
+                    >
+                      <RepoCard repo={repo} rank={(page - 1) * PAGE_SIZE + i + 1} />
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <RepoTable repos={pageRepos} page={page} pageSize={PAGE_SIZE} />
+              )}
             </motion.div>
           </AnimatePresence>
 
@@ -160,7 +183,7 @@ export function TrendingReposClient() {
             </div>
           )}
 
-          {/* Pagination controls */}
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-8 flex items-center justify-center gap-2">
               <button
@@ -172,7 +195,6 @@ export function TrendingReposClient() {
                 Previous
               </button>
 
-              {/* Page number pills */}
               <div className="flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
