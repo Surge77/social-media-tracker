@@ -4,6 +4,7 @@ import HeroNew from '@/components/landing/HeroNew';
 
 const DataSourcesMarquee = dynamic(() => import('@/components/landing/DataSourcesMarquee'), { ssr: true });
 const BentoFeaturesNew   = dynamic(() => import('@/components/landing/BentoFeaturesNew'),   { ssr: true });
+const VelocityScroll     = dynamic(() => import('@/components/landing/VelocityScrollWrapper'));
 const TechCloudSection   = dynamic(() => import('@/components/landing/TechCloudSection'),   { ssr: true });
 const LandingFAQ         = dynamic(() => import('@/components/landing/LandingFAQ'),         { ssr: true });
 const FinalCTA           = dynamic(() => import('@/components/landing/FinalCTA'),           { ssr: true });
@@ -16,6 +17,7 @@ export default function HomePage() {
       <HeroNew />
       <DataSourcesMarquee />
       <BentoFeaturesNew />
+      <VelocityScroll />
       <TechCloudSection />
       <LandingFAQ />
       <FinalCTA />

@@ -63,10 +63,10 @@ export async function GET(
     const data = (chartRows ?? []).map((row) => ({
       date: row.score_date,
       composite: Number(row.composite_score),
-      github: Number(row.github_score ?? 0),
-      community: Number(row.community_score ?? 0),
-      jobs: Number(row.jobs_score ?? 0),
-      ecosystem: Number(row.ecosystem_score ?? 0),
+      github: row.github_score !== null ? Number(row.github_score) : null,
+      community: row.community_score !== null ? Number(row.community_score) : null,
+      jobs: row.jobs_score !== null ? Number(row.jobs_score) : null,
+      ecosystem: row.ecosystem_score !== null ? Number(row.ecosystem_score) : null,
     }))
 
     return Response.json({ data })

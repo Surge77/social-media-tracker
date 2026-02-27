@@ -66,6 +66,15 @@ export async function GET(request: Request) {
         if (insertError) {
           throw new Error(`Failed to upsert data points (batch ${Math.floor(i / BATCH_SIZE) + 1}): ${insertError.message}`)
         }
+
+        // Keep data_points_latest in sync — one row per (tech, source, metric)
+        // Without this, the technology detail page won't show the latest signals.
+        await supabase
+          .from('data_points_latest')
+          .upsert(
+            batch.map((dp) => ({ ...dp, updated_at: new Date().toISOString() })),
+            { onConflict: 'technology_id,source,metric' }
+          )
       }
 
       console.log(`[Weekly Cron] Inserted ${allDataPoints.length} data points`)

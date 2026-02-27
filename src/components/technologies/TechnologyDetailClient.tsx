@@ -20,6 +20,8 @@ import { TrendChart } from '@/components/technologies/TrendChart'
 import { SourceSignalCard } from '@/components/technologies/SourceSignalCard'
 import { RelatedTechnologies } from '@/components/technologies/RelatedTechnologies'
 import { StarHistoryChart } from '@/components/technologies/StarHistoryChart'
+import { PackageDownloadsChart } from '@/components/technologies/PackageDownloadsChart'
+import { JobMarketChart } from '@/components/technologies/JobMarketChart'
 import { AlternativesPanel } from '@/components/technologies/AlternativesPanel'
 import { AIInsightCard, AIInsightSkeleton, AIInsightError } from '@/components/ai/AIInsightCard'
 import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
@@ -102,11 +104,11 @@ export function TechnologyDetailClient() {
   // Extract lifecycle stage from raw_sub_scores
   const lifecycleStage =
     current_scores?.raw_sub_scores &&
-    typeof current_scores.raw_sub_scores === 'object' &&
-    'lifecycle' in current_scores.raw_sub_scores &&
-    typeof current_scores.raw_sub_scores.lifecycle === 'object' &&
-    current_scores.raw_sub_scores.lifecycle !== null &&
-    'stage' in current_scores.raw_sub_scores.lifecycle
+      typeof current_scores.raw_sub_scores === 'object' &&
+      'lifecycle' in current_scores.raw_sub_scores &&
+      typeof current_scores.raw_sub_scores.lifecycle === 'object' &&
+      current_scores.raw_sub_scores.lifecycle !== null &&
+      'stage' in current_scores.raw_sub_scores.lifecycle
       ? String(current_scores.raw_sub_scores.lifecycle.stage)
       : null
 
@@ -318,6 +320,34 @@ export function TechnologyDetailClient() {
           </div>
         </motion.section>
       )}
+
+      {/* Package Downloads */}
+      {(technology.npm_package || technology.pypi_package || technology.crates_package || technology.packagist_package || technology.rubygems_package || technology.nuget_package) && (
+        <motion.section
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.36 }}
+          className="mb-8"
+        >
+          <h2 className="mb-4 text-xl font-semibold text-foreground">Package Downloads</h2>
+          <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm">
+            <PackageDownloadsChart slug={slug} techColor={technology.color} />
+          </div>
+        </motion.section>
+      )}
+
+      {/* Job Market Demand */}
+      <motion.section
+        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.37 }}
+        className="mb-8"
+      >
+        <h2 className="mb-4 text-xl font-semibold text-foreground">Job Market Demand</h2>
+        <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm">
+          <JobMarketChart slug={slug} techColor={technology.color} />
+        </div>
+      </motion.section>
 
       {/* Latest Signals */}
       <motion.section

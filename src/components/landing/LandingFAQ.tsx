@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, HelpCircle } from 'lucide-react';
+import { HyperText } from '@/components/ui/hyper-text';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { MagicCard } from '@/components/ui/magic-card';
@@ -61,7 +62,9 @@ export default function LandingFAQ() {
               <HelpCircle className="mr-1.5 h-3 w-3" />
               FAQ
             </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">Questions, answered clearly</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">
+              <HyperText text="Questions, answered clearly" duration={900} />
+            </h2>
             <p className="text-muted-foreground">
               Everything people ask before trusting a data-driven learning roadmap.
             </p>

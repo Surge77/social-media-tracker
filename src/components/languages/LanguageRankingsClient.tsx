@@ -127,6 +127,7 @@ export function LanguageRankingsClient() {
   }, [rankings, search, category, trend, sortField, sortDir])
 
   const isFiltered = search.trim() !== '' || category !== 'All' || trend !== 'all'
+  const hasRankHistory = React.useMemo(() => rankings.some((r) => r.prev_rank !== null), [rankings])
 
   function handleSort(field: SortField) {
     if (sortField === field) {
@@ -261,21 +262,28 @@ export function LanguageRankingsClient() {
 
               {/* Trend filter */}
               <div className="flex flex-wrap items-center gap-1 rounded-md border border-border bg-background p-0.5">
-                {TREND_OPTIONS.map(({ value, label, icon }) => (
+                {TREND_OPTIONS.map(({ value, label, icon }) => {
+                  const needsHistory = value === 'rising' || value === 'falling' || value === 'stable'
+                  const isDisabled = needsHistory && !hasRankHistory
+                  return (
                   <button
                     key={value}
-                    onClick={() => setTrend(value)}
+                    onClick={() => !isDisabled && setTrend(value)}
+                    title={isDisabled ? 'No rank history yet — requires 2+ days of data' : undefined}
                     className="flex items-center gap-1 rounded px-2.5 py-1 text-xs font-medium transition-colors"
                     style={
                       trend === value
                         ? { backgroundColor: 'hsl(var(--foreground))', color: 'hsl(var(--background))' }
+                        : isDisabled
+                        ? { color: 'hsl(var(--muted-foreground))', opacity: 0.4, cursor: 'not-allowed' }
                         : { color: 'hsl(var(--muted-foreground))' }
                     }
                   >
                     {icon}
                     {label}
                   </button>
-                ))}
+                  )
+                })}
               </div>
             </div>
 
@@ -342,8 +350,12 @@ export function LanguageRankingsClient() {
 
           {/* List */}
           {processed.length === 0 ? (
-            <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-border">
-              <p className="text-sm text-muted-foreground">No languages match your filters.</p>
+            <div className="flex min-h-[200px] flex-col items-center justify-center gap-2 rounded-lg border border-border">
+              <p className="text-sm text-muted-foreground">
+                {(trend === 'rising' || trend === 'falling') && !hasRankHistory
+                  ? 'No rank history yet — run the cron job on two consecutive days to enable trend filters.'
+                  : 'No languages match your filters.'}
+              </p>
             </div>
           ) : (
             <div className="flex flex-col gap-1">

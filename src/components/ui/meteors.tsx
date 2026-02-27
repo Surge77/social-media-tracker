@@ -30,12 +30,12 @@ export function Meteors({ number = 12, className }: MeteorsProps) {
           key={i}
           className={cn(
             'pointer-events-none absolute size-0.5 rotate-[215deg] animate-meteor',
-            'rounded-full bg-orange-400/50 shadow-[0_0_0_1px_rgba(249,115,22,0.08)]',
+            'rounded-full bg-orange-700/90 dark:bg-orange-400/50 shadow-[0_0_0_1px_rgba(194,65,12,0.2)]',
             className,
           )}
           style={style}
         >
-          <div className="pointer-events-none absolute top-1/2 -z-10 h-px w-[60px] -translate-y-1/2 bg-gradient-to-r from-orange-400/50 to-transparent" />
+          <div className="pointer-events-none absolute top-1/2 -z-10 h-px w-[60px] -translate-y-1/2 bg-gradient-to-r from-orange-700/90 dark:from-orange-400/50 to-transparent" />
         </span>
       ))}
     </>

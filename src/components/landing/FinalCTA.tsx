@@ -4,45 +4,46 @@ import { motion } from 'framer-motion';
 import AnimatedCTA from '../AnimatedCTA';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Meteors } from '@/components/ui/meteors';
-import { BackgroundBeamsCollision } from '@/components/ui/background-beams-collision';
+import { RetroGrid } from '@/components/ui/retro-grid';
+import TextAnimation from '@/components/ui/scroll-text';
 
 export default function FinalCTA() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <BackgroundBeamsCollision className="py-16 sm:py-20 md:py-32">
-      {/* Magic UI — meteors */}
-      {!prefersReducedMotion && <Meteors number={10} />}
+    <section className="relative overflow-hidden py-24 sm:py-32 md:py-40">
+      {/* 1. Retro Grid Background */}
+      {!prefersReducedMotion && <RetroGrid className="z-0 opacity-40" angle={65} />}
 
-      {/* Background with gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_60%)]" />
+      {/* 2. Meteors */}
+      {!prefersReducedMotion && <Meteors number={15} />}
 
-      {/* Animated gradient mesh */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-blob" />
-        <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000" />
+      {/* 3. Gradient Overlays for depth */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.08),transparent_70%)] z-0" />
+
+      {/* 4. Animated Glowing Orbs */}
+      <div className="absolute inset-0 z-0 opacity-40 pointer-events-none">
+        <div className="absolute top-1/4 -left-10 w-96 h-96 bg-orange-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob" />
+        <div className="absolute top-1/3 -right-10 w-96 h-96 bg-purple-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-2000" />
+        <div className="absolute -bottom-20 left-1/3 w-96 h-96 bg-pink-600/20 rounded-full mix-blend-screen filter blur-[100px] animate-blob animation-delay-4000" />
       </div>
 
-      {/* Glow orbs */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-64 h-64 bg-orange-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" />
-      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-64 h-64 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse animation-delay-1000" />
-
-      <div className="container mx-auto px-4 sm:px-6 relative z-30">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <motion.h2
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-            whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-5 sm:mb-6"
-          >
-            Stop learning what{' '}
-            <span className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent">
-              everyone already knows
-            </span>
-          </motion.h2>
+          <TextAnimation
+            as="h2"
+            text="Stop learning what everyone already knows"
+            classname="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-5 sm:mb-6 justify-center"
+            letterAnime={false}
+            variants={{
+              hidden: { filter: 'blur(10px)', opacity: 0, y: 20 },
+              visible: {
+                filter: 'blur(0px)', opacity: 1, y: 0,
+                transition: { ease: 'linear', duration: 0.4 },
+              },
+            }}
+          />
 
           <motion.p
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -64,7 +65,7 @@ export default function FinalCTA() {
             <AnimatedCTA
               href="/technologies"
               size="lg"
-              className="px-8 sm:px-12 py-4 sm:py-5 text-lg sm:text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-[1.05] active:scale-[0.98] transition-all duration-300"
+              className="group relative px-8 sm:px-12 py-4 sm:py-5 text-lg sm:text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-[1.05] active:scale-[0.98] transition-all duration-300 overflow-hidden"
               delay={150}
             >
               See What to Learn Next →
@@ -82,6 +83,6 @@ export default function FinalCTA() {
           </motion.p>
         </div>
       </div>
-    </BackgroundBeamsCollision>
+    </section>
   );
 }

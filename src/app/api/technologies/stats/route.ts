@@ -11,10 +11,10 @@ interface MergedTech {
   category: TechnologyCategory
   color: string
   composite_score: number
-  jobs_score: number
-  community_score: number
-  github_score: number
-  ecosystem_score: number
+  jobs_score: number | null
+  community_score: number | null
+  github_score: number | null
+  ecosystem_score: number | null
   momentum: number
 }
 
@@ -115,14 +115,14 @@ export async function GET() {
     const technologies = techResult.data ?? []
 
     // 5. Build lookup maps
-    const scoreMap = new Map<string, Record<string, number>>()
+    const scoreMap = new Map<string, { composite_score: number; jobs_score: number | null; community_score: number | null; github_score: number | null; ecosystem_score: number | null; momentum: number }>()
     for (const s of (latestScoresResult.data ?? [])) {
       scoreMap.set(s.technology_id, {
         composite_score: Number(s.composite_score ?? 0),
-        jobs_score: Number(s.jobs_score ?? 0),
-        community_score: Number(s.community_score ?? 0),
-        github_score: Number(s.github_score ?? 0),
-        ecosystem_score: Number(s.ecosystem_score ?? 0),
+        jobs_score: s.jobs_score != null ? Number(s.jobs_score) : null,
+        community_score: s.community_score != null ? Number(s.community_score) : null,
+        github_score: s.github_score != null ? Number(s.github_score) : null,
+        ecosystem_score: s.ecosystem_score != null ? Number(s.ecosystem_score) : null,
         momentum: Number(s.momentum ?? 0),
       })
     }
@@ -183,11 +183,13 @@ export async function GET() {
       ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === coolingEntry.technology_id)?.score_delta ?? 0) : coolingEntry.momentum) * 10) / 10
       : 0
 
-    const mostDemanded = [...merged].sort((a, b) => b.jobs_score - a.jobs_score)[0]
+    const mostDemanded = [...merged]
+      .filter((t) => t.jobs_score !== null)
+      .sort((a, b) => (b.jobs_score ?? 0) - (a.jobs_score ?? 0))[0] ?? null
 
     const hiddenGem = merged
-      .filter((t) => t.jobs_score > 40 && t.community_score < 55)
-      .sort((a, b) => (b.jobs_score - b.community_score) - (a.jobs_score - a.community_score))[0] ?? null
+      .filter((t) => (t.jobs_score ?? 0) > 40 && (t.community_score ?? 0) < 55)
+      .sort((a, b) => ((b.jobs_score ?? 0) - (b.community_score ?? 0)) - ((a.jobs_score ?? 0) - (a.community_score ?? 0)))[0] ?? null
 
     const trending = sortedByMomentum.slice(0, 3)
 
@@ -200,7 +202,7 @@ export async function GET() {
         ? { name: hottestEntry.name, slug: hottestEntry.slug, color: hottestEntry.color, score_delta: hottestDelta }
         : null,
       most_demanded: mostDemanded
-        ? { name: mostDemanded.name, slug: mostDemanded.slug, color: mostDemanded.color, jobs_score: Math.round(mostDemanded.jobs_score) }
+        ? { name: mostDemanded.name, slug: mostDemanded.slug, color: mostDemanded.color, jobs_score: Math.round(mostDemanded.jobs_score!) }
         : null,
       cooling: coolingEntry
         ? { name: coolingEntry.name, slug: coolingEntry.slug, color: coolingEntry.color, score_delta: coolingDelta }
@@ -222,8 +224,8 @@ export async function GET() {
     }
 
     const category_health = Array.from(categoryGroups.entries()).map(([cat, techs]) => {
-      const avgScore = Math.round(mean(techs.map((t) => t.composite_score)) * 10) / 10
-      const avgMomentum = Math.round(mean(techs.map((t) => t.momentum)) * 10) / 10
+      const avgScore = Math.round(mean(techs.map((t) => t.composite_score ?? 0)) * 10) / 10
+      const avgMomentum = Math.round(mean(techs.map((t) => t.momentum ?? 0)) * 10) / 10
       const bestTech = [...techs].sort((a, b) => b.composite_score - a.composite_score)[0]
       return {
         category: cat,

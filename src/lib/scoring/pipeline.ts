@@ -115,6 +115,25 @@ export async function runScoringPipeline(
 
   console.log(`[Scoring] Found ${dataPoints.length} data points for ${date}`)
 
+  // Step 2b: Supplement with latest job data from data_points_latest
+  // Jobs are fetched weekly, so on most days there are no job data_points for today.
+  // We pull the latest job data to ensure jobs_score is always computed.
+  const todayHasJobs = dataPoints.some(
+    (dp) => dp.metric === 'job_postings'
+  )
+  if (!todayHasJobs) {
+    const { data: latestJobPoints } = await supabase
+      .from('data_points_latest')
+      .select('technology_id, source, metric, value')
+      .eq('metric', 'job_postings')
+      .in('technology_id', techIds)
+
+    if (latestJobPoints && latestJobPoints.length > 0) {
+      console.log(`[Scoring] Supplemented with ${latestJobPoints.length} latest job data points`)
+      dataPoints.push(...latestJobPoints)
+    }
+  }
+
   // Step 3: Group data points by technology
   const techData = new Map<string, TechDataPoints>()
 
@@ -279,20 +298,20 @@ export async function runScoringPipeline(
   const soMentionsArr = allTechs.map((t) => t.soMentions ?? 0)
   const dependentsArr = allTechs.map((t) => t.dependentsCount ?? 0)
 
-  const starsPct        = percentileRankNormalize(starsArr)
-  const forksPct        = percentileRankNormalize(forksArr)
+  const starsPct = percentileRankNormalize(starsArr)
+  const forksPct = percentileRankNormalize(forksArr)
   const contributorsPct = percentileRankNormalize(contributorsArr)
-  const hnPct           = percentileRankNormalize(hnArr)
-  const redditPct       = percentileRankNormalize(redditArr)
-  const devtoPct        = percentileRankNormalize(devtoArr)
-  const rssPct          = percentileRankNormalize(rssArr)
-  const adzunaPct       = percentileRankNormalize(adzunaArr)
-  const jsearchPct      = percentileRankNormalize(jsearchArr)
-  const remotivePct     = percentileRankNormalize(remotiveArr)
-  const downloadsPct    = percentileRankNormalize(downloadsArr)
-  const soPct           = percentileRankNormalize(soArr)
-  const soMentionsPct   = percentileRankNormalize(soMentionsArr)
-  const dependentsPct   = percentileRankNormalize(dependentsArr)
+  const hnPct = percentileRankNormalize(hnArr)
+  const redditPct = percentileRankNormalize(redditArr)
+  const devtoPct = percentileRankNormalize(devtoArr)
+  const rssPct = percentileRankNormalize(rssArr)
+  const adzunaPct = percentileRankNormalize(adzunaArr)
+  const jsearchPct = percentileRankNormalize(jsearchArr)
+  const remotivePct = percentileRankNormalize(remotiveArr)
+  const downloadsPct = percentileRankNormalize(downloadsArr)
+  const soPct = percentileRankNormalize(soArr)
+  const soMentionsPct = percentileRankNormalize(soMentionsArr)
+  const dependentsPct = percentileRankNormalize(dependentsArr)
 
   // Step 5: Fetch historical scores for enhanced momentum (up to 90 days)
   const date90DaysAgo = new Date(date)
@@ -450,18 +469,18 @@ export async function runScoringPipeline(
         // Libraries.io signals (Source 2)
         librariesio: tech.sourcerank !== null || tech.dependentsCount !== null
           ? {
-              sourcerank: tech.sourcerank ?? null,
-              dependents_count: tech.dependentsCount ?? null,
-              latest_release_age_days: null, // populated from librariesio API metadata
-            }
+            sourcerank: tech.sourcerank ?? null,
+            dependents_count: tech.dependentsCount ?? null,
+            latest_release_age_days: null, // populated from librariesio API metadata
+          }
           : undefined,
         // npms.io signals (Source 5)
         npms: tech.npmsQuality !== null || tech.npmsMaintenance !== null
           ? {
-              quality: tech.npmsQuality ?? null,
-              popularity: tech.npmsPopularity ?? null,
-              maintenance: tech.npmsMaintenance ?? null,
-            }
+            quality: tech.npmsQuality ?? null,
+            popularity: tech.npmsPopularity ?? null,
+            maintenance: tech.npmsMaintenance ?? null,
+          }
           : undefined,
       },
       computed_at: new Date().toISOString(),

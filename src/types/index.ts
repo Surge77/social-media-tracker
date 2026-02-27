@@ -104,10 +104,10 @@ export interface DailyScore {
   technology_id: string
   score_date: string // DATE string: "2026-01-15"
   composite_score: number
-  github_score: number
-  community_score: number
-  jobs_score: number
-  ecosystem_score: number
+  github_score: number | null
+  community_score: number | null
+  jobs_score: number | null
+  ecosystem_score: number | null
   momentum: number
   data_completeness: number
   raw_sub_scores: Record<string, unknown>
@@ -169,10 +169,10 @@ export interface TechnologyDetail {
 export interface ChartDataPoint {
   date: string
   composite: number
-  github: number
-  community: number
-  jobs: number
-  ecosystem: number
+  github: number | null
+  community: number | null
+  jobs: number | null
+  ecosystem: number | null
 }
 
 export interface LatestSignals {

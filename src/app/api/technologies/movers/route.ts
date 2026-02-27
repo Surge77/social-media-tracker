@@ -127,10 +127,10 @@ export async function GET(request: NextRequest) {
 
       // Calculate sub-score deltas for primary driver
       const scoreDeltas = {
-        github_delta: Number(latest.github_score) - Number(previous.github_score),
-        community_delta: Number(latest.community_score) - Number(previous.community_score),
-        jobs_delta: Number(latest.jobs_score) - Number(previous.jobs_score),
-        ecosystem_delta: Number(latest.ecosystem_score) - Number(previous.ecosystem_score),
+        github_delta: latest.github_score != null && previous.github_score != null ? Number(latest.github_score) - Number(previous.github_score) : 0,
+        community_delta: latest.community_score != null && previous.community_score != null ? Number(latest.community_score) - Number(previous.community_score) : 0,
+        jobs_delta: latest.jobs_score != null && previous.jobs_score != null ? Number(latest.jobs_score) - Number(previous.jobs_score) : 0,
+        ecosystem_delta: latest.ecosystem_score != null && previous.ecosystem_score != null ? Number(latest.ecosystem_score) - Number(previous.ecosystem_score) : 0,
       }
 
       movers.push({

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --hostname 127.0.0.1 -p 3000",
+    "dev": "cross-env NODE_OPTIONS=--dns-result-order=ipv4first next dev --turbopack --hostname 127.0.0.1 -p 3000",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
@@ -51,6 +51,7 @@
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.0.18",
     "autoprefixer": "^10.4.21",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.5",
     "fast-check": "^4.5.3",

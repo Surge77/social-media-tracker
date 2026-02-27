@@ -70,16 +70,40 @@ export async function GET(
 
     const currentScores = currentScoresResult.data
     const chartRows = chartResult.data ?? []
-    const dataPoints = signalsResult.data ?? []
+    let dataPoints = signalsResult.data ?? []
     const relatedTechs = relatedTechsResult.data ?? []
+
+    // Supplement with latest job data from data_points if data_points_latest lacks it.
+    // Jobs are fetched weekly and data_points_latest may not have been populated.
+    const hasJobSignals = dataPoints.some(dp => dp.metric === 'job_postings')
+    if (!hasJobSignals) {
+      const { data: latestJobs } = await supabase
+        .from('data_points')
+        .select('source, metric, value')
+        .eq('technology_id', technology.id)
+        .eq('metric', 'job_postings')
+        .order('measured_at', { ascending: false })
+        .limit(10) // Grab latest from each source
+
+      if (latestJobs && latestJobs.length > 0) {
+        // Deduplicate: keep only the most recent entry per source
+        const seenSources = new Set<string>()
+        for (const dp of latestJobs) {
+          if (!seenSources.has(dp.source)) {
+            dataPoints.push(dp)
+            seenSources.add(dp.source)
+          }
+        }
+      }
+    }
 
     const chart_data = chartRows.map((row) => ({
       date: row.score_date,
       composite: Number(row.composite_score),
-      github: Number(row.github_score ?? 0),
-      community: Number(row.community_score ?? 0),
-      jobs: Number(row.jobs_score ?? 0),
-      ecosystem: Number(row.ecosystem_score ?? 0),
+      github: row.github_score !== null ? Number(row.github_score) : null,
+      community: row.community_score !== null ? Number(row.community_score) : null,
+      jobs: row.jobs_score !== null ? Number(row.jobs_score) : null,
+      ecosystem: row.ecosystem_score !== null ? Number(row.ecosystem_score) : null,
     }))
 
     const latest_signals = buildLatestSignals(dataPoints)
@@ -131,16 +155,32 @@ export async function GET(
         maintained_by: technology.maintained_by,
       },
       current_scores: currentScores
-        ? {
+        ? (() => {
+          // If jobs_score is null but we have actual job data, compute a quick estimate
+          let effectiveJobsScore = currentScores.jobs_score !== null
+            ? Number(currentScores.jobs_score)
+            : null
+
+          if (effectiveJobsScore === null && latest_signals.jobs && latest_signals.jobs.total > 0) {
+            // Quick heuristic: scale total jobs to a 0-100 score
+            // This is a temporary estimate until the scoring pipeline runs with the fix
+            const totalJobs = latest_signals.jobs.total
+            effectiveJobsScore = Math.min(100, Math.round(
+              Math.log10(totalJobs + 1) * 25 // logarithmic scale: 1→0, 10→25, 100→50, 1000→75, 10000→100
+            ))
+          }
+
+          return {
             composite_score: Number(currentScores.composite_score),
-            github_score: Number(currentScores.github_score),
-            community_score: Number(currentScores.community_score),
-            jobs_score: Number(currentScores.jobs_score),
-            ecosystem_score: Number(currentScores.ecosystem_score),
+            github_score: currentScores.github_score !== null ? Number(currentScores.github_score) : null,
+            community_score: currentScores.community_score !== null ? Number(currentScores.community_score) : null,
+            jobs_score: effectiveJobsScore,
+            ecosystem_score: currentScores.ecosystem_score !== null ? Number(currentScores.ecosystem_score) : null,
             momentum: Number(currentScores.momentum),
             data_completeness: Number(currentScores.data_completeness),
             raw_sub_scores: currentScores.raw_sub_scores,
           }
+        })()
         : null,
       chart_data,
       latest_signals,
@@ -195,11 +235,11 @@ function buildLatestSignals(
     hackernews:
       hnMentions !== null
         ? {
-            mentions: hnMentions,
-            avg_upvotes: hnUpvotes ?? 0,
-            sentiment: hnSentiment ?? 0.5,
-            top_stories: [],
-          }
+          mentions: hnMentions,
+          avg_upvotes: hnUpvotes ?? 0,
+          sentiment: hnSentiment ?? 0.5,
+          top_stories: [],
+        }
         : null,
     stackoverflow:
       soQuestions !== null || soMentions !== null
@@ -209,10 +249,10 @@ function buildLatestSignals(
     reddit:
       redditPosts !== null
         ? {
-            posts: redditPosts,
-            avg_upvotes: redditUpvotes ?? 0,
-            sentiment: redditSentiment ?? 0.5,
-          }
+          posts: redditPosts,
+          avg_upvotes: redditUpvotes ?? 0,
+          sentiment: redditSentiment ?? 0.5,
+        }
         : null,
     devto:
       devtoArticles !== null
@@ -221,11 +261,11 @@ function buildLatestSignals(
     jobs:
       adzunaJobs !== null || jsearchJobs !== null || remotiveJobs !== null
         ? {
-            adzuna: adzunaJobs ?? 0,
-            jsearch: jsearchJobs ?? 0,
-            remotive: remotiveJobs ?? 0,
-            total: (adzunaJobs ?? 0) + (jsearchJobs ?? 0) + (remotiveJobs ?? 0),
-          }
+          adzuna: adzunaJobs ?? 0,
+          jsearch: jsearchJobs ?? 0,
+          remotive: remotiveJobs ?? 0,
+          total: (adzunaJobs ?? 0) + (jsearchJobs ?? 0) + (remotiveJobs ?? 0),
+        }
         : null,
   }
 }

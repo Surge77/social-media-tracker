@@ -5,12 +5,13 @@ import FloatingIcons from '../FloatingIcons';
 import AnimatedCTA from '../AnimatedCTA';
 import { ArrowUpRight, ArrowDownRight, Minus, Users, Database, Zap } from 'lucide-react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useTheme } from 'next-themes';
 import { Sparkline } from '@/components/technologies/Sparkline';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { BorderBeam } from '@/components/ui/border-beam';
-import { Meteors } from '@/components/ui/meteors';
-import { RetroGrid } from '@/components/ui/retro-grid';
+import { FlickeringGrid } from '@/components/ui/flickering-grid';
 import { MorphingText } from '@/components/ui/morphing-text';
+import { HyperText } from '@/components/ui/hyper-text';
 
 const MOCK_SPARKLINES = {
   up:     [52, 54, 51, 56, 58, 55, 62, 66, 70, 75, 78, 82, 86, 90, 94],
@@ -28,20 +29,56 @@ const mockLeaderboard = [
 
 export default function HeroNew() {
   const prefersReducedMotion = useReducedMotion();
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === 'light';
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-10">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
+      {/* ── Layer 1: solid background base ─────────────────────────────── */}
+      <div className="absolute inset-0 bg-background" />
 
-      {/* Magic UI — RetroGrid */}
-      <RetroGrid className="opacity-50" />
+      {/* ── Layer 2: FlickeringGrid + masking overlays ──────────────────
+           The canvas fills the section via absolute inset-0.
+           Three overlay passes ensure uniform masking on every edge:
+             a) Radial vignette  — fades all four corners symmetrically.
+                ellipse 50% 50% means horizontal radius = 50% of element
+                width = exact center-to-edge distance, so the right/left
+                edges always reach 100% background opacity.
+             b) Left + right linear fades — hard-edge backup so even at
+                odd viewport widths the side edges are fully masked.
+             c) Top + bottom linear fades — clean crop at header/section end.
+      ──────────────────────────────────────────────────────────────── */}
+      {!prefersReducedMotion && (
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <FlickeringGrid
+            squareSize={4}
+            gridGap={6}
+            color={isLight ? '#9a3412' : '#f97316'}
+            maxOpacity={isLight ? 0.35 : 0.22}
+            flickerChance={0.10}
+          />
 
-      {/* Radial glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+          {/* a) Radial vignette */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(ellipse 50% 50% at 50% 50%, transparent 30%, hsl(var(--background)) 100%)',
+            }}
+          />
 
-      {/* Magic UI — meteors */}
-      {!prefersReducedMotion && <Meteors number={14} />}
+          {/* b) Left + right edge fades */}
+          <div className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background to-transparent" />
+          <div className="absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-background to-transparent" />
+
+          {/* c) Top + bottom edge fades */}
+          <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-background to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
+        </div>
+      )}
+
+      {/* ── Layer 3: subtle centered glow (square = equal spread) ────── */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] pointer-events-none z-0" />
 
       <FloatingIcons />
 
@@ -73,10 +110,12 @@ export default function HeroNew() {
             transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="mb-8"
           >
-            <span className="block text-3xl sm:text-5xl md:text-6xl font-bold tracking-[-0.02em] leading-[1.02] text-foreground">
-              Know what to learn
-            </span>
-            <span className="mt-1.5 block text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.02em] leading-[1.04] bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 bg-clip-text text-transparent animate-gradient">
+            <HyperText
+              text="Know what to learn"
+              className="block text-3xl sm:text-5xl md:text-6xl font-bold tracking-[-0.02em] leading-[1.02] text-foreground"
+              duration={1000}
+            />
+            <span className="mt-1.5 block text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.02em] leading-[1.04] bg-gradient-to-r from-orange-700 via-amber-600 to-orange-600 dark:from-orange-500 dark:via-amber-500 dark:to-orange-400 bg-clip-text text-transparent animate-gradient">
               before the market shifts
             </span>
           </motion.h1>
@@ -102,7 +141,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-lg md:text-xl text-foreground/70 dark:text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             Aggregated into daily scores for 100+ technologies.
             Skip the guesswork. See what the data actually says.
@@ -133,7 +172,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-8"
+            className="flex items-center justify-center gap-2 text-sm text-foreground/65 dark:text-muted-foreground mb-8"
           >
             <div className="flex -space-x-2">
               <div className="w-8 h-8 rounded-full bg-[#61DAFB]/10 border-2 border-background flex items-center justify-center p-1.5">
@@ -183,7 +222,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-muted-foreground mb-16"
+            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-foreground/65 dark:text-muted-foreground mb-16"
           >
             <span className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-green-500" />
@@ -217,7 +256,7 @@ export default function HeroNew() {
             className="relative max-w-3xl mx-auto group"
           >
             <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 rounded-3xl blur-3xl group-hover:blur-2xl transition-all duration-500" />
-            <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl blur-2xl opacity-50" />
+            <div className="absolute -inset-4 bg-purple-500/8 rounded-3xl blur-2xl opacity-50" />
 
             {/* Card with Magic UI BorderBeam */}
             <div className="relative bg-card/90 backdrop-blur-2xl border border-border/50 rounded-2xl p-6 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] transition-shadow duration-500 overflow-hidden">

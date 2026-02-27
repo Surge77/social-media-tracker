@@ -7,6 +7,11 @@ export const maxDuration = 60
 
 /**
  * Batch 3: Reddit + RSS feeds
+ *
+ * NOTE: Job market fetching was moved to the weekly cron only
+ * (fetch-weekly) to conserve Adzuna/JSearch API limits and prevent
+ * daily runs from overwriting good weekly job counts with stale data.
+ *
  * Called by the daily cron orchestrator. Can also be triggered manually.
  */
 export async function GET(request: Request) {

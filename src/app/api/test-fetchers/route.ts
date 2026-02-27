@@ -7,6 +7,7 @@ import { fetchPackageDownloads } from '@/lib/api/packages'
 import { fetchDevToData } from '@/lib/api/devto'
 import { fetchRedditData } from '@/lib/api/reddit'
 import { fetchRSSData } from '@/lib/api/rss'
+import { fetchJobsData } from '@/lib/api/jobs'
 import type { Technology } from '@/types'
 
 /**
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '5', 10)
   const shouldInsert = searchParams.get('insert') === 'true'
 
-  const validSources = ['github', 'hackernews', 'stackoverflow', 'packages', 'devto', 'reddit', 'rss']
+  const validSources = ['github', 'hackernews', 'stackoverflow', 'packages', 'devto', 'reddit', 'rss', 'jobs']
   if (!source || !validSources.includes(source)) {
     return Response.json(
       { error: `Invalid or missing source parameter. Must be one of: ${validSources.join(', ')}` },
@@ -79,6 +80,9 @@ export async function GET(request: NextRequest) {
         break
       case 'rss':
         result = await fetchRSSData(technologies as Technology[])
+        break
+      case 'jobs':
+        result = await fetchJobsData(technologies as Technology[])
         break
       default:
         return Response.json({ error: 'Invalid source' }, { status: 400 })

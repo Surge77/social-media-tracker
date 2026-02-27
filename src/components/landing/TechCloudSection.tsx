@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import TextAnimation from '@/components/ui/scroll-text'
 
 const IconCloud = dynamic(
   () => import('@/components/ui/icon-cloud').then(m => ({ default: m.IconCloud })),
@@ -21,12 +22,19 @@ export default function TechCloudSection() {
               <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
                 100+ technologies
               </p>
-              <h2 className="mb-4 text-3xl font-bold leading-tight text-foreground md:text-4xl">
-                Every language, framework,{' '}
-                <span className="bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 bg-clip-text text-transparent">
-                  and tool that matters
-                </span>
-              </h2>
+              <TextAnimation
+                as="h2"
+                text="Every language, framework, and tool that matters"
+                classname="mb-4 text-3xl font-bold leading-tight text-foreground md:text-4xl"
+                direction="left"
+                variants={{
+                  hidden: { filter: 'blur(8px)', opacity: 0, x: 20 },
+                  visible: {
+                    filter: 'blur(0px)', opacity: 1, x: 0,
+                    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+                  },
+                }}
+              />
               <p className="text-base text-muted-foreground leading-relaxed">
                 From JavaScript frameworks to systems languages, cloud platforms
                 to databases — if developers are talking about it, we're

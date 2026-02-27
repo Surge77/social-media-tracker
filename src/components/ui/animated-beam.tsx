@@ -39,7 +39,7 @@ export function AnimatedBeam({
   reverse = false,
   duration = 3,
   delay = 0,
-  pathColor = 'rgba(255,255,255,0.1)',
+  pathColor = 'currentColor',
   pathWidth = 2,
   pathOpacity = 0.2,
   gradientStartColor = '#f97316',
@@ -65,10 +65,10 @@ export function AnimatedBeam({
       const fp = getCenter(f, c)
       const tp = getCenter(t, c)
       const sx = fp.x + startXOffset, sy = fp.y + startYOffset
-      const ex = tp.x + endXOffset,   ey = tp.y + endYOffset
-      const mx = (sx + ex) / 2,       my = (sy + ey) / 2
+      const ex = tp.x + endXOffset, ey = tp.y + endYOffset
+      const mx = (sx + ex) / 2, my = (sy + ey) / 2
       const len = Math.sqrt((ex - sx) ** 2 + (ey - sy) ** 2)
-      const nx = -(ey - sy) / len,    ny = (ex - sx) / len
+      const nx = -(ey - sy) / len, ny = (ex - sx) / len
       const cpx = mx + nx * curvature, cpy = my + ny * curvature
       setD(`M ${sx},${sy} Q ${cpx},${cpy} ${ex},${ey}`)
     }
@@ -94,9 +94,9 @@ export function AnimatedBeam({
           x1={reverse ? '100%' : '0%'}
           x2={reverse ? '0%' : '100%'}
         >
-          <stop offset="0%"   stopColor={gradientStartColor} stopOpacity="0" />
-          <stop offset="50%"  stopColor={gradientStartColor} stopOpacity="1" />
-          <stop offset="100%" stopColor={gradientStopColor}  stopOpacity="0" />
+          <stop offset="0%" stopColor={gradientStartColor} stopOpacity="0" />
+          <stop offset="50%" stopColor={gradientStartColor} stopOpacity="1" />
+          <stop offset="100%" stopColor={gradientStopColor} stopOpacity="0" />
         </linearGradient>
       </defs>
       {/* Static path */}
@@ -112,7 +112,7 @@ export function AnimatedBeam({
         animate={{ pathLength: 1, opacity: [0, 1, 1, 0] }}
         transition={{
           pathLength: { delay, duration, repeat: Infinity, ease: 'linear' },
-          opacity:    { delay, duration, repeat: Infinity, ease: 'easeInOut', times: [0, 0.1, 0.9, 1] },
+          opacity: { delay, duration, repeat: Infinity, ease: 'easeInOut', times: [0, 0.1, 0.9, 1] },
         }}
       />
     </svg>
