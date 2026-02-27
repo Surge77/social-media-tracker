@@ -51,12 +51,15 @@ export async function GET(request: Request) {
         }
 
         // Keep data_points_latest in sync — one row per (tech, source, metric)
-        await supabase
+        const { error: latestError } = await supabase
           .from('data_points_latest')
           .upsert(
             batch.map((dp) => ({ ...dp, updated_at: new Date().toISOString() })),
             { onConflict: 'technology_id,source,metric' }
           )
+        if (latestError) {
+          console.warn(`[Batch 4a] data_points_latest sync failed: ${latestError.message}`)
+        }
       }
     }
 

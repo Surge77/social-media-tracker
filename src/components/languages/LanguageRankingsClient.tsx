@@ -6,6 +6,8 @@ import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X, TrendingUp, Trending
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { LanguageRow } from '@/components/languages/LanguageRow'
 import { LanguageRisingStars } from '@/components/languages/LanguageRisingStars'
+import { LanguagePodium } from '@/components/languages/LanguagePodium'
+import { LanguageStatsBar } from '@/components/languages/LanguageStatsBar'
 import { LANG_CATEGORIES, CATEGORIES, LANG_COLORS } from '@/components/languages/constants'
 import { Loading } from '@/components/ui/loading'
 import type { LanguageRanking, MarketFit } from '@/components/languages/LanguageRow'
@@ -189,6 +191,14 @@ export function LanguageRankingsClient() {
 
       {!isLoading && !error && rankings.length > 0 && (
         <>
+          {/* Summary stats bar — always visible */}
+          <LanguageStatsBar rankings={rankings} />
+
+          {/* Top-3 podium — only when unfiltered */}
+          {!isFiltered && rankings.length >= 3 && (
+            <LanguagePodium top3={rankings.slice(0, 3)} maxIndex={maxIndex} />
+          )}
+
           {/* Category leaders strip */}
           {categoryLeaders.length > 0 && (
             <motion.div

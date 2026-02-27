@@ -1,100 +1,412 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useCallback } from 'react'
+import { ResponsiveHeatMap } from '@nivo/heatmap'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowUp, ArrowDown, TrendingUp, TrendingDown } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { TechnologyWithScore } from '@/types'
-import { cn } from '@/lib/utils'
+import { CATEGORY_LABELS } from '@/types'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface TechHeatmapProps {
   technologies: TechnologyWithScore[]
 }
 
-type SortColumn = 'name' | 'composite_score' | 'jobs_score' | 'community_score' | 'github_score' | 'ecosystem_score' | 'momentum'
-type SortDirection = 'asc' | 'desc'
+type SortKey =
+  | 'composite_score'
+  | 'jobs_score'
+  | 'community_score'
+  | 'github_score'
+  | 'ecosystem_score'
+  | 'momentum'
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const METRICS: { key: SortKey; label: string }[] = [
+  { key: 'github_score',    label: 'GitHub'    },
+  { key: 'community_score', label: 'Community' },
+  { key: 'jobs_score',      label: 'Jobs'      },
+  { key: 'ecosystem_score', label: 'Ecosystem' },
+  { key: 'momentum',        label: 'Momentum'  },
+  { key: 'composite_score', label: 'Overall'   },
+]
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: 'composite_score', label: 'Overall'   },
+  { value: 'jobs_score',      label: 'Jobs'      },
+  { value: 'community_score', label: 'Community' },
+  { value: 'github_score',    label: 'GitHub'    },
+  { value: 'ecosystem_score', label: 'Ecosystem' },
+  { value: 'momentum',        label: 'Momentum'  },
+]
+
+const SCORE_BARS: { key: keyof TechnologyWithScore; label: string }[] = [
+  { key: 'github_score',    label: 'GitHub'    },
+  { key: 'community_score', label: 'Community' },
+  { key: 'jobs_score',      label: 'Jobs'      },
+  { key: 'ecosystem_score', label: 'Ecosystem' },
+  { key: 'composite_score', label: 'Overall'   },
+]
+
+const MAX_TECHS = 30
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function scoreBarColor(val: number): string {
+  if (val >= 70) return '#16a34a'
+  if (val >= 45) return '#d97706'
+  return '#dc2626'
+}
+
+function momentumLabel(m: number): string {
+  if (m > 8)  return 'Rising fast'
+  if (m > 2)  return 'Growing'
+  if (m >= -2) return 'Stable'
+  if (m > -8) return 'Cooling'
+  return 'Declining'
+}
+
+function momentumColor(m: number, isDark: boolean): string {
+  if (m > 2)  return '#22c55e'
+  if (m < -2) return '#ef4444'
+  return isDark ? '#71717a' : '#a1a1aa'
+}
+
+// ─── Hover Card ───────────────────────────────────────────────────────────────
+
+interface HoverCardProps {
+  tech: TechnologyWithScore
+  isDark: boolean
+}
+
+function HoverCard({ tech, isDark }: HoverCardProps) {
+  const bg      = isDark ? '#111113' : '#ffffff'
+  const border  = isDark ? '#27272a' : '#e4e4e7'
+  const fg      = isDark ? '#d4d4d8' : '#3f3f46'
+  const fgMuted = isDark ? '#71717a' : '#a1a1aa'
+  const trackBg = isDark ? '#27272a' : '#f4f4f5'
+
+  const momentum = tech.momentum ?? 0
+  const mColor   = momentumColor(momentum, isDark)
+  const mLabel   = momentumLabel(momentum)
+  const mArrow   = momentum > 2 ? '▲' : momentum < -2 ? '▼' : '→'
+
+  const rankChange = tech.rank_change ?? null
+
+  return (
+    <div
+      style={{
+        width: 268,
+        background: bg,
+        border: `1px solid ${border}`,
+        borderRadius: 12,
+        padding: '14px 16px',
+        boxShadow: isDark
+          ? '0 8px 32px rgba(0,0,0,0.6)'
+          : '0 8px 32px rgba(0,0,0,0.12)',
+        fontFamily: 'inherit',
+        pointerEvents: 'none',
+      }}
+    >
+      {/* ── Header ─────────────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
+        {/* Color dot */}
+        <div
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: '50%',
+            backgroundColor: tech.color,
+            marginTop: 3,
+            flexShrink: 0,
+          }}
+        />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Name + rank change */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontWeight: 700, fontSize: 14, color: fg, lineHeight: 1.2 }}>
+              {tech.name}
+            </span>
+            {rankChange !== null && rankChange !== 0 && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: rankChange > 0 ? '#22c55e' : '#ef4444',
+                  backgroundColor: rankChange > 0
+                    ? (isDark ? '#14532d44' : '#dcfce744')
+                    : (isDark ? '#7f1d1d44' : '#fee2e244'),
+                  border: `1px solid ${rankChange > 0 ? '#16a34a44' : '#dc262644'}`,
+                  borderRadius: 4,
+                  padding: '1px 5px',
+                  flexShrink: 0,
+                }}
+              >
+                {rankChange > 0 ? `↑${rankChange}` : `↓${Math.abs(rankChange)}`}
+              </span>
+            )}
+          </div>
+          {/* Badges row */}
+          <div style={{ display: 'flex', gap: 5, marginTop: 4, flexWrap: 'wrap' }}>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 500,
+                color: fgMuted,
+                backgroundColor: isDark ? '#27272a' : '#f4f4f5',
+                borderRadius: 4,
+                padding: '1px 6px',
+              }}
+            >
+              {CATEGORY_LABELS[tech.category] ?? tech.category}
+            </span>
+            {tech.lifecycle_label && (
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 500,
+                  color: '#7c3aed',
+                  backgroundColor: isDark ? '#3b0764aa' : '#f5f3ffaa',
+                  border: '1px solid #7c3aed44',
+                  borderRadius: 4,
+                  padding: '1px 6px',
+                }}
+              >
+                {tech.lifecycle_label}
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Overall score badge */}
+        <div
+          style={{
+            flexShrink: 0,
+            width: 40,
+            height: 40,
+            borderRadius: 8,
+            background: `${tech.color}22`,
+            border: `1.5px solid ${tech.color}55`,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <span style={{ fontSize: 15, fontWeight: 700, color: tech.color, lineHeight: 1 }}>
+            {Math.round(tech.composite_score ?? 0)}
+          </span>
+          <span style={{ fontSize: 8, color: fgMuted, marginTop: 1 }}>score</span>
+        </div>
+      </div>
+
+      {/* ── AI summary ─────────────────────────────── */}
+      {tech.ai_summary && (
+        <p
+          style={{
+            fontSize: 11,
+            color: fgMuted,
+            lineHeight: 1.5,
+            marginBottom: 12,
+            paddingBottom: 12,
+            borderBottom: `1px solid ${border}`,
+            fontStyle: 'italic',
+          }}
+        >
+          &ldquo;
+          {tech.ai_summary.length > 90
+            ? tech.ai_summary.slice(0, 87) + '…'
+            : tech.ai_summary}
+          &rdquo;
+        </p>
+      )}
+
+      {/* ── Score bars ─────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+        {SCORE_BARS.map(({ key, label }) => {
+          const val = Math.round((tech[key] as number | null) ?? 0)
+          const color = key === 'composite_score' ? tech.color : scoreBarColor(val)
+          const isOverall = key === 'composite_score'
+          return (
+            <div key={key}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: 3,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 10,
+                    color: isOverall ? fg : fgMuted,
+                    fontWeight: isOverall ? 600 : 400,
+                  }}
+                >
+                  {label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 600,
+                    color: color,
+                  }}
+                >
+                  {val}
+                </span>
+              </div>
+              <div
+                style={{
+                  height: isOverall ? 5 : 3,
+                  borderRadius: 99,
+                  background: trackBg,
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    height: '100%',
+                    width: `${val}%`,
+                    borderRadius: 99,
+                    backgroundColor: color,
+                    opacity: isOverall ? 1 : 0.85,
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* ── Momentum ───────────────────────────────── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 10px',
+          borderRadius: 8,
+          background: isDark ? '#1c1c1f' : '#f8f8f8',
+          marginBottom: 12,
+        }}
+      >
+        <span style={{ fontSize: 10, color: fgMuted }}>Momentum</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: mColor }}>
+          {mArrow} {momentum > 0 ? '+' : ''}
+          {momentum.toFixed(1)} &middot; {mLabel}
+        </span>
+      </div>
+
+      {/* ── Footer hint ────────────────────────────── */}
+      <div style={{ fontSize: 10, color: fgMuted, textAlign: 'center' }}>
+        Click to view full details →
+      </div>
+    </div>
+  )
+}
+
+// ─── Card positioning ─────────────────────────────────────────────────────────
+
+const CARD_W = 268
+const CARD_H = 380 // approximate — used for smart flipping only
+const OFFSET  = 20 // distance from cursor
+
+function cardPosition(cursorX: number, cursorY: number) {
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+
+  // Prefer right of cursor; flip left if too close to right edge
+  const left =
+    cursorX + OFFSET + CARD_W > vw - 12
+      ? cursorX - CARD_W - OFFSET
+      : cursorX + OFFSET
+
+  // Vertically centered on cursor; clamp to viewport
+  let top = cursorY - CARD_H / 2
+  if (top < 8)            top = 8
+  if (top + CARD_H > vh - 8) top = vh - CARD_H - 8
+
+  return { left, top }
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export function TechHeatmap({ technologies }: TechHeatmapProps) {
   const router = useRouter()
+  const { resolvedTheme } = useTheme()
   const prefersReducedMotion = useReducedMotion()
-  const [sortColumn, setSortColumn] = useState<SortColumn>('composite_score')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
-  const [hoveredCell, setHoveredCell] = useState<string | null>(null)
+  const isDark = resolvedTheme === 'dark'
 
-  // Sort technologies
-  const sortedTechs = useMemo(() => {
-    return [...technologies]
-      .filter(t => t.composite_score !== null)
-      .sort((a, b) => {
-        let aVal: number | string = 0
-        let bVal: number | string = 0
+  const [sortKey, setSortKey] = useState<SortKey>('composite_score')
 
-        if (sortColumn === 'name') {
-          aVal = a.name
-          bVal = b.name
-        } else {
-          aVal = a[sortColumn] ?? 0
-          bVal = b[sortColumn] ?? 0
-        }
+  // Custom tooltip state — bypasses nivo's clipped tooltip layer
+  const [hoveredTech, setHoveredTech]   = useState<TechnologyWithScore | null>(null)
+  const [cardPos, setCardPos]           = useState({ left: 0, top: 0 })
+  // Ref lets nivo's tooltip render prop set the current tech without a setState-in-render
+  const pendingTechRef = useRef<TechnologyWithScore | null>(null)
 
-        if (typeof aVal === 'string' && typeof bVal === 'string') {
-          return sortDirection === 'asc'
-            ? aVal.localeCompare(bVal)
-            : bVal.localeCompare(aVal)
-        }
+  const top = useMemo(
+    () =>
+      [...technologies]
+        .filter((t) => t.composite_score !== null)
+        .sort((a, b) => (b[sortKey] ?? 0) - (a[sortKey] ?? 0))
+        .slice(0, MAX_TECHS),
+    [technologies, sortKey]
+  )
 
-        return sortDirection === 'asc'
-          ? (aVal as number) - (bVal as number)
-          : (bVal as number) - (aVal as number)
-      })
-      .slice(0, 50) // Show top 50
-  }, [technologies, sortColumn, sortDirection])
+  const techMap = useMemo(() => {
+    const m = new Map<string, TechnologyWithScore>()
+    for (const t of top) m.set(t.name, t)
+    return m
+  }, [top])
 
-  const handleSort = (column: SortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortColumn(column)
-      setSortDirection('desc')
+  const data = useMemo(
+    () =>
+      top.map((tech) => ({
+        id: tech.name,
+        data: METRICS.map((m) => ({
+          x: m.label,
+          y: Math.round((tech[m.key] as number | null) ?? 0),
+        })),
+      })),
+    [top]
+  )
+
+  // ~26px per row, clamped to 300–720px
+  const containerHeight = Math.min(720, Math.max(300, top.length * 26 + 60))
+
+  const fg      = isDark ? '#d4d4d8' : '#3f3f46'
+  const fgMuted = isDark ? '#71717a' : '#a1a1aa'
+
+  const nivoTheme = {
+    text: { fill: fg, fontFamily: 'inherit', fontSize: 11 },
+    axis: { ticks: { text: { fill: fgMuted, fontSize: 11 } } },
+    // Zero out nivo's tooltip wrapper — we render our own fixed card instead
+    tooltip: { container: { padding: 0, background: 'transparent', boxShadow: 'none' } },
+  }
+
+  const handleCellClick = (cell: { serieId: string | number }) => {
+    const tech = techMap.get(String(cell.serieId))
+    if (tech) router.push(`/technologies/${tech.slug}`)
+  }
+
+  // Called on every mouse move over the chart area
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    setCardPos(cardPosition(e.clientX, e.clientY))
+    // Flush whatever tech nivo's tooltip render set in the ref
+    if (pendingTechRef.current !== hoveredTech) {
+      setHoveredTech(pendingTechRef.current)
     }
-  }
+  }, [hoveredTech])
 
-  const getColor = (value: number | null, type: 'score' | 'momentum' = 'score'): string => {
-    if (value === null) return 'hsl(var(--muted))'
+  const handleMouseLeave = useCallback(() => {
+    setHoveredTech(null)
+    pendingTechRef.current = null
+  }, [])
 
-    if (type === 'momentum') {
-      // Momentum: red (negative) -> yellow (0) -> green (positive)
-      if (value > 10) return 'hsl(142, 71%, 45%)' // Strong green
-      if (value > 5) return 'hsl(142, 71%, 55%)' // Green
-      if (value > 0) return 'hsl(84, 81%, 55%)' // Yellow-green
-      if (value > -5) return 'hsl(48, 96%, 53%)' // Yellow
-      if (value > -10) return 'hsl(25, 95%, 53%)' // Orange
-      return 'hsl(0, 84%, 60%)' // Red
-    }
-
-    // Score: red (low) -> yellow (medium) -> green (high)
-    if (value >= 75) return 'hsl(142, 71%, 45%)' // Dark green
-    if (value >= 60) return 'hsl(142, 71%, 55%)' // Green
-    if (value >= 50) return 'hsl(84, 81%, 55%)' // Yellow-green
-    if (value >= 40) return 'hsl(48, 96%, 53%)' // Yellow
-    if (value >= 25) return 'hsl(25, 95%, 53%)' // Orange
-    return 'hsl(0, 84%, 60%)' // Red
-  }
-
-  const getTextColor = (value: number | null): string => {
-    if (value === null) return 'hsl(var(--muted-foreground))'
-    return 'white'
-  }
-
-  const columns = [
-    { key: 'composite_score' as SortColumn, label: 'Overall', width: '80px' },
-    { key: 'jobs_score' as SortColumn, label: 'Jobs', width: '80px' },
-    { key: 'community_score' as SortColumn, label: 'Community', width: '100px' },
-    { key: 'github_score' as SortColumn, label: 'GitHub', width: '80px' },
-    { key: 'ecosystem_score' as SortColumn, label: 'Ecosystem', width: '100px' },
-    { key: 'momentum' as SortColumn, label: 'Momentum', width: '90px' },
-  ]
+  const excluded = technologies.filter((t) => t.composite_score !== null).length - top.length
 
   return (
     <motion.div
@@ -103,133 +415,123 @@ export function TechHeatmap({ technologies }: TechHeatmapProps) {
       transition={{ duration: 0.5 }}
       className="mb-8"
     >
-      <div className="mb-4 flex items-center justify-between">
+      {/* Header */}
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold">Technology Heatmap</h3>
+          <h3 className="text-lg font-semibold">Score Heatmap</h3>
           <p className="text-sm text-muted-foreground">
-            Top 50 technologies across all metrics • Click column headers to sort
+            Hover any row for details · click to open
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 rounded" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} />
-            <span className="text-muted-foreground">Low</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 rounded" style={{ backgroundColor: 'hsl(48, 96%, 53%)' }} />
-            <span className="text-muted-foreground">Mid</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 rounded" style={{ backgroundColor: 'hsl(142, 71%, 45%)' }} />
-            <span className="text-muted-foreground">High</span>
-          </div>
-        </div>
-      </div>
 
-      <div className="overflow-hidden rounded-xl border bg-card shadow-lg">
-        {/* Header */}
-        <div className="sticky top-0 z-10 border-b bg-muted/50 backdrop-blur-sm">
-          <div className="flex">
-            {/* Technology Name Column */}
-            <div
-              className="flex min-w-[200px] cursor-pointer items-center gap-2 border-r px-4 py-3 font-semibold transition-colors hover:bg-muted"
-              onClick={() => handleSort('name')}
-            >
-              <span className="text-sm">Technology</span>
-              {sortColumn === 'name' && (
-                sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-              )}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-muted-foreground">Sort by</span>
+            <div className="flex overflow-hidden rounded-lg border border-border">
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setSortKey(opt.value)}
+                  className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                    sortKey === opt.value
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-background text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
-
-            {/* Metric Columns */}
-            {columns.map(col => (
-              <div
-                key={col.key}
-                className="flex cursor-pointer items-center justify-center gap-1 border-r px-2 py-3 text-center font-semibold transition-colors hover:bg-muted"
-                style={{ minWidth: col.width }}
-                onClick={() => handleSort(col.key)}
-              >
-                <span className="text-xs">{col.label}</span>
-                {sortColumn === col.key && (
-                  sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-                )}
-              </div>
-            ))}
           </div>
-        </div>
 
-        {/* Rows */}
-        <div className="max-h-[600px] overflow-y-auto">
-          {sortedTechs.map((tech, index) => (
-            <motion.div
-              key={tech.id}
-              initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2, delay: Math.min(index * 0.02, 0.5) }}
-              className="group flex border-b last:border-b-0 transition-colors hover:bg-muted/30"
-            >
-              {/* Technology Name */}
-              <div
-                className="flex min-w-[200px] cursor-pointer items-center gap-3 border-r px-4 py-3"
-                onClick={() => router.push(`/technologies/${tech.slug}`)}
-              >
-                <div
-                  className="h-3 w-3 shrink-0 rounded-full"
-                  style={{ backgroundColor: tech.color }}
-                />
-                <span className="truncate text-sm font-medium transition-colors group-hover:text-primary">
-                  {tech.name}
-                </span>
-              </div>
-
-              {/* Metric Cells */}
-              {columns.map(col => {
-                const value = tech[col.key]
-                const numValue = typeof value === 'number' ? value : null
-                const cellId = `${tech.id}-${col.key}`
-                const isHovered = hoveredCell === cellId
-                const isMomentum = col.key === 'momentum'
-
-                return (
-                  <div
-                    key={col.key}
-                    className="flex items-center justify-center border-r px-2 py-3 transition-all"
-                    style={{
-                      minWidth: col.width,
-                      backgroundColor: getColor(numValue, isMomentum ? 'momentum' : 'score'),
-                      transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-                      zIndex: isHovered ? 5 : 1,
-                    }}
-                    onMouseEnter={() => setHoveredCell(cellId)}
-                    onMouseLeave={() => setHoveredCell(null)}
-                  >
-                    <div className="flex items-center gap-1">
-                      <span
-                        className="text-sm font-bold"
-                        style={{ color: getTextColor(numValue) }}
-                      >
-                        {numValue !== null ? Math.round(numValue) : '—'}
-                      </span>
-                      {isMomentum && numValue !== null && (
-                        numValue > 0 ? (
-                          <TrendingUp className="h-3 w-3 text-white" />
-                        ) : numValue < 0 ? (
-                          <TrendingDown className="h-3 w-3 text-white" />
-                        ) : null
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </motion.div>
-          ))}
+          <div className="text-right text-xs">
+            <p className="font-medium text-primary">{top.length} shown</p>
+            {excluded > 0 && (
+              <p className="text-muted-foreground">{excluded} more in table</p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Footer info */}
-      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-        <p>Showing top 50 of {technologies.length} technologies</p>
-        <p>Click any row to view details • Scroll to see more</p>
+      {/* Chart — onMouseMove + onMouseLeave drive the fixed card below */}
+      <div
+        className="overflow-x-auto rounded-lg border bg-card"
+        style={{ height: containerHeight }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div style={{ minWidth: 560, height: '100%' }}>
+          <ResponsiveHeatMap
+            data={data}
+            margin={{ top: 36, right: 20, bottom: 12, left: 116 }}
+            valueFormat=">-.0f"
+            axisTop={{ tickSize: 0, tickPadding: 10 }}
+            axisLeft={{ tickSize: 0, tickPadding: 10 }}
+            axisBottom={null}
+            axisRight={null}
+            colors={{
+              type: 'diverging',
+              scheme: 'red_yellow_green',
+              minValue: 0,
+              divergeAt: 0.5,
+              maxValue: 100,
+            }}
+            emptyColor={isDark ? '#1c1c1f' : '#f4f4f5'}
+            borderRadius={3}
+            borderWidth={2}
+            borderColor={isDark ? '#09090b' : '#fafafa'}
+            theme={nivoTheme}
+            animate={!prefersReducedMotion}
+            hoverTarget="row"
+            activeOpacity={1}
+            inactiveOpacity={0.5}
+            onClick={handleCellClick}
+            label={(datum) => (datum.value !== null ? String(datum.value) : '')}
+            labelTextColor={(datum) => {
+              const score = datum.value ?? 0
+              if (score >= 72) return '#ffffff'
+              if (score >= 40) return '#1a1a1a'
+              return isDark ? '#9ca3af' : '#6b7280'
+            }}
+            tooltip={({ cell }) => {
+              // Set the ref — no setState here to avoid render-loop
+              pendingTechRef.current = techMap.get(String(cell.serieId)) ?? null
+              // Return null: we render our own fixed card, not nivo's tooltip
+              return null
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Fixed-position hover card — never clipped by ancestor overflow */}
+      {hoveredTech && (
+        <div
+          style={{
+            position: 'fixed',
+            left: cardPos.left,
+            top: cardPos.top,
+            zIndex: 9999,
+            pointerEvents: 'none',
+          }}
+        >
+          <HoverCard tech={hoveredTech} isDark={isDark} />
+        </div>
+      )}
+
+      {/* Legend */}
+      <div className="mt-3 flex items-center justify-end gap-5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-5 rounded-sm" style={{ background: '#d73027' }} />
+          Low
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-5 rounded-sm" style={{ background: '#fee08b' }} />
+          Mid
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-5 rounded-sm" style={{ background: '#1a9850' }} />
+          High
+        </div>
       </div>
     </motion.div>
   )

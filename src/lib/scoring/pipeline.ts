@@ -341,10 +341,13 @@ export async function runScoringPipeline(
 
   // Step 6: Compute sub-scores and composite for each technology
 
-  // Pre-build dpCount map to avoid O(n²) filter inside the loop (OPT-01)
+  // Pre-build dpCount and sourceSet maps to avoid O(n²) filters inside the loop (OPT-01, OPT-02)
   const dpCountMap = new Map<string, number>()
+  const sourceMap = new Map<string, Set<string>>()
   for (const dp of dataPoints) {
     dpCountMap.set(dp.technology_id, (dpCountMap.get(dp.technology_id) ?? 0) + 1)
+    if (!sourceMap.has(dp.technology_id)) sourceMap.set(dp.technology_id, new Set())
+    sourceMap.get(dp.technology_id)!.add(dp.source)
   }
 
   const scoredRows: ScoredTechnology[] = []
@@ -513,11 +516,7 @@ export async function runScoringPipeline(
 
     // Confidence scoring
     const category = techCategoryMap.get(row.technology_id) ?? 'language'
-    const activeSources = new Set(
-      dataPoints
-        .filter((dp) => dp.technology_id === row.technology_id)
-        .map((dp) => dp.source)
-    ).size
+    const activeSources = sourceMap.get(row.technology_id)?.size ?? 0
     const latestDpAge = 0 // Today's data is 0 hours old
     const historyDays = history.length
 

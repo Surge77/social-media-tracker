@@ -13,10 +13,11 @@ export const maxDuration = 60 // Maximum duration in seconds (Vercel hobby plan 
 export async function GET(request: Request) {
   const startTime = Date.now()
 
-  // Verify this is a Vercel cron request in production
+  // Verify this is a Vercel cron or internal orchestrator request in production
   if (process.env.VERCEL_ENV === 'production') {
     const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-    if (!isVercelCron) {
+    const isInternal = request.headers.get('x-internal-cron') === process.env.CRON_SECRET
+    if (!isVercelCron && !isInternal) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }
@@ -69,12 +70,15 @@ export async function GET(request: Request) {
 
         // Keep data_points_latest in sync — one row per (tech, source, metric)
         // Without this, the technology detail page won't show the latest signals.
-        await supabase
+        const { error: latestError } = await supabase
           .from('data_points_latest')
           .upsert(
             batch.map((dp) => ({ ...dp, updated_at: new Date().toISOString() })),
             { onConflict: 'technology_id,source,metric' }
           )
+        if (latestError) {
+          console.warn(`[Weekly Cron] data_points_latest sync failed: ${latestError.message}`)
+        }
       }
 
       console.log(`[Weekly Cron] Inserted ${allDataPoints.length} data points`)

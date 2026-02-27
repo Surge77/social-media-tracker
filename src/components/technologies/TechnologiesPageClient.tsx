@@ -11,7 +11,7 @@ import { SmartFilters, applySmartFilter, getFilterEmptyMessage, type SmartFilter
 import { TechCard } from '@/components/technologies/TechCard'
 import { TechTable } from '@/components/technologies/TechTable'
 import { ViewToggle, type ViewMode } from '@/components/technologies/ViewToggle'
-import { MarketBubbleMap } from '@/components/technologies/MarketBubbleMap'
+import { TechHeatmap } from '@/components/technologies/TechHeatmap'
 import { MarketPulse } from '@/components/technologies/MarketPulse'
 import { CategoryHealth } from '@/components/technologies/CategoryHealth'
 import { WeeklyDigest } from '@/components/technologies/WeeklyDigest'
@@ -274,14 +274,7 @@ export function TechnologiesPageClient() {
         {filtered.length > 0 && (
           <>
             {viewMode === 'overview' && (
-              <div className="hidden md:block">
-                <MarketBubbleMap technologies={filtered} />
-              </div>
-            )}
-            {viewMode === 'overview' && (
-              <div className="md:hidden flex min-h-[200px] items-center justify-center rounded-lg border border-dashed">
-                <p className="text-sm text-muted-foreground">Switch to cards or table view on mobile</p>
-              </div>
+              <TechHeatmap technologies={filtered} />
             )}
             {viewMode === 'table' && (
               <TechTable technologies={filtered} />

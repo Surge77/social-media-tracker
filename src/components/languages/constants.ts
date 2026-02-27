@@ -39,6 +39,13 @@ export const LANG_COLORS: Record<string, string> = {
   'Visual Basic':  '#945db7',
   D:              '#ba595e',
   Ada:            '#02f88c',
+  Tcl:            '#e4cc98',
+  COBOL:          '#005ca5',
+  Racket:         '#9f1d20',
+  Carbon:         '#1c4587',
+  Hack:           '#878787',
+  CoffeeScript:   '#244776',
+  VHDL:           '#543978',
 }
 
 export const LANG_CATEGORIES: Record<string, string> = {
@@ -57,6 +64,9 @@ export const LANG_CATEGORIES: Record<string, string> = {
   Haskell: 'Functional', Elixir: 'Functional', 'F#': 'Functional',
   Clojure: 'Functional', OCaml: 'Functional', Erlang: 'Functional',
   Solidity: 'Blockchain', Prolog: 'Logic',
+  Tcl: 'Scripting',    COBOL: 'Scripting',  CoffeeScript: 'Web',
+  Hack: 'Web',         Racket: 'Functional', Carbon: 'Systems',
+  VHDL: 'Systems',
 }
 
 export const CATEGORIES = ['All', 'Web', 'Systems', 'Data', 'Mobile', 'JVM', 'Scripting', 'Functional']
