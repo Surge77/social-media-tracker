@@ -49,50 +49,62 @@ function LegendaryRepoCard({ repo, rank, metric }: LegendaryRepoCardProps) {
       href={repo.html_url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex w-[220px] shrink-0 flex-col gap-3 rounded-xl border border-border/60 bg-card/40 p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:bg-card hover:shadow-xl hover:shadow-primary/5 snap-start"
+      className="group relative flex w-[260px] shrink-0 flex-col gap-3 rounded-2xl border border-border/60 bg-card/30 p-5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-yellow-500/40 hover:bg-card hover:shadow-[0_12px_30px_-10px_rgba(234,179,8,0.2)] snap-start overflow-hidden"
     >
-      {/* Subtle glow */}
-      <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-primary/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      {/* Subtle glow on hover */}
+      <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-yellow-500/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      {/* Background texture */}
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(hsl(var(--primary))_1px,transparent_1px)] [background-size:16px_16px] opacity-[0.02] group-hover:opacity-[0.05] transition-opacity duration-500" />
+
+      {/* Top gradient accent for top 3 */}
+      {rank <= 3 && (
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-500/10 via-yellow-500/50 to-yellow-500/10 opacity-60 group-hover:opacity-100 transition-opacity" />
+      )}
 
       {/* Rank + avatar */}
-      <div className="flex items-center gap-3">
-        <div className="relative shrink-0">
+      <div className="flex items-start gap-3 relative z-10">
+        <div className="relative shrink-0 mt-0.5">
           <img
             src={repo.owner_avatar_url}
             alt={owner}
-            className="h-9 w-9 rounded-lg object-cover ring-1 ring-border/50 transition-all group-hover:ring-primary/30 group-hover:scale-105"
+            className="h-11 w-11 rounded-xl object-cover ring-1 ring-border/60 transition-all duration-300 group-hover:ring-yellow-500/40 group-hover:scale-105"
           />
           {rank <= 3 && (
-            <span className="absolute -right-1.5 -top-1.5 text-[13px] leading-none">
+            <span className="absolute -right-2.5 -top-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-background border border-border text-[13px] shadow-sm z-10">
               {RANK_BADGES[rank - 1]}
             </span>
           )}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[10px] text-muted-foreground/60">{owner}</p>
-          <p className="truncate text-sm font-bold leading-tight text-foreground transition-colors group-hover:text-primary">
+        <div className="min-w-0 flex-1 pt-1">
+          <div className="flex items-center justify-between gap-2">
+            <p className="truncate text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">{owner}</p>
+            {rank > 3 && (
+              <span className="shrink-0 text-[11px] font-black uppercase tracking-wider text-muted-foreground/40 transition-colors group-hover:text-yellow-500/60">
+                #{rank}
+              </span>
+            )}
+          </div>
+          <p className="truncate text-base font-bold leading-tight text-foreground transition-colors group-hover:text-yellow-600 dark:group-hover:text-yellow-500 mt-0.5">
             {name}
           </p>
         </div>
-        <span className="shrink-0 text-[10px] font-black text-muted-foreground/30 transition-colors group-hover:text-primary/40">
-          #{rank}
-        </span>
       </div>
 
       {/* Description */}
-      <p className="line-clamp-2 min-h-[2.5rem] text-xs leading-[1.25rem] text-muted-foreground transition-colors group-hover:text-foreground/80">
+      <p className="line-clamp-2 min-h-[2.75rem] text-[13px] leading-[1.375rem] text-muted-foreground transition-colors group-hover:text-foreground/80 mt-1 relative z-10">
         {repo.description ?? (
-          <span className="italic text-muted-foreground/40">No description provided</span>
+          <span className="italic text-muted-foreground/40">No description provided for this legendary repository.</span>
         )}
       </p>
 
       {/* Footer: language + metric */}
-      <div className="mt-auto flex items-center justify-between border-t border-border/50 pt-2.5">
-        <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+      <div className="mt-auto flex items-center justify-between border-t border-border/50 pt-3.5 relative z-10">
+        <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted-foreground group-hover:text-foreground/80 transition-colors">
           {repo.language ? (
             <>
               <span
-                className="h-2 w-2 rounded-full"
+                className="h-2 w-2 rounded-full shadow-sm"
                 style={{ backgroundColor: getLangColor(repo.language) }}
               />
               {repo.language}
@@ -102,14 +114,14 @@ function LegendaryRepoCard({ repo, rank, metric }: LegendaryRepoCardProps) {
           )}
         </span>
         <span
-          className={`flex items-center gap-1 text-xs font-bold tabular-nums ${
-            metric === 'stars' ? 'text-yellow-500' : 'text-blue-400'
+          className={`flex items-center gap-1.5 text-sm font-black tabular-nums transition-transform group-hover:scale-105 origin-right ${
+            metric === 'stars' ? 'text-yellow-600 dark:text-yellow-500' : 'text-blue-500'
           }`}
         >
           {metric === 'stars' ? (
-            <Star size={12} className="fill-yellow-500/30" />
+            <Star size={14} className="fill-yellow-500/20" />
           ) : (
-            <GitFork size={12} />
+            <GitFork size={14} />
           )}
           {formatCount(metric === 'stars' ? repo.stars : repo.forks)}
         </span>
@@ -158,8 +170,8 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
   function scroll(direction: 'left' | 'right') {
     const el = scrollRef.current
     if (!el) return
-    // Step by CARDS_PER_PAGE card widths (220px card + 12px gap = 232px)
-    const step = 232 * CARDS_PER_PAGE
+    // Step by CARDS_PER_PAGE card widths (260px card + 12px gap = 272px)
+    const step = 272 * CARDS_PER_PAGE
     el.scrollBy({ left: direction === 'left' ? -step : step, behavior: 'smooth' })
   }
 
@@ -171,7 +183,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
     const el = scrollRef.current
     if (!el) return
     function onScroll() {
-      const step = 232 * CARDS_PER_PAGE
+      const step = 272 * CARDS_PER_PAGE
       setActiveDot(Math.round(el!.scrollLeft / step))
     }
     el.addEventListener('scroll', onScroll, { passive: true })
@@ -181,40 +193,44 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
   React.useEffect(() => setActiveDot(0), [tab])
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card/20 p-5">
+    <div className="rounded-xl border border-border/60 bg-card/20 p-5 shadow-sm">
       {/* Header row */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2">
-          <Trophy size={16} className="text-yellow-500" />
-          <h2 className="text-sm font-semibold text-foreground">GitHub Legends</h2>
-          <span className="hidden text-xs text-muted-foreground sm:inline">
-            Top {repos.length} all-time
-          </span>
+      <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+            <Trophy size={16} className="text-yellow-500" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-foreground leading-tight">GitHub Legends</h2>
+            <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              Top {repos.length} All-Time
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Tab toggle */}
-          <div className="flex items-center rounded-full border border-border/60 bg-muted/20 p-1 text-xs font-medium">
+          <div className="flex items-center rounded-full border border-border/60 bg-muted/20 p-1 text-xs font-semibold">
             <button
               onClick={() => setTab('stars')}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-200 ${
+              className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 transition-all duration-200 ${
                 tab === 'stars'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Star size={11} className={tab === 'stars' ? 'text-yellow-500 fill-yellow-500/30' : ''} />
+              <Star size={12} className={tab === 'stars' ? 'text-yellow-500 fill-yellow-500/30' : ''} />
               Most Starred
             </button>
             <button
               onClick={() => setTab('forks')}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-all duration-200 ${
+              className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 transition-all duration-200 ${
                 tab === 'forks'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <GitFork size={11} className={tab === 'forks' ? 'text-blue-400' : ''} />
+              <GitFork size={12} className={tab === 'forks' ? 'text-blue-400' : ''} />
               Most Forked
             </button>
           </div>
@@ -227,7 +243,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
               aria-label="Scroll left"
               className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-all hover:border-primary/40 hover:bg-muted/50 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
             >
-              <ChevronLeft size={15} />
+              <ChevronLeft size={16} />
             </button>
             <button
               onClick={() => scroll('right')}
@@ -235,7 +251,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
               aria-label="Scroll right"
               className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-all hover:border-primary/40 hover:bg-muted/50 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
             >
-              <ChevronRight size={15} />
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>
@@ -245,18 +261,18 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
       <div className="relative">
         {/* Left fade mask */}
         <div
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-8 bg-gradient-to-r from-background/60 to-transparent transition-opacity duration-300"
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-background to-transparent transition-opacity duration-300"
           style={{ opacity: canScrollLeft ? 1 : 0 }}
         />
         {/* Right fade mask */}
         <div
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-gradient-to-l from-background/60 to-transparent transition-opacity duration-300"
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-background to-transparent transition-opacity duration-300"
           style={{ opacity: canScrollRight ? 1 : 0 }}
         />
 
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto pb-1 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-3 overflow-x-auto pb-2 pt-1 px-1 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
           {repos.map((repo, i) => (
             <LegendaryRepoCard
@@ -271,7 +287,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
 
       {/* Dot pagination */}
       {totalPages > 1 && (
-        <div className="mt-3 flex items-center justify-center gap-1.5">
+        <div className="mt-4 flex items-center justify-center gap-1.5">
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i}
@@ -279,11 +295,11 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
               onClick={() => {
                 const el = scrollRef.current
                 if (!el) return
-                el.scrollTo({ left: 232 * CARDS_PER_PAGE * i, behavior: 'smooth' })
+                el.scrollTo({ left: 272 * CARDS_PER_PAGE * i, behavior: 'smooth' })
               }}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 i === activeDot
-                  ? 'w-5 bg-primary'
+                  ? 'w-6 bg-primary'
                   : 'w-1.5 bg-border hover:bg-muted-foreground/50'
               }`}
             />

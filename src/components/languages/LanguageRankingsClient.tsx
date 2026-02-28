@@ -268,13 +268,15 @@ export function LanguageRankingsClient() {
                         key={value}
                         onClick={() => !isDisabled && setTrend(value)}
                         title={isDisabled ? 'No rank history yet — requires 2+ days of data' : undefined}
-                        className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200"
+                        className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200 ${
+                          trend !== value && !isDisabled ? 'hover:text-foreground' : ''
+                        }`}
                         style={
                           trend === value
                             ? { backgroundColor: 'hsl(var(--foreground))', color: 'hsl(var(--background))', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }
                             : isDisabled
                             ? { color: 'hsl(var(--muted-foreground))', opacity: 0.4, cursor: 'not-allowed' }
-                            : { color: 'hsl(var(--muted-foreground))', hover: 'hsl(var(--foreground))' }
+                            : { color: 'hsl(var(--muted-foreground))' }
                         }
                       >
                         {icon}
