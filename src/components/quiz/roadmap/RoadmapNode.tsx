@@ -3,7 +3,7 @@
 // src/components/quiz/roadmap/RoadmapNode.tsx
 // Individual technology node in the roadmap
 
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Check, Circle, Clock, TrendingUp, Briefcase } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
@@ -21,10 +21,17 @@ interface RoadmapNodeProps {
   status?: 'skipped' | 'completed' | 'current' | 'upcoming'
   onViewDetails?: () => void
   className?: string
+  roadmapId?: string
+  checked?: boolean
+  onCheckedChange?: (nodeId: string, checked: boolean) => void
 }
 
-export function RoadmapNode({ node, status = 'upcoming', onViewDetails, className }: RoadmapNodeProps) {
+export function RoadmapNode({ node, status = 'upcoming', onViewDetails, className, roadmapId, checked = false, onCheckedChange }: RoadmapNodeProps) {
   const prefersReducedMotion = useReducedMotion()
+
+  const handleCheckboxChange = useCallback(() => {
+    onCheckedChange?.(node.id, !checked)
+  }, [node.id, checked, onCheckedChange])
 
   const getStatusIcon = () => {
     switch (status) {
@@ -76,13 +83,31 @@ export function RoadmapNode({ node, status = 'upcoming', onViewDetails, classNam
         className={cn(
           'group relative h-full overflow-hidden border border-border bg-gradient-to-br from-background to-background p-5 transition-all hover:shadow-lg hover:shadow-primary/5',
           isSkipped && 'opacity-60',
-          status === 'current' && 'ring-2 ring-primary/50 shadow-lg shadow-primary/10',
+          checked && 'border-success/40 bg-success/5',
+          status === 'current' && !checked && 'ring-2 ring-primary/50 shadow-lg shadow-primary/10',
           !isSkipped && 'hover:border-primary/30'
         )}
         role="article"
         aria-labelledby={`node-${node.id}-title`}
         aria-describedby={`node-${node.id}-description`}
       >
+        {/* Checkbox — top right corner */}
+        {!isSkipped && onCheckedChange && (
+          <button
+            onClick={handleCheckboxChange}
+            className={cn(
+              'absolute top-3 right-3 w-5 h-5 rounded flex items-center justify-center border-2 transition-all z-10',
+              checked
+                ? 'bg-success border-success text-success-foreground'
+                : 'border-border hover:border-primary',
+            )}
+            aria-label={checked ? `Mark ${node.name} as incomplete` : `Mark ${node.name} as complete`}
+            aria-checked={checked}
+            role="checkbox"
+          >
+            {checked && <Check className="w-3 h-3" />}
+          </button>
+        )}
         {/* Status indicator bar */}
         {status === 'current' && (
           <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary via-primary to-primary/50" />
@@ -106,7 +131,7 @@ export function RoadmapNode({ node, status = 'upcoming', onViewDetails, classNam
 
             {/* Title and category */}
             <div className="min-w-0 flex-1">
-              <h4 id={`node-${node.id}-title`} className="break-words text-base font-bold tracking-tight sm:text-lg">
+              <h4 id={`node-${node.id}-title`} className={cn('break-words text-base font-bold tracking-tight sm:text-lg', checked && 'line-through text-muted-foreground')}>
                 {node.name}
               </h4>
               <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs">

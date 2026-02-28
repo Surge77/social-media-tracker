@@ -379,10 +379,11 @@ export function TechHeatmap({ technologies }: TechHeatmapProps) {
 
   const fg      = isDark ? '#d4d4d8' : '#3f3f46'
   const fgMuted = isDark ? '#71717a' : '#a1a1aa'
+  const axisLabelColor = isDark ? '#c4c4cd' : '#27272a'
 
   const nivoTheme = {
     text: { fill: fg, fontFamily: 'inherit', fontSize: 11 },
-    axis: { ticks: { text: { fill: fgMuted, fontSize: 11 } } },
+    axis: { ticks: { text: { fill: axisLabelColor, fontSize: 12, fontWeight: 500 } } },
     // Zero out nivo's tooltip wrapper — we render our own fixed card instead
     tooltip: { container: { padding: 0, background: 'transparent', boxShadow: 'none' } },
   }

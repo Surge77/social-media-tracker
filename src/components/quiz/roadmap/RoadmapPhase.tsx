@@ -4,7 +4,7 @@
 // Individual phase card with collapsible nodes
 
 import React, { useState } from 'react'
-import { ChevronDown, ChevronUp, Award, Briefcase } from 'lucide-react'
+import { ChevronDown, ChevronUp, Award, Briefcase, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,9 @@ interface RoadmapPhaseProps {
   defaultExpanded?: boolean
   onNodeClick?: (nodeId: string) => void
   className?: string
+  roadmapId?: string
+  checkedNodes?: Set<string>
+  onNodeCheckedChange?: (nodeId: string, checked: boolean) => void
 }
 
 export function RoadmapPhase({
@@ -27,7 +30,10 @@ export function RoadmapPhase({
   isCurrent = false,
   defaultExpanded = false,
   onNodeClick,
-  className
+  className,
+  roadmapId,
+  checkedNodes = new Set(),
+  onNodeCheckedChange,
 }: RoadmapPhaseProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded || isCurrent)
   const prefersReducedMotion = useReducedMotion()
@@ -36,11 +42,19 @@ export function RoadmapPhase({
   const skippedNodes = phase.nodes.filter((n: any) => n.isSkipped).length
   const activeNodes = totalNodes - skippedNodes
 
+  // Progress tracking
+  const activeNodeIds = phase.nodes
+    .filter((n: any) => !n.isSkipped)
+    .map((n: any) => n.id as string)
+  const completedCount = activeNodeIds.filter(id => checkedNodes.has(id)).length
+  const isPhaseComplete = activeNodeIds.length > 0 && completedCount === activeNodeIds.length
+
   return (
     <div
       className={cn(
         'group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-background to-muted/10 transition-all hover:shadow-xl hover:shadow-primary/5',
-        isCurrent && 'ring-2 ring-primary/50 shadow-lg shadow-primary/10',
+        isCurrent && !isPhaseComplete && 'ring-2 ring-primary/50 shadow-lg shadow-primary/10',
+        isPhaseComplete && 'ring-2 ring-success/50 shadow-lg shadow-success/10',
         className
       )}
     >
@@ -93,7 +107,7 @@ export function RoadmapPhase({
 
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{phase.description}</p>
 
-              {/* Node count */}
+              {/* Node count + progress */}
               <div className="mt-3 flex flex-wrap items-center gap-4 text-xs">
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 shrink-0 rounded-full bg-primary" />
@@ -105,6 +119,17 @@ export function RoadmapPhase({
                   <div className="flex items-center gap-1.5">
                     <div className="h-2 w-2 shrink-0 rounded-full bg-muted-foreground/50" />
                     <span className="text-muted-foreground">{skippedNodes} already mastered</span>
+                  </div>
+                )}
+                {activeNodes > 0 && (
+                  <div className={cn(
+                    'ml-auto flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium',
+                    isPhaseComplete
+                      ? 'bg-success/20 text-success'
+                      : 'bg-muted text-muted-foreground',
+                  )}>
+                    {isPhaseComplete && <Check className="w-3 h-3" />}
+                    {isPhaseComplete ? 'Phase Complete' : `${completedCount}/${activeNodes} complete`}
                   </div>
                 )}
               </div>
@@ -152,6 +177,9 @@ export function RoadmapPhase({
                         node={node}
                         status={status}
                         onViewDetails={onNodeClick ? () => onNodeClick(node.id) : undefined}
+                        roadmapId={roadmapId}
+                        checked={checkedNodes.has(node.id)}
+                        onCheckedChange={onNodeCheckedChange}
                       />
                     </motion.div>
                   )

@@ -19,6 +19,10 @@ import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ResultActions } from '@/components/quiz/ResultActions'
 import { NextQuizCTA } from '@/components/quiz/NextQuizCTA'
+import { MarketValidationBlock } from '@/components/quiz/MarketValidationBlock'
+import { StarterKitBento } from '@/components/quiz/StarterKitBento'
+import { CompanionSkills } from '@/components/quiz/CompanionSkills'
+import { WeekendProjectCard } from '@/components/quiz/WeekendProjectCard'
 import type { QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 
@@ -151,6 +155,44 @@ export function DecisionResult({
             </div>
           </Card>
         </motion.div>
+
+        {/* Market Validation */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <MarketValidationBlock
+              slug={recommendation.primary.technology}
+              technologies={technologies}
+            />
+          </motion.div>
+        )}
+
+        {/* Starter Kit Bento */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <StarterKitBento slug={recommendation.primary.technology} />
+          </motion.div>
+        )}
+
+        {/* Companion Skills */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <CompanionSkills
+              slug={recommendation.primary.technology}
+              technologies={technologies}
+            />
+          </motion.div>
+        )}
+
+        {/* Weekend Project */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <WeekendProjectCard
+              slug={recommendation.primary.technology}
+              goal={result.answers.find(a => a.questionId === 'use-case')?.value as string}
+              level={result.answers.find(a => a.questionId === 'experience-level')?.value as string}
+            />
+          </motion.div>
+        )}
 
         {/* Alternative */}
         {recommendation.secondary && secondaryTech && (

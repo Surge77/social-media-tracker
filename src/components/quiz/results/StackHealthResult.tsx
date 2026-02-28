@@ -21,6 +21,8 @@ import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ResultActions } from '@/components/quiz/ResultActions'
 import { NextQuizCTA } from '@/components/quiz/NextQuizCTA'
+import { StarterKitBento } from '@/components/quiz/StarterKitBento'
+import { CompanionSkills } from '@/components/quiz/CompanionSkills'
 import type { QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 import { getMomentumInsight } from '@/lib/quiz/stack-health-engine'
@@ -203,6 +205,19 @@ export function StackHealthResult({
                   />
                 ))}
               </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Starter Kit for the recommended replacement */}
+        {risk.length > 0 && recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <div className="space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                What to learn instead of {risk[0].tech.name}:
+              </p>
+              <StarterKitBento slug={recommendation.primary.technology} />
+              <CompanionSkills slug={recommendation.primary.technology} technologies={technologies} />
             </div>
           </motion.div>
         )}

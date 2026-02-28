@@ -3,13 +3,14 @@
 // src/components/quiz/roadmap/RoadmapTimeline.tsx
 // Main roadmap timeline with modern, polished UI
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, Target, TrendingUp, Award } from 'lucide-react'
 import { RoadmapPhase } from './RoadmapPhase'
 import { RoadmapMilestone } from './RoadmapMilestone'
 import { RoadmapStats } from './RoadmapStats'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
 import type { GeneratedRoadmap } from '@/lib/quiz/roadmap-engine'
@@ -30,6 +31,36 @@ export function RoadmapTimeline({
   className
 }: RoadmapTimelineProps) {
   const prefersReducedMotion = useReducedMotion()
+  const storageKey = `devtrends_roadmap_${roadmap.roadmapId}_progress`
+
+  // --- Checkbox progress state ---
+  const [checkedNodes, setCheckedNodes] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem(storageKey)
+      return stored ? new Set<string>(JSON.parse(stored) as string[]) : new Set<string>()
+    } catch {
+      return new Set<string>()
+    }
+  })
+
+  const handleNodeCheckedChange = useCallback((nodeId: string, checked: boolean) => {
+    setCheckedNodes(prev => {
+      const next = new Set(prev)
+      if (checked) { next.add(nodeId) } else { next.delete(nodeId) }
+      try {
+        localStorage.setItem(storageKey, JSON.stringify([...next]))
+      } catch { /* storage unavailable */ }
+      return next
+    })
+  }, [storageKey])
+
+  // --- Progress calculation ---
+  const allActiveNodeIds: string[] = roadmap.phases.flatMap(phase =>
+    phase.nodes.filter((n: any) => !n.isSkipped).map((n: any) => n.id as string)
+  )
+  const totalActive = allActiveNodeIds.length
+  const totalChecked = allActiveNodeIds.filter(id => checkedNodes.has(id)).length
+  const progressPercent = totalActive > 0 ? Math.round((totalChecked / totalActive) * 100) : 0
 
   // Find the first phase with non-skipped nodes as the current phase
   const currentPhaseNumber = initialExpandedPhase ?? (roadmap.phases.findIndex(phase =>
@@ -188,6 +219,28 @@ export function RoadmapTimeline({
         transition={{ delay: 1.1 }}
         className="space-y-6"
       >
+        {/* Global progress bar */}
+        {totalActive > 0 && (
+          <div className="rounded-xl border border-border/50 bg-card p-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-foreground">
+                {totalChecked > 0 ? 'Your progress' : 'Start learning'}
+              </span>
+              <span className="text-muted-foreground">
+                {totalChecked} / {totalActive} technologies
+              </span>
+            </div>
+            <Progress value={progressPercent} className="h-2" />
+            <p className="text-xs text-muted-foreground">
+              {progressPercent === 0
+                ? 'Check off technologies as you learn them'
+                : progressPercent === 100
+                ? '🎉 Roadmap complete!'
+                : `${progressPercent}% complete — keep going!`}
+            </p>
+          </div>
+        )}
+
         {/* Timeline header */}
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Learning Timeline</h2>
@@ -216,6 +269,9 @@ export function RoadmapTimeline({
                   isCurrent={isCurrent}
                   defaultExpanded={variant === 'expanded' || isCurrent}
                   onNodeClick={onNodeClick}
+                  roadmapId={roadmap.roadmapId}
+                  checkedNodes={checkedNodes}
+                  onNodeCheckedChange={handleNodeCheckedChange}
                 />
 
                 {/* Milestone after phase */}

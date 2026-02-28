@@ -57,6 +57,7 @@ export function LanguageRow({
   const [isExpanded, setIsExpanded] = React.useState(false)
   const [barReady, setBarReady] = React.useState(false)
   const [expandBarReady, setExpandBarReady] = React.useState(false)
+  const [iconFailed, setIconFailed] = React.useState(false)
 
   // Main bar animation on mount
   React.useEffect(() => {
@@ -79,6 +80,27 @@ export function LanguageRow({
     { label: 'Stack Overflow', weight: '40%', value: ranking.stackoverflow_questions, max: maxSO,     color: '#e8a838' },
     { label: 'Job listings',   weight: '20%', value: ranking.job_listings,            max: maxJobs,   color: '#5ab56e' },
   ]
+
+  const getIconSlug = (lang: string) => {
+    const map: Record<string, string> = {
+      'C++': 'cplusplus',
+      'C#': 'csharp',
+      'F#': 'fsharp',
+      'Objective-C': 'objectivec',
+      'Shell': 'gnubash',
+      'Jupyter Notebook': 'jupyter',
+      'Vue': 'vuedotjs',
+      'Emacs Lisp': 'emacs',
+      'Vim Script': 'vim',
+      'Assembly': 'assemblyscript',
+      'HTML': 'html5',
+      'CSS': 'css3',
+    }
+    return map[lang] || lang.toLowerCase().replace(/[^a-z0-9]/g, '')
+  }
+
+  const iconSlug = getIconSlug(ranking.language)
+  const iconUrl = `https://cdn.simpleicons.org/${iconSlug}/${color.replace('#', '')}`
 
   return (
     <div
@@ -109,15 +131,24 @@ export function LanguageRow({
           <RankChangeBadge rank={ranking.rank} prevRank={ranking.prev_rank} />
         </div>
 
-        {/* Language name */}
+        {/* Language name + Logo */}
         <div className="flex w-32 shrink-0 items-center gap-2.5 sm:w-36">
-          <span
-            className="h-3 w-3 shrink-0 rounded-full transition-transform group-hover:scale-110"
-            style={{
-              backgroundColor: color,
-              boxShadow: isTop10 ? `0 0 8px ${color}80` : undefined,
-            }}
-          />
+          {!iconFailed ? (
+            <img
+              src={iconUrl}
+              alt={ranking.language}
+              className="h-4 w-4 shrink-0 transition-transform group-hover:scale-110 drop-shadow-sm"
+              onError={() => setIconFailed(true)}
+            />
+          ) : (
+            <span
+              className="h-3 w-3 shrink-0 rounded-full transition-transform group-hover:scale-110"
+              style={{
+                backgroundColor: color,
+                boxShadow: isTop10 ? `0 0 8px ${color}80` : undefined,
+              }}
+            />
+          )}
           <span className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors">
             {ranking.language}
           </span>

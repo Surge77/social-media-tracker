@@ -21,6 +21,12 @@ import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ResultActions } from '@/components/quiz/ResultActions'
 import { NextQuizCTA } from '@/components/quiz/NextQuizCTA'
+import { MarketValidationBlock } from '@/components/quiz/MarketValidationBlock'
+import { StarterKitBento } from '@/components/quiz/StarterKitBento'
+import { CompanionSkills } from '@/components/quiz/CompanionSkills'
+import { SevenDayPlan } from '@/components/quiz/SevenDayPlan'
+import { WeekendProjectCard } from '@/components/quiz/WeekendProjectCard'
+import { LearningStyleToggle, useLearningMode } from '@/components/quiz/LearningStyleToggle'
 import type { QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 
@@ -39,6 +45,7 @@ export function LearnNextResult({
 }: LearnNextResultProps) {
   const prefersReducedMotion = useReducedMotion()
   const { recommendation } = result
+  const [learningMode, setLearningMode] = useLearningMode()
 
   // Find the recommended technology
   const primaryTech = technologies.find(
@@ -164,6 +171,62 @@ export function LearnNextResult({
             </div>
           </Card>
         </motion.div>
+
+        {/* Market Validation */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <MarketValidationBlock
+              slug={recommendation.primary.technology}
+              technologies={technologies}
+            />
+          </motion.div>
+        )}
+
+        {/* Learning Style Toggle */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <LearningStyleToggle value={learningMode} onChange={setLearningMode} />
+          </motion.div>
+        )}
+
+        {/* Starter Kit Bento */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <StarterKitBento slug={recommendation.primary.technology} mode={learningMode} />
+          </motion.div>
+        )}
+
+        {/* Companion Skills */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <CompanionSkills
+              slug={recommendation.primary.technology}
+              technologies={technologies}
+            />
+          </motion.div>
+        )}
+
+        {/* Weekend Project */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <WeekendProjectCard
+              slug={recommendation.primary.technology}
+              goal={result.answers.find(a => a.questionId === 'goal')?.value as string}
+              level={result.answers.find(a => a.questionId === 'experience-level')?.value as string}
+            />
+          </motion.div>
+        )}
+
+        {/* 7-Day Plan */}
+        {recommendation.primary.technology && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <SevenDayPlan
+              slug={recommendation.primary.technology}
+              commitment={result.answers.find(a => a.questionId === 'time-commitment')?.value as string ?? '10hrs'}
+              goal={result.answers.find(a => a.questionId === 'goal')?.value as string ?? 'side-project'}
+            />
+          </motion.div>
+        )}
 
         {/* Alternative (if available) */}
         {recommendation.secondary && secondaryTech && (

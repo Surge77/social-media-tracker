@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react'
 import { Sparkles, AlertCircle } from 'lucide-react'
 import { RoadmapTimeline } from './RoadmapTimeline'
+import { SevenDayPlan } from '@/components/quiz/SevenDayPlan'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getTemplateByRole } from '@/lib/quiz/roadmap-templates'
@@ -157,9 +158,25 @@ export function RoadmapResult({ answers, onRestart }: RoadmapResultProps) {
     return null
   }
 
+  // First non-skipped node slug for SevenDayPlan
+  const firstNodeSlug = roadmap.phases[0]?.nodes
+    ?.find((n: any) => !n.isSkipped)
+    ?.technologySlug ?? roadmap.phases[0]?.nodes?.[0]?.id
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* 7-Day plan for first phase */}
+        {firstNodeSlug && (
+          <div className="mb-6 p-4 rounded-xl border border-border/50 bg-card">
+            <SevenDayPlan
+              slug={firstNodeSlug}
+              commitment={roadmap.userContext.timeCommitment}
+              goal={roadmap.userContext.motivation ?? 'side-project'}
+            />
+          </div>
+        )}
+
         <RoadmapTimeline roadmap={roadmap} />
 
         {/* Action bar - Sticky bottom on mobile */}
