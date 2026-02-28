@@ -53,3 +53,6 @@ next-env.d.ts
 
 # Git worktrees
 .worktrees/
+
+# local MCP state
+/.playwright-mcp/
