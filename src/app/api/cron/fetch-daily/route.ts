@@ -40,6 +40,7 @@ export async function GET(request: Request) {
       `${baseUrl}/api/cron/fetch-daily/batch-4a`,
       `${baseUrl}/api/cron/fetch-daily/batch-4b`,
       `${baseUrl}/api/cron/fetch-daily/language-rankings`,
+      `${baseUrl}/api/cron/fetch-daily/batch-5-blockchain`,
     ]
     const scoringRoute = `${baseUrl}/api/cron/fetch-daily/batch-scoring`
 
@@ -87,7 +88,7 @@ export async function GET(request: Request) {
 
     return Response.json({
       success: true,
-      message: 'Fired 6 fetcher batches + scoring',
+      message: 'Fired 7 fetcher batches + scoring',
       batches: [...fetcherBatches, scoringRoute],
       duration: `${duration}ms`,
     })
