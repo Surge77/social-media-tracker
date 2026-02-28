@@ -228,87 +228,80 @@ export function LanguageRankingsClient() {
             </motion.div>
           )}
 
-          {/* Methodology */}
-          <motion.div
-            initial={prefersReducedMotion ? {} : { opacity: 0 }}
-            animate={prefersReducedMotion ? {} : { opacity: 1 }}
-            transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.08 }}
-            className="mb-5 rounded-lg border border-border bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground"
-          >
-            <span className="font-medium text-foreground">Rating</span> — relative score where #1 = 100.
-            Weighted: GitHub repos (40%), Stack Overflow questions (40%), job listings (20%).{' '}
-            <span className="font-medium text-foreground">Market Fit</span> — job demand relative to community size.
-            Click any row to see the full breakdown.
-          </motion.div>
-
           {/* Controls: search + trend filter + category pills */}
           <motion.div
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={prefersReducedMotion ? {} : { duration: 0.35, delay: 0.1 }}
-            className="mb-5 space-y-2.5"
+            className="mb-6 space-y-4"
           >
-            {/* Row 1: search + trend */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Search */}
-              <div className="relative w-full sm:w-auto">
-                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search languages..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="h-8 w-full sm:w-52 rounded-md border border-border bg-background pl-8 pr-8 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-                {search && (
-                  <button
-                    onClick={() => setSearch('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    <X size={12} />
-                  </button>
-                )}
-              </div>
+            {/* Row 1: search + trend + methodology */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Search */}
+                <div className="relative w-full sm:w-64">
+                  <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60" />
+                  <input
+                    type="text"
+                    placeholder="Search languages..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="h-9 w-full rounded-full border border-border/60 bg-muted/20 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all hover:bg-muted/40"
+                  />
+                  {search && (
+                    <button
+                      onClick={() => setSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground bg-background rounded-full p-0.5"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
 
-              {/* Trend filter */}
-              <div className="flex flex-wrap items-center gap-1 rounded-md border border-border bg-background p-0.5">
-                {TREND_OPTIONS.map(({ value, label, icon }) => {
-                  const needsHistory = value === 'rising' || value === 'falling' || value === 'stable'
-                  const isDisabled = needsHistory && !hasRankHistory
-                  return (
-                  <button
-                    key={value}
-                    onClick={() => !isDisabled && setTrend(value)}
-                    title={isDisabled ? 'No rank history yet — requires 2+ days of data' : undefined}
-                    className="flex items-center gap-1 rounded px-2.5 py-1 text-xs font-medium transition-colors"
-                    style={
-                      trend === value
-                        ? { backgroundColor: 'hsl(var(--foreground))', color: 'hsl(var(--background))' }
-                        : isDisabled
-                        ? { color: 'hsl(var(--muted-foreground))', opacity: 0.4, cursor: 'not-allowed' }
-                        : { color: 'hsl(var(--muted-foreground))' }
-                    }
-                  >
-                    {icon}
-                    {label}
-                  </button>
-                  )
-                })}
+                {/* Trend filter */}
+                <div className="flex items-center rounded-full border border-border/60 bg-muted/20 p-1">
+                  {TREND_OPTIONS.map(({ value, label, icon }) => {
+                    const needsHistory = value === 'rising' || value === 'falling' || value === 'stable'
+                    const isDisabled = needsHistory && !hasRankHistory
+                    return (
+                      <button
+                        key={value}
+                        onClick={() => !isDisabled && setTrend(value)}
+                        title={isDisabled ? 'No rank history yet — requires 2+ days of data' : undefined}
+                        className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200"
+                        style={
+                          trend === value
+                            ? { backgroundColor: 'hsl(var(--foreground))', color: 'hsl(var(--background))', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }
+                            : isDisabled
+                            ? { color: 'hsl(var(--muted-foreground))', opacity: 0.4, cursor: 'not-allowed' }
+                            : { color: 'hsl(var(--muted-foreground))', hover: 'hsl(var(--foreground))' }
+                        }
+                      >
+                        {icon}
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              
+              {/* Methodology hint */}
+              <div className="text-[11px] text-muted-foreground/80 max-w-xs text-right hidden lg:block">
+                <span className="font-semibold text-foreground/70">Rating</span> based on GitHub (40%), Stack Overflow (40%), and Jobs (20%).
               </div>
             </div>
 
             {/* Row 2: category pills */}
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className="rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors"
-                  style={
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
                     category === cat
-                      ? { borderColor: 'hsl(var(--primary))', backgroundColor: 'hsl(var(--primary))', color: 'hsl(var(--primary-foreground))' }
-                      : { borderColor: 'hsl(var(--border))', backgroundColor: 'transparent', color: 'hsl(var(--muted-foreground))' }
-                  }
+                      ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                      : 'border-border/60 bg-muted/20 text-muted-foreground hover:bg-muted hover:text-foreground hover:border-border'
+                  }`}
                 >
                   {cat}
                 </button>

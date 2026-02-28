@@ -82,24 +82,23 @@ export function LanguageRow({
 
   return (
     <div
-      className="rounded-lg border bg-card/30 transition-colors hover:bg-card/50"
+      className={`group rounded-xl border transition-all duration-300 ${isExpanded ? 'bg-card shadow-sm border-border' : 'bg-card/30 hover:bg-card border-transparent hover:shadow-sm'}`}
       style={{
-        borderColor: isTop3 ? `${color}35` : undefined,
         borderLeftColor: isTop10 ? color : undefined,
-        borderLeftWidth: isTop10 ? 2 : undefined,
+        borderLeftWidth: isTop10 ? 3 : 1,
       }}
     >
       {/* Main row — clickable to expand */}
       <button
         onClick={() => setIsExpanded((v) => !v)}
-        className="flex w-full items-center gap-3 px-4 py-2.5 text-left"
+        className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors"
       >
         {/* Rank / medal */}
         <div className="w-7 shrink-0 text-center">
           {medal ? (
-            <span className="text-base leading-none">{medal}</span>
+            <span className="text-xl leading-none drop-shadow-sm">{medal}</span>
           ) : (
-            <span className="font-mono text-sm font-bold tabular-nums text-foreground">
+            <span className="font-mono text-sm font-bold tabular-nums text-foreground/70 group-hover:text-foreground transition-colors">
               {ranking.rank}
             </span>
           )}
@@ -111,57 +110,57 @@ export function LanguageRow({
         </div>
 
         {/* Language name */}
-        <div className="flex w-32 shrink-0 items-center gap-2 sm:w-36">
+        <div className="flex w-32 shrink-0 items-center gap-2.5 sm:w-36">
           <span
-            className="h-3 w-3 shrink-0 rounded-full"
+            className="h-3 w-3 shrink-0 rounded-full transition-transform group-hover:scale-110"
             style={{
               backgroundColor: color,
-              boxShadow: isTop10 ? `0 0 6px ${color}60` : undefined,
+              boxShadow: isTop10 ? `0 0 8px ${color}80` : undefined,
             }}
           />
-          <span className="truncate text-sm font-semibold text-foreground">
+          <span className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors">
             {ranking.language}
           </span>
         </div>
 
         {/* Rating bar */}
-        <div className="flex flex-1 items-center gap-2.5 min-w-0">
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
+        <div className="flex flex-1 items-center gap-3 min-w-0">
+          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/60">
             <div
-              className="absolute inset-y-0 left-0 rounded-full"
+              className="absolute inset-y-0 left-0 rounded-full group-hover:brightness-110 transition-all"
               style={{
                 width: barReady ? `${relIndex}%` : '0%',
                 backgroundColor: color,
-                opacity: 0.75,
-                transition: `width 700ms cubic-bezier(0.4, 0, 0.2, 1) ${animationDelay}ms`,
+                boxShadow: `0 0 10px ${color}40`,
+                transition: `width 1s cubic-bezier(0.34, 1.56, 0.64, 1) ${animationDelay}ms`,
               }}
             />
           </div>
-          <span className="w-8 shrink-0 text-right text-xs font-semibold tabular-nums text-muted-foreground">
+          <span className="w-8 shrink-0 text-right text-xs font-bold tabular-nums text-foreground/80 group-hover:text-foreground transition-colors">
             {relIndex}
           </span>
         </div>
 
         {/* GitHub */}
         <div className="hidden w-16 shrink-0 text-right md:block">
-          <p className="text-[10px] text-muted-foreground">GitHub</p>
-          <p className="text-xs font-medium tabular-nums text-foreground">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">GitHub</p>
+          <p className="text-xs font-semibold tabular-nums text-foreground/90 group-hover:text-foreground transition-colors">
             {fmt(ranking.github_repos_count)}
           </p>
         </div>
 
         {/* Stack Overflow */}
         <div className="hidden w-16 shrink-0 text-right lg:block">
-          <p className="text-[10px] text-muted-foreground">S.O. Q&apos;s</p>
-          <p className="text-xs font-medium tabular-nums text-foreground">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">S.O. Q&apos;s</p>
+          <p className="text-xs font-semibold tabular-nums text-foreground/90 group-hover:text-foreground transition-colors">
             {fmt(ranking.stackoverflow_questions)}
           </p>
         </div>
 
         {/* Jobs */}
         <div className="w-16 shrink-0 text-right">
-          <p className="text-[10px] text-muted-foreground">Jobs</p>
-          <p className="text-xs font-medium tabular-nums text-foreground">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">Jobs</p>
+          <p className="text-xs font-semibold tabular-nums text-foreground/90 group-hover:text-foreground transition-colors">
             {fmt(ranking.job_listings)}
           </p>
         </div>
@@ -169,7 +168,7 @@ export function LanguageRow({
         {/* Market fit badge */}
         <div className="hidden w-20 shrink-0 items-center justify-end lg:flex">
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${mf.bg}`}
+            className={`rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide transition-transform group-hover:scale-105 ${mf.bg}`}
             style={{ color: mf.color }}
           >
             {mf.label}
@@ -177,11 +176,13 @@ export function LanguageRow({
         </div>
 
         {/* Expand chevron */}
-        <ChevronDown
-          size={14}
-          className="shrink-0 text-muted-foreground/50 transition-transform duration-200"
-          style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        />
+        <div className={`shrink-0 rounded-full p-1 transition-colors ${isExpanded ? 'bg-primary/10 text-primary' : 'text-muted-foreground/50 group-hover:bg-muted group-hover:text-foreground'}`}>
+          <ChevronDown
+            size={16}
+            className="transition-transform duration-300"
+            style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          />
+        </div>
       </button>
 
       {/* Expanded breakdown */}
@@ -191,58 +192,62 @@ export function LanguageRow({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: 'easeInOut' }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <div className="border-t border-border/50 px-4 pb-4 pt-3">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-8">
+            <div className="border-t border-border/50 px-4 pb-5 pt-4 bg-muted/10 rounded-b-xl">
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-stretch sm:gap-8">
 
                 {/* Metric bars */}
-                <div className="flex-1 space-y-2.5">
-                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Metric breakdown
+                <div className="flex-1 space-y-3.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Metric Breakdown
                   </p>
-                  {metrics.map((m) => {
-                    const pct = m.max > 0 ? (m.value / m.max) * 100 : 0
-                    return (
-                      <div key={m.label}>
-                        <div className="mb-1 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs text-foreground">{m.label}</span>
-                            <span className="text-[10px] text-muted-foreground">({m.weight})</span>
+                  <div className="space-y-3">
+                    {metrics.map((m) => {
+                      const pct = m.max > 0 ? (m.value / m.max) * 100 : 0
+                      return (
+                        <div key={m.label} className="group/metric">
+                          <div className="mb-1.5 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-medium text-foreground">{m.label}</span>
+                              <span className="rounded bg-muted px-1.5 py-0.5 text-[9px] font-semibold text-muted-foreground">{m.weight}</span>
+                            </div>
+                            <span className="font-mono text-xs font-bold tabular-nums text-foreground group-hover/metric:text-primary transition-colors">
+                              {fmt(m.value)}
+                            </span>
                           </div>
-                          <span className="font-mono text-xs font-medium tabular-nums text-foreground">
-                            {fmt(m.value)}
-                          </span>
+                          <div className="relative h-2 overflow-hidden rounded-full bg-muted/80">
+                            <div
+                              className="absolute inset-y-0 left-0 rounded-full"
+                              style={{
+                                width: expandBarReady ? `${pct}%` : '0%',
+                                backgroundColor: m.color,
+                                boxShadow: `0 0 8px ${m.color}60`,
+                                transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+                              }}
+                            />
+                          </div>
                         </div>
-                        <div className="relative h-1.5 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="absolute inset-y-0 left-0 rounded-full"
-                            style={{
-                              width: expandBarReady ? `${pct}%` : '0%',
-                              backgroundColor: m.color,
-                              opacity: 0.8,
-                              transition: 'width 600ms cubic-bezier(0.4, 0, 0.2, 1)',
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
 
                 {/* Market fit */}
-                <div className="w-full rounded-lg border border-border/60 bg-muted/20 p-3 sm:w-56">
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Market fit
+                <div className="w-full rounded-xl border border-border/60 bg-background p-4 shadow-sm sm:w-64 flex flex-col justify-center">
+                  <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Market Fit Analysis
                   </p>
-                  <span
-                    className={`mb-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${mf.bg}`}
-                    style={{ color: mf.color }}
-                  >
-                    {mf.label}
-                  </span>
-                  <p className="text-[11px] leading-relaxed text-muted-foreground">{mf.desc}</p>
+                  <div className="mb-2 flex items-center gap-2">
+                    <span
+                      className={`inline-block rounded-md px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${mf.bg}`}
+                      style={{ color: mf.color }}
+                    >
+                      {mf.label}
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted-foreground">{mf.desc}</p>
                 </div>
               </div>
             </div>

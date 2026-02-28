@@ -8,9 +8,11 @@ import { RepoCard } from '@/components/repos/RepoCard'
 import { RepoTable } from '@/components/repos/RepoTable'
 import { RepoFilters } from '@/components/repos/RepoFilters'
 import { RisingStarsSection } from '@/components/repos/RisingStarsSection'
+import { LegendaryReposSection } from '@/components/repos/LegendaryReposSection'
 import { WordPullUp } from '@/components/ui/word-pull-up'
 import { Loading } from '@/components/ui/loading'
 import type { TrendingRepo } from '@/lib/api/github-trending'
+import type { LegendaryRepo } from '@/app/api/repos/legendary/route'
 
 const PAGE_SIZE = 30
 
@@ -25,6 +27,23 @@ export function TrendingReposClient() {
   const [error, setError] = React.useState<string | null>(null)
   const [page, setPage] = React.useState(1)
   const [view, setView] = React.useState<ViewMode>('grid')
+  const [legendaryByStars, setLegendaryByStars] = React.useState<LegendaryRepo[]>([])
+  const [legendaryByForks, setLegendaryByForks] = React.useState<LegendaryRepo[]>([])
+  const [legendaryLoaded, setLegendaryLoaded] = React.useState(false)
+
+  // Fetch legendary repos once on mount
+  React.useEffect(() => {
+    fetch('/api/repos/legendary')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data) {
+          setLegendaryByStars(data.byStars ?? [])
+          setLegendaryByForks(data.byForks ?? [])
+        }
+        setLegendaryLoaded(true)
+      })
+      .catch(() => setLegendaryLoaded(true))
+  }, [])
 
   // Reset to page 1 whenever filters change
   React.useEffect(() => {
@@ -73,12 +92,24 @@ export function TrendingReposClient() {
         <p className="text-muted-foreground">Open-source repositories gaining momentum on GitHub</p>
       </motion.div>
 
+      {/* GitHub Legends */}
+      {legendaryLoaded && (legendaryByStars.length > 0 || legendaryByForks.length > 0) && (
+        <motion.div
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.05 }}
+          className="mb-8"
+        >
+          <LegendaryReposSection byStars={legendaryByStars} byForks={legendaryByForks} />
+        </motion.div>
+      )}
+
       {/* Filters + view toggle */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.1 }}
-        className="mb-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"
+        className="mb-8 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center"
       >
         <div className="flex-1">
           <RepoFilters
@@ -90,28 +121,28 @@ export function TrendingReposClient() {
         </div>
 
         {/* View toggle */}
-        <div className="self-end flex items-center rounded-lg border border-border bg-card/30 p-1">
+        <div className="self-end sm:self-auto flex items-center rounded-full border border-border/60 bg-muted/20 p-1">
           <button
             onClick={() => setView('grid')}
             aria-label="Grid view"
-            className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
+            className={`flex h-8 w-10 items-center justify-center rounded-full transition-all duration-200 ${
               view === 'grid'
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-background shadow-sm text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <LayoutGrid size={14} />
+            <LayoutGrid size={15} />
           </button>
           <button
             onClick={() => setView('table')}
             aria-label="Table view"
-            className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
+            className={`flex h-8 w-10 items-center justify-center rounded-full transition-all duration-200 ${
               view === 'table'
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-background shadow-sm text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <List size={14} />
+            <List size={15} />
           </button>
         </div>
       </motion.div>
@@ -188,17 +219,17 @@ export function TrendingReposClient() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-2">
+            <div className="mt-10 flex items-center justify-center gap-3">
               <button
                 onClick={() => goToPage(page - 1)}
                 disabled={page === 1}
-                className="flex items-center gap-1.5 rounded-lg border border-border bg-card/30 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card/60 disabled:pointer-events-none disabled:opacity-40"
+                className="flex h-10 items-center gap-1.5 rounded-full border border-border/60 bg-card/30 px-4 text-sm font-medium text-foreground transition-all hover:bg-muted/50 hover:border-border disabled:pointer-events-none disabled:opacity-40"
               >
-                <ChevronLeft size={15} />
-                Previous
+                <ChevronLeft size={16} />
+                <span className="hidden sm:inline">Previous</span>
               </button>
 
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
                   .reduce<(number | 'ellipsis')[]>((acc, p, idx, arr) => {
@@ -208,15 +239,15 @@ export function TrendingReposClient() {
                   }, [])
                   .map((item, idx) =>
                     item === 'ellipsis' ? (
-                      <span key={`ellipsis-${idx}`} className="px-1 text-muted-foreground">…</span>
+                      <span key={`ellipsis-${idx}`} className="px-1.5 text-muted-foreground/50">…</span>
                     ) : (
                       <button
                         key={item}
                         onClick={() => goToPage(item as number)}
-                        className={`h-8 w-8 rounded-lg text-sm font-medium transition-colors ${
+                        className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-all ${
                           item === page
-                            ? 'bg-primary text-primary-foreground'
-                            : 'border border-border bg-card/30 text-foreground hover:bg-card/60'
+                            ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                            : 'border border-border/60 bg-card/30 text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:border-border'
                         }`}
                       >
                         {item}
@@ -228,10 +259,10 @@ export function TrendingReposClient() {
               <button
                 onClick={() => goToPage(page + 1)}
                 disabled={page === totalPages}
-                className="flex items-center gap-1.5 rounded-lg border border-border bg-card/30 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-card/60 disabled:pointer-events-none disabled:opacity-40"
+                className="flex h-10 items-center gap-1.5 rounded-full border border-border/60 bg-card/30 px-4 text-sm font-medium text-foreground transition-all hover:bg-muted/50 hover:border-border disabled:pointer-events-none disabled:opacity-40"
               >
-                Next
-                <ChevronRight size={15} />
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight size={16} />
               </button>
             </div>
           )}
