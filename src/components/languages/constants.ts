@@ -35,6 +35,12 @@ export const LANG_COLORS: Record<string, string> = {
   OCaml:          '#ef7a08',
   Prolog:         '#74283c',
   Solidity:       '#363636',
+  Vyper:          '#1c6b8a',
+  Move:           '#4a90d9',
+  Cairo:          '#ff6b35',
+  'Ink!':         '#7c3aed',
+  Clarity:        '#5546ff',
+  Tact:           '#0098ea',
   Fortran:        '#4d41b1',
   'Visual Basic':  '#945db7',
   D:              '#ba595e',
@@ -63,13 +69,15 @@ export const LANG_CATEGORIES: Record<string, string> = {
   Shell: 'Scripting',   PowerShell: 'Scripting', Lua: 'Scripting', Perl: 'Scripting',
   Haskell: 'Functional', Elixir: 'Functional', 'F#': 'Functional',
   Clojure: 'Functional', OCaml: 'Functional', Erlang: 'Functional',
-  Solidity: 'Blockchain', Prolog: 'Logic',
+  Solidity: 'Blockchain', Vyper: 'Blockchain', Move: 'Blockchain',
+  Cairo: 'Blockchain', 'Ink!': 'Blockchain', Clarity: 'Blockchain', Tact: 'Blockchain',
+  Prolog: 'Logic',
   Tcl: 'Scripting',    COBOL: 'Scripting',  CoffeeScript: 'Web',
   Hack: 'Web',         Racket: 'Functional', Carbon: 'Systems',
   VHDL: 'Systems',
 }
 
-export const CATEGORIES = ['All', 'Web', 'Systems', 'Data', 'Mobile', 'JVM', 'Scripting', 'Functional']
+export const CATEGORIES = ['All', 'Web', 'Systems', 'Data', 'Mobile', 'JVM', 'Scripting', 'Functional', 'Blockchain']
 
 export function fmt(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
