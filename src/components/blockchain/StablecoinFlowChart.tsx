@@ -26,7 +26,7 @@ const CHAIN_COLORS: Record<string, string> = {
 
 export function StablecoinFlowChart() {
   const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
   const { data: chains, isLoading } = useBlockchainStables()
 
   if (isLoading) return <Skeleton className="h-64 rounded-xl" />

@@ -20,7 +20,7 @@ function formatTVL(n: number): string {
 
 export function ChainTVLChart() {
   const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
   const [activeChain, setActiveChain] = useState('Ethereum')
 
   const { data, isLoading } = useQuery({

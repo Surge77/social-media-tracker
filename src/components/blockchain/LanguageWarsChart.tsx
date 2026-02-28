@@ -15,7 +15,7 @@ function fmtCount(n: number): string {
 
 export function LanguageWarsChart() {
   const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
   const prefersReducedMotion = useReducedMotion()
   const { data, isLoading, isError } = useLanguageWars()
 

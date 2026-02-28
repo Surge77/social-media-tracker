@@ -20,7 +20,7 @@ const BRIDGE_COLORS = [
 
 export function BridgeFlowChart() {
   const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
   const { data: bridges, isLoading } = useBlockchainBridges()
 
   if (isLoading) return <Skeleton className="h-64 rounded-xl" />

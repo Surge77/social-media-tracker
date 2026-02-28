@@ -4,6 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { RankChangeBadge } from '@/components/languages/RankChangeBadge'
+import { LanguageIcon } from '@/components/languages/LanguageIcon'
 import { LANG_COLORS, fmt } from '@/components/languages/constants'
 import type { LanguageRanking } from '@/components/languages/LanguageRow'
 
@@ -64,18 +65,9 @@ export function LanguagePodium({ top3, maxIndex }: LanguagePodiumProps) {
                 {medal.label}
               </div>
 
-              {/* Language avatar */}
-              <div
-                className="mx-auto mb-3 flex items-center justify-center rounded-full font-mono font-black text-white"
-                style={{
-                  width: isFirst ? 56 : 44,
-                  height: isFirst ? 56 : 44,
-                  fontSize: isFirst ? 17 : 13,
-                  backgroundColor: langColor,
-                  boxShadow: `0 4px 14px ${langColor}50`,
-                }}
-              >
-                {lang.language.slice(0, 2)}
+              {/* Language icon */}
+              <div className="mx-auto mb-3 flex justify-center">
+                <LanguageIcon language={lang.language} size={isFirst ? 64 : 52} />
               </div>
 
               {/* Name */}

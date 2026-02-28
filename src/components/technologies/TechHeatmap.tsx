@@ -337,7 +337,7 @@ export function TechHeatmap({ technologies }: TechHeatmapProps) {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const prefersReducedMotion = useReducedMotion()
-  const isDark = resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
 
   const [sortKey, setSortKey] = useState<SortKey>('composite_score')
 
@@ -382,7 +382,8 @@ export function TechHeatmap({ technologies }: TechHeatmapProps) {
   const axisLabelColor = isDark ? '#c4c4cd' : '#27272a'
 
   const nivoTheme = {
-    text: { fill: fg, fontFamily: 'inherit', fontSize: 11 },
+    textColor: axisLabelColor,
+    text: { fill: axisLabelColor, fontFamily: 'inherit', fontSize: 11 },
     axis: { ticks: { text: { fill: axisLabelColor, fontSize: 12, fontWeight: 500 } } },
     // Zero out nivo's tooltip wrapper — we render our own fixed card instead
     tooltip: { container: { padding: 0, background: 'transparent', boxShadow: 'none' } },

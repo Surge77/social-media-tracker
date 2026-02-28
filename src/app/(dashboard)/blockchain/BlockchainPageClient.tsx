@@ -103,7 +103,7 @@ const renderActiveShape = (props: any) => {
 
 function MarketTab() {
   const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
   const { data, isLoading, isError } = useBlockchainOverview()
   const [activeIndex, setActiveIndex] = useState(-1)
 

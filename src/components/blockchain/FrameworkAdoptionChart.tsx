@@ -23,7 +23,7 @@ function timeAgo(iso: string): string {
 
 export function FrameworkAdoptionChart() {
   const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
   const { data, isLoading } = useLanguageWars()
 
   const frameworks = data?.frameworks ?? []

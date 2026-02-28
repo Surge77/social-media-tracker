@@ -15,7 +15,7 @@ function fmtDl(n: number): string {
 
 export function WalletLibraryChart() {
   const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
   const { data, isLoading } = useLanguageWars()
 
   const libs = data?.walletLibs ?? []

@@ -326,29 +326,29 @@ export function LanguageRankingsClient() {
 
           {/* Column headers */}
           {processed.length > 0 && (
-            <div className="mb-1 flex items-center gap-3 px-4 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">
-              <div className="w-7 text-center">#</div>
+            <div className="mb-1 flex items-center gap-3 px-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+              <div className="w-8 text-center">#</div>
               <div className="w-10">Δ</div>
-              <div className="w-32 sm:w-36">Language</div>
+              <div className="w-36 sm:w-40">Language</div>
               {(
                 [
                   { field: 'popularity_index' as SortField,      label: 'Rating',   cls: 'flex-1 flex' },
-                  { field: 'github_repos_count' as SortField,    label: 'GitHub',   cls: 'hidden w-16 text-right md:flex' },
-                  { field: 'stackoverflow_questions' as SortField, label: "S.O. Q's", cls: 'hidden w-16 text-right lg:flex' },
-                  { field: 'job_listings' as SortField,          label: 'Jobs',     cls: 'w-16 text-right flex' },
+                  { field: 'github_repos_count' as SortField,    label: 'GitHub',   cls: 'hidden w-20 text-right md:flex' },
+                  { field: 'stackoverflow_questions' as SortField, label: "S.O. Q's", cls: 'hidden w-20 text-right lg:flex' },
+                  { field: 'job_listings' as SortField,          label: 'Jobs',     cls: 'w-20 text-right flex' },
                 ] as const
               ).map(({ field, label, cls }) => (
                 <button
                   key={field}
                   onClick={() => handleSort(field)}
-                  className={`${cls} cursor-pointer items-center gap-0.5 transition-colors hover:text-foreground justify-end`}
+                  className={`${cls} cursor-pointer items-center gap-1 transition-colors hover:text-foreground justify-end`}
                   style={field === 'popularity_index' ? { justifyContent: 'flex-start' } : undefined}
                 >
                   {label}
                   <SortIcon field={field} active={sortField} dir={sortDir} />
                 </button>
               ))}
-              <div className="hidden w-20 text-right lg:block">Market</div>
+              <div className="hidden w-24 text-right lg:block">Market</div>
               <div className="w-4" /> {/* chevron spacer */}
             </div>
           )}

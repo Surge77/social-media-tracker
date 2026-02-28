@@ -4,6 +4,7 @@ import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 import { RankChangeBadge } from '@/components/languages/RankChangeBadge'
+import { LanguageIcon } from '@/components/languages/LanguageIcon'
 import { LANG_COLORS, fmt } from '@/components/languages/constants'
 
 export interface LanguageRanking {
@@ -57,7 +58,6 @@ export function LanguageRow({
   const [isExpanded, setIsExpanded] = React.useState(false)
   const [barReady, setBarReady] = React.useState(false)
   const [expandBarReady, setExpandBarReady] = React.useState(false)
-  const [iconFailed, setIconFailed] = React.useState(false)
 
   // Main bar animation on mount
   React.useEffect(() => {
@@ -81,27 +81,6 @@ export function LanguageRow({
     { label: 'Job listings',   weight: '20%', value: ranking.job_listings,            max: maxJobs,   color: '#5ab56e' },
   ]
 
-  const getIconSlug = (lang: string) => {
-    const map: Record<string, string> = {
-      'C++': 'cplusplus',
-      'C#': 'csharp',
-      'F#': 'fsharp',
-      'Objective-C': 'objectivec',
-      'Shell': 'gnubash',
-      'Jupyter Notebook': 'jupyter',
-      'Vue': 'vuedotjs',
-      'Emacs Lisp': 'emacs',
-      'Vim Script': 'vim',
-      'Assembly': 'assemblyscript',
-      'HTML': 'html5',
-      'CSS': 'css3',
-    }
-    return map[lang] || lang.toLowerCase().replace(/[^a-z0-9]/g, '')
-  }
-
-  const iconSlug = getIconSlug(ranking.language)
-  const iconUrl = `https://cdn.simpleicons.org/${iconSlug}/${color.replace('#', '')}`
-
   return (
     <div
       className={`group rounded-xl border transition-all duration-300 ${isExpanded ? 'bg-card shadow-sm border-border' : 'bg-card/30 hover:bg-card border-transparent hover:shadow-sm'}`}
@@ -116,11 +95,11 @@ export function LanguageRow({
         className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors"
       >
         {/* Rank / medal */}
-        <div className="w-7 shrink-0 text-center">
+        <div className="w-8 shrink-0 text-center">
           {medal ? (
-            <span className="text-xl leading-none drop-shadow-sm">{medal}</span>
+            <span className="text-2xl leading-none drop-shadow-sm">{medal}</span>
           ) : (
-            <span className="font-mono text-sm font-bold tabular-nums text-foreground/70 group-hover:text-foreground transition-colors">
+            <span className="font-mono text-base font-extrabold tabular-nums text-foreground/80 group-hover:text-foreground transition-colors">
               {ranking.rank}
             </span>
           )}
@@ -132,31 +111,18 @@ export function LanguageRow({
         </div>
 
         {/* Language name + Logo */}
-        <div className="flex w-32 shrink-0 items-center gap-2.5 sm:w-36">
-          {!iconFailed ? (
-            <img
-              src={iconUrl}
-              alt={ranking.language}
-              className="h-4 w-4 shrink-0 transition-transform group-hover:scale-110 drop-shadow-sm"
-              onError={() => setIconFailed(true)}
-            />
-          ) : (
-            <span
-              className="h-3 w-3 shrink-0 rounded-full transition-transform group-hover:scale-110"
-              style={{
-                backgroundColor: color,
-                boxShadow: isTop10 ? `0 0 8px ${color}80` : undefined,
-              }}
-            />
-          )}
-          <span className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+        <div className="flex w-36 shrink-0 items-center gap-3 sm:w-40">
+          <div className="shrink-0 transition-transform group-hover:scale-110">
+            <LanguageIcon language={ranking.language} size={28} />
+          </div>
+          <span className="truncate text-base font-extrabold text-foreground group-hover:text-primary transition-colors">
             {ranking.language}
           </span>
         </div>
 
         {/* Rating bar */}
         <div className="flex flex-1 items-center gap-3 min-w-0">
-          <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted/60">
+          <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-muted/80">
             <div
               className="absolute inset-y-0 left-0 rounded-full group-hover:brightness-110 transition-all"
               style={{
@@ -167,39 +133,39 @@ export function LanguageRow({
               }}
             />
           </div>
-          <span className="w-8 shrink-0 text-right text-xs font-bold tabular-nums text-foreground/80 group-hover:text-foreground transition-colors">
+          <span className="w-9 shrink-0 text-right text-sm font-extrabold tabular-nums text-foreground group-hover:text-foreground transition-colors">
             {relIndex}
           </span>
         </div>
 
         {/* GitHub */}
-        <div className="hidden w-16 shrink-0 text-right md:block">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">GitHub</p>
-          <p className="text-xs font-semibold tabular-nums text-foreground/90 group-hover:text-foreground transition-colors">
+        <div className="hidden w-20 shrink-0 text-right md:block">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 group-hover:text-muted-foreground transition-colors">GitHub</p>
+          <p className="text-sm font-bold tabular-nums text-foreground group-hover:text-foreground transition-colors">
             {fmt(ranking.github_repos_count)}
           </p>
         </div>
 
         {/* Stack Overflow */}
-        <div className="hidden w-16 shrink-0 text-right lg:block">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">S.O. Q&apos;s</p>
-          <p className="text-xs font-semibold tabular-nums text-foreground/90 group-hover:text-foreground transition-colors">
+        <div className="hidden w-20 shrink-0 text-right lg:block">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 group-hover:text-muted-foreground transition-colors">S.O. Q&apos;s</p>
+          <p className="text-sm font-bold tabular-nums text-foreground group-hover:text-foreground transition-colors">
             {fmt(ranking.stackoverflow_questions)}
           </p>
         </div>
 
         {/* Jobs */}
-        <div className="w-16 shrink-0 text-right">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">Jobs</p>
-          <p className="text-xs font-semibold tabular-nums text-foreground/90 group-hover:text-foreground transition-colors">
+        <div className="w-20 shrink-0 text-right">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 group-hover:text-muted-foreground transition-colors">Jobs</p>
+          <p className="text-sm font-bold tabular-nums text-foreground group-hover:text-foreground transition-colors">
             {fmt(ranking.job_listings)}
           </p>
         </div>
 
         {/* Market fit badge */}
-        <div className="hidden w-20 shrink-0 items-center justify-end lg:flex">
+        <div className="hidden w-24 shrink-0 items-center justify-end lg:flex">
           <span
-            className={`rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wide transition-transform group-hover:scale-105 ${mf.bg}`}
+            className={`rounded-md px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide transition-transform group-hover:scale-105 ${mf.bg}`}
             style={{ color: mf.color }}
           >
             {mf.label}
