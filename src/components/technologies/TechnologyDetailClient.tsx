@@ -3,7 +3,7 @@
 import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package, Link2 } from 'lucide-react'
 import Link from 'next/link'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAIInsight } from '@/hooks/useAIInsight'
@@ -292,6 +292,42 @@ export function TechnologyDetailClient() {
           </div>
         </div>
       </motion.section>
+
+      {/* On-Chain Health — blockchain techs only */}
+      {technology.category === 'blockchain' && current_scores?.onchain_score != null && (
+        <motion.section
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.25 }}
+          className="mb-8"
+        >
+          <h2 className="mb-4 text-xl font-semibold text-foreground">On-Chain Health</h2>
+          <div className="rounded-xl border bg-card p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-violet-400" />
+                <span className="text-sm font-medium text-foreground">Onchain Score</span>
+              </div>
+              <span className="text-2xl font-bold text-violet-400">
+                {current_scores.onchain_score.toFixed(1)}
+                <span className="ml-0.5 text-sm font-normal text-muted-foreground">/100</span>
+              </span>
+            </div>
+            <div className="mb-3 h-2 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 transition-all"
+                style={{ width: `${Math.min(100, current_scores.onchain_score)}%` }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Composite of protocol TVL, on-chain developer activity, and chain transaction volume.{' '}
+              <Link href="/blockchain" className="text-violet-400 hover:underline">
+                View full blockchain dashboard →
+              </Link>
+            </p>
+          </div>
+        </motion.section>
+      )}
 
       {/* Trend Chart */}
       <motion.section
