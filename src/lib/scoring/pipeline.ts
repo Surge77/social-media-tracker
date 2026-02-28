@@ -13,6 +13,7 @@ import { getAdaptiveWeights } from '@/lib/scoring/adaptive-weights'
 import { analyzeMomentum, computeLegacyMomentum } from '@/lib/scoring/enhanced-momentum'
 import { computeConfidence } from '@/lib/scoring/confidence'
 import { classifyLifecycle } from '@/lib/analysis/lifecycle'
+import { computeOnchainScore } from '@/lib/api/blockchain-score'
 
 interface TechDataPoints {
   technologyId: string
@@ -57,6 +58,7 @@ interface ScoredTechnology {
   community_score: number | null
   jobs_score: number | null
   ecosystem_score: number | null
+  onchain_score: number | null
   momentum: number
   data_completeness: number
   raw_sub_scores: Record<string, unknown>
@@ -83,7 +85,7 @@ export async function runScoringPipeline(
   // Step 1: Fetch all active technologies (with category for adaptive weights)
   const { data: technologies, error: techError } = await supabase
     .from('technologies')
-    .select('id, category, created_at')
+    .select('id, slug, category, created_at')
     .eq('is_active', true)
 
   if (techError || !technologies) {
@@ -93,9 +95,11 @@ export async function runScoringPipeline(
   const techIds = technologies.map((t) => t.id as string)
   const techCategoryMap = new Map<string, TechnologyCategory>()
   const techCreatedMap = new Map<string, string>()
+  const techSlugMap = new Map<string, string>()
   for (const t of technologies) {
     techCategoryMap.set(t.id as string, t.category as TechnologyCategory)
     techCreatedMap.set(t.id as string, t.created_at as string)
+    techSlugMap.set(t.id as string, t.slug as string)
   }
 
   // Step 2: Fetch today's data_points for all technologies
@@ -427,8 +431,15 @@ export async function runScoringPipeline(
       }
     }
 
-    // Compute adaptive weights based on category and maturity
+    // Onchain score — blockchain category only
     const category = techCategoryMap.get(tech.technologyId) ?? 'language'
+    const techSlug = techSlugMap.get(tech.technologyId) ?? ''
+    let onchainScore: number | null = null
+    if (category === 'blockchain') {
+      onchainScore = await computeOnchainScore(techSlug).then((r) => r.onchain_score).catch(() => null)
+    }
+
+    // Compute adaptive weights based on category and maturity
     const createdAt = techCreatedMap.get(tech.technologyId)
     const dataAgeDays = createdAt
       ? Math.floor((new Date(date).getTime() - new Date(createdAt).getTime()) / 86400000)
@@ -446,6 +457,7 @@ export async function runScoringPipeline(
         community: communityScore,
         jobs: jobsScore,
         ecosystem: ecosystemScore,
+        onchain: onchainScore,
       },
       adaptiveWeights,
       category
@@ -462,6 +474,7 @@ export async function runScoringPipeline(
       community_score: communityScore,
       jobs_score: jobsScore,
       ecosystem_score: ecosystemScore,
+      onchain_score: onchainScore,
       momentum: 0, // computed after Bayesian smoothing
       data_completeness: completeness,
       raw_sub_scores: {
@@ -469,6 +482,7 @@ export async function runScoringPipeline(
         community: communityScore,
         jobs: jobsScore,
         ecosystem: ecosystemScore,
+        onchain: onchainScore,
         // Libraries.io signals (Source 2)
         librariesio: tech.sourcerank !== null || tech.dependentsCount !== null
           ? {
