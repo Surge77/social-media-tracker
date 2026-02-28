@@ -28,6 +28,7 @@ const MAX_SOURCES: Record<TechnologyCategory, number> = {
   cloud: 9,      // +librariesio
   mobile: 11,    // +librariesio, +pubdev for Flutter/Dart
   ai_ml: 12,     // +librariesio, +npms for Python ML packages
+  blockchain: 12, // +defillama, +etherscan, +coingecko, +web3-jobs RSS
 }
 
 // ---- Main function ----
