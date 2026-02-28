@@ -8,6 +8,7 @@ export type QuizType =
   | 'decision'
   | 'roadmap'
   | 'hype-check'
+  | 'web3-path'
 
 export type QuestionType =
   | 'single-select'

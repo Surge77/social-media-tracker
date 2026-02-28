@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
-  Target, Activity, Zap, GitCompare, Map,
+  Target, Activity, Zap, GitCompare, Map, Link2,
   Clock, HelpCircle, ArrowRight, Users, Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -83,6 +83,18 @@ const ACTIVE_QUIZZES: QuizMeta[] = [
     gradient: 'from-teal-500 via-cyan-500 to-teal-400',
     href: '/quiz/roadmap',
     audience: 'All levels',
+  },
+  {
+    id: 'web3-path',
+    title: 'Find Your Web3 Path',
+    description: 'Which blockchain, language, and toolchain matches your background and goals?',
+    icon: Link2,
+    duration: '30 sec',
+    questionCount: 5,
+    gradient: 'from-violet-600 via-purple-500 to-indigo-500',
+    href: '/quiz/web3-path',
+    audience: 'Web3 curious',
+    isNew: true,
   },
 ]
 
