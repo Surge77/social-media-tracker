@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowUpDown, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface Protocol {
@@ -42,6 +42,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('tvl')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const categories = [...new Set(protocols.map((p) => p.category))].sort()
 
@@ -67,6 +68,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
   })
 
   const maxTVL = sorted[0]?.tvl ?? 1
+  const displayedProtocols = isExpanded ? sorted : sorted.slice(0, 10)
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
@@ -85,14 +87,14 @@ export function ProtocolHealthTable({ protocols }: Props) {
     )
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Category filter pills */}
       <div className="flex flex-wrap gap-1.5">
         <button
-          onClick={() => setActiveCategory(null)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+          onClick={() => { setActiveCategory(null); setIsExpanded(false); }}
+          className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition-all ${
             activeCategory === null
-              ? 'bg-foreground text-background shadow-sm scale-105'
+              ? 'bg-foreground text-background shadow-sm'
               : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
           }`}
         >
@@ -101,10 +103,10 @@ export function ProtocolHealthTable({ protocols }: Props) {
         {categories.map((cat) => (
           <button
             key={cat}
-            onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+            onClick={() => { setActiveCategory(activeCategory === cat ? null : cat); setIsExpanded(false); }}
+            className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition-all ${
               activeCategory === cat
-                ? 'bg-violet-600 text-white shadow-sm scale-105'
+                ? 'bg-violet-600 text-white shadow-sm'
                 : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
@@ -115,22 +117,22 @@ export function ProtocolHealthTable({ protocols }: Props) {
 
       <div className="overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[540px] text-sm">
             <thead>
-              <tr className="border-b bg-muted/40 text-xs text-muted-foreground">
-                <th className="w-8 px-3 py-3 text-left">#</th>
+              <tr className="border-b bg-muted/40 text-[11px] uppercase tracking-wider text-muted-foreground">
+                <th className="w-8 px-3 py-3 text-left font-medium">#</th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-left hover:text-foreground transition-colors"
+                  className="cursor-pointer px-4 py-3 text-left font-medium hover:text-foreground transition-colors"
                   onClick={() => handleSort('name')}
                 >
                   <span className="flex items-center gap-1">
                     Protocol <SortIcon k="name" />
                   </span>
                 </th>
-                <th className="px-4 py-3 text-left">Category</th>
-                <th className="hidden px-4 py-3 text-left sm:table-cell">Chains</th>
+                <th className="px-4 py-3 text-left font-medium">Category</th>
+                <th className="hidden px-4 py-3 text-left font-medium sm:table-cell">Chains</th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-right hover:text-foreground transition-colors"
+                  className="cursor-pointer px-4 py-3 text-right font-medium hover:text-foreground transition-colors"
                   onClick={() => handleSort('tvl')}
                 >
                   <span className="flex items-center justify-end gap-1">
@@ -138,7 +140,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                   </span>
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-right hover:text-foreground transition-colors"
+                  className="cursor-pointer px-4 py-3 text-right font-medium hover:text-foreground transition-colors"
                   onClick={() => handleSort('change_7d')}
                 >
                   <span className="flex items-center justify-end gap-1">
@@ -148,87 +150,106 @@ export function ProtocolHealthTable({ protocols }: Props) {
               </tr>
             </thead>
             <tbody>
-              {sorted.slice(0, 20).map((p, i) => {
-                const change = p.change_7d ?? 0
-                const tvlBarPct = Math.max(4, (p.tvl / maxTVL) * 100)
-                const catColor = CATEGORY_COLORS[p.category] ?? 'bg-muted/60 text-muted-foreground'
+              <AnimatePresence initial={false}>
+                {displayedProtocols.map((p, i) => {
+                  const change = p.change_7d ?? 0
+                  const tvlBarPct = Math.max(4, (p.tvl / maxTVL) * 100)
+                  const catColor = CATEGORY_COLORS[p.category] ?? 'bg-muted/60 text-muted-foreground'
 
-                return (
-                  <motion.tr
-                    key={p.slug}
-                    initial={prefersReducedMotion ? {} : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.03 }}
-                    className="group border-b last:border-0 transition-all hover:bg-muted/50 hover:shadow-[inset_4px_0_0_0_#8b5cf6]"
-                  >
-                    {/* Rank */}
-                    <td className="px-3 py-3 text-xs font-mono text-muted-foreground transition-colors group-hover:text-foreground">
-                      {i + 1}
-                    </td>
-
-                    {/* Protocol name + logo + link */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={`https://icons.llama.fi/protocols/${p.slug}.jpg`}
-                          alt={p.name}
-                          width={18}
-                          height={18}
-                          className="rounded-full bg-muted flex-shrink-0 transition-transform group-hover:scale-110"
-                          onError={(e) => { e.currentTarget.style.display = 'none' }}
-                        />
-                        <a
-                          href={`https://defillama.com/protocol/${p.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-foreground hover:text-violet-400 transition-colors flex items-center gap-1"
-                        >
-                          {p.name}
-                          <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-violet-400" />
-                        </a>
-                      </div>
-                    </td>
-
-                    {/* Category badge */}
-                    <td className="px-4 py-3">
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${catColor} transition-transform group-hover:scale-105 inline-block`}>
-                        {p.category}
-                      </span>
-                    </td>
-
-                    {/* Chains */}
-                    <td className="hidden px-4 py-3 text-xs text-muted-foreground sm:table-cell transition-colors group-hover:text-foreground">
-                      {p.chains.slice(0, 3).join(', ')}
-                      {p.chains.length > 3 && ` +${p.chains.length - 3}`}
-                    </td>
-
-                    {/* TVL + bar */}
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="font-mono font-medium text-xs transition-colors group-hover:text-foreground">{fmt(p.tvl)}</span>
-                        <div className="h-1 w-16 rounded-full bg-muted overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-violet-500/60 transition-all duration-500 ease-out group-hover:bg-violet-500 group-hover:shadow-[0_0_8px_rgba(139,92,246,0.6)]"
-                            style={{ width: `${tvlBarPct}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* 7d change */}
-                    <td
-                      className={`px-4 py-3 text-right text-xs font-medium transition-all group-hover:scale-105 origin-right ${
-                        change >= 0 ? 'text-green-500 group-hover:text-green-400' : 'text-red-500 group-hover:text-red-400'
-                      }`}
+                  return (
+                    <motion.tr
+                      key={p.slug}
+                      initial={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
+                      animate={prefersReducedMotion ? {} : { opacity: 1, height: 'auto' }}
+                      exit={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="group border-b last:border-0 transition-colors hover:bg-muted/30"
                     >
-                      {change >= 0 ? '+' : ''}{change.toFixed(1)}%
-                    </td>
-                  </motion.tr>
-                )
-              })}
+                      {/* Rank */}
+                      <td className="px-3 py-2.5 text-xs font-mono text-muted-foreground transition-colors group-hover:text-foreground">
+                        {i + 1}
+                      </td>
+
+                      {/* Protocol name + logo + link */}
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={`https://icons.llama.fi/protocols/${p.slug}.jpg`}
+                            alt={p.name}
+                            width={20}
+                            height={20}
+                            className="rounded-full bg-muted flex-shrink-0 transition-transform group-hover:scale-110"
+                            onError={(e) => { e.currentTarget.style.display = 'none' }}
+                          />
+                          <a
+                            href={`https://defillama.com/protocol/${p.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-foreground hover:text-violet-400 transition-colors flex items-center gap-1.5"
+                          >
+                            {p.name}
+                            <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-violet-400" />
+                          </a>
+                        </div>
+                      </td>
+
+                      {/* Category badge */}
+                      <td className="px-4 py-2.5">
+                        <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${catColor} inline-block`}>
+                          {p.category}
+                        </span>
+                      </td>
+
+                      {/* Chains */}
+                      <td className="hidden px-4 py-2.5 text-xs text-muted-foreground sm:table-cell transition-colors group-hover:text-foreground">
+                        {p.chains.slice(0, 3).join(', ')}
+                        {p.chains.length > 3 && ` +${p.chains.length - 3}`}
+                      </td>
+
+                      {/* TVL + bar */}
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex flex-col items-end gap-1.5">
+                          <span className="font-mono font-medium text-xs transition-colors group-hover:text-foreground">{fmt(p.tvl)}</span>
+                          <div className="h-1 w-16 rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-violet-500/60 transition-all duration-500 ease-out group-hover:bg-violet-500"
+                              style={{ width: `${tvlBarPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* 7d change */}
+                      <td
+                        className={`px-4 py-2.5 text-right text-xs font-medium transition-transform origin-right group-hover:scale-105 ${
+                          change >= 0 ? 'text-green-500 group-hover:text-green-400' : 'text-red-500 group-hover:text-red-400'
+                        }`}
+                      >
+                        {change >= 0 ? '+' : ''}{change.toFixed(1)}%
+                      </td>
+                    </motion.tr>
+                  )
+                })}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
+        
+        {/* Footer actions */}
+        {sorted.length > 10 && (
+          <div className="border-t bg-muted/20 p-2 flex justify-center">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-4 py-1.5 rounded-md hover:bg-muted/50"
+            >
+              {isExpanded ? (
+                <>Show Less <ChevronUp className="h-3.5 w-3.5" /></>
+              ) : (
+                <>Show {sorted.length - 10} More <ChevronDown className="h-3.5 w-3.5" /></>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -17,9 +17,10 @@ export async function GET() {
 
     if (cached?.value) {
       const parsed = JSON.parse(cached.value as string)
-      // Return if fetched in last 24 hours
       const age = Date.now() - new Date(parsed.fetched_at).getTime()
-      if (age < 86400000) {
+      // Invalidate if older than 24h OR if chain data is missing change fields (stale schema)
+      const hasChangeFields = parsed.chains?.[0]?.change_1d !== undefined
+      if (age < 86400000 && hasChangeFields) {
         return NextResponse.json({ success: true, data: parsed, source: 'cache' })
       }
     }
