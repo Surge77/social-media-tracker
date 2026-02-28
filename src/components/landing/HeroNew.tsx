@@ -141,7 +141,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg md:text-xl text-foreground/70 dark:text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="text-lg md:text-xl text-foreground/80 dark:text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
           >
             Aggregated into daily scores for 100+ technologies.
             Skip the guesswork. See what the data actually says.

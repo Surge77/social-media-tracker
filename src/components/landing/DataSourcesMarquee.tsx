@@ -112,10 +112,10 @@ const sources: Source[] = [
 function LogoItem({ source }: { source: Source }) {
   return (
     <div className="group flex flex-col items-center gap-3 px-10 cursor-default">
-      <div className="text-foreground/40 group-hover:text-foreground/70 transition-colors duration-500 grayscale [&>svg]:h-8 [&>svg]:w-8">
+      <div className="text-muted-foreground group-hover:text-foreground transition-colors duration-500 grayscale [&>svg]:h-8 [&>svg]:w-8">
         {source.icon}
       </div>
-      <span className="text-[10px] font-medium tracking-[0.18em] uppercase text-foreground/30 group-hover:text-foreground/60 transition-colors duration-500 whitespace-nowrap">
+      <span className="text-[10px] font-medium tracking-[0.18em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-500 whitespace-nowrap">
         {source.name}
       </span>
     </div>
@@ -125,7 +125,7 @@ function LogoItem({ source }: { source: Source }) {
 export default function DataSourcesMarquee() {
   return (
     <section className="relative overflow-hidden py-10 sm:py-12 border-y border-border/20">
-      <p className="text-center text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground/50 mb-8">
+      <p className="text-center text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground mb-8">
         Data sourced from
       </p>
 

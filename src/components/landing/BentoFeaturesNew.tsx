@@ -45,7 +45,7 @@ function LeaderboardMockup() {
         {items.map((item) => (
           <div key={item.name} className="flex items-center justify-between px-3 py-2 rounded-lg bg-background/50 border border-border/30 hover:bg-background/80 transition-colors group">
             <div className="flex items-center gap-2">
-              <div className="opacity-70 group-hover:opacity-100 transition-opacity">{item.logo}</div>
+              <div className="opacity-80 group-hover:opacity-100 transition-opacity">{item.logo}</div>
               <span className="text-xs font-medium text-foreground">{item.name}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -61,9 +61,9 @@ function LeaderboardMockup() {
       {/* AnimatedBeam: data sources → score */}
       <div ref={containerRef} className="relative mt-3 h-10 flex items-center justify-between px-1">
         <div className="flex flex-col justify-between h-full py-0.5">
-          <div ref={ghRef} className="text-[8px] font-mono text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded w-fit">GH</div>
-          <div ref={hnRef} className="text-[8px] font-mono text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded w-fit">HN</div>
-          <div ref={soRef} className="text-[8px] font-mono text-muted-foreground/70 bg-muted/40 px-1.5 py-0.5 rounded w-fit">SO</div>
+          <div ref={ghRef} className="text-[8px] font-mono text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded w-fit">GH</div>
+          <div ref={hnRef} className="text-[8px] font-mono text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded w-fit">HN</div>
+          <div ref={soRef} className="text-[8px] font-mono text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded w-fit">SO</div>
         </div>
         <div ref={scoreRef} className="w-8 h-8 rounded-full border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0">
           <span className="text-[8px] font-bold text-primary">▲</span>
@@ -273,7 +273,7 @@ export default function BentoFeaturesNew() {
             whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto"
+            className="text-base sm:text-lg text-foreground/80 dark:text-muted-foreground max-w-2xl mx-auto"
           >
             Rankings, comparisons, trending repos, language data, career quizzes, and AI answers — all in one place.
           </motion.p>
