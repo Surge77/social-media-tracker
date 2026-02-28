@@ -36,36 +36,36 @@ export function RepoTable({ repos, page, pageSize }: RepoTableProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/30">
-              <th className="px-4 py-3.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground w-12">#</th>
-              <th className="px-4 py-3.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Repository</th>
-              <th className="px-4 py-3.5 text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground w-28">Language</th>
-              <th className="px-4 py-3.5 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground w-24">
-                <span className="flex items-center justify-end gap-1">
-                  <TrendingUp size={12} className="text-emerald-500" />
+              <th className="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/80 w-12">#</th>
+              <th className="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/80">Repository</th>
+              <th className="px-4 py-3.5 text-left text-xs font-bold uppercase tracking-widest text-muted-foreground/80 w-28">Language</th>
+              <th className="px-4 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground/80 w-24">
+                <span className="flex items-center justify-end gap-1.5">
+                  <TrendingUp size={13} className="text-emerald-500" />
                   Gained
                 </span>
               </th>
-              <th className="px-4 py-3.5 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground w-24">
-                <span className="flex items-center justify-end gap-1">
-                  <Star size={12} className="text-yellow-500" />
+              <th className="px-4 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground/80 w-24">
+                <span className="flex items-center justify-end gap-1.5">
+                  <Star size={13} className="text-yellow-500" />
                   Stars
                 </span>
               </th>
-              <th className="px-4 py-3.5 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground w-20">
-                <span className="flex items-center justify-end gap-1">
-                  <GitFork size={12} />
+              <th className="px-4 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground/80 w-24">
+                <span className="flex items-center justify-end gap-1.5">
+                  <GitFork size={13} />
                   Forks
                 </span>
               </th>
-              <th className="px-4 py-3.5 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground w-20">
-                <span className="flex items-center justify-end gap-1">
-                  <AlertCircle size={12} />
+              <th className="px-4 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground/80 w-24">
+                <span className="flex items-center justify-end gap-1.5">
+                  <AlertCircle size={13} />
                   Issues
                 </span>
               </th>
-              <th className="px-4 py-3.5 text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground w-24">
-                <span className="flex items-center justify-end gap-1">
-                  <Clock size={12} />
+              <th className="px-4 py-3.5 text-right text-xs font-bold uppercase tracking-widest text-muted-foreground/80 w-28">
+                <span className="flex items-center justify-end gap-1.5">
+                  <Clock size={13} />
                   Updated
                 </span>
               </th>
@@ -82,36 +82,36 @@ export function RepoTable({ repos, page, pageSize }: RepoTableProps) {
                   onClick={() => window.open(repo.html_url, '_blank')}
                 >
                   {/* Rank */}
-                  <td className="px-4 py-4 text-xs font-mono text-muted-foreground/60 group-hover:text-foreground transition-colors">
+                  <td className="px-4 py-4 text-sm font-mono font-bold text-muted-foreground/70 group-hover:text-foreground transition-colors">
                     {rank}
                   </td>
 
                   {/* Repo info */}
                   <td className="px-4 py-4">
-                    <div className="flex items-center gap-3.5">
+                    <div className="flex items-center gap-4">
                       <img
                         src={repo.owner_avatar_url}
                         alt={owner}
-                        className="h-8 w-8 shrink-0 rounded-md object-cover ring-1 ring-border/50 group-hover:ring-primary/40 transition-all group-hover:scale-110"
+                        className="h-10 w-10 shrink-0 rounded-md object-cover ring-1 ring-border/50 group-hover:ring-primary/40 transition-all group-hover:scale-105"
                       />
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 font-bold text-foreground transition-colors group-hover:text-primary">
-                            <span className="text-muted-foreground/70 font-medium">{owner}/</span>
+                          <div className="flex items-center gap-1 text-base font-extrabold text-foreground transition-colors group-hover:text-primary">
+                            <span className="text-muted-foreground/80 font-bold">{owner}/</span>
                             <span>{repoName}</span>
-                            <ExternalLink size={12} className="shrink-0 text-muted-foreground/0 group-hover:text-primary/60 transition-all -translate-y-1 translate-x-1 group-hover:translate-y-0 group-hover:translate-x-0 ml-0.5" />
+                            <ExternalLink size={14} className="shrink-0 text-muted-foreground/0 group-hover:text-primary/60 transition-all -translate-y-1 translate-x-1 group-hover:translate-y-0 group-hover:translate-x-0 ml-0.5" />
                           </div>
                           {repo.hn_points && (
                             <button
                               onClick={(e) => { e.stopPropagation(); window.open(repo.hn_url, '_blank'); }}
-                              className="flex items-center gap-1 rounded bg-orange-500/10 px-1.5 py-0.5 text-[10px] font-bold text-orange-500 hover:bg-orange-500/20 transition-colors"
+                              className="flex items-center gap-1 rounded bg-orange-500/10 px-2 py-0.5 text-[11px] font-extrabold text-orange-500 hover:bg-orange-500/20 transition-colors"
                             >
                               <span>▲</span>
                               <span>{repo.hn_points}</span>
                               {repo.hn_comments && (
                                 <>
-                                  <span className="w-px h-2.5 bg-orange-500/30 mx-0.5" />
-                                  <MessageSquare size={9} />
+                                  <span className="w-px h-3 bg-orange-500/30 mx-0.5" />
+                                  <MessageSquare size={10} />
                                   <span>{repo.hn_comments}</span>
                                 </>
                               )}
@@ -119,7 +119,7 @@ export function RepoTable({ repos, page, pageSize }: RepoTableProps) {
                           )}
                         </div>
                         {repo.description && (
-                          <p className="mt-1.5 truncate text-xs text-muted-foreground max-w-lg group-hover:text-foreground/80 transition-colors">
+                          <p className="mt-1.5 truncate text-sm text-muted-foreground max-w-lg group-hover:text-foreground/90 transition-colors">
                             {repo.description}
                           </p>
                         )}
@@ -128,7 +128,7 @@ export function RepoTable({ repos, page, pageSize }: RepoTableProps) {
                             {repo.topics.slice(0, 3).map((topic) => (
                               <span
                                 key={topic}
-                                className="rounded-md bg-primary/5 border border-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary/70 group-hover:border-primary/20 transition-colors"
+                                className="rounded-md bg-primary/5 border border-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary/80 group-hover:border-primary/20 transition-colors"
                               >
                                 {topic}
                               </span>
@@ -142,43 +142,43 @@ export function RepoTable({ repos, page, pageSize }: RepoTableProps) {
                   {/* Language */}
                   <td className="px-4 py-4">
                     {repo.language ? (
-                      <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                        <span className="h-2 w-2 shrink-0 rounded-full bg-primary/60 group-hover:shadow-[0_0_6px_rgba(var(--primary),0.5)] transition-shadow" />
+                      <span className="flex items-center gap-2 text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors">
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary/60 group-hover:shadow-[0_0_8px_rgba(var(--primary),0.5)] transition-shadow" />
                         {repo.language}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground/30">—</span>
+                      <span className="text-sm text-muted-foreground/30">—</span>
                     )}
                   </td>
 
                   {/* Stars gained — the key trending metric */}
                   <td className="px-4 py-4 text-right">
                     {repo.stars_gained > 0 ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 border border-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 group-hover:scale-105 origin-right transition-transform">
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/10 px-2.5 py-1 text-sm font-extrabold text-emerald-600 dark:text-emerald-400 group-hover:scale-105 origin-right transition-transform">
                         +{formatNumber(repo.stars_gained)}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground/30">—</span>
+                      <span className="text-sm text-muted-foreground/30">—</span>
                     )}
                   </td>
 
                   {/* Total stars */}
-                  <td className="px-4 py-4 text-right text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  <td className="px-4 py-4 text-right text-sm font-bold tabular-nums text-muted-foreground group-hover:text-foreground transition-colors">
                     {formatNumber(repo.stars_total)}
                   </td>
 
                   {/* Forks */}
-                  <td className="px-4 py-4 text-right text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  <td className="px-4 py-4 text-right text-sm font-bold tabular-nums text-muted-foreground group-hover:text-foreground transition-colors">
                     {formatNumber(repo.forks)}
                   </td>
 
                   {/* Issues */}
-                  <td className="px-4 py-4 text-right text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  <td className="px-4 py-4 text-right text-sm font-bold tabular-nums text-muted-foreground group-hover:text-foreground transition-colors">
                     {formatNumber(repo.open_issues)}
                   </td>
 
                   {/* Updated */}
-                  <td className="px-4 py-4 text-right text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  <td className="px-4 py-4 text-right text-sm font-bold tabular-nums text-muted-foreground group-hover:text-foreground transition-colors">
                     {timeAgo(repo.last_pushed_at)}
                   </td>
                 </tr>

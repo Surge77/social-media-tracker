@@ -171,40 +171,40 @@ export const CompareTable = React.forwardRef<HTMLDivElement, CompareTableProps>(
               className="rounded-lg border border-border bg-card/30 p-4"
             >
               {/* Dimension header */}
-              <div className="mb-3 flex items-baseline justify-between gap-2">
+              <div className="mb-4 flex items-baseline justify-between gap-2">
                 <div>
-                  <h3 className={cn('text-sm font-semibold', dim.color)}>
+                  <h3 className={cn('text-[11px] font-bold uppercase tracking-widest', dim.color)}>
                     {dim.label}
                   </h3>
-                  <p className="text-xs text-muted-foreground italic">
+                  <p className="text-xs font-medium text-muted-foreground/80 mt-0.5">
                     {dim.question}
                   </p>
                 </div>
                 {winner && (
-                  <span className="flex items-center gap-1 text-xs font-medium text-amber-400">
-                    <Trophy size={12} />
+                  <span className="flex items-center gap-1 text-xs font-bold text-amber-400">
+                    <Trophy size={14} />
                     {winner}
                   </span>
                 )}
                 {!winner && techScores.some((t) => t.score !== null) && (
-                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Minus size={12} />
+                  <span className="flex items-center gap-1 text-xs font-bold text-muted-foreground">
+                    <Minus size={14} />
                     Tie
                   </span>
                 )}
               </div>
 
               {/* Score bars */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {technologies.map((tech) => {
                   const score = tech[dim.scoreKey]
                   const isWinner = winner === tech.name
                   return (
                     <div key={tech.id} className="flex items-center gap-3">
-                      <span className="w-20 shrink-0 truncate text-xs font-medium text-foreground/80">
+                      <span className="w-24 shrink-0 truncate text-sm font-extrabold text-foreground group-hover:text-primary transition-colors">
                         {tech.name}
                       </span>
-                      <div className="relative flex-1 h-5 overflow-hidden rounded-full bg-muted/30">
+                      <div className="relative flex-1 h-6 overflow-hidden rounded-full bg-muted/50">
                         <motion.div
                           initial={prefersReducedMotion ? { width: `${score ?? 0}%` } : { width: 0 }}
                           animate={{ width: `${score ?? 0}%` }}
@@ -213,11 +213,11 @@ export const CompareTable = React.forwardRef<HTMLDivElement, CompareTableProps>(
                             'h-full rounded-full transition-colors',
                             isWinner
                               ? dim.color.replace('text-', 'bg-')
-                              : 'bg-muted-foreground/30'
+                              : 'bg-muted-foreground/40'
                           )}
                         />
                         {score !== null && (
-                          <span className="absolute inset-y-0 right-2 flex items-center text-[11px] font-mono font-semibold text-foreground/70">
+                          <span className="absolute inset-y-0 right-2.5 flex items-center text-xs font-mono font-bold text-foreground drop-shadow-sm">
                             {Math.round(score)}
                           </span>
                         )}
@@ -228,7 +228,7 @@ export const CompareTable = React.forwardRef<HTMLDivElement, CompareTableProps>(
               </div>
 
               {/* Insight text */}
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              <p className="mt-4 text-[13px] font-medium leading-relaxed text-muted-foreground">
                 {insight}
               </p>
             </motion.div>
@@ -240,15 +240,15 @@ export const CompareTable = React.forwardRef<HTMLDivElement, CompareTableProps>(
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 15 }}
           animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
           transition={prefersReducedMotion ? {} : { duration: 0.3, delay: 0.5 }}
-          className="rounded-lg border border-border/50 bg-muted/10 p-4"
+          className="rounded-xl border border-border/50 bg-muted/10 p-5 shadow-sm"
         >
-          <h3 className="mb-2 text-sm font-semibold text-foreground">
+          <h3 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-foreground/80">
             Job Market Takeaway
           </h3>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {technologies.map((tech) => (
-              <p key={tech.id} className="text-xs text-muted-foreground">
-                <span className="font-medium text-foreground/80">{tech.name}:</span>{' '}
+              <p key={tech.id} className="text-[13px] font-medium text-muted-foreground">
+                <span className="font-extrabold text-foreground">{tech.name}:</span>{' '}
                 {getJobInsight(tech.jobs_score, tech.momentum)}
               </p>
             ))}
