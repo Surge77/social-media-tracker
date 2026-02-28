@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
 import AnimatedCTA from '../AnimatedCTA';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Meteors } from '@/components/ui/meteors';
@@ -68,7 +69,10 @@ export default function FinalCTA() {
               className="group relative px-8 sm:px-12 py-4 sm:py-5 text-lg sm:text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-[1.05] active:scale-[0.98] transition-all duration-300 overflow-hidden"
               delay={150}
             >
-              See What to Learn Next →
+              <span className="flex items-center gap-2">
+                Start Exploring
+                <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+              </span>
             </AnimatedCTA>
           </motion.div>
 

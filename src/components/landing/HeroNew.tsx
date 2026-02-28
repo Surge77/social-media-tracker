@@ -152,7 +152,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="flex items-center justify-center mb-6"
+            className="flex flex-col items-center gap-4 mb-6"
           >
             <AnimatedCTA
               href="/technologies"
@@ -161,10 +161,17 @@ export default function HeroNew() {
               delay={150}
             >
               <span className="relative z-10 flex items-center gap-2">
-                See the Rankings
+                Start Exploring
                 <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
               </span>
             </AnimatedCTA>
+            <a
+              href="/quiz/learn-next"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+            >
+              Not sure where to start? Take the career quiz
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
           </motion.div>
 
           {/* Social proof */}

@@ -66,11 +66,11 @@ export default function HeaderNew() {
                 >
                   Methodology
                 </Link>
-                <Link 
+                <Link
                   href="/technologies"
-                  className="group flex items-center gap-1.5 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/60 px-4 py-1.5 text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
                 >
-                  Enter App
+                  Start Exploring
                   <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </Link>
                 <div className="w-px h-4 bg-border/60 mx-1" />
@@ -160,17 +160,6 @@ export default function HeaderNew() {
                 })}
               </nav>
 
-              <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
-                <p className="text-xs text-muted-foreground">Want the full data view?</p>
-                <Link
-                  href="/technologies"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-primary"
-                >
-                  See the rankings
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
             </motion.aside>
           </>
         )}
