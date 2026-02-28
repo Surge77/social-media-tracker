@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { ArrowRight, Map, Activity, Target, GitCompare, Zap } from 'lucide-react'
+import { ArrowRight, Map, Activity, Target, GitCompare, Zap, Link2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { QuizType } from '@/lib/quiz/types'
 
@@ -63,6 +63,13 @@ const NEXT_QUIZ_MAP: Record<QuizType, NextQuizConfig> = {
     href: '/quiz/roadmap',
     icon: Map,
     gradient: 'from-teal-500 to-cyan-500',
+  },
+  'web3-path': {
+    label: 'Explore the Blockchain Market',
+    description: 'See chain TVL, job trends, and developer ecosystem data',
+    href: '/blockchain',
+    icon: Link2,
+    gradient: 'from-violet-600 to-indigo-500',
   },
 }
 

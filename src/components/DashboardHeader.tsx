@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { ChevronDown } from 'lucide-react'
 import { ThemePrismSwitch } from '@/components/ThemePrismSwitch'
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
 import { MobileNav } from '@/components/MobileNav'
@@ -8,6 +10,19 @@ import { useScrolled } from '@/hooks/useScrolled'
 
 export function DashboardHeader() {
   const isScrolled = useScrolled(8)
+  const pathname = usePathname()
+
+  const isActive = (path: string) => {
+    if (path === '/' && pathname !== '/') return false
+    return pathname?.startsWith(path)
+  }
+
+  const navItemClass = (path: string) => 
+    `block rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
+      isActive(path) ? 'bg-accent/50 text-foreground font-semibold' : 'text-muted-foreground'
+    }`
+
+  const isGroupActive = (paths: string[]) => paths.some(p => isActive(p))
 
   return (
     <header
@@ -23,45 +38,39 @@ export function DashboardHeader() {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          <Link
-            href="/technologies"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Technologies
-          </Link>
-          <Link
-            href="/compare"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Compare
-          </Link>
-          <Link
-            href="/quiz"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Quizzes
-          </Link>
-          <Link
-            href="/digest"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Digest
-          </Link>
-          <Link
-            href="/repos"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Repos
-          </Link>
-          <Link
-            href="/languages"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Languages
-          </Link>
+          {/* Explore Dropdown */}
+          <div className="group relative">
+            <button className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-foreground ${isGroupActive(['/technologies', '/languages', '/repos', '/blockchain']) ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
+              Explore <ChevronDown size={14} className="transition-transform group-hover:rotate-180" />
+            </button>
+            <div className="absolute left-0 top-full hidden w-48 pt-2 group-hover:block">
+              <div className="rounded-md border border-border bg-popover p-2 shadow-md">
+                <Link href="/technologies" className={navItemClass('/technologies')}>Technologies</Link>
+                <Link href="/languages" className={navItemClass('/languages')}>Languages</Link>
+                <Link href="/repos" className={navItemClass('/repos')}>Repositories</Link>
+                <Link href="/blockchain" className={navItemClass('/blockchain')}>Blockchain</Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Tools & Insights Dropdown */}
+          <div className="group relative">
+            <button className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-foreground ${isGroupActive(['/compare', '/digest', '/quiz']) ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
+              Insights <ChevronDown size={14} className="transition-transform group-hover:rotate-180" />
+            </button>
+            <div className="absolute left-0 top-full hidden w-48 pt-2 group-hover:block">
+              <div className="rounded-md border border-border bg-popover p-2 shadow-md">
+                <Link href="/compare" className={navItemClass('/compare')}>Compare</Link>
+                <Link href="/digest" className={navItemClass('/digest')}>Digest</Link>
+                <Link href="/quiz" className={navItemClass('/quiz')}>Quizzes</Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Single Links */}
           <Link
             href="/methodology"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className={`text-sm font-medium transition-colors hover:text-foreground ${isActive('/methodology') ? 'text-foreground font-semibold relative after:absolute after:bottom-[-22px] after:left-0 after:h-0.5 after:w-full after:bg-primary' : 'text-muted-foreground'}`}
           >
             Methodology
           </Link>

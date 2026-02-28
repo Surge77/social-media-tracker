@@ -58,6 +58,7 @@ export type TechnologyCategory =
   | 'cloud'
   | 'mobile'
   | 'ai_ml'
+  | 'blockchain'
 
 export const CATEGORY_LABELS: Record<TechnologyCategory, string> = {
   language: 'Language',
@@ -68,6 +69,7 @@ export const CATEGORY_LABELS: Record<TechnologyCategory, string> = {
   cloud: 'Cloud',
   mobile: 'Mobile',
   ai_ml: 'AI/ML',
+  blockchain: 'Blockchain',
 }
 
 export interface DataPoint {
@@ -108,6 +110,7 @@ export interface DailyScore {
   community_score: number | null
   jobs_score: number | null
   ecosystem_score: number | null
+  onchain_score: number | null
   momentum: number
   data_completeness: number
   raw_sub_scores: Record<string, unknown>
@@ -134,6 +137,7 @@ export interface TechnologyWithScore extends Technology {
   community_score: number | null
   jobs_score: number | null
   ecosystem_score: number | null
+  onchain_score: number | null
   momentum: number | null
   data_completeness: number | null
   sparkline: number[]

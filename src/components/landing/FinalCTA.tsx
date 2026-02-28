@@ -65,7 +65,7 @@ export default function FinalCTA() {
             <AnimatedCTA
               href="/technologies"
               size="lg"
-              className="group relative px-8 sm:px-12 py-4 sm:py-5 text-lg sm:text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:scale-[1.05] active:scale-[0.98] transition-all duration-300 overflow-hidden"
+              className="group relative px-8 sm:px-12 py-4 sm:py-5 text-lg sm:text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
               delay={150}
             >
               See What to Learn Next →
@@ -77,7 +77,7 @@ export default function FinalCTA() {
             whileInView={prefersReducedMotion ? {} : { opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-xs text-muted-foreground"
+            className="text-sm font-medium text-foreground/70 dark:text-muted-foreground drop-shadow-sm"
           >
             No account required · Free forever · No credit card
           </motion.p>

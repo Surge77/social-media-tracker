@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ const navItems = [
 export default function HeaderNew() {
   const isScrolled = useScrolled(8);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -56,8 +58,26 @@ export default function HeaderNew() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-4">
+                <Link 
+                  href="/methodology" 
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Methodology
+                </Link>
+                <Link 
+                  href="/technologies"
+                  className="group flex items-center gap-1.5 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+                >
+                  Enter App
+                  <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </Link>
+                <div className="w-px h-4 bg-border/60 mx-1" />
+              </div>
+
               <ThemePrismSwitch />
+              
               <Button
                 type="button"
                 variant="outline"
@@ -120,17 +140,24 @@ export default function HeaderNew() {
               </div>
 
               <nav className="mt-5 space-y-2">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="group flex items-center justify-between rounded-xl border border-border/40 bg-card/50 px-4 py-3 text-sm font-medium text-foreground transition-all hover:border-primary/40 hover:bg-primary/5"
-                  >
-                    <span>{item.label}</span>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
-                  </Link>
-                ))}
+                {navItems.map((item) => {
+                  const isActive = pathname?.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`group flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+                        isActive 
+                          ? 'border-primary/40 bg-primary/10 text-primary' 
+                          : 'border-border/40 bg-card/50 text-foreground hover:border-primary/40 hover:bg-primary/5'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ArrowUpRight className={`h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'}`} />
+                    </Link>
+                  );
+                })}
               </nav>
 
               <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4">

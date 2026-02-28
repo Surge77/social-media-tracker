@@ -19,6 +19,7 @@ const CATEGORY_COLORS: Record<TechnologyCategory, string> = {
   cloud: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
   mobile: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
   ai_ml: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+  blockchain: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
 }
 
 export const CategoryBadge = React.forwardRef<HTMLDivElement, CategoryBadgeProps>(

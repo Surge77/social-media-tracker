@@ -3,10 +3,12 @@
 import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package, Link2, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAIInsight } from '@/hooks/useAIInsight'
+import { useScrolled } from '@/hooks/useScrolled'
+import { cn } from '@/lib/utils'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -35,6 +37,7 @@ export function TechnologyDetailClient() {
   const router = useRouter()
   const slug = params?.slug as string
   const prefersReducedMotion = useReducedMotion()
+  const isScrolled = useScrolled(250)
 
   const [data, setData] = React.useState<TechnologyDetail | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
@@ -114,21 +117,43 @@ export function TechnologyDetailClient() {
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
-      {/* Back Button */}
-      <motion.div
+      {/* Sticky Summary Bar (visible only when scrolled) */}
+      <div 
+        className={cn(
+          "fixed top-16 left-0 right-0 z-40 border-b bg-background/80 backdrop-blur-xl transition-all duration-300 shadow-sm",
+          isScrolled ? "translate-y-0 opacity-100 border-border/50" : "-translate-y-full opacity-0 border-transparent pointer-events-none"
+        )}
+      >
+        <div className="container mx-auto max-w-7xl px-4 py-2 sm:px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="font-semibold text-foreground">{technology.name}</span>
+            <ScoreBadge score={current_scores?.composite_score ?? null} size="sm" />
+          </div>
+          <div className="flex items-center gap-3">
+            <MomentumBadge momentum={current_scores?.momentum ?? null} size="sm" />
+            <button 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+              className="hidden sm:block text-xs font-medium text-primary hover:underline"
+            >
+              Back to top
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Breadcrumbs */}
+      <motion.nav
         initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.3 }}
-        className="mb-6"
+        className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground"
       >
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft size={16} />
-          Back
-        </button>
-      </motion.div>
+        <Link href="/technologies" className="transition-colors hover:text-foreground">
+          Technologies
+        </Link>
+        <ChevronRight size={14} className="opacity-50" />
+        <span className="text-foreground font-medium">{technology.name}</span>
+      </motion.nav>
 
       {/* Header */}
       <motion.div
@@ -293,6 +318,42 @@ export function TechnologyDetailClient() {
         </div>
       </motion.section>
 
+      {/* On-Chain Health — blockchain techs only */}
+      {technology.category === 'blockchain' && current_scores?.onchain_score != null && (
+        <motion.section
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.25 }}
+          className="mb-8"
+        >
+          <h2 className="mb-4 text-xl font-semibold text-foreground">On-Chain Health</h2>
+          <div className="rounded-xl border bg-card p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-violet-400" />
+                <span className="text-sm font-medium text-foreground">Onchain Score</span>
+              </div>
+              <span className="text-2xl font-bold text-violet-400">
+                {current_scores.onchain_score.toFixed(1)}
+                <span className="ml-0.5 text-sm font-normal text-muted-foreground">/100</span>
+              </span>
+            </div>
+            <div className="mb-3 h-2 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-violet-600 to-indigo-500 transition-all"
+                style={{ width: `${Math.min(100, current_scores.onchain_score)}%` }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Composite of protocol TVL, on-chain developer activity, and chain transaction volume.{' '}
+              <Link href="/blockchain" className="text-violet-400 hover:underline">
+                View full blockchain dashboard →
+              </Link>
+            </p>
+          </div>
+        </motion.section>
+      )}
+
       {/* Trend Chart */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -301,7 +362,7 @@ export function TechnologyDetailClient() {
         className="mb-8"
       >
         <h2 className="mb-4 text-xl font-semibold text-foreground">90-Day Trend</h2>
-        <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm">
+        <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm hover:border-primary/20 transition-colors">
           <TrendChart data={chart_data} />
         </div>
       </motion.section>
@@ -315,7 +376,7 @@ export function TechnologyDetailClient() {
           className="mb-8"
         >
           <h2 className="mb-4 text-xl font-semibold text-foreground">Star History</h2>
-          <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm">
+          <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm hover:border-primary/20 transition-colors">
             <StarHistoryChart slug={slug} techColor={technology.color} />
           </div>
         </motion.section>
@@ -330,7 +391,7 @@ export function TechnologyDetailClient() {
           className="mb-8"
         >
           <h2 className="mb-4 text-xl font-semibold text-foreground">Package Downloads</h2>
-          <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm">
+          <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm hover:border-primary/20 transition-colors">
             <PackageDownloadsChart slug={slug} techColor={technology.color} />
           </div>
         </motion.section>
@@ -344,7 +405,7 @@ export function TechnologyDetailClient() {
         className="mb-8"
       >
         <h2 className="mb-4 text-xl font-semibold text-foreground">Job Market Demand</h2>
-        <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm">
+        <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm hover:border-primary/20 transition-colors">
           <JobMarketChart slug={slug} techColor={technology.color} />
         </div>
       </motion.section>

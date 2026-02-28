@@ -207,7 +207,8 @@ function estimateLearningTime(tech: TechnologyWithScore, timeCommitment: string)
     devops: 60,
     cloud: 50,
     mobile: 60,
-    ai_ml: 80
+    ai_ml: 80,
+    blockchain: 70,
   }
 
   const hoursPerWeek: Record<string, number> = {

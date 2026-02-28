@@ -114,6 +114,7 @@ export interface SubScores {
   community: number | null
   jobs: number | null
   ecosystem: number | null
+  onchain?: number | null  // blockchain techs only
 }
 
 export interface CompositeResult {
@@ -129,16 +130,17 @@ export interface CompositeResult {
  * DevOps tools often lack package downloads too.
  */
 const MAX_POSSIBLE_DIMENSIONS: Record<string, number> = {
-  cloud:    2, // community + jobs only
-  devops:   3, // github + community + jobs (no package downloads)
-  language: 3, // github + community + jobs (languages distributed via OS, not pkg registries)
-  frontend: 4,
-  backend:  4,
-  database: 4,
-  mobile:   4,
-  ai_ml:    4,
-  testing:  4,
-  other:    4,
+  cloud:       2, // community + jobs only
+  devops:      3, // github + community + jobs (no package downloads)
+  language:    3, // github + community + jobs (languages distributed via OS, not pkg registries)
+  frontend:    4,
+  backend:     4,
+  database:    4,
+  mobile:      4,
+  ai_ml:       4,
+  blockchain:  5, // github + community + jobs + ecosystem + onchain
+  testing:     4,
+  other:       4,
 }
 
 /**
@@ -168,6 +170,9 @@ export function computeCompositeScore(
     available.push({ score: subScores.jobs, weight: w.jobs })
   if (subScores.ecosystem !== null)
     available.push({ score: subScores.ecosystem, weight: w.ecosystem })
+  // onchain dimension — blockchain techs only; null treated as missing (redistributed)
+  if (subScores.onchain != null && w.onchain != null)
+    available.push({ score: subScores.onchain, weight: w.onchain })
 
   if (available.length === 0) return { composite: 0, completeness: 0 }
 
@@ -185,4 +190,34 @@ export function computeCompositeScore(
     composite: Math.round(composite * 100) / 100,
     completeness,
   }
+}
+
+/**
+ * On-Chain Score (0-100) — blockchain techs only.
+ *
+ * Components:
+ *   - tvlScore:            TVL rank among top 100 DeFi protocols (0-100)
+ *   - devActivityScore:   CoinGecko commit/PR velocity for backing chain (0-100)
+ *   - chainActivityScore: Etherscan network tx trend (0-100)
+ *
+ * For non-protocol techs (Solidity, Hardhat, etc.):
+ *   - tvlScore is 0, weights redistribute to devActivity + chainActivity
+ */
+export function computeOnchainScoreFromParts(
+  tvlScore: number,
+  devActivityScore: number,
+  chainActivityScore: number,
+  hasProtocol: boolean
+): number {
+  if (hasProtocol) {
+    return Math.round(
+      tvlScore           * 0.40 +
+      devActivityScore   * 0.40 +
+      chainActivityScore * 0.20
+    )
+  }
+  return Math.round(
+    devActivityScore   * 0.70 +
+    chainActivityScore * 0.30
+  )
 }

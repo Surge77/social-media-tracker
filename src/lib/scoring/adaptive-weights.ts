@@ -7,6 +7,7 @@ export interface WeightProfile {
   community: number
   jobs: number
   ecosystem: number
+  onchain?: number  // Only set for blockchain category
 }
 
 /**
@@ -26,8 +27,9 @@ const CATEGORY_WEIGHTS: Record<TechnologyCategory, WeightProfile> = {
   database: { github: 0.15, community: 0.10, jobs: 0.40, ecosystem: 0.35 },
   devops:   { github: 0.15, community: 0.15, jobs: 0.40, ecosystem: 0.30 },
   cloud:    { github: 0.10, community: 0.15, jobs: 0.45, ecosystem: 0.30 },
-  mobile:   { github: 0.20, community: 0.20, jobs: 0.30, ecosystem: 0.30 },
-  ai_ml:    { github: 0.25, community: 0.30, jobs: 0.25, ecosystem: 0.20 },
+  mobile:     { github: 0.20, community: 0.20, jobs: 0.30, ecosystem: 0.30 },
+  ai_ml:      { github: 0.25, community: 0.30, jobs: 0.25, ecosystem: 0.20 },
+  blockchain: { github: 0.20, community: 0.20, jobs: 0.25, ecosystem: 0.15, onchain: 0.20 },
 }
 
 /**

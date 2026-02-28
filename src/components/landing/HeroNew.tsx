@@ -157,12 +157,12 @@ export default function HeroNew() {
             <AnimatedCTA
               href="/technologies"
               size="lg"
-              className="group relative px-12 py-5 text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.4),0_20px_40px_rgba(0,0,0,0.1)] hover:shadow-[0_0_50px_rgba(249,115,22,0.6),0_30px_60px_rgba(0,0,0,0.15)] hover:scale-[1.05] active:scale-[0.98] overflow-hidden cursor-pointer transition-all duration-300"
+              className="group relative px-12 py-5 text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] hover:scale-[1.02] active:scale-[0.98] overflow-hidden cursor-pointer transition-all duration-300"
               delay={150}
             >
               <span className="relative z-10 flex items-center gap-2">
                 See the Rankings
-                <ArrowUpRight className="w-5 h-5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
               </span>
             </AnimatedCTA>
           </motion.div>
@@ -295,14 +295,14 @@ export default function HeroNew() {
                     initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
                     animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.9 + index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className="grid grid-cols-[40px_1fr_80px_80px_50px] gap-3 items-center px-3 py-2.5 rounded-lg hover:bg-muted/60 hover:shadow-sm transition-all duration-200 group cursor-pointer"
+                    className={`grid grid-cols-[40px_1fr_80px_80px_50px] gap-3 items-center px-3 py-2.5 rounded-lg hover:bg-muted/80 hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.2)] transition-all duration-200 group cursor-pointer ${index === 0 ? 'bg-orange-500/5' : ''}`}
                   >
-                    <span className="text-sm font-bold text-muted-foreground">{item.rank}</span>
+                    <span className={`text-sm font-bold ${index === 0 ? 'text-orange-500' : 'text-muted-foreground'}`}>{item.rank}</span>
                     <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                       {item.name}
                     </span>
                     <div className="text-right">
-                      <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                      <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full ${index === 0 ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400' : 'bg-primary/10 text-primary'} text-xs font-bold`}>
                         {item.score}
                       </div>
                     </div>

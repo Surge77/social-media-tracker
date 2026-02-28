@@ -12,6 +12,7 @@ const navLinks = [
   { href: '/digest', label: 'Digest' },
   { href: '/repos', label: 'Repos' },
   { href: '/languages', label: 'Languages' },
+  { href: '/blockchain', label: 'Blockchain' },
   { href: '/methodology', label: 'Methodology' },
 ]
 
