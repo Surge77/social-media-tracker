@@ -3,14 +3,16 @@
 // src/components/quiz/roadmap/RoadmapNode.tsx
 // Individual technology node in the roadmap
 
-import React, { useCallback } from 'react'
-import { Check, Circle, Clock, TrendingUp, Briefcase } from 'lucide-react'
+import React, { useCallback, useMemo } from 'react'
+import { Check, Circle, Clock, TrendingUp, Briefcase, BookOpen, Play, ExternalLink, GraduationCap } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
+import { getTechResources, getTechVideos } from '@/lib/quiz/resources'
+import type { YouTubeVideoEntry } from '@/lib/quiz/resources'
 import type { EnrichedRoadmapNode } from '@/lib/quiz/roadmap-engine'
 
 interface RoadmapNodeProps {
@@ -28,6 +30,20 @@ interface RoadmapNodeProps {
 
 export function RoadmapNode({ node, status = 'upcoming', onViewDetails, className, roadmapId, checked = false, onCheckedChange }: RoadmapNodeProps) {
   const prefersReducedMotion = useReducedMotion()
+
+  // Look up curated resources for this technology
+  const techResources = useMemo(() => {
+    if (node.technologySlug) {
+      return getTechResources(node.technologySlug)
+    }
+    // Try looking up by node id as fallback
+    return getTechResources(node.id)
+  }, [node.technologySlug, node.id])
+
+  // Get all curated videos (multi-video support)
+  const techVideos = useMemo(() => {
+    return getTechVideos(node.technologySlug || node.id)
+  }, [node.technologySlug, node.id])
 
   const handleCheckboxChange = useCallback(() => {
     onCheckedChange?.(node.id, !checked)
@@ -256,6 +272,89 @@ export function RoadmapNode({ node, status = 'upcoming', onViewDetails, classNam
           </div>
         )}
 
+        {/* Learning Resources */}
+        {(techResources || techVideos.length > 0) && !isSkipped && (
+          <div className="mb-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="rounded-lg bg-emerald-500/20 p-1.5">
+                <GraduationCap className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Learning Resources</p>
+            </div>
+            <div className="space-y-2">
+              {/* Official Docs */}
+              {techResources?.docsUrl && (
+                <a
+                  href={techResources.docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 rounded-lg bg-background/60 px-3 py-2 text-sm transition-all hover:bg-background hover:shadow-sm group/link"
+                >
+                  <BookOpen className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                  <span className="flex-1 text-muted-foreground group-hover/link:text-foreground transition-colors">
+                    Official Docs
+                  </span>
+                  <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground/50 group-hover/link:text-muted-foreground transition-colors" aria-hidden="true" />
+                </a>
+              )}
+
+              {/* YouTube Videos — show all curated videos */}
+              {techVideos.length > 0 ? (
+                techVideos.map((video) => (
+                  <a
+                    key={video.videoId}
+                    href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2.5 rounded-lg bg-background/60 px-3 py-2 text-sm transition-all hover:bg-background hover:shadow-sm group/link"
+                  >
+                    <Play className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
+                    <div className="flex-1 min-w-0">
+                      <span className="block truncate text-muted-foreground group-hover/link:text-foreground transition-colors">
+                        {video.title}
+                      </span>
+                      <span className="text-xs text-muted-foreground/70">
+                        {video.channel} · {video.durationMinutes >= 60 ? `${Math.round(video.durationMinutes / 60)}h ${video.durationMinutes % 60}m` : `${video.durationMinutes} min`}
+                      </span>
+                    </div>
+                    <VideoTypeBadge type={video.type} />
+                    <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground/50 group-hover/link:text-muted-foreground transition-colors" aria-hidden="true" />
+                  </a>
+                ))
+              ) : techResources?.youtube && (
+                /* Fallback: single legacy video */
+                <a
+                  href={`https://www.youtube.com/watch?v=${techResources.youtube.videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2.5 rounded-lg bg-background/60 px-3 py-2 text-sm transition-all hover:bg-background hover:shadow-sm group/link"
+                >
+                  <Play className="h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
+                  <div className="flex-1 min-w-0">
+                    <span className="block truncate text-muted-foreground group-hover/link:text-foreground transition-colors">
+                      {techResources.youtube.title}
+                    </span>
+                    <span className="text-xs text-muted-foreground/70">
+                      {techResources.youtube.channel} · {techResources.youtube.durationMinutes} min
+                    </span>
+                  </div>
+                  <ExternalLink className="h-3 w-3 shrink-0 text-muted-foreground/50 group-hover/link:text-muted-foreground transition-colors" aria-hidden="true" />
+                </a>
+              )}
+
+              {/* Primary Learn Resource */}
+              {techResources?.primaryLearnResource && !techResources.docsUrl && (
+                <div className="flex items-center gap-2.5 rounded-lg bg-background/60 px-3 py-2 text-sm">
+                  <GraduationCap className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                  <span className="text-muted-foreground">
+                    {techResources.primaryLearnResource}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Dependencies */}
         {node.dependencies && node.dependencies.length > 0 && !isSkipped && (
           <div className="mb-3 text-xs text-muted-foreground">
@@ -284,5 +383,24 @@ export function RoadmapNode({ node, status = 'upcoming', onViewDetails, classNam
         )}
       </Card>
     </motion.div>
+  )
+}
+
+/** Small badge showing the type of video (intro, crash-course, etc.) */
+function VideoTypeBadge({ type }: { type: YouTubeVideoEntry['type'] }) {
+  const config: Record<YouTubeVideoEntry['type'], { label: string; className: string }> = {
+    'intro': { label: 'Quick Intro', className: 'bg-zinc-500/10 text-zinc-600 dark:text-zinc-400' },
+    'crash-course': { label: 'Crash Course', className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400' },
+    'full-tutorial': { label: 'Full Tutorial', className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
+    'project-based': { label: 'Project', className: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
+    'comparison': { label: 'Comparison', className: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400' },
+  }
+
+  const { label, className } = config[type] ?? config['intro']
+
+  return (
+    <span className={cn('shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider', className)}>
+      {label}
+    </span>
   )
 }

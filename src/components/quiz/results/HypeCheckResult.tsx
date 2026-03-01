@@ -21,6 +21,8 @@ import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ResultActions } from '@/components/quiz/ResultActions'
 import { NextQuizCTA } from '@/components/quiz/NextQuizCTA'
+import { StarterKitBento } from '@/components/quiz/StarterKitBento'
+import { getVideoIntent } from '@/lib/quiz/video-intent'
 import type { QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 
@@ -250,6 +252,19 @@ export function HypeCheckResult({
             </div>
           </Card>
         </motion.div>
+
+        {/* Context-aware video — intent matches the hype verdict */}
+        {techSlug && (
+          <motion.div variants={prefersReducedMotion ? undefined : itemVariants}>
+            <StarterKitBento
+              slug={techSlug}
+              videoIntent={getVideoIntent({
+                quizType: 'hype-check',
+                hypeVerdict: recommendation.primary.action,
+              })}
+            />
+          </motion.div>
+        )}
 
         {/* Warnings */}
         {recommendation.warnings && recommendation.warnings.length > 0 && (

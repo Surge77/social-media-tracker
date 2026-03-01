@@ -147,10 +147,23 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                     <LifecycleBadge stage={tech.lifecycle_stage} />
                   </td>
 
-                  {/* Score with label */}
+                  {/* Score with confidence grade chip */}
                   <td className="px-4 py-3 text-center">
                     <div className="flex flex-col items-center gap-0.5">
-                      <ScoreBadge score={tech.composite_score} />
+                      <div className="flex items-center gap-1">
+                        <ScoreBadge score={tech.composite_score} confidenceGrade={tech.confidence_grade} />
+                        {tech.confidence_grade && (
+                          <span className={cn(
+                            'text-[10px] font-semibold font-mono px-1 py-0.5 rounded',
+                            tech.confidence_grade === 'A' && 'text-emerald-400 bg-emerald-500/10',
+                            tech.confidence_grade === 'B' && 'text-blue-400 bg-blue-500/10',
+                            tech.confidence_grade === 'C' && 'text-amber-400 bg-amber-500/10',
+                            (tech.confidence_grade === 'D' || tech.confidence_grade === 'F') && 'text-slate-400 bg-slate-500/10',
+                          )}>
+                            {tech.confidence_grade}
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[10px] text-muted-foreground">
                         {getScoreLabel(tech.composite_score)}
                       </span>

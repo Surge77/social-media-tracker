@@ -216,7 +216,11 @@ export function StackHealthResult({
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 What to learn instead of {risk[0].tech.name}:
               </p>
-              <StarterKitBento slug={recommendation.primary.technology} />
+              {/* videoIntent="learn" — show tutorial for the replacement tech, not the declining one */}
+              <StarterKitBento
+                slug={recommendation.primary.technology}
+                videoIntent="learn"
+              />
               <CompanionSkills slug={recommendation.primary.technology} technologies={technologies} />
             </div>
           </motion.div>

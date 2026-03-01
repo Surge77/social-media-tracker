@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Rocket, Copy, Check, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { Rocket, Clock, ChevronDown, ChevronUp, CheckCircle2, Zap } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -23,12 +23,18 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   advanced: 'bg-destructive/10 text-red-600 dark:text-red-400',
 }
 
+const STEP_COLORS = [
+  'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+  'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20',
+  'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
+  'bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20',
+]
+
 export function WeekendProjectCard({ slug, goal = 'side-project', level = 'intermediate', className }: WeekendProjectCardProps) {
   const prefersReducedMotion = useReducedMotion()
   const [idea, setIdea] = useState<ProjectIdea | null>(null)
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [loaded, setLoaded] = useState(false)
 
   // Load on first expand to avoid blocking render
@@ -42,22 +48,11 @@ export function WeekendProjectCard({ slug, goal = 'side-project', level = 'inter
           if (data.idea) setIdea(data.idea)
         })
         .catch(() => {
-          // silently fail — show nothing
+          // silently fail
         })
         .finally(() => setLoading(false))
     }
   }, [expanded, loaded, slug, goal, level])
-
-  const handleCopy = async () => {
-    if (!idea?.starterSnippet) return
-    try {
-      await navigator.clipboard.writeText(idea.starterSnippet)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // clipboard unavailable
-    }
-  }
 
   return (
     <div className={className}>
@@ -88,78 +83,9 @@ export function WeekendProjectCard({ slug, goal = 'side-project', level = 'inter
             className="overflow-hidden"
           >
             <div className="mt-3">
-              {loading && (
-                <Card className="p-4 space-y-3">
-                  <Skeleton className="h-5 w-48" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-32 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                </Card>
-              )}
+              {loading && <LoadingSkeleton />}
 
-              {!loading && idea && (
-                <Card className="border border-border/50 overflow-hidden">
-                  {/* Header */}
-                  <div className="p-4 border-b border-border/50">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-foreground">Build: "{idea.name}"</h4>
-                        <p className="text-sm text-muted-foreground mt-1">{idea.description}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="w-3 h-3" />
-                          <span>{idea.estimatedHours}h</span>
-                        </div>
-                        <Badge className={cn('text-xs capitalize', DIFFICULTY_COLOR[idea.difficulty] ?? '')}>
-                          {idea.difficulty}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Code snippet */}
-                  <div className="relative">
-                    {/* macOS chrome */}
-                    <div className="flex items-center gap-1.5 px-3 py-2 bg-[#161b22] border-b border-border/30">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#ffbd2e]" />
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-                      <span className="ml-3 font-mono text-[11px] text-zinc-500">
-                        starter.{getExtension(idea.starterSnippetLanguage)}
-                      </span>
-                    </div>
-
-                    <div className="bg-[#0d1117] p-4 overflow-x-auto">
-                      <pre className="text-xs text-green-400 font-mono leading-relaxed whitespace-pre">
-                        {idea.starterSnippet}
-                      </pre>
-                    </div>
-
-                    <button
-                      onClick={handleCopy}
-                      className={cn(
-                        'absolute top-10 right-3 flex items-center gap-1 px-2 py-1 rounded text-xs transition-all',
-                        copied
-                          ? 'bg-success/20 text-success'
-                          : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white',
-                      )}
-                      aria-label={copied ? 'Copied!' : 'Copy snippet'}
-                    >
-                      {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      {copied ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
-
-                  {/* Success condition */}
-                  <div className="p-4 bg-success/5 border-t border-success/20">
-                    <div className="flex items-start gap-2">
-                      <span className="text-success text-base" aria-hidden>✅</span>
-                      <p className="text-sm text-foreground">{idea.successCondition}</p>
-                    </div>
-                  </div>
-                </Card>
-              )}
+              {!loading && idea && <ProjectIdeaContent idea={idea} prefersReducedMotion={prefersReducedMotion} />}
 
               {!loading && !idea && (
                 <Card className="p-4 border-dashed border-border/50">
@@ -176,18 +102,108 @@ export function WeekendProjectCard({ slug, goal = 'side-project', level = 'inter
   )
 }
 
-function getExtension(language: string): string {
-  const map: Record<string, string> = {
-    typescript: 'ts',
-    javascript: 'js',
-    python: 'py',
-    solidity: 'sol',
-    rust: 'rs',
-    go: 'go',
-    java: 'java',
-    sql: 'sql',
-    dockerfile: 'dockerfile',
-    dart: 'dart',
-  }
-  return map[language?.toLowerCase()] ?? 'ts'
+function LoadingSkeleton() {
+  return (
+    <Card className="p-4 space-y-4">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2 flex-1">
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+        <Skeleton className="h-6 w-20 ml-4" />
+      </div>
+      <div className="space-y-2">
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} className="flex gap-3">
+            <Skeleton className="h-7 w-7 rounded-full shrink-0" />
+            <div className="space-y-1.5 flex-1">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-full" />
+            </div>
+          </div>
+        ))}
+      </div>
+      <Skeleton className="h-8 w-full rounded" />
+    </Card>
+  )
+}
+
+function ProjectIdeaContent({ idea, prefersReducedMotion }: { idea: ProjectIdea; prefersReducedMotion: boolean }) {
+  return (
+    <Card className="border border-border/50 overflow-hidden">
+      {/* Header */}
+      <div className="p-4 border-b border-border/50">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1">
+            <h4 className="font-semibold text-foreground">Build: &quot;{idea.name}&quot;</h4>
+            <p className="text-sm text-muted-foreground mt-1">{idea.description}</p>
+          </div>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              <span>{idea.estimatedHours}h</span>
+            </div>
+            <Badge className={cn('text-xs capitalize', DIFFICULTY_COLOR[idea.difficulty] ?? '')}>
+              {idea.difficulty}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      {/* Build steps */}
+      <div className="p-4 space-y-3">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Build Plan</p>
+        <div className="space-y-2">
+          {(idea.buildSteps ?? []).map((step, i) => (
+            <motion.div
+              key={step.step}
+              initial={prefersReducedMotion ? {} : { opacity: 0, x: -8 }}
+              animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.07 }}
+              className="flex items-start gap-3"
+            >
+              <div className={cn(
+                'flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold border shrink-0 mt-0.5',
+                STEP_COLORS[i % STEP_COLORS.length],
+              )}>
+                {step.step}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground">{step.title}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">{step.hours}h</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{step.what}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Skills */}
+      {idea.skills && idea.skills.length > 0 && (
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Zap className="w-3 h-3 text-muted-foreground" />
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Skills You&apos;ll Practice</p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {idea.skills.map(skill => (
+              <Badge key={skill} variant="secondary" className="text-xs">
+                {skill}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Success condition */}
+      <div className="p-4 bg-success/5 border-t border-success/20">
+        <div className="flex items-start gap-2">
+          <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
+          <p className="text-sm text-foreground">{idea.successCondition}</p>
+        </div>
+      </div>
+    </Card>
+  )
 }

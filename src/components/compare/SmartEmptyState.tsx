@@ -11,6 +11,8 @@ import {
   ChevronRight,
   Sparkles,
   RotateCcw,
+  Loader2,
+  BrainCircuit,
 } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
@@ -31,6 +33,8 @@ interface Comparison {
   techs: TechTrend[]
   hot?: boolean
   description: string
+  aiReasoning?: string
+  trendReason?: string
 }
 
 interface CategoryData {
@@ -542,14 +546,52 @@ function HelpMeDecide({
   const [goal, setGoal] = useState<DecideGoal | null>(null)
   const [focus, setFocus] = useState<DecideFocus | null>(null)
   const [level, setLevel] = useState<DecideLevel | null>(null)
+  const [aiRecommendation, setAiRecommendation] = useState<Comparison | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const recommendation =
-    goal && focus && level ? getRecommendedComparison(goal, focus, level) : null
+  // Trigger AI recommendation when all 3 are selected
+  useEffect(() => {
+    if (goal && focus && level) {
+      const fetchRecommendation = async () => {
+        setIsLoading(true)
+        setAiRecommendation(null)
+        try {
+          const res = await fetch(`/api/ai/recommend?goal=${goal}&focus=${focus}&level=${level}`)
+          const data = await res.json()
+          if (data.recommendation) {
+            const rec = data.recommendation
+            setAiRecommendation({
+              name: rec.name,
+              slugs: rec.slugs,
+              description: rec.explanation,
+              techs: rec.slugs.map((s: string) => ({
+                slug: s,
+                label: s.charAt(0).toUpperCase() + s.slice(1),
+                trend: 'rising',
+              })),
+              aiReasoning: rec.explanation,
+              trendReason: rec.trendReason,
+            })
+          } else {
+            // Fallback to static matrix
+            setAiRecommendation(getRecommendedComparison(goal, focus, level))
+          }
+        } catch (err) {
+          console.error('Failed to get recommendation:', err)
+          setAiRecommendation(getRecommendedComparison(goal, focus, level))
+        } finally {
+          setIsLoading(false)
+        }
+      }
+      fetchRecommendation()
+    }
+  }, [goal, focus, level])
 
   const reset = () => {
     setGoal(null)
     setFocus(null)
     setLevel(null)
+    setAiRecommendation(null)
   }
 
   return (
@@ -569,9 +611,14 @@ function HelpMeDecide({
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">Help me decide</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-foreground">AI Tech Consultant</p>
+                <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                  BETA
+                </span>
+              </div>
               <p className="text-xs text-muted-foreground">
-                Answer 3 quick questions to get a tailored comparison
+                Get personalized comparison advice based on your specific goals
               </p>
             </div>
           </div>
@@ -670,25 +717,57 @@ function HelpMeDecide({
                 </div>
               </div>
 
-              {/* Result */}
-              <AnimatePresence>
-                {recommendation && (
+              {/* Result / Loading */}
+              <AnimatePresence mode="wait">
+                {isLoading && (
                   <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center justify-center py-6 text-center"
+                  >
+                    <Loader2 className="mb-2 h-6 w-6 animate-spin text-primary" />
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Consulting market trends...
+                    </p>
+                  </motion.div>
+                )}
+
+                {aiRecommendation && !isLoading && (
+                  <motion.div
+                    key="result"
                     initial={prefersReducedMotion ? {} : { opacity: 0, y: 8 }}
                     animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                     exit={prefersReducedMotion ? {} : { opacity: 0, y: 4 }}
-                    className="rounded-lg border border-primary/30 bg-card p-4"
+                    className="relative overflow-hidden rounded-lg border border-primary/30 bg-card p-4 shadow-sm"
                   >
+                    <div className="absolute right-0 top-0 p-2 opacity-10">
+                      <BrainCircuit size={40} className="text-primary" />
+                    </div>
+
                     <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                      Recommended comparison
+                      AI Recommendation
                     </p>
-                    <p className="mb-1 font-semibold text-foreground">{recommendation.name}</p>
-                    <p className="mb-3 text-xs text-muted-foreground">{recommendation.description}</p>
+                    <p className="mb-1 font-semibold text-foreground">{aiRecommendation.name}</p>
+                    
+                    <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+                      {aiRecommendation.aiReasoning || aiRecommendation.description}
+                    </p>
+
+                    {aiRecommendation.trendReason && (
+                      <div className="mb-4 flex items-center gap-1.5">
+                        <TrendingUp className="h-3 w-3 text-emerald-500" />
+                        <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                          {aiRecommendation.trendReason}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => {
-                          onCompare(recommendation.slugs)
+                          onCompare(aiRecommendation.slugs)
                           setOpen(false)
                         }}
                         className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
@@ -700,7 +779,7 @@ function HelpMeDecide({
                         onClick={reset}
                         className="text-xs text-muted-foreground underline-offset-2 hover:underline"
                       >
-                        Reset
+                        Start over
                       </button>
                     </div>
                   </motion.div>

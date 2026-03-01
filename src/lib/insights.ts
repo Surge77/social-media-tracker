@@ -5,6 +5,8 @@
  * that help developers make career decisions.
  */
 
+import type { ExplainerDimension } from '@/components/technologies/ScoreExplainer'
+
 // ---- Status Labels ----
 
 export type TechStatus =
@@ -391,3 +393,172 @@ export function getRecommendation(
   // Default
   return 'A viable technology worth considering based on your specific goals and interests.'
 }
+
+// ---- Score Explainer Builder ----
+
+/**
+ * Build the ExplainerDimension[] array from a DailyScore's raw_sub_scores.
+ *
+ * This converts the stored pipeline data into the structured format that
+ * ScoreExplainer needs to render the "Why This Score?" breakdown.
+ *
+ * rawSubScores shape (stored by pipeline.ts):
+ *   github, community, jobs, ecosystem, onchain (numbers, may be null)
+ *   momentum_detail: { shortTerm, mediumTerm, longTerm, trend, acceleration, volatility, streak }
+ *   confidence: { overall, grade, sourceCoverage, signalAgreement }
+ *   lifecycle: { stage, confidence, reasoning, daysInStage, transitionProbability }
+ */
+export function buildScoreExplainerDimensions(
+  scores: {
+    github_score: number | null
+    community_score: number | null
+    jobs_score: number | null
+    ecosystem_score: number | null
+    onchain_score?: number | null
+  },
+  rawSubScores: Record<string, unknown> | null,
+  category: string
+): ExplainerDimension[] {
+  // Category-based weights (matching adaptive-weights.ts defaults per category)
+  const WEIGHT_MAP: Record<string, { github: number; community: number; jobs: number; ecosystem: number }> = {
+    language: { github: 20, community: 15, jobs: 35, ecosystem: 30 },
+    frontend: { github: 25, community: 25, jobs: 25, ecosystem: 25 },
+    backend: { github: 20, community: 15, jobs: 35, ecosystem: 30 },
+    database: { github: 15, community: 10, jobs: 40, ecosystem: 35 },
+    devops: { github: 15, community: 15, jobs: 40, ecosystem: 30 },
+    cloud: { github: 10, community: 15, jobs: 45, ecosystem: 30 },
+    mobile: { github: 20, community: 20, jobs: 30, ecosystem: 30 },
+    ai_ml: { github: 25, community: 30, jobs: 25, ecosystem: 20 },
+    blockchain: { github: 20, community: 20, jobs: 25, ecosystem: 15 },
+  }
+
+  const weights = WEIGHT_MAP[category] ?? { github: 25, community: 20, jobs: 25, ecosystem: 30 }
+
+  const momentum = rawSubScores?.momentum_detail as Record<string, number> | undefined
+  const confidence = rawSubScores?.confidence as Record<string, number | string> | undefined
+  // Factor percentiles stored by scoring pipeline (populated since scoring pipeline update)
+  const fp = rawSubScores?.factor_percentiles as Record<string, Record<string, number>> | undefined
+
+  const dims: ExplainerDimension[] = []
+
+  // ---- GitHub ----
+  if (scores.github_score !== null || category !== 'cloud') {
+    dims.push({
+      key: 'github',
+      score: scores.github_score,
+      weightPct: weights.github,
+      factors: [
+        {
+          label: 'Star velocity (30-day gain)',
+          value: fp?.github?.stars ?? null,
+          unit: 'pct',
+        },
+        {
+          label: 'Fork momentum',
+          value: fp?.github?.forks ?? null,
+          unit: 'pct',
+        },
+        {
+          label: 'Issue close rate (percentile)',
+          value: fp?.github?.issueCloseRate ?? null,
+          unit: 'pct',
+        },
+        {
+          label: 'Active contributors (percentile)',
+          value: fp?.github?.contributors ?? null,
+          unit: 'pct',
+        },
+        // If we have momentum detail, show it as a contextual signal
+        ...(momentum
+          ? [
+            {
+              label: 'Short-term momentum',
+              value: momentum.shortTerm != null
+                ? Math.max(0, Math.min(100, 50 + momentum.shortTerm * 10))
+                : null,
+              direction: (momentum.shortTerm > 0 ? 'positive' : momentum.shortTerm < 0 ? 'negative' : 'neutral') as 'positive' | 'negative' | 'neutral',
+            },
+          ]
+          : []),
+      ],
+    })
+  }
+
+  // ---- Community ----
+  dims.push({
+    key: 'community',
+    score: scores.community_score,
+    weightPct: weights.community,
+    factors: [
+      { label: 'Hacker News mentions (30d)', value: fp?.community?.hnMentions ?? null, unit: 'pct' },
+      { label: 'Reddit posts (30d)', value: fp?.community?.redditPosts ?? null, unit: 'pct' },
+      { label: 'Dev.to articles (30d)', value: fp?.community?.devtoArticles ?? null, unit: 'pct' },
+      { label: 'RSS tech blog mentions', value: fp?.community?.rssMentions ?? null, unit: 'pct' },
+      { label: 'YouTube tutorial videos', value: fp?.community?.youtube ?? null, unit: 'pct' },
+      // Show signal agreement from confidence as a health indicator
+      ...(confidence?.signalAgreement != null
+        ? [
+          {
+            label: 'Signal agreement across dimensions',
+            value: confidence.signalAgreement as number,
+            direction: (
+              (confidence.signalAgreement as number) >= 70 ? 'positive'
+                : (confidence.signalAgreement as number) >= 40 ? 'neutral'
+                  : 'negative'
+            ) as 'positive' | 'negative' | 'neutral',
+          },
+        ]
+        : []),
+    ],
+  })
+
+  // ---- Jobs ----
+  dims.push({
+    key: 'jobs',
+    score: scores.jobs_score,
+    weightPct: weights.jobs,
+    factors: [
+      { label: 'Adzuna job postings (percentile)', value: fp?.jobs?.adzuna ?? null, unit: 'pct' },
+      { label: 'JSearch job postings (percentile)', value: fp?.jobs?.jsearch ?? null, unit: 'pct' },
+      { label: 'Remotive remote jobs (percentile)', value: fp?.jobs?.remotive ?? null, unit: 'pct' },
+    ],
+  })
+
+  // ---- Ecosystem ----
+  dims.push({
+    key: 'ecosystem',
+    score: scores.ecosystem_score,
+    weightPct: weights.ecosystem,
+    factors: [
+      { label: 'Package downloads (percentile)', value: fp?.ecosystem?.downloads ?? null, unit: 'pct' },
+      {
+        label: 'SO questions — 30-day (primary signal)',
+        value: fp?.ecosystem?.soMentions ?? null,
+        unit: 'pct',
+      },
+      {
+        label: 'SO questions — all-time (tiebreaker)',
+        value: fp?.ecosystem?.soQuestions ?? null,
+        unit: 'pct',
+      },
+      { label: 'Dependent packages (Libraries.io)', value: fp?.ecosystem?.dependents ?? null, unit: 'pct' },
+    ],
+  })
+
+  // ---- Onchain (blockchain only) ----
+  if (category === 'blockchain' && scores.onchain_score !== null && scores.onchain_score !== undefined) {
+    dims.push({
+      key: 'onchain',
+      score: scores.onchain_score,
+      weightPct: 20,
+      factors: [
+        { label: 'Protocol TVL rank', value: null, unit: 'score' },
+        { label: 'On-chain dev activity', value: null, unit: 'score' },
+        { label: 'Network transaction volume trend', value: null, unit: 'score' },
+      ],
+    })
+  }
+
+  return dims
+}
+

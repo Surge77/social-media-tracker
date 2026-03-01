@@ -54,9 +54,10 @@ export async function GET(
         .order('score_date', { ascending: true }),
 
       // Latest signals from data_points_latest (indexed single-row lookup per metric)
+      // metadata is needed for YouTube top_videos (actual video objects live there)
       supabase
         .from('data_points_latest')
-        .select('source, metric, value')
+        .select('source, metric, value, metadata')
         .eq('technology_id', technology.id),
 
       // Related techs in same category
@@ -79,7 +80,7 @@ export async function GET(
     if (!hasJobSignals) {
       const { data: latestJobs } = await supabase
         .from('data_points')
-        .select('source, metric, value')
+        .select('source, metric, value, metadata')
         .eq('technology_id', technology.id)
         .eq('metric', 'job_postings')
         .order('measured_at', { ascending: false })
@@ -107,6 +108,42 @@ export async function GET(
     }))
 
     const latest_signals = buildLatestSignals(dataPoints)
+
+    // Compute global rank and dimension percentiles for this tech
+    let rank: number | null = null
+    let totalRanked: number | null = null
+    let dimensionPercentiles: { github: number | null; community: number | null; jobs: number | null; ecosystem: number | null } | null = null
+
+    if (currentScores) {
+      const { data: allScoresOnDate } = await supabase
+        .from('daily_scores')
+        .select('technology_id, composite_score, github_score, community_score, jobs_score, ecosystem_score')
+        .eq('score_date', currentScores.score_date)
+        .not('composite_score', 'is', null)
+        .order('composite_score', { ascending: false })
+
+      if (allScoresOnDate && allScoresOnDate.length > 0) {
+        totalRanked = allScoresOnDate.length
+        const rankIdx = allScoresOnDate.findIndex(s => s.technology_id === technology.id)
+        rank = rankIdx >= 0 ? rankIdx + 1 : null
+
+        // Dimension percentiles: where does this tech's sub-score rank among all sub-scores?
+        const computeDimPct = (myScore: number | null, allRows: typeof allScoresOnDate, field: keyof typeof allScoresOnDate[0]) => {
+          if (myScore === null) return null
+          const allValues = allRows.map(r => Number(r[field])).filter(v => !isNaN(v) && v !== null)
+          if (allValues.length === 0) return null
+          const below = allValues.filter(v => v < myScore).length
+          return Math.round((below / allValues.length) * 100)
+        }
+
+        dimensionPercentiles = {
+          github: computeDimPct(currentScores.github_score !== null ? Number(currentScores.github_score) : null, allScoresOnDate, 'github_score'),
+          community: computeDimPct(currentScores.community_score !== null ? Number(currentScores.community_score) : null, allScoresOnDate, 'community_score'),
+          jobs: computeDimPct(currentScores.jobs_score !== null ? Number(currentScores.jobs_score) : null, allScoresOnDate, 'jobs_score'),
+          ecosystem: computeDimPct(currentScores.ecosystem_score !== null ? Number(currentScores.ecosystem_score) : null, allScoresOnDate, 'ecosystem_score'),
+        }
+      }
+    }
 
     // Fetch related tech scores (depends on relatedTechs result above)
     const relatedWithScores: Array<{ slug: string; name: string; color: string; composite_score: number }> = []
@@ -185,6 +222,9 @@ export async function GET(
       chart_data,
       latest_signals,
       related_technologies: relatedWithScores.slice(0, 6),
+      rank,
+      total_ranked: totalRanked,
+      dimension_percentiles: dimensionPercentiles,
     })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
@@ -193,7 +233,7 @@ export async function GET(
 }
 
 function buildLatestSignals(
-  dataPoints: Array<{ source: string; metric: string; value: number }>
+  dataPoints: Array<{ source: string; metric: string; value: number; metadata?: Record<string, unknown> | null }>
 ) {
   // O(1) lookup via Map instead of repeated .find() calls
   const dpMap = new Map<string, number>()
@@ -226,6 +266,30 @@ function buildLatestSignals(
   const adzunaJobs = get('adzuna', 'job_postings')
   const jsearchJobs = get('jsearch', 'job_postings')
   const remotiveJobs = get('remotive', 'job_postings')
+
+  // YouTube signals
+  const ytVideoCount = get('youtube', 'yt_video_count')
+  const ytTotalViews = get('youtube', 'yt_total_views')
+  const ytAvgLikes = get('youtube', 'yt_avg_likes')
+  const ytUploadVelocity = get('youtube', 'yt_upload_velocity')
+  const ytTopVideosDP = dataPoints.find(
+    dp => dp.source === 'youtube' && dp.metric === 'yt_top_videos'
+  )
+  const ytTopVideosMeta = ytTopVideosDP?.metadata as
+    | { videos?: unknown[]; comparisonVideos?: unknown[] }
+    | null
+    | undefined
+
+  const youtube = ytVideoCount !== null ? {
+    videoCount30d: ytVideoCount,
+    totalViews: ytTotalViews ?? 0,
+    avgLikes: ytAvgLikes ?? 0,
+    uploadVelocity: ytUploadVelocity ?? 0,
+    topVideos: [
+      ...(ytTopVideosMeta?.videos ?? []),
+      ...(ytTopVideosMeta?.comparisonVideos ?? []),
+    ],
+  } : null
 
   return {
     github:
@@ -267,5 +331,6 @@ function buildLatestSignals(
           total: (adzunaJobs ?? 0) + (jsearchJobs ?? 0) + (remotiveJobs ?? 0),
         }
         : null,
+    youtube,
   }
 }

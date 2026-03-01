@@ -31,6 +31,13 @@ export interface RoadmapNode {
     course?: string                // Top recommended course
     docs?: string                  // Official docs link
     project?: string               // Project tutorial link
+    youtube?: {                    // Video resolved via video-lookup.ts
+      videoId: string
+      title: string
+      channel: string
+      views?: number
+      thumbnail?: string | null
+    }
   }
   // Fallback data for when TechnologyWithScore is unavailable
   fallbackScores?: {

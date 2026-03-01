@@ -120,6 +120,10 @@ export async function GET() {
       const scores = scoreMap.get(tech.id) as Record<string, unknown> | undefined
       const previousScore = previousScoreMap.get(tech.id) as Record<string, unknown> | undefined
 
+      // Extract confidence grade from raw_sub_scores
+      const rawSub = scores?.raw_sub_scores as Record<string, unknown> | undefined
+      const confidenceGrade = (rawSub?.confidence as Record<string, unknown> | undefined)?.grade as string | undefined
+
       return {
         ...tech,
         composite_score: scores?.composite_score != null ? Number(scores.composite_score) : null,
@@ -132,7 +136,9 @@ export async function GET() {
         sparkline: sparklineMap.get(tech.id) ?? [],
         previous_rank: null, // Will be computed after sorting
         rank_change: null,   // Will be computed after sorting
+        rank: null,          // Will be set after sorting
         ai_summary: '',      // Will be generated after sorting
+        confidence_grade: confidenceGrade ?? null,
       } as TechnologyWithScore
     })
 
@@ -171,6 +177,7 @@ export async function GET() {
 
       tech.previous_rank = previousRank
       tech.rank_change = previousRank !== null ? previousRank - currentRank : null
+      tech.rank = currentRank
       tech.ai_summary = generateTechSummary(tech)
 
       // Read lifecycle from raw_sub_scores — already computed by the scoring pipeline,

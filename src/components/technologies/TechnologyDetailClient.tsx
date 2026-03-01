@@ -22,6 +22,8 @@ import { TrendChart } from '@/components/technologies/TrendChart'
 import { SourceSignalCard } from '@/components/technologies/SourceSignalCard'
 import { RelatedTechnologies } from '@/components/technologies/RelatedTechnologies'
 import { StarHistoryChart } from '@/components/technologies/StarHistoryChart'
+import { MomentumDetailCard } from '@/components/technologies/MomentumDetailCard'
+import { YouTubeSignalsCard } from '@/components/technologies/YouTubeSignalsCard'
 import { PackageDownloadsChart } from '@/components/technologies/PackageDownloadsChart'
 import { JobMarketChart } from '@/components/technologies/JobMarketChart'
 import { AlternativesPanel } from '@/components/technologies/AlternativesPanel'
@@ -29,7 +31,8 @@ import { AIInsightCard, AIInsightSkeleton, AIInsightError } from '@/components/a
 import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
 import { AnomalyBanner } from '@/components/technologies/AnomalyBanner'
 import { Loading } from '@/components/ui/loading'
-import { getRecommendation, getMomentumInsight } from '@/lib/insights'
+import { getRecommendation, getMomentumInsight, buildScoreExplainerDimensions } from '@/lib/insights'
+import { ScoreExplainer } from '@/components/technologies/ScoreExplainer'
 import type { TechnologyDetail } from '@/types'
 
 export function TechnologyDetailClient() {
@@ -102,23 +105,62 @@ export function TechnologyDetailClient() {
     )
   }
 
-  const { technology, current_scores, chart_data, latest_signals, related_technologies } = data
+  const { technology, current_scores, chart_data, latest_signals, related_technologies, rank, total_ranked } = data
+
+  // Extract confidence grade from raw_sub_scores (computed by confidence.ts, stored by pipeline.ts)
+  const rawSub = current_scores?.raw_sub_scores as Record<string, unknown> | null | undefined
+  const confidenceGrade =
+    rawSub && typeof rawSub === 'object' && 'confidence' in rawSub &&
+      typeof (rawSub.confidence as any)?.grade === 'string'
+      ? String((rawSub.confidence as any).grade)
+      : null
 
   // Extract lifecycle stage from raw_sub_scores
   const lifecycleStage =
-    current_scores?.raw_sub_scores &&
-      typeof current_scores.raw_sub_scores === 'object' &&
-      'lifecycle' in current_scores.raw_sub_scores &&
-      typeof current_scores.raw_sub_scores.lifecycle === 'object' &&
-      current_scores.raw_sub_scores.lifecycle !== null &&
-      'stage' in current_scores.raw_sub_scores.lifecycle
-      ? String(current_scores.raw_sub_scores.lifecycle.stage)
+    rawSub && typeof rawSub === 'object' && 'lifecycle' in rawSub &&
+      typeof rawSub.lifecycle === 'object' && rawSub.lifecycle !== null &&
+      'stage' in (rawSub.lifecycle as object)
+      ? String((rawSub.lifecycle as any).stage)
       : null
+
+  // Extract signal agreement (0-100) from confidence data
+  const signalAgreementRaw = (rawSub?.confidence as any)?.signalAgreement as number | undefined
+  const signalAgreement = signalAgreementRaw != null ? signalAgreementRaw : null
+
+  // Extract momentum detail for MomentumDetailCard
+  const momentumDetail = (rawSub?.momentum_detail as any) ?? null
+
+  // Extract source coverage count to show in DataFreshness
+  const sourceCoverageRaw = (rawSub?.confidence as any)?.sourceCoverage as number | undefined
+  // Category-based max sources (mirrors MAX_SOURCES in confidence.ts)
+  const MAX_SOURCES_BY_CATEGORY: Record<string, number> = {
+    language: 14, frontend: 14, backend: 13, database: 10,
+    devops: 10, cloud: 9, mobile: 11, ai_ml: 12, blockchain: 12,
+  }
+  const totalSources = MAX_SOURCES_BY_CATEGORY[technology.category] ?? 12
+  const sourceCount = sourceCoverageRaw != null
+    ? Math.round((sourceCoverageRaw / 100) * totalSources)
+    : null
+
+  // Build explainer dimensions for the "Why This Score?" panel
+  const explainerDimensions = current_scores
+    ? buildScoreExplainerDimensions(
+      {
+        github_score: current_scores.github_score,
+        community_score: current_scores.community_score,
+        jobs_score: current_scores.jobs_score,
+        ecosystem_score: current_scores.ecosystem_score,
+        onchain_score: current_scores.onchain_score,
+      },
+      rawSub ?? null,
+      technology.category
+    )
+    : []
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       {/* Sticky Summary Bar (visible only when scrolled) */}
-      <div 
+      <div
         className={cn(
           "fixed top-16 left-0 right-0 z-40 border-b bg-background/80 backdrop-blur-xl transition-all duration-300 shadow-sm",
           isScrolled ? "translate-y-0 opacity-100 border-border/50" : "-translate-y-full opacity-0 border-transparent pointer-events-none"
@@ -131,8 +173,8 @@ export function TechnologyDetailClient() {
           </div>
           <div className="flex items-center gap-3">
             <MomentumBadge momentum={current_scores?.momentum ?? null} size="sm" />
-            <button 
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} 
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className="hidden sm:block text-xs font-medium text-primary hover:underline"
             >
               Back to top
@@ -170,11 +212,21 @@ export function TechnologyDetailClient() {
             <p className="text-muted-foreground">{technology.description}</p>
           </div>
           <div className="flex items-center gap-2">
+            {rank != null && total_ranked != null && (
+              <span className="text-xs text-muted-foreground font-medium px-2 py-0.5 rounded border border-border/50 bg-muted/20">
+                #{rank} of {total_ranked}
+              </span>
+            )}
             <ConfidenceBadge
               completeness={current_scores?.data_completeness ?? null}
+              grade={confidenceGrade as any}
               size="md"
             />
-            <ScoreBadge score={current_scores?.composite_score ?? null} size="lg" />
+            <ScoreBadge
+              score={current_scores?.composite_score ?? null}
+              size="lg"
+              confidenceGrade={confidenceGrade}
+            />
           </div>
         </div>
 
@@ -213,7 +265,12 @@ export function TechnologyDetailClient() {
               GitHub
             </a>
           )}
-          <DataFreshness timestamp={current_scores?.computed_at ?? null} />
+          <DataFreshness
+            timestamp={current_scores?.computed_at ?? null}
+            sourceCount={sourceCount}
+            totalSources={totalSources}
+            signalAgreement={signalAgreement}
+          />
         </div>
       </motion.div>
 
@@ -288,14 +345,32 @@ export function TechnologyDetailClient() {
         )}
       </motion.section>
 
-      {/* Score Breakdown with Radar Chart */}
+      {/* Score Breakdown — "Why This Score?" expandable explainer */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.2 }}
         className="mb-8"
       >
-        <h2 className="mb-4 text-xl font-semibold text-foreground">Score Breakdown</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">Score Breakdown</h2>
+          {confidenceGrade && (
+            <span className="text-xs text-muted-foreground">
+              Confidence:{' '}
+              <span
+                className={
+                  confidenceGrade === 'A' || confidenceGrade === 'B'
+                    ? 'text-emerald-400 font-semibold'
+                    : confidenceGrade === 'C'
+                      ? 'text-amber-400 font-semibold'
+                      : 'text-slate-400 font-semibold'
+                }
+              >
+                Grade {confidenceGrade}
+              </span>
+            </span>
+          )}
+        </div>
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Radar Chart */}
           <TechRadarChart
@@ -306,15 +381,12 @@ export function TechnologyDetailClient() {
             compositeScore={current_scores?.composite_score ?? null}
             techColor={technology.color}
           />
-          {/* Bar Breakdown */}
-          <div>
-            <ScoreBreakdown
-              githubScore={current_scores?.github_score ?? null}
-              communityScore={current_scores?.community_score ?? null}
-              jobsScore={current_scores?.jobs_score ?? null}
-              ecosystemScore={current_scores?.ecosystem_score ?? null}
-            />
-          </div>
+          {/* "Why This Score?" expandable explainer */}
+          <ScoreExplainer
+            dimensions={explainerDimensions}
+            compositeScore={current_scores?.composite_score ?? null}
+            confidenceGrade={confidenceGrade}
+          />
         </div>
       </motion.section>
 
@@ -354,7 +426,7 @@ export function TechnologyDetailClient() {
         </motion.section>
       )}
 
-      {/* Trend Chart */}
+      {/* Trend Chart + Momentum Detail */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
@@ -365,6 +437,14 @@ export function TechnologyDetailClient() {
         <div className="rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm hover:border-primary/20 transition-colors">
           <TrendChart data={chart_data} />
         </div>
+        {momentumDetail && (
+          <div className="mt-4">
+            <MomentumDetailCard
+              momentumDetail={momentumDetail}
+              currentScore={current_scores?.composite_score ?? null}
+            />
+          </div>
+        )}
       </motion.section>
 
       {/* Star History */}
@@ -483,6 +563,13 @@ export function TechnologyDetailClient() {
             />
           )}
         </div>
+
+        {/* YouTube Signals — spans full width when present */}
+        {latest_signals.youtube && (
+          <div className="mt-4">
+            <YouTubeSignalsCard signals={latest_signals.youtube} />
+          </div>
+        )}
       </motion.section>
 
       {/* Alternatives */}

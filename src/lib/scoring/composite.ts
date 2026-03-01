@@ -14,19 +14,19 @@ const COMPOSITE_WEIGHTS = DEFAULT_WEIGHTS
  * Components:
  *   - starVelocityPct: percentile-ranked star gain (0-100)
  *   - forkVelocityPct: percentile-ranked fork count (0-100)
- *   - issueCloseRate: closed / (closed + open), 0 to 1 (not percentile-ranked)
+ *   - issueCloseRatePct: percentile-ranked issue close rate (0-100) — consistent with other inputs
  *   - contributorGrowthPct: percentile-ranked active contributors (0-100)
  */
 export function computeGitHubScore(
   starVelocityPct: number,
   forkVelocityPct: number,
-  issueCloseRate: number,
+  issueCloseRatePct: number,
   contributorGrowthPct: number = 50
 ): number {
-  const starComponent        = starVelocityPct        * 0.35
-  const forkComponent        = forkVelocityPct        * 0.15
-  const issueComponent       = (issueCloseRate * 100) * 0.20
-  const contributorComponent = contributorGrowthPct   * 0.30
+  const starComponent = starVelocityPct * 0.35
+  const forkComponent = forkVelocityPct * 0.15
+  const issueComponent = issueCloseRatePct * 0.20
+  const contributorComponent = contributorGrowthPct * 0.30
   return starComponent + forkComponent + issueComponent + contributorComponent
 }
 
@@ -40,6 +40,9 @@ export function computeGitHubScore(
  *   - devtoArticlesPct: percentile-ranked Dev.to article count (0-100)
  *   - redditSentiment: 0 to 1 (not percentile-ranked)
  *   - rssMentionsPct: percentile-ranked RSS mention count (0-100)
+ *   - ytPct: blended YouTube percentile (0-100) — defaults to 50 when no data
+ *
+ * Weights: HN 25% + Reddit 18% + Dev.to 18% + RSS 14% + YouTube 10% + Sentiment ±15pts = max 100
  */
 export function computeCommunityScore(
   hnMentionsPct: number,
@@ -47,18 +50,20 @@ export function computeCommunityScore(
   redditPostsPct: number,
   devtoArticlesPct: number,
   redditSentiment: number = 0.5,
-  rssMentionsPct: number = 50
+  rssMentionsPct: number = 50,
+  ytPct: number = 50
 ): number {
-  const hnComponent     = hnMentionsPct    * 0.30
-  const redditComponent = redditPostsPct   * 0.20
-  const devtoComponent  = devtoArticlesPct * 0.20
-  const rssComponent    = rssMentionsPct   * 0.15
+  const hnComponent = hnMentionsPct * 0.25
+  const redditComponent = redditPostsPct * 0.18
+  const devtoComponent = devtoArticlesPct * 0.18
+  const rssComponent = rssMentionsPct * 0.14
+  const ytComponent = ytPct * 0.10
   // Combined sentiment from HN (60% weight) and Reddit (40% weight)
   const combinedSentiment = hnSentiment * 0.6 + redditSentiment * 0.4
   const sentimentAdjustment = (combinedSentiment - 0.5) * 30 // -15 to +15
   return Math.max(
     0,
-    Math.min(100, hnComponent + redditComponent + devtoComponent + rssComponent + sentimentAdjustment)
+    Math.min(100, hnComponent + redditComponent + devtoComponent + rssComponent + ytComponent + sentimentAdjustment)
   )
 }
 
@@ -76,7 +81,7 @@ export function computeJobsScore(
   remotiveCountPct: number
 ): number {
   return (
-    adzunaCountPct  * 0.40 +
+    adzunaCountPct * 0.40 +
     jsearchCountPct * 0.40 +
     remotiveCountPct * 0.20
   )
@@ -99,11 +104,15 @@ export function computeEcosystemScore(
   soMentionsPct: number = 50,
   dependentsPct: number = 50
 ): number {
-  const downloadComponent   = downloadsPct                                     * 0.20
-  const growthComponent     = minMaxNormalize(downloadGrowthRate, -0.5, 1.0)  * 0.15
-  const soComponent         = soQuestionsPct                                   * 0.15
-  const soMentionsComponent = soMentionsPct                                    * 0.15
-  const dependentsComponent = dependentsPct                                    * 0.35
+  const downloadComponent = downloadsPct * 0.20
+  const growthComponent = minMaxNormalize(downloadGrowthRate, -0.5, 1.0) * 0.15
+  // soQuestionsPct is ALL-TIME cumulative — jQuery has 1M questions.
+  // Weight it as a minor tiebreaker (0.05) so legacy tech doesn't inflate artificially.
+  const soComponent = soQuestionsPct * 0.05
+  // soMentionsPct is 30-day recent activity — this is the meaningful recency signal.
+  const soMentionsComponent = soMentionsPct * 0.25
+  const dependentsComponent = dependentsPct * 0.35
+  // Total: 0.20 + 0.15 + 0.05 + 0.25 + 0.35 = 1.00 ✓
   return downloadComponent + growthComponent + soComponent + soMentionsComponent + dependentsComponent
 }
 
@@ -130,17 +139,17 @@ export interface CompositeResult {
  * DevOps tools often lack package downloads too.
  */
 const MAX_POSSIBLE_DIMENSIONS: Record<string, number> = {
-  cloud:       2, // community + jobs only
-  devops:      3, // github + community + jobs (no package downloads)
-  language:    3, // github + community + jobs (languages distributed via OS, not pkg registries)
-  frontend:    4,
-  backend:     4,
-  database:    4,
-  mobile:      4,
-  ai_ml:       4,
-  blockchain:  5, // github + community + jobs + ecosystem + onchain
-  testing:     4,
-  other:       4,
+  cloud: 2, // community + jobs only
+  devops: 3, // github + community + jobs (no package downloads)
+  language: 3, // github + community + jobs (languages distributed via OS, not pkg registries)
+  frontend: 4,
+  backend: 4,
+  database: 4,
+  mobile: 4,
+  ai_ml: 4,
+  blockchain: 5, // github + community + jobs + ecosystem + onchain
+  testing: 4,
+  other: 4,
 }
 
 /**
@@ -211,13 +220,13 @@ export function computeOnchainScoreFromParts(
 ): number {
   if (hasProtocol) {
     return Math.round(
-      tvlScore           * 0.40 +
-      devActivityScore   * 0.40 +
+      tvlScore * 0.40 +
+      devActivityScore * 0.40 +
       chainActivityScore * 0.20
     )
   }
   return Math.round(
-    devActivityScore   * 0.70 +
+    devActivityScore * 0.70 +
     chainActivityScore * 0.30
   )
 }

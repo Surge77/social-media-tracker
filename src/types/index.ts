@@ -90,6 +90,7 @@ export type DataSource =
   | 'librariesio'                                      // Source 2
   | 'npms'                                             // Source 5
   | 'packagist' | 'rubygems' | 'nuget' | 'pubdev'     // Source 4
+  | 'youtube'                                          // YouTube Data API v3
 
 export type DataMetric =
   | 'stars' | 'forks' | 'open_issues' | 'contributors' | 'watchers'
@@ -100,6 +101,8 @@ export type DataMetric =
   | 'active_contributors' | 'commit_velocity' | 'closed_issues'             // Source 1
   | 'dependents_count' | 'dependent_repos_count' | 'sourcerank' | 'latest_release_age'  // Source 2
   | 'quality_score' | 'popularity_score' | 'maintenance_score'              // Source 5
+  | 'yt_video_count' | 'yt_total_views' | 'yt_avg_likes'                   // YouTube metrics
+  | 'yt_upload_velocity' | 'yt_top_videos'                                  // YouTube metrics
 
 export interface DailyScore {
   id: number
@@ -143,7 +146,9 @@ export interface TechnologyWithScore extends Technology {
   sparkline: number[]
   previous_rank: number | null      // Rank 7 days ago
   rank_change: number | null        // Current rank - previous rank (positive = moved up)
+  rank?: number | null              // Current rank among all scored techs
   ai_summary: string                // Generated honest one-liner
+  confidence_grade?: string | null  // A-F confidence grade from scoring pipeline
   // Lifecycle classification (added by technologies API)
   lifecycle_stage?: LifecycleStage
   lifecycle_label?: string          // Human-readable: "Early Growth", "Mainstream Adoption", etc.
@@ -161,6 +166,14 @@ export interface TechnologyDetail {
   chart_data: ChartDataPoint[]
   latest_signals: LatestSignals
   related_technologies: TechnologyWithScore[]
+  rank?: number | null
+  total_ranked?: number | null
+  dimension_percentiles?: {
+    github: number | null
+    community: number | null
+    jobs: number | null
+    ecosystem: number | null
+  } | null
   anomalies?: Array<{
     type: string
     severity: string
@@ -210,6 +223,25 @@ export interface LatestSignals {
     popularity: number   // 0-1 downloads, stars, dependents
     maintenance: number  // 0-1 release frequency, issue response
   } | null
+  // YouTube Data API v3 — tutorial video signals
+  youtube: {
+    videoCount30d: number        // Tutorial videos published in last 30 days
+    totalViews: number           // Aggregate views across top tutorial videos
+    avgLikes: number             // Average likes per video
+    uploadVelocity: number       // last7d videos minus prev7d videos (positive = accelerating)
+    topVideos: YouTubeTopVideo[] // Top 3 tutorial + top 2 comparison videos
+  } | null
+}
+
+export interface YouTubeTopVideo {
+  videoId: string
+  title: string
+  channel: string
+  views: number
+  likes: number
+  publishedAt: string
+  thumbnail: string | null
+  intent: 'tutorial' | 'comparison'
 }
 
 export interface HNStory {

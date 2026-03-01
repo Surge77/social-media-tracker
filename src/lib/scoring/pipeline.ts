@@ -48,6 +48,9 @@ interface TechDataPoints {
   npmsQuality: number | null
   npmsPopularity: number | null
   npmsMaintenance: number | null
+  // YouTube Data API v3
+  ytTotalViews: number | null
+  ytUploadVelocity: number | null
 }
 
 interface ScoredTechnology {
@@ -168,6 +171,8 @@ export async function runScoringPipeline(
       npmsQuality: null,
       npmsPopularity: null,
       npmsMaintenance: null,
+      ytTotalViews: null,
+      ytUploadVelocity: null,
     })
   }
 
@@ -259,6 +264,13 @@ export async function runScoringPipeline(
       case 'npms:maintenance_score':
         tech.npmsMaintenance = value
         break
+      // YouTube Data API v3
+      case 'youtube:yt_total_views':
+        tech.ytTotalViews = value
+        break
+      case 'youtube:yt_upload_velocity':
+        tech.ytUploadVelocity = value
+        break
     }
   }
 
@@ -301,6 +313,18 @@ export async function runScoringPipeline(
   const soArr = allTechs.map((t) => t.soQuestions ?? 0)
   const soMentionsArr = allTechs.map((t) => t.soMentions ?? 0)
   const dependentsArr = allTechs.map((t) => t.dependentsCount ?? 0)
+  // YouTube percentiles — blend total views + upload velocity
+  const ytViewsArr = allTechs.map((t) => t.ytTotalViews ?? 0)
+  const ytVelocityArr = allTechs.map((t) => Math.max(0, t.ytUploadVelocity ?? 0))
+  // Issue close rate — collect raw ratios for percentile ranking (consistent with other inputs)
+  const issueCloseRateRawArr = allTechs.map((t) => {
+    const closed = t.closedIssues
+    const open = t.openIssues
+    if (closed !== null && open !== null && (closed + open) > 0) {
+      return closed / (closed + open)
+    }
+    return open === 0 ? 1.0 : 0
+  })
 
   const starsPct = percentileRankNormalize(starsArr)
   const forksPct = percentileRankNormalize(forksArr)
@@ -316,6 +340,9 @@ export async function runScoringPipeline(
   const soPct = percentileRankNormalize(soArr)
   const soMentionsPct = percentileRankNormalize(soMentionsArr)
   const dependentsPct = percentileRankNormalize(dependentsArr)
+  const ytViewsPct = percentileRankNormalize(ytViewsArr)
+  const ytVelocityPct = percentileRankNormalize(ytVelocityArr)
+  const issueCloseRatePct = percentileRankNormalize(issueCloseRateRawArr)
 
   // Step 5: Fetch historical scores for enhanced momentum (up to 90 days)
   const date90DaysAgo = new Date(date)
@@ -364,14 +391,19 @@ export async function runScoringPipeline(
     // GitHub score — null if no GitHub data at all
     let githubScore: number | null = null
     if (tech.stars !== null || tech.forks !== null) {
-      // Real issueCloseRate: closed / (closed + open). Falls back to 0 if not yet fetched.
-      const closedIssues = tech.closedIssues ?? null
-      const openIssues = tech.openIssues ?? null
-      const issueCloseRate =
-        closedIssues !== null && openIssues !== null && (closedIssues + openIssues) > 0
-          ? closedIssues / (closedIssues + openIssues)
-          : openIssues === 0 ? 1.0 : 0
-      githubScore = computeGitHubScore(starsPct[i], forksPct[i], issueCloseRate, contributorsPct[i])
+      // Use percentile-ranked issue close rate (consistent with all other inputs)
+      githubScore = computeGitHubScore(starsPct[i], forksPct[i], issueCloseRatePct[i], contributorsPct[i])
+
+      // Bot/spam health penalty: penalise repos where stars massively outpace contributors.
+      // Formula: if a repo has N stars, we'd "expect" at least N/1000 active contributors.
+      // A real project with 50K stars should have at least ~50 active contributors.
+      // healthFactor is clamped 0.0–1.0 and used to reduce githubScore by up to 30%.
+      if (tech.stars !== null && tech.activeContributors !== null && tech.stars > 0) {
+        const expectedContributors = Math.max(1, tech.stars / 1000)
+        const healthFactor = Math.min(1.0, tech.activeContributors / expectedContributors)
+        // Penalty only kicks in when healthFactor < 1.0 (stars >> contributors)
+        githubScore = Math.round(githubScore * (0.70 + 0.30 * healthFactor) * 100) / 100
+      }
     }
 
     // Community score — null if no community data
@@ -382,13 +414,19 @@ export async function runScoringPipeline(
       tech.devtoArticles !== null ||
       tech.rssMentions !== null
     ) {
+      // YouTube percentile: blend views (60%) + velocity (40%), default to 50 if no data
+      const hasYtData = tech.ytTotalViews !== null || tech.ytUploadVelocity !== null
+      const ytBlendedPct = hasYtData
+        ? ytViewsPct[i] * 0.6 + ytVelocityPct[i] * 0.4
+        : 50
       communityScore = computeCommunityScore(
         hnPct[i],
         tech.hnSentiment ?? 0.5,
         redditPct[i],
         devtoPct[i],
         tech.redditSentiment ?? 0.5,
-        rssPct[i]
+        rssPct[i],
+        ytBlendedPct
       )
     }
 
@@ -429,6 +467,16 @@ export async function runScoringPipeline(
       if (tech.npmsMaintenance !== null && tech.npmsMaintenance < 0.3) {
         ecosystemScore = Math.round(ecosystemScore * 0.85 * 100) / 100
       }
+
+      // npm spam penalty: if a package has millions of downloads but almost no dependents,
+      // it's likely inflated by CI/automated download traffic (e.g. fake packages, bootstrap scripts).
+      // A healthy package with 1M+ weekly downloads should have at least some real dependents.
+      if (tech.downloads !== null && tech.dependentsCount !== null) {
+        const downloadMillions = tech.downloads / 1_000_000
+        if (downloadMillions > 1 && tech.dependentsCount < 10) {
+          ecosystemScore = Math.round(ecosystemScore * 0.75 * 100) / 100
+        }
+      }
     }
 
     // Onchain score — blockchain category only
@@ -463,13 +511,35 @@ export async function runScoringPipeline(
       category
     )
 
-    rawComposites.push(composite)
+    // ---- Jobs Anchor Multiplier for Mature / Declining Techs ----
+    // Economic signal is ground truth: a mature technology with poor job demand
+    // should not be recommended for career investment even if its GitHub hype is high.
+    // This multiplier is only applied post-composite so it doesn't distort sub-scores.
+    // It does NOT apply to new/emerging techs (they haven't had time to build job listings yet).
+    // lifecycleStageForAnchor is resolved after composite, before Bayesian smoothing.
+    // We re-use jobsScore here (already computed above).
+    let compositeWithAnchor = composite
+    if (
+      jobsScore !== null &&
+      category !== 'blockchain' // blockchain has different economic signals
+    ) {
+      // We peek at lifecycle from historical scores — use dataAgeDays as a proxy:
+      // A tech with >400 days of data is likely past its hype phase.
+      if (dataAgeDays > 400) {
+        // jobsAnchorFactor: 0.70 when jobs=0, 1.00 when jobs=100
+        const jobsAnchorFactor = 0.70 + 0.30 * (jobsScore / 100)
+        compositeWithAnchor = composite * jobsAnchorFactor
+      }
+    }
+    const finalComposite = compositeWithAnchor
+
+    rawComposites.push(finalComposite)
     dataPointCounts.push(dpCount)
 
     scoredRows.push({
       technology_id: tech.technologyId,
       score_date: date,
-      composite_score: composite,
+      composite_score: finalComposite,
       github_score: githubScore,
       community_score: communityScore,
       jobs_score: jobsScore,
@@ -499,6 +569,33 @@ export async function runScoringPipeline(
             maintenance: tech.npmsMaintenance ?? null,
           }
           : undefined,
+        // Per-factor percentile ranks — powers the ScoreExplainer "Why This Score?" UI
+        factor_percentiles: {
+          github: {
+            stars: Math.round(starsPct[i]),
+            forks: Math.round(forksPct[i]),
+            issueCloseRate: Math.round(issueCloseRatePct[i]),
+            contributors: Math.round(contributorsPct[i]),
+          },
+          community: {
+            hnMentions: Math.round(hnPct[i]),
+            redditPosts: Math.round(redditPct[i]),
+            devtoArticles: Math.round(devtoPct[i]),
+            rssMentions: Math.round(rssPct[i]),
+            youtube: Math.round(ytViewsPct[i] * 0.6 + ytVelocityPct[i] * 0.4),
+          },
+          jobs: {
+            adzuna: Math.round(adzunaPct[i]),
+            jsearch: Math.round(jsearchPct[i]),
+            remotive: Math.round(remotivePct[i]),
+          },
+          ecosystem: {
+            downloads: Math.round(downloadsPct[i]),
+            soMentions: Math.round(soMentionsPct[i]),
+            soQuestions: Math.round(soPct[i]),
+            dependents: Math.round(dependentsPct[i]),
+          },
+        },
       },
       computed_at: new Date().toISOString(),
     })
@@ -563,9 +660,19 @@ export async function runScoringPipeline(
       recentScores,
     })
 
+    // Recompute adaptive weights for this row to store in raw_sub_scores
+    const rowCreatedAt = techCreatedMap.get(row.technology_id)
+    const rowDataAgeDays = rowCreatedAt
+      ? Math.floor((new Date(date).getTime() - new Date(rowCreatedAt).getTime()) / 86400000)
+      : 365
+    const rowDpCount = dpCountMap.get(row.technology_id) ?? 0
+    const rowCategory = techCategoryMap.get(row.technology_id) ?? 'language'
+    const rowAdaptiveWeights = getAdaptiveWeights(rowCategory, rowDataAgeDays, rowDpCount / 12)
+
     // Store enhanced momentum + confidence + lifecycle in raw_sub_scores
     row.raw_sub_scores = {
       ...row.raw_sub_scores,
+      weights: rowAdaptiveWeights,
       momentum_detail: {
         shortTerm: momentum.shortTerm,
         mediumTerm: momentum.mediumTerm,
