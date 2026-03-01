@@ -86,12 +86,12 @@ export function ChainTVLCards({ chains, isLoading }: Props) {
               <img
                 src={`https://icons.llama.fi/chains/rsz_${logoSlug}.jpg`}
                 alt={chain.name}
-                width={18}
-                height={18}
+                width={22}
+                height={22}
                 className="rounded-full bg-muted transition-transform group-hover:scale-110"
                 onError={(e) => { e.currentTarget.style.display = 'none' }}
               />
-              <span className="text-sm font-semibold text-foreground truncate transition-colors group-hover:text-primary">{chain.name}</span>
+              <span className="text-base font-semibold text-foreground truncate transition-colors group-hover:text-primary">{chain.name}</span>
             </div>
 
             {/* TVL */}

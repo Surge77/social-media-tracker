@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, TrendingUp, TrendingDown, Minus, CheckCircle2, Shield, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { TechIcon } from '@/components/shared/TechIcon'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { SubScoreBars } from '@/components/technologies/SubScoreBars'
 import { RankChangeBadge } from '@/components/technologies/RankChangeBadge'
@@ -63,11 +64,11 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
           href={`/technologies/${technology.slug}`}
           className="group block rounded-lg focus:outline-none"
         >
-          <div className={`rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-card/60 hover:shadow-lg active:translate-y-0 active:shadow-md ${vstyle.border}`}>
+          <div className={`rounded-lg border border-border bg-card/30 p-5 backdrop-blur-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-card/60 hover:shadow-lg active:translate-y-0 active:shadow-md ${vstyle.border}`}>
 
             {/* Top row: verdict + lifecycle + category */}
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${vstyle.badgeBg}`}>
+            <div className="mb-3.5 flex items-center justify-between gap-2">
+              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${vstyle.badgeBg}`}>
                 {vstyle.icon}
                 {verdict.badge}
               </span>
@@ -78,40 +79,37 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
             </div>
 
             {/* Name + rank */}
-            <div className="mb-1 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
+            <div className="mb-1.5 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
                 {rank && (
                   <div className="flex shrink-0 items-center gap-1">
-                    <span className="text-xs font-bold text-muted-foreground tabular-nums">#{rank}</span>
+                    <span className="text-sm font-bold text-muted-foreground tabular-nums">#{rank}</span>
                     <RankChangeBadge rankChange={technology.rank_change} />
                   </div>
                 )}
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: technology.color }}
-                />
-                <h3 className="truncate font-semibold text-foreground transition-colors duration-200 group-hover:text-primary">
+                <TechIcon slug={technology.slug} name={technology.name} color={technology.color} size={28} />
+                <h3 className="truncate text-[18px] font-semibold text-foreground transition-colors duration-200 group-hover:text-primary">
                   {technology.name}
                 </h3>
               </div>
-              <ArrowRight size={14} className="shrink-0 text-muted-foreground/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
+              <ArrowRight size={15} className="shrink-0 text-muted-foreground/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
             </div>
 
             {/* Description */}
-            <p className="mb-2 line-clamp-1 text-xs text-muted-foreground">
+            <p className="mb-2.5 line-clamp-1 text-sm text-muted-foreground">
               {technology.description}
             </p>
 
             {/* AI insight quote */}
             {technology.ai_summary && (
-              <p className="mb-3 line-clamp-2 text-[11px] italic text-muted-foreground/70">
+              <p className="mb-3.5 line-clamp-2 text-xs italic text-muted-foreground/70">
                 &ldquo;{technology.ai_summary}&rdquo;
               </p>
             )}
 
             {/* Job demand bar */}
-            <div className="mb-3">
-              <div className="mb-1 flex items-center justify-between text-[10px] text-muted-foreground">
+            <div className="mb-3.5">
+              <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
                 <span>Job demand</span>
                 <span className="font-medium text-foreground">{jobsBarWidth}/100</span>
               </div>
@@ -124,7 +122,7 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
             </div>
 
             {/* Stats row */}
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 {momentumIcon}
                 {verdict.momentumLabel}

@@ -55,19 +55,22 @@ const DI: Record<string, string> = {
   Erlang:         'erlang/erlang-original',
   OCaml:          'ocaml/ocaml-original',
   Prolog:         'prolog/prolog-original',
-  // Blockchain (1 in devicons)
+  // Blockchain (2 in devicons)
   Solidity:       'solidity/solidity-original',
-  // Legacy / Niche (5 in devicons)
+  Vyper:          'vyper/vyper-original',
+  // Legacy / Niche (6 in devicons)
   Fortran:        'fortran/fortran-original',
   'Visual Basic': 'visualbasic/visualbasic-original',
   COBOL:          'cobol/cobol-original',
   CoffeeScript:   'coffeescript/coffeescript-original',
+  Racket:         'racket/racket-original',
 }
 
 // ─── Strategy 2: Simple Icons CDN — tinted monochromatic SVGs ────────────────
-// Used for languages devicons doesn't cover (D, Objective-C fallback, Hack)
+// Used for languages devicons doesn't cover (D, Ada, Hack)
 const SI: Record<string, string> = {
   D:    'd',          // D programming language
+  Ada:  'ada',        // Ada programming language
   Hack: 'hacklang',   // Meta's Hack language
 }
 
@@ -75,11 +78,24 @@ const SI: Record<string, string> = {
 const SI_COLOR_OVERRIDE: Record<string, string> = {
   JavaScript: 'c9b200',
   Nim:        'c8b000',
+  Ada:        '01a862',  // #02f88c is too bright on light backgrounds
 }
 
-// ─── Strategy 3: Hash badge — 13 langs with no logo anywhere ─────────────────
-// Assembly, Vyper, Move, Cairo, Ink!, Clarity, Tact, Ada, Tcl, Racket, Carbon, VHDL
-// (plus any unrecognised language name)
+// ─── Strategy 3: Local SVG overrides — custom icons for niche languages ──────
+// Languages with no official logo on any CDN get custom-designed SVGs
+const LO: Record<string, string> = {
+  Assembly:  '/icons/languages/assembly.svg',
+  Move:      '/icons/languages/move.svg',
+  Cairo:     '/icons/languages/cairo.svg',
+  'Ink!':    '/icons/languages/ink.svg',
+  Clarity:   '/icons/languages/clarity.svg',
+  Tact:      '/icons/languages/tact.svg',
+  Tcl:       '/icons/languages/tcl.svg',
+  Carbon:    '/icons/languages/carbon.svg',
+  VHDL:      '/icons/languages/vhdl.svg',
+}
+
+// ─── Strategy 4: Hash badge — fallback for any unrecognised language ──────────
 
 function hashColor(name: string): string {
   let h = 0
@@ -179,7 +195,7 @@ export type LanguageName =
   | (typeof LANGUAGES.legacyNiche)[number]
 
 // ─── Component ────────────────────────────────────────────────────────────────
-type Stage = 'devicons' | 'simpleicons' | 'badge'
+type Stage = 'devicons' | 'simpleicons' | 'local' | 'badge'
 
 interface LanguageIconProps {
   language: string
@@ -199,6 +215,7 @@ export function LanguageIcon({
   function initialStage(): Stage {
     if (DI[language])  return 'devicons'
     if (SI[language])  return 'simpleicons'
+    if (LO[language])  return 'local'
     return 'badge'
   }
 
@@ -207,6 +224,10 @@ export function LanguageIcon({
   function handleError() {
     if (stage === 'devicons' && SI[language]) {
       setStage('simpleicons')
+    } else if (stage === 'devicons' && LO[language]) {
+      setStage('local')
+    } else if (stage === 'simpleicons' && LO[language]) {
+      setStage('local')
     } else {
       setStage('badge')
     }
@@ -219,6 +240,8 @@ export function LanguageIcon({
       ? `${DI_BASE}/${DI[language]}.svg`
       : stage === 'simpleicons'
       ? `https://cdn.simpleicons.org/${SI[language]}/${SI_COLOR_OVERRIDE[language] ?? brandColor.replace('#', '')}`
+      : stage === 'local'
+      ? LO[language]
       : null
 
   const containerStyle: React.CSSProperties = {

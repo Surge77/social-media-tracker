@@ -4,6 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Star, Briefcase, MessageSquare, TrendingUp } from 'lucide-react'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
+import { TechIcon } from '@/components/shared/TechIcon'
 import { LoadingSpinner } from '@/components/ui/loading'
 import type { TechnologyCategory } from '@/types'
 
@@ -110,12 +111,13 @@ export function AlternativesPanel({ slug }: AlternativesPanelProps) {
           >
             {/* Name + category */}
             <div className="mb-2">
-              <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                {alt.name}
-              </h4>
-              <div className="mt-1">
-                <CategoryBadge category={alt.category} size="sm" />
+              <div className="flex items-center gap-2 mb-1">
+                <TechIcon slug={alt.slug} name={alt.name} color={alt.color} size={22} />
+                <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                  {alt.name}
+                </h4>
               </div>
+              <CategoryBadge category={alt.category} size="sm" />
             </div>
 
             {/* Description */}

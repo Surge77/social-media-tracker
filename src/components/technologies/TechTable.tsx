@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
+import { TechIcon } from '@/components/shared/TechIcon'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { MomentumBadge } from '@/components/technologies/MomentumBadge'
@@ -53,31 +54,31 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
           <table className="w-full min-w-[980px]">
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   #
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3.5 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Δ
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Technology
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[130px]">
+                <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[130px]">
                   Status
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Stage
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3.5 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Score
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3.5 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Trend
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3.5 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   30-Day Chart
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-3.5 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Insight
                 </th>
               </tr>
@@ -98,31 +99,27 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                   style={{ '--tech-color': tech.color } as React.CSSProperties}
                 >
                   {/* Rank */}
-                  <td className="px-4 py-3 text-center">
-                    <span className="font-mono text-sm text-muted-foreground">
+                  <td className="px-4 py-4 text-center">
+                    <span className="font-mono text-sm font-medium text-muted-foreground">
                       {index + 1}
                     </span>
                   </td>
 
                   {/* Rank Change */}
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-4 text-center">
                     <RankChangeBadge rankChange={tech.rank_change} />
                   </td>
 
                   {/* Technology Name + Category */}
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-4">
                     <Link
                       href={`/technologies/${tech.slug}`}
                       className="block focus:outline-none"
                     >
-                      <div className="flex items-center gap-3">
-                        {/* Color dot */}
-                        <div
-                          className="tech-dot h-3 w-3 shrink-0 rounded-full transition-shadow duration-150"
-                          style={{ backgroundColor: tech.color }}
-                        />
-                        <div className="flex flex-col gap-0.5 min-w-0">
-                          <span className="tech-name font-semibold transition-colors duration-150">
+                      <div className="flex items-center gap-3.5">
+                        <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={32} />
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <span className="tech-name text-[17px] font-semibold transition-colors duration-150">
                             {tech.name}
                           </span>
                           <span className="flex items-center gap-2">
@@ -134,7 +131,7 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                   </td>
 
                   {/* Status Label */}
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-4">
                     <StatusBadge
                       compositeScore={tech.composite_score}
                       momentum={tech.momentum}
@@ -143,18 +140,18 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                   </td>
 
                   {/* Lifecycle Stage */}
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-4">
                     <LifecycleBadge stage={tech.lifecycle_stage} />
                   </td>
 
                   {/* Score with confidence grade chip */}
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-4 text-center">
                     <div className="flex flex-col items-center gap-0.5">
                       <div className="flex items-center gap-1">
                         <ScoreBadge score={tech.composite_score} confidenceGrade={tech.confidence_grade} />
                         {tech.confidence_grade && (
                           <span className={cn(
-                            'text-[10px] font-semibold font-mono px-1 py-0.5 rounded',
+                            'text-[11px] font-semibold font-mono px-1 py-0.5 rounded',
                             tech.confidence_grade === 'A' && 'text-emerald-400 bg-emerald-500/10',
                             tech.confidence_grade === 'B' && 'text-blue-400 bg-blue-500/10',
                             tech.confidence_grade === 'C' && 'text-amber-400 bg-amber-500/10',
@@ -164,32 +161,32 @@ export const TechTable = React.forwardRef<HTMLDivElement, TechTableProps>(
                           </span>
                         )}
                       </div>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {getScoreLabel(tech.composite_score)}
                       </span>
                     </div>
                   </td>
 
                   {/* Momentum with insight */}
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-4 text-center">
                     <div className="flex flex-col items-center gap-0.5">
                       <MomentumBadge momentum={tech.momentum} />
-                      <span className="text-[10px] text-muted-foreground max-w-[100px] line-clamp-1">
+                      <span className="text-xs text-muted-foreground max-w-[100px] line-clamp-1">
                         {getMomentumInsight(tech.momentum).split(' — ')[0]}
                       </span>
                     </div>
                   </td>
 
                   {/* Sparkline */}
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-4">
                     <div className="flex justify-center">
                       <Sparkline data={tech.sparkline} />
                     </div>
                   </td>
 
                   {/* AI Summary */}
-                  <td className="px-4 py-3">
-                    <AISummaryTooltip summary={tech.ai_summary} maxLength={50} />
+                  <td className="px-4 py-4">
+                    <AISummaryTooltip summary={tech.ai_summary} maxLength={55} />
                   </td>
                 </motion.tr>
               ))}

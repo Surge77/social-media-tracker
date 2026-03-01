@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Check, X, Plus, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { TechIcon } from '@/components/shared/TechIcon'
 import type { TechnologyWithScore } from '@/types'
 
 interface TechSelectorProps {
@@ -85,6 +86,7 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
               'text-sm font-medium text-foreground transition-all hover:border-primary/50'
             )}
           >
+            <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={20} />
             <span>{tech.name}</span>
             <button
               onClick={() => onRemove(tech.slug)}
@@ -159,8 +161,9 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
                             'transition-colors hover:bg-primary/10 hover:text-primary'
                           )}
                         >
+                          <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={24} className="shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-foreground">{tech.name}</div>
+                            <div className="text-[15px] font-medium text-foreground">{tech.name}</div>
                             <div className="text-xs text-muted-foreground truncate">
                               Same category: {tech.category}
                             </div>
@@ -191,8 +194,9 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
                             'transition-colors hover:bg-primary/10 hover:text-primary'
                           )}
                         >
+                          <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={24} className="shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-foreground">{tech.name}</div>
+                            <div className="text-[15px] font-medium text-foreground">{tech.name}</div>
                             <div className="text-xs text-muted-foreground truncate">
                               {tech.description}
                             </div>

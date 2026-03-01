@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { TechIcon } from '@/components/shared/TechIcon'
 import { ResultActions } from '@/components/quiz/ResultActions'
 import { NextQuizCTA } from '@/components/quiz/NextQuizCTA'
 import { StarterKitBento } from '@/components/quiz/StarterKitBento'
@@ -345,6 +346,7 @@ function TechStatusCard({
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
+              <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={22} />
               <h4 className="font-semibold text-foreground">{tech.name}</h4>
               <Badge variant="outline" className="text-xs">
                 {tech.category}

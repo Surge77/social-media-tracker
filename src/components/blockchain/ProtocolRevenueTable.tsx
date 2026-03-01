@@ -103,8 +103,8 @@ export function ProtocolRevenueTable() {
                         <img
                           src={p.logo}
                           alt={p.name}
-                          width={16}
-                          height={16}
+                          width={20}
+                          height={20}
                           className="rounded-full bg-muted flex-shrink-0"
                           onError={(e) => { e.currentTarget.style.display = 'none' }}
                         />
@@ -113,7 +113,7 @@ export function ProtocolRevenueTable() {
                         href={`https://defillama.com/protocol/${p.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-semibold text-foreground hover:text-violet-400 transition-colors flex items-center gap-1"
+                        className="text-sm font-semibold text-foreground hover:text-violet-400 transition-colors flex items-center gap-1"
                       >
                         {p.name}
                         <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-60 transition-opacity" />

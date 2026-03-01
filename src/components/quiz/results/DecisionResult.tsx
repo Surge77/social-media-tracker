@@ -23,6 +23,7 @@ import { MarketValidationBlock } from '@/components/quiz/MarketValidationBlock'
 import { StarterKitBento } from '@/components/quiz/StarterKitBento'
 import { CompanionSkills } from '@/components/quiz/CompanionSkills'
 import { WeekendProjectCard } from '@/components/quiz/WeekendProjectCard'
+import { TechIcon } from '@/components/shared/TechIcon'
 import type { QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 
@@ -92,9 +93,14 @@ export function DecisionResult({
                       BEST CHOICE FOR YOUR PROJECT
                     </span>
                   </div>
-                  <h2 className="text-3xl font-bold text-foreground mb-2">
-                    {recommendation.primary.action}
-                  </h2>
+                  <div className="flex items-center gap-3 mb-2">
+                    {primaryTech && (
+                      <TechIcon slug={primaryTech.slug} name={primaryTech.name} color={primaryTech.color} size={40} />
+                    )}
+                    <h2 className="text-3xl font-bold text-foreground">
+                      {recommendation.primary.action}
+                    </h2>
+                  </div>
                   {primaryTech && (
                     <Badge variant="outline" className="mt-2">
                       {primaryTech.category}

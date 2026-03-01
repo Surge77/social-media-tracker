@@ -41,6 +41,7 @@
     "react-icon-cloud": "^4.1.7",
     "recharts": "^3.7.0",
     "rss-parser": "^3.13.0",
+    "simple-icons": "^16.10.0",
     "simple-statistics": "^7.8.8",
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.6.1",

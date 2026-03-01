@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { Trophy, GitBranch, Users, Briefcase, Blocks, TrendingUp } from 'lucide-react'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
+import { TechIcon } from '@/components/shared/TechIcon'
 import type { CompareData } from '@/types'
 
 interface DimensionBattleProps {
@@ -128,10 +129,7 @@ export function DimensionBattle({ compareData, className }: DimensionBattleProps
                       {/* Tech Info */}
                       <div className="mb-1 flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
-                          <div
-                            className="h-2 w-2 rounded-full"
-                            style={{ backgroundColor: tech.color }}
-                          />
+                          <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={18} />
                           <span className={cn(
                             "font-medium",
                             isWinner ? "text-foreground font-semibold" : "text-muted-foreground"

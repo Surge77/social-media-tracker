@@ -176,8 +176,8 @@ export function ProtocolHealthTable({ protocols }: Props) {
                           <img
                             src={`https://icons.llama.fi/protocols/${p.slug}.jpg`}
                             alt={p.name}
-                            width={22}
-                            height={22}
+                            width={24}
+                            height={24}
                             className="rounded-full bg-muted flex-shrink-0 transition-transform group-hover:scale-110 shadow-sm"
                             onError={(e) => { e.currentTarget.style.display = 'none' }}
                           />
@@ -185,7 +185,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                             href={`https://defillama.com/protocol/${p.slug}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-base font-extrabold text-foreground hover:text-violet-400 transition-colors flex items-center gap-1.5"
+                            className="text-[17px] font-extrabold text-foreground hover:text-violet-400 transition-colors flex items-center gap-1.5"
                           >
                             {p.name}
                             <ExternalLink className="h-3.5 w-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-violet-400" />

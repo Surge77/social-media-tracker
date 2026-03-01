@@ -10,6 +10,7 @@ import { useAIInsight } from '@/hooks/useAIInsight'
 import { useScrolled } from '@/hooks/useScrolled'
 import { cn } from '@/lib/utils'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
+import { TechIcon } from '@/components/shared/TechIcon'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { ConfidenceBadge } from '@/components/shared/ConfidenceBadge'
@@ -206,9 +207,12 @@ export function TechnologyDetailClient() {
       >
         <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="mb-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              {technology.name}
-            </h1>
+            <div className="mb-2 flex items-center gap-3">
+              <TechIcon slug={technology.slug} name={technology.name} color={technology.color} size={36} />
+              <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                {technology.name}
+              </h1>
+            </div>
             <p className="text-muted-foreground">{technology.description}</p>
           </div>
           <div className="flex items-center gap-2">

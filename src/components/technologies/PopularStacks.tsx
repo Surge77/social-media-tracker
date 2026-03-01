@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { cn } from '@/lib/utils'
+import { TechIcon } from '@/components/shared/TechIcon'
 import type { TechStatsResponse } from '@/hooks/useTechStats'
 
 interface PopularStacksProps {
@@ -96,11 +97,7 @@ export default function PopularStacks({ data, isLoading, isError }: PopularStack
                         key={tech.slug}
                         className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2 py-0.5 rounded-full border border-border/60 bg-background text-foreground/80"
                       >
-                        <span
-                          className="inline-block h-1.5 w-1.5 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: tech.color }}
-                          aria-hidden="true"
-                        />
+                        <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={14} />
                         {tech.name}
                       </span>
                     ))}

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { getTechResources } from '@/lib/quiz/resources'
+import { TechIcon } from '@/components/shared/TechIcon'
 import type { TechnologyWithScore } from '@/types'
 import Link from 'next/link'
 
@@ -81,8 +82,7 @@ export function CompanionSkills({ slug, technologies, className }: CompanionSkil
                   'text-xs font-medium transition-all',
                 )}
               >
-                {/* Co-occurrence dot */}
-                <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                <TechIcon slug={cSlug} name={displayName} color={tech?.color} size={16} />
                 <span className="text-foreground">{displayName}</span>
                 <span className="text-muted-foreground">{coOccurrencePercent}%</span>
                 {MomentumIcon && (

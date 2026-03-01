@@ -6,6 +6,7 @@ import { TrendingUp, TrendingDown, Target, Zap, Briefcase, ArrowUpRight, GitComp
 import Link from 'next/link'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { cn } from '@/lib/utils'
+import { TechIcon } from '@/components/shared/TechIcon'
 import type { DigestSection } from '@/lib/ai/generators/weekly-digest'
 
 // ─── Section config ───────────────────────────────────────────────────────────
@@ -149,6 +150,7 @@ function TechChip({
         href={`/technologies/${slug}`}
         className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
       >
+        <TechIcon slug={slug} name={name} size={16} showBackground={false} />
         <span>{name}</span>
 
         {change !== undefined && (

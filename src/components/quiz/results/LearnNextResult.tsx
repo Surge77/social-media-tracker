@@ -27,6 +27,7 @@ import { CompanionSkills } from '@/components/quiz/CompanionSkills'
 import { SevenDayPlan } from '@/components/quiz/SevenDayPlan'
 import { WeekendProjectCard } from '@/components/quiz/WeekendProjectCard'
 import { LearningStyleToggle, useLearningMode } from '@/components/quiz/LearningStyleToggle'
+import { TechIcon } from '@/components/shared/TechIcon'
 import type { QuizResult } from '@/lib/quiz/types'
 import type { TechnologyWithScore } from '@/types'
 
@@ -102,9 +103,14 @@ export function LearnNextResult({
                       RECOMMENDED FOR YOU
                     </span>
                   </div>
-                  <h2 className="text-3xl font-bold text-foreground mb-2">
-                    {recommendation.primary.action}
-                  </h2>
+                  <div className="flex items-center gap-3 mb-2">
+                    {primaryTech && (
+                      <TechIcon slug={primaryTech.slug} name={primaryTech.name} color={primaryTech.color} size={40} />
+                    )}
+                    <h2 className="text-3xl font-bold text-foreground">
+                      {recommendation.primary.action}
+                    </h2>
+                  </div>
                 </div>
 
                 {recommendation.primary.score && (

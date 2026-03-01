@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
+import { TechIcon } from '@/components/shared/TechIcon'
 import { CategoryBadge } from '@/components/shared/CategoryBadge'
 import { MomentumBadge } from '@/components/technologies/MomentumBadge'
 import { Sparkline } from '@/components/technologies/Sparkline'
@@ -50,9 +51,12 @@ export const RelatedTechnologies = React.forwardRef<HTMLDivElement, RelatedTechn
               <div className="h-full rounded-lg border border-border bg-card/30 p-4 backdrop-blur-sm transition-all hover:border-primary/50 hover:bg-card/50 hover:shadow-lg">
                 {/* Header */}
                 <div className="mb-2 flex items-start justify-between gap-2">
-                  <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {tech.name}
-                  </h4>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={28} className="shrink-0" />
+                    <h4 className="text-[16px] font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+                      {tech.name}
+                    </h4>
+                  </div>
                   <ScoreBadge score={tech.composite_score} size="sm" />
                 </div>
 

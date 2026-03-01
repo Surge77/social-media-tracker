@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { TechIcon } from '@/components/shared/TechIcon'
 import { ResultActions } from '@/components/quiz/ResultActions'
 import { NextQuizCTA } from '@/components/quiz/NextQuizCTA'
 import { StarterKitBento } from '@/components/quiz/StarterKitBento'
@@ -104,8 +105,11 @@ export function HypeCheckResult({
 
             <div className="relative p-6 space-y-4">
               <div className="flex items-start gap-4">
-                <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center', `bg-${verdictColor}/20`)}>
-                  <VerdictIcon className={cn('w-6 h-6', `text-${verdictColor}`)} />
+                <div className="flex items-center gap-2">
+                  <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={40} />
+                  <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', `bg-${verdictColor}/20`)}>
+                    <VerdictIcon className={cn('w-5 h-5', `text-${verdictColor}`)} />
+                  </div>
                 </div>
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-foreground mb-1">
