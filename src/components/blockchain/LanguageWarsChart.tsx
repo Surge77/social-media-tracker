@@ -58,7 +58,7 @@ export function LanguageWarsChart() {
       <div className="rounded-xl border bg-card p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Composite Activity Score</h3>
+            <h3 className="text-base font-semibold text-foreground">Composite Activity Score</h3>
             <p className="text-xs text-muted-foreground">
               Weighted: GitHub repos 40% · Stack Overflow 40% · npm 20%
             </p>
@@ -126,7 +126,7 @@ export function LanguageWarsChart() {
             {/* Header */}
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-bold text-foreground">{lang.name}</p>
+                <p className="text-base font-bold text-foreground">{lang.name}</p>
                 <p className="text-xs text-muted-foreground">{lang.vm}</p>
               </div>
               <span

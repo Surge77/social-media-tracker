@@ -113,9 +113,9 @@ export function LanguageRow({
         {/* Language name + Logo */}
         <div className="flex w-36 shrink-0 items-center gap-3 sm:w-40">
           <div className="shrink-0 transition-transform group-hover:scale-110">
-            <LanguageIcon language={ranking.language} size={28} />
+            <LanguageIcon language={ranking.language} size={32} />
           </div>
-          <span className="truncate text-base font-extrabold text-foreground group-hover:text-primary transition-colors">
+          <span className="truncate text-[17px] font-extrabold text-foreground group-hover:text-primary transition-colors">
             {ranking.language}
           </span>
         </div>

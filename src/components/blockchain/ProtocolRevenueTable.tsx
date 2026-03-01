@@ -57,7 +57,7 @@ export function ProtocolRevenueTable() {
   return (
     <div className="overflow-hidden rounded-xl border bg-card">
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/40 text-muted-foreground">
               <th className="w-8 px-3 py-3 text-left">#</th>

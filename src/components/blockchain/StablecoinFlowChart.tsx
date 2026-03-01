@@ -53,7 +53,7 @@ export function StablecoinFlowChart() {
       {/* Summary */}
       <div className="rounded-xl border bg-card p-4">
         <p className="text-xs text-muted-foreground">Total stablecoins tracked</p>
-        <p className="mt-1 text-2xl font-bold text-foreground">{fmtB(total)}</p>
+        <p className="mt-1 text-[28px] font-bold leading-none text-foreground">{fmtB(total)}</p>
         <p className="text-xs text-muted-foreground">across {chains.length} chains</p>
       </div>
 

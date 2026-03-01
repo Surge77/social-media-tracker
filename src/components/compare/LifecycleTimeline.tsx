@@ -191,7 +191,7 @@ export function LifecycleTimeline({ compareData, className }: LifecycleTimelineP
 
                   {/* Label */}
                   <div className="rounded-md border border-border bg-card px-3 py-1.5 shadow-sm">
-                    <p className="text-sm font-semibold text-foreground">{tech.name}</p>
+                    <p className="text-[15px] font-semibold text-foreground">{tech.name}</p>
                     <p className={cn('text-xs', tech.stageConfig.color)}>
                       {tech.stageConfig.label}
                       {tech.lifecycle.confidence > 0 && (
@@ -216,7 +216,7 @@ export function LifecycleTimeline({ compareData, className }: LifecycleTimelineP
             className="rounded-lg border border-border bg-card/50 p-3"
           >
             <div className="mb-1 flex items-center justify-between">
-              <span className="text-sm font-semibold" style={{ color: tech.color }}>
+              <span className="text-[15px] font-semibold" style={{ color: tech.color }}>
                 {tech.name}
               </span>
               <span className={cn('text-xs font-medium', tech.stageConfig.color)}>

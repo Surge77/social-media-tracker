@@ -50,7 +50,7 @@ export function WalletLibraryChart() {
         {libs.map((lib) => (
           <div key={lib.package} className="rounded-lg border bg-card px-3 py-2.5">
             <p className="text-xs font-semibold" style={{ color: lib.color }}>{lib.label}</p>
-            <p className="mt-1 text-sm font-bold text-foreground">{fmtDl(lib.weeklyDownloads)}</p>
+            <p className="mt-1 text-base font-bold text-foreground">{fmtDl(lib.weeklyDownloads)}</p>
             <p className="text-xs text-muted-foreground">/ week</p>
           </div>
         ))}

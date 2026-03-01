@@ -61,7 +61,7 @@ export function L2CostTable() {
         </p>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/20 text-muted-foreground">
               <th className="px-4 py-3 text-left font-medium">Chain</th>

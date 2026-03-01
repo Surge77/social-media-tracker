@@ -431,13 +431,13 @@ export function BlockchainPageClient() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  'flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all',
+                  'flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-[15px] font-medium transition-all',
                   isActive
                     ? 'bg-foreground text-background shadow-sm'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-[18px] w-[18px]" />
                 {tab.label}
               </button>
             )

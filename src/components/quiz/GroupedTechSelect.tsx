@@ -363,7 +363,7 @@ export function GroupedTechSelect({ value, onChange, className }: GroupedTechSel
                   <group.icon className={cn("h-4 w-4", selectedInGroup > 0 ? "text-primary" : "text-muted-foreground")} />
                   <span className="font-semibold text-sm">{group.label}</span>
                   {selectedInGroup > 0 && (
-                    <Badge variant="primary" className="h-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
+                    <Badge variant="default" className="h-5 px-1.5 text-[10px] bg-primary text-primary-foreground">
                       {selectedInGroup}
                     </Badge>
                   )}

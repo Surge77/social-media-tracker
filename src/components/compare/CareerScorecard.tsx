@@ -104,8 +104,8 @@ export function CareerScorecard({ compareData, className }: CareerScorecardProps
               {/* Header */}
               <div className="mb-3 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={22} />
-                  <h4 className="text-sm font-semibold text-foreground">{tech.name}</h4>
+                  <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={24} />
+                  <h4 className="text-base font-semibold text-foreground">{tech.name}</h4>
                   {isTopChoice && (
                     <span className="rounded-full bg-primary/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary whitespace-nowrap">
                       Best Opportunity

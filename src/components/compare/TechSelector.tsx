@@ -83,10 +83,10 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
             key={tech.slug}
             className={cn(
               'inline-flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5',
-              'text-sm font-medium text-foreground transition-all hover:border-primary/50'
+              'text-[15px] font-medium text-foreground transition-all hover:border-primary/50'
             )}
           >
-            <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={20} />
+            <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={24} />
             <span>{tech.name}</span>
             <button
               onClick={() => onRemove(tech.slug)}
@@ -163,7 +163,7 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
                         >
                           <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={24} className="shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="text-[15px] font-medium text-foreground">{tech.name}</div>
+                            <div className="text-base font-medium text-foreground">{tech.name}</div>
                             <div className="text-xs text-muted-foreground truncate">
                               Same category: {tech.category}
                             </div>
@@ -196,7 +196,7 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
                         >
                           <TechIcon slug={tech.slug} name={tech.name} color={tech.color} size={24} className="shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <div className="text-[15px] font-medium text-foreground">{tech.name}</div>
+                            <div className="text-base font-medium text-foreground">{tech.name}</div>
                             <div className="text-xs text-muted-foreground truncate">
                               {tech.description}
                             </div>

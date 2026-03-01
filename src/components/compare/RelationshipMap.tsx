@@ -135,7 +135,7 @@ export function RelationshipMap({ compareData, className }: RelationshipMapProps
                     className="h-3 w-3 rounded-full"
                     style={{ backgroundColor: sourceTech.color }}
                   />
-                  <span className="text-sm font-semibold text-foreground">
+                  <span className="text-[15px] font-semibold text-foreground">
                     {sourceTech.name}
                   </span>
                 </div>
@@ -153,7 +153,7 @@ export function RelationshipMap({ compareData, className }: RelationshipMapProps
 
                 {/* Target tech */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">
+                  <span className="text-[15px] font-semibold text-foreground">
                     {targetTech.name}
                   </span>
                   <div

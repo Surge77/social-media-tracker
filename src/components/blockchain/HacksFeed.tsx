@@ -75,7 +75,7 @@ export function HacksFeed() {
       {/* Feed */}
       <div className="overflow-hidden rounded-xl border bg-card">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+          <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-muted-foreground">
                 <th className="px-4 py-3 text-left font-medium">Protocol</th>

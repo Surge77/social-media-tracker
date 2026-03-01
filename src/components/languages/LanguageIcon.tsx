@@ -9,10 +9,12 @@
  *     https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/{path}.svg
  *   Strategy 2 — Simple Icons CDN: color-tinted monochromatic SVGs
  *     https://cdn.simpleicons.org/{slug}/{hex}
- *   Strategy 3 — Hash badge: deterministic color + abbreviation (13 niche langs)
+ *   Strategy 3 — Inline SVG: custom-designed icons for 9 niche langs (theme-aware)
+ *   Strategy 4 — Hash badge: deterministic color + abbreviation (unrecognised langs)
  */
 
 import React, { useState } from 'react'
+import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
 
 // ─── Strategy 1: Devicons CDN — full-color, verified against devicon.json ─────
@@ -67,47 +69,119 @@ const DI: Record<string, string> = {
 }
 
 // ─── Strategy 2: Simple Icons CDN — tinted monochromatic SVGs ────────────────
-// Used for languages devicons doesn't cover (D, Ada, Hack)
+// Used for languages devicons doesn't cover (D, Ada)
 const SI: Record<string, string> = {
   D:    'd',          // D programming language
   Ada:  'ada',        // Ada programming language
-  Hack: 'hacklang',   // Meta's Hack language
+  // Hack: 'hacklang' does not exist in simple-icons — handled via LOCAL_ICONS instead
 }
 
-// Light-colored brands need a darker hex so the icon shows on both themes
-const SI_COLOR_OVERRIDE: Record<string, string> = {
-  JavaScript: 'c9b200',
-  Nim:        'c8b000',
-  Ada:        '01a862',  // #02f88c is too bright on light backgrounds
-}
+// ─── Strategy 3: Inline SVG renderers — 10 niche languages with no CDN logo ──
+// Rendered as JSX so fill color can be theme-adapted at render time.
+type IconRenderer = (size: number, color: string) => React.ReactElement
 
-// ─── Strategy 3: Local SVG overrides — custom icons for niche languages ──────
-// Languages with no official logo on any CDN get custom-designed SVGs
-const LO: Record<string, string> = {
-  Assembly:  '/icons/languages/assembly.svg',
-  Move:      '/icons/languages/move.svg',
-  Cairo:     '/icons/languages/cairo.svg',
-  'Ink!':    '/icons/languages/ink.svg',
-  Clarity:   '/icons/languages/clarity.svg',
-  Tact:      '/icons/languages/tact.svg',
-  Tcl:       '/icons/languages/tcl.svg',
-  Carbon:    '/icons/languages/carbon.svg',
-  VHDL:      '/icons/languages/vhdl.svg',
-}
-
-// ─── Strategy 4: Hash badge — fallback for any unrecognised language ──────────
-
-function hashColor(name: string): string {
-  let h = 0
-  for (let i = 0; i < name.length; i++) {
-    h = name.charCodeAt(i) + ((h << 5) - h)
-    h |= 0
-  }
-  return `hsl(${Math.abs(h) % 360}, 58%, 42%)`
-}
-
-function getAbbr(name: string): string {
-  return name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 3).toUpperCase()
+const LOCAL_ICONS: Record<string, IconRenderer> = {
+  Assembly: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="7" y="7" width="10" height="10" rx="1.5" stroke={c} strokeWidth="1.5"/>
+      <line x1="10" y1="7" x2="10" y2="4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="14" y1="7" x2="14" y2="4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="10" y1="17" x2="10" y2="20" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="14" y1="17" x2="14" y2="20" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="7" y1="10" x2="4" y2="10" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="7" y1="14" x2="4" y2="14" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="17" y1="10" x2="20" y2="10" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="17" y1="14" x2="20" y2="14" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="9.5" y="9.5" width="5" height="5" rx="0.5" fill={c}/>
+    </svg>
+  ),
+  Move: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M5 12h14" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M13 6l6 6-6 6" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M5 7v10" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M5 7l3 3" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M5 17l3-3" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  Cairo: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3L20 19H4L12 3Z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M12 8L16.5 17H7.5L12 8Z" fill={c} fillOpacity="0.25"/>
+      <line x1="12" y1="9" x2="12" y2="16" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  'Ink!': (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3C12 3 7 9 7 13.5C7 16.538 9.239 19 12 19C14.761 19 17 16.538 17 13.5C17 9 12 3 12 3Z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M12 19V21" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M9.5 14.5C9.5 14.5 10.5 16 12 16" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  Clarity: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="11" r="5" stroke={c} strokeWidth="1.5"/>
+      <line x1="15.5" y1="15.5" x2="19" y2="19" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="10" y1="11" x2="14" y2="11" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="12" y1="9" x2="12" y2="13" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  Tact: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <polygon points="12,3 21,8.5 21,15.5 12,21 3,15.5 3,8.5" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+      <polygon points="12,7 17,10 17,14 12,17 7,14 7,10" fill={c} fillOpacity="0.2" stroke={c} strokeWidth="1" strokeLinejoin="round"/>
+    </svg>
+  ),
+  Tcl: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="4" y="10" width="16" height="4" rx="1" stroke={c} strokeWidth="1.5"/>
+      <line x1="8" y1="10" x2="8" y2="7" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="12" y1="10" x2="12" y2="7" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="16" y1="10" x2="16" y2="7" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="8" y1="14" x2="8" y2="17" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="12" y1="14" x2="12" y2="17" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="16" y1="14" x2="16" y2="17" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  Carbon: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="2.5" fill={c}/>
+      <circle cx="12" cy="5" r="1.5" stroke={c} strokeWidth="1.5"/>
+      <circle cx="12" cy="19" r="1.5" stroke={c} strokeWidth="1.5"/>
+      <circle cx="5.5" cy="8.5" r="1.5" stroke={c} strokeWidth="1.5"/>
+      <circle cx="18.5" cy="8.5" r="1.5" stroke={c} strokeWidth="1.5"/>
+      <circle cx="5.5" cy="15.5" r="1.5" stroke={c} strokeWidth="1.5"/>
+      <circle cx="18.5" cy="15.5" r="1.5" stroke={c} strokeWidth="1.5"/>
+      <line x1="12" y1="9.5" x2="12" y2="6.5" stroke={c} strokeWidth="1"/>
+      <line x1="12" y1="14.5" x2="12" y2="17.5" stroke={c} strokeWidth="1"/>
+      <line x1="9.8" y1="10.7" x2="7.0" y2="9.2" stroke={c} strokeWidth="1"/>
+      <line x1="14.2" y1="10.7" x2="17.0" y2="9.2" stroke={c} strokeWidth="1"/>
+      <line x1="9.8" y1="13.3" x2="7.0" y2="14.8" stroke={c} strokeWidth="1"/>
+      <line x1="14.2" y1="13.3" x2="17.0" y2="14.8" stroke={c} strokeWidth="1"/>
+    </svg>
+  ),
+  VHDL: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="6" y="6" width="12" height="12" rx="1" stroke={c} strokeWidth="1.5"/>
+      <line x1="9" y1="6" x2="9" y2="4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="12" y1="6" x2="12" y2="4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="15" y1="6" x2="15" y2="4" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="9" y1="18" x2="9" y2="20" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="12" y1="18" x2="12" y2="20" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="15" y1="18" x2="15" y2="20" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <rect x="9" y="9" width="6" height="6" rx="0.5" fill={c} fillOpacity="0.3" stroke={c} strokeWidth="1"/>
+    </svg>
+  ),
+  Hack: (size, c) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      {/* Curly braces — { h } — representing Hack's PHP/typed-language heritage */}
+      <path d="M8 5C6.5 5 6 5.5 6 7v2.5C6 10.5 5 11 4 12c1 .5 2 1 2 2.5V17c0 1.5.5 2 2 2" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M16 5c1.5 0 2 .5 2 2v2.5c0 1 1 1.5 2 2-1 .5-2 1-2 2.5V17c0 1.5-.5 2-2 2" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="10" y1="9" x2="10" y2="15" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="10" y1="12" x2="14" y2="12" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="14" y1="9" x2="14" y2="15" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
 }
 
 // ─── Brand colors (background tinting for all 53 languages) ──────────────────
@@ -143,11 +217,11 @@ const COLORS: Record<string, string> = {
   'Objective-C':  '#438eff',
   MATLAB:         '#e16737',
   PowerShell:     '#5391fe',
-  Assembly:       '#6e4c13',
+  Assembly:       '#b8863b',
   Erlang:         '#b83998',
   OCaml:          '#ef7a08',
-  Solidity:       '#363636',
-  CoffeeScript:   '#2f2625',
+  Solidity:       '#5a5a8a',   // #363636 was too dark on dark bg → shifted to visible mid-blue
+  CoffeeScript:   '#7a6060',   // #2f2625 was near-black → lightened to visible brown-gray
   Hack:           '#878787',
   Fortran:        '#4d41b1',
   'Visual Basic': '#945db7',
@@ -155,7 +229,7 @@ const COLORS: Record<string, string> = {
   Tcl:            '#7b9cb0',
   D:              '#ba595e',
   Prolog:         '#74283c',
-  Vyper:          '#2b247c',
+  Vyper:          '#5b52a0',   // #2b247c was very dark → lightened
   Move:           '#4a90e2',
   Cairo:          '#ff6b6b',
   'Ink!':         '#e6007a',
@@ -163,7 +237,7 @@ const COLORS: Record<string, string> = {
   Tact:           '#0088cc',
   Ada:            '#02f88c',
   Racket:         '#9f1d20',
-  Carbon:         '#333333',
+  Carbon:         '#888888',   // #333333 was near-black → mid-gray visible on all themes
   VHDL:           '#6b8e23',
 }
 
@@ -194,8 +268,56 @@ export type LanguageName =
   | (typeof LANGUAGES.blockchain)[number]
   | (typeof LANGUAGES.legacyNiche)[number]
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function hexLuminance(hex: string): number {
+  const h = hex.replace('#', '')
+  if (h.length < 6) return 0.5
+  const r = parseInt(h.slice(0, 2), 16) / 255
+  const g = parseInt(h.slice(2, 4), 16) / 255
+  const b = parseInt(h.slice(4, 6), 16) / 255
+  const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4))
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
+}
+
+/**
+ * Returns a theme-aware color for icon strokes/fills.
+ * Dark/midnight: lighten dark colors. Light: darken bright colors.
+ */
+function iconColor(brandHex: string, isDark: boolean): string {
+  const lum = hexLuminance(brandHex)
+  if (isDark && lum < 0.18) return '#b0bec5'
+  if (!isDark && lum > 0.55) {
+    const h = brandHex.replace('#', '')
+    const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.58)
+    const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.58)
+    const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.58)
+    return `rgb(${r},${g},${b})`
+  }
+  return brandHex.startsWith('#') ? brandHex : `#${brandHex}`
+}
+
+function hashColor(name: string): string {
+  let h = 0
+  for (let i = 0; i < name.length; i++) {
+    h = name.charCodeAt(i) + ((h << 5) - h)
+    h |= 0
+  }
+  return `hsl(${Math.abs(h) % 360}, 58%, 42%)`
+}
+
+function getAbbr(name: string): string {
+  return name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 3).toUpperCase()
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
-type Stage = 'devicons' | 'simpleicons' | 'local' | 'badge'
+type Stage = 'devicons' | 'simpleicons' | 'badge'
+
+// Overrides for Simple Icons that have too-bright colors on light bg
+const SI_COLOR_OVERRIDE: Record<string, string> = {
+  JavaScript: 'c9b200',
+  Nim:        'c8b000',
+  Ada:        '01a862',  // #02f88c is too bright on light backgrounds
+}
 
 interface LanguageIconProps {
   language: string
@@ -210,13 +332,16 @@ export function LanguageIcon({
   className,
   showBackground = true,
 }: LanguageIconProps) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme !== 'light'
+
   const brandColor = COLORS[language] ?? hashColor(language)
+  const isLocal = !!LOCAL_ICONS[language]
 
   function initialStage(): Stage {
     if (DI[language])  return 'devicons'
     if (SI[language])  return 'simpleicons'
-    if (LO[language])  return 'local'
-    return 'badge'
+    return 'badge'  // LOCAL_ICONS and hash badge both render as 'badge' stage
   }
 
   const [stage, setStage] = useState<Stage>(initialStage)
@@ -224,10 +349,6 @@ export function LanguageIcon({
   function handleError() {
     if (stage === 'devicons' && SI[language]) {
       setStage('simpleicons')
-    } else if (stage === 'devicons' && LO[language]) {
-      setStage('local')
-    } else if (stage === 'simpleicons' && LO[language]) {
-      setStage('local')
     } else {
       setStage('badge')
     }
@@ -235,13 +356,34 @@ export function LanguageIcon({
 
   const imgSize = Math.round(size * 0.62)
 
+  // Compute theme-aware hex for Simple Icons CDN URL
+  const siHex = (() => {
+    const override = SI_COLOR_OVERRIDE[language]
+    if (override) return override
+    const lum = hexLuminance(brandColor)
+    const h = brandColor.replace('#', '')
+    if (isDark && lum < 0.18) {
+      // Too dark for dark bg — blend 50% toward white
+      const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.5 + 127.5).toString(16).padStart(2, '0')
+      const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.5 + 127.5).toString(16).padStart(2, '0')
+      const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.5 + 127.5).toString(16).padStart(2, '0')
+      return `${r}${g}${b}`
+    }
+    if (!isDark && lum > 0.55) {
+      // Too bright for light bg — darken 42%
+      const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.58).toString(16).padStart(2, '0')
+      const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.58).toString(16).padStart(2, '0')
+      const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.58).toString(16).padStart(2, '0')
+      return `${r}${g}${b}`
+    }
+    return h
+  })()
+
   const src: string | null =
     stage === 'devicons'
       ? `${DI_BASE}/${DI[language]}.svg`
       : stage === 'simpleicons'
-      ? `https://cdn.simpleicons.org/${SI[language]}/${SI_COLOR_OVERRIDE[language] ?? brandColor.replace('#', '')}`
-      : stage === 'local'
-      ? LO[language]
+      ? `https://cdn.simpleicons.org/${SI[language]}/${siHex}`
       : null
 
   const containerStyle: React.CSSProperties = {
@@ -252,6 +394,9 @@ export function LanguageIcon({
       : undefined,
     boxShadow: showBackground ? `0 0 0 1px ${brandColor}25` : undefined,
   }
+
+  // Local inline SVG icon (theme-adaptive color)
+  const localIconColor = iconColor(brandColor, isDark)
 
   return (
     <div
@@ -268,14 +413,20 @@ export function LanguageIcon({
           onError={handleError}
           draggable={false}
           loading="lazy"
+          referrerPolicy="no-referrer"
         />
+      ) : isLocal && stage === 'badge' ? (
+        // Strategy 3: inline SVG with theme-aware brand color
+        LOCAL_ICONS[language](imgSize, localIconColor)
       ) : (
-        // Strategy 3: hash-colored badge with abbreviation
+        // Strategy 4: hash-colored badge with abbreviation
         <span
           className="font-mono font-black text-white select-none leading-none"
           style={{
             fontSize: Math.round(size * (getAbbr(language).length > 2 ? 0.24 : 0.30)),
-            backgroundColor: brandColor,
+            backgroundColor: isDark
+              ? hashColor(language)
+              : iconColor(hashColor(language), false),
             width:  Math.round(size * 0.78),
             height: Math.round(size * 0.78),
             borderRadius: '50%',

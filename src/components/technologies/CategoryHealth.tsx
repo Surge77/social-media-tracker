@@ -65,7 +65,7 @@ export function CategoryHealth({
 
   if (isLoading) {
     return (
-      <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-4 md:overflow-x-visible xl:grid-cols-8">
+      <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-x-visible lg:grid-cols-4 xl:grid-cols-5">
         {Array.from({ length: 8 }).map((_, i) => (
           <SkeletonCard key={i} />
         ))}
@@ -84,7 +84,7 @@ export function CategoryHealth({
   if (!data || data.length === 0) return null
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-4 md:overflow-x-visible xl:grid-cols-8">
+    <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-x-visible lg:grid-cols-4 xl:grid-cols-5">
       {data.map((item, index) => {
         const trend = TREND_STYLES[item.trend_label as TrendLabel] ?? TREND_STYLES.Stable
         const momentumSign = item.avg_momentum >= 0 ? '+' : ''

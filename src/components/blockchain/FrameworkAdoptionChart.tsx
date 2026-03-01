@@ -99,7 +99,7 @@ export function FrameworkAdoptionChart() {
 
       {/* Framework detail rows */}
       <div className="overflow-hidden rounded-xl border bg-card">
-        <table className="w-full text-xs">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/40 text-muted-foreground">
               <th className="px-4 py-2.5 text-left font-medium">Framework</th>
@@ -123,7 +123,7 @@ export function FrameworkAdoptionChart() {
                       href={`https://github.com/${f.repo}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 font-semibold hover:text-violet-400 transition-colors"
+                      className="flex items-center gap-1.5 text-base font-semibold hover:text-violet-400 transition-colors"
                       style={{ color: f.color }}
                     >
                       {f.name}

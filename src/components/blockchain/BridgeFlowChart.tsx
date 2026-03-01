@@ -51,15 +51,15 @@ export function BridgeFlowChart() {
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-xl border bg-card p-4">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ArrowLeftRight className="h-3.5 w-3.5" /> 24h Volume
+            <ArrowLeftRight className="h-4 w-4" /> 24h Volume
           </div>
-          <p className="mt-1 text-xl font-bold text-foreground">{fmtVol(total24h)}</p>
+          <p className="mt-1 text-2xl font-bold text-foreground">{fmtVol(total24h)}</p>
         </div>
         <div className="rounded-xl border bg-card p-4">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <ArrowLeftRight className="h-3.5 w-3.5" /> 7d Volume
+            <ArrowLeftRight className="h-4 w-4" /> 7d Volume
           </div>
-          <p className="mt-1 text-xl font-bold text-foreground">{fmtVol(total7d)}</p>
+          <p className="mt-1 text-2xl font-bold text-foreground">{fmtVol(total7d)}</p>
         </div>
       </div>
 

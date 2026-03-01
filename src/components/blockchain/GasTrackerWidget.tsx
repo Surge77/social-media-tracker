@@ -18,9 +18,9 @@ function GasLevel({
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5 rounded-lg bg-muted/50 p-3">
-      <Icon className={cn('h-4 w-4', className)} />
+      <Icon className={cn('h-[18px] w-[18px]', className)} />
       <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-sm font-bold text-foreground">{gwei.toFixed(1)}</span>
+      <span className="text-base font-bold text-foreground">{gwei.toFixed(1)}</span>
       <span className="text-xs text-muted-foreground">gwei</span>
     </div>
   )
@@ -66,8 +66,8 @@ export function GasTrackerWidget() {
         <div className="rounded-xl border bg-card p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Flame className="h-4 w-4 text-orange-400" />
-              <span className="text-sm font-semibold text-foreground">Ethereum Gas</span>
+              <Flame className="h-[18px] w-[18px] text-orange-400" />
+              <span className="text-base font-semibold text-foreground">Ethereum Gas</span>
             </div>
             <span className={cn('text-xs font-medium rounded-full px-2 py-0.5', statusColor,
               eth.standard < 15 ? 'bg-green-500/10' : eth.standard < 40 ? 'bg-yellow-500/10' : 'bg-red-500/10'
@@ -97,7 +97,7 @@ export function GasTrackerWidget() {
             return (
               <div key={chain.chain} className="rounded-xl border bg-card p-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold text-foreground">{chain.chain}</p>
+                  <p className="text-sm font-semibold text-foreground">{chain.chain}</p>
                   <span className={cn(
                     'text-xs font-medium',
                     isL2Cheap ? 'text-green-400' : 'text-yellow-400'
