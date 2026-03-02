@@ -165,7 +165,6 @@ export interface TechnologyDetail {
   current_scores: DailyScore | null
   chart_data: ChartDataPoint[]
   latest_signals: LatestSignals
-  related_technologies: TechnologyWithScore[]
   rank?: number | null
   total_ranked?: number | null
   dimension_percentiles?: {
@@ -181,6 +180,8 @@ export interface TechnologyDetail {
     deviationSigma: number
     explanation: string | null
   }>
+  decision_summary: import('@/lib/insights').DecisionSummary | null
+  what_changed: import('@/lib/insights').WhatChanged
 }
 
 export interface ChartDataPoint {

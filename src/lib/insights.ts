@@ -419,7 +419,7 @@ export function buildScoreExplainerDimensions(
   rawSubScores: Record<string, unknown> | null,
   category: string
 ): ExplainerDimension[] {
-  // Category-based weights (matching adaptive-weights.ts defaults per category)
+  // Category-based fallback weights (used only if dynamic weights unavailable)
   const WEIGHT_MAP: Record<string, { github: number; community: number; jobs: number; ecosystem: number }> = {
     language: { github: 20, community: 15, jobs: 35, ecosystem: 30 },
     frontend: { github: 25, community: 25, jobs: 25, ecosystem: 25 },
@@ -432,7 +432,17 @@ export function buildScoreExplainerDimensions(
     blockchain: { github: 20, community: 20, jobs: 25, ecosystem: 15 },
   }
 
-  const weights = WEIGHT_MAP[category] ?? { github: 25, community: 20, jobs: 25, ecosystem: 30 }
+  const fallbackWeights = WEIGHT_MAP[category] ?? { github: 25, community: 20, jobs: 25, ecosystem: 30 }
+  const dynamicWeights = rawSubScores?.weights as
+    | { github?: number; community?: number; jobs?: number; ecosystem?: number; onchain?: number }
+    | undefined
+  const weights = {
+    github: Math.round((dynamicWeights?.github ?? fallbackWeights.github / 100) * 100),
+    community: Math.round((dynamicWeights?.community ?? fallbackWeights.community / 100) * 100),
+    jobs: Math.round((dynamicWeights?.jobs ?? fallbackWeights.jobs / 100) * 100),
+    ecosystem: Math.round((dynamicWeights?.ecosystem ?? fallbackWeights.ecosystem / 100) * 100),
+    onchain: Math.round((dynamicWeights?.onchain ?? 0.2) * 100),
+  }
 
   const momentum = rawSubScores?.momentum_detail as Record<string, number> | undefined
   const confidence = rawSubScores?.confidence as Record<string, number | string> | undefined
@@ -547,14 +557,17 @@ export function buildScoreExplainerDimensions(
 
   // ---- Onchain (blockchain only) ----
   if (category === 'blockchain' && scores.onchain_score !== null && scores.onchain_score !== undefined) {
+    const onchainDetail = rawSubScores?.onchain_detail as
+      | { tvl_score?: number; dev_activity_score?: number; chain_activity_score?: number }
+      | undefined
     dims.push({
       key: 'onchain',
       score: scores.onchain_score,
-      weightPct: 20,
+      weightPct: weights.onchain,
       factors: [
-        { label: 'Protocol TVL rank', value: null, unit: 'score' },
-        { label: 'On-chain dev activity', value: null, unit: 'score' },
-        { label: 'Network transaction volume trend', value: null, unit: 'score' },
+        { label: 'Protocol TVL rank', value: onchainDetail?.tvl_score ?? null, unit: 'score' },
+        { label: 'On-chain dev activity', value: onchainDetail?.dev_activity_score ?? null, unit: 'score' },
+        { label: 'Network transaction volume trend', value: onchainDetail?.chain_activity_score ?? null, unit: 'score' },
       ],
     })
   }
@@ -562,3 +575,173 @@ export function buildScoreExplainerDimensions(
   return dims
 }
 
+// ---- Decision Summary ----
+
+export type CareerVerdict = 'Learn Now' | 'Watch' | 'Low Priority'
+export type StackVerdict = 'Adopt' | 'Pilot' | 'Wait'
+
+export interface DecisionSummary {
+  career: {
+    verdict: CareerVerdict
+    evidence: string[]  // max 3
+    risks: string[]     // max 2
+  }
+  stack: {
+    verdict: StackVerdict
+    evidence: string[]
+    risks: string[]
+  }
+}
+
+export function computeDecisionSummary(
+  compositeScore: number | null,
+  momentum: number | null,
+  jobsScore: number | null,
+  githubScore: number | null,
+  communityScore: number | null,
+  ecosystemScore: number | null,
+  dataCompleteness: number | null,
+  confidenceGrade: string | null
+): DecisionSummary {
+  const score = compositeScore ?? 0
+  const mom = momentum ?? 0
+  const jobs = jobsScore ?? 0
+  const github = githubScore ?? 0
+  const community = communityScore ?? 0
+  const ecosystem = ecosystemScore ?? 0
+
+  // Career verdict
+  let careerVerdict: CareerVerdict
+  if (dataCompleteness !== null && dataCompleteness < 0.3) {
+    careerVerdict = 'Watch'
+  } else if (score >= 55 && (mom > 3 || jobs >= 50)) {
+    careerVerdict = 'Learn Now'
+  } else if (score >= 35 || mom > 5) {
+    careerVerdict = 'Watch'
+  } else {
+    careerVerdict = 'Low Priority'
+  }
+
+  const careerEvidence: string[] = []
+  if (jobs >= 60) careerEvidence.push(`Jobs score ${jobs.toFixed(0)}/100 — strong employer demand`)
+  else if (jobs >= 35) careerEvidence.push(`Jobs score ${jobs.toFixed(0)}/100 — moderate demand`)
+  if (mom > 5) careerEvidence.push(`Momentum +${mom.toFixed(1)} — gaining traction`)
+  else if (mom > 0) careerEvidence.push(`Momentum +${mom.toFixed(1)} — slowly growing`)
+  else if (mom < -5) careerEvidence.push(`Momentum ${mom.toFixed(1)} — losing ground`)
+  if (community >= 55) careerEvidence.push(`Community score ${community.toFixed(0)}/100 — active developer discussion`)
+  if (careerEvidence.length === 0) careerEvidence.push(`Composite score ${score.toFixed(0)}/100`)
+
+  const careerRisks: string[] = []
+  if (confidenceGrade === 'D' || confidenceGrade === 'F') careerRisks.push('Low confidence — limited signal data')
+  if (mom < -5) careerRisks.push('Negative momentum — trend is declining')
+  if (jobs < 25 && score >= 40) careerRisks.push('Community buzz without job market validation')
+
+  // Stack verdict
+  let stackVerdict: StackVerdict
+  if (ecosystem >= 55 && github >= 45 && score >= 50) {
+    stackVerdict = 'Adopt'
+  } else if (score >= 40 || github >= 40) {
+    stackVerdict = 'Pilot'
+  } else {
+    stackVerdict = 'Wait'
+  }
+
+  const stackEvidence: string[] = []
+  if (ecosystem >= 60) stackEvidence.push(`Ecosystem score ${ecosystem.toFixed(0)}/100 — mature packages and SO support`)
+  else if (ecosystem >= 35) stackEvidence.push(`Ecosystem score ${ecosystem.toFixed(0)}/100 — growing support`)
+  if (github >= 55) stackEvidence.push(`GitHub score ${github.toFixed(0)}/100 — active development`)
+  else if (github >= 35) stackEvidence.push(`GitHub score ${github.toFixed(0)}/100 — maintained`)
+  if (stackEvidence.length === 0) stackEvidence.push(`Composite score ${score.toFixed(0)}/100`)
+
+  const stackRisks: string[] = []
+  if (ecosystem < 30) stackRisks.push('Thin ecosystem — limited packages and community resources')
+  if (github < 25) stackRisks.push('Low GitHub activity — maintenance risk')
+  if (mom < -8) stackRisks.push('Declining signal — may be losing adoption')
+
+  return {
+    career: { verdict: careerVerdict, evidence: careerEvidence.slice(0, 3), risks: careerRisks.slice(0, 2) },
+    stack: { verdict: stackVerdict, evidence: stackEvidence.slice(0, 3), risks: stackRisks.slice(0, 2) },
+  }
+}
+
+// ---- What Changed ----
+
+export interface DimensionDelta {
+  dimension: 'composite' | 'github' | 'community' | 'jobs' | 'ecosystem'
+  delta: number
+  direction: 'up' | 'down' | 'flat'
+  label: string
+}
+
+export interface WhatChanged {
+  period7d: DimensionDelta[]
+  period30d: DimensionDelta[]
+  topMover7d: DimensionDelta | null
+}
+
+export function computeWhatChanged(
+  chartData: Array<{
+    date: string
+    composite: number
+    github: number | null
+    community: number | null
+    jobs: number | null
+    ecosystem: number | null
+  }>
+): WhatChanged {
+  if (chartData.length === 0) {
+    return { period7d: [], period30d: [], topMover7d: null }
+  }
+
+  const sorted = [...chartData].sort((a, b) => a.date.localeCompare(b.date))
+  const latest = sorted[sorted.length - 1]
+
+  function findNearest(daysAgo: number) {
+    const target = new Date(latest.date)
+    target.setDate(target.getDate() - daysAgo)
+    const targetStr = target.toISOString().split('T')[0]
+    for (let i = sorted.length - 1; i >= 0; i--) {
+      if (sorted[i].date <= targetStr) return sorted[i]
+    }
+    return sorted[0]
+  }
+
+  const past7 = findNearest(7)
+  const past30 = findNearest(30)
+
+  function makeDelta(
+    dim: DimensionDelta['dimension'],
+    current: number | null,
+    past: number | null,
+    label: string
+  ): DimensionDelta | null {
+    if (current === null || past === null) return null
+    const delta = current - past
+    const direction: DimensionDelta['direction'] = delta > 1 ? 'up' : delta < -1 ? 'down' : 'flat'
+    const sign = delta > 0 ? '+' : ''
+    return { dimension: dim, delta, direction, label: `${label} ${sign}${delta.toFixed(1)}pts` }
+  }
+
+  const dims: Array<[DimensionDelta['dimension'], string]> = [
+    ['composite', 'Overall score'],
+    ['github', 'GitHub activity'],
+    ['community', 'Community buzz'],
+    ['jobs', 'Job demand'],
+    ['ecosystem', 'Ecosystem'],
+  ]
+
+  const period7d = dims
+    .map(([dim, label]) => makeDelta(dim, (latest as any)[dim], (past7 as any)[dim], label))
+    .filter((d): d is DimensionDelta => d !== null && d.direction !== 'flat')
+
+  const period30d = dims
+    .map(([dim, label]) => makeDelta(dim, (latest as any)[dim], (past30 as any)[dim], label))
+    .filter((d): d is DimensionDelta => d !== null && d.direction !== 'flat')
+
+  const topMover7d = period7d.reduce<DimensionDelta | null>((best, d) => {
+    if (!best) return d
+    return Math.abs(d.delta) > Math.abs(best.delta) ? d : best
+  }, null)
+
+  return { period7d, period30d, topMover7d }
+}

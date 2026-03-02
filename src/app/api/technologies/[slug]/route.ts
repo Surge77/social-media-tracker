@@ -1,5 +1,10 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import type { NextRequest } from 'next/server'
+import {
+  getCanonicalScoringDate,
+  getTargetDateDaysAgo,
+} from '@/lib/scoring/scoring-date'
+import { computeDecisionSummary, computeWhatChanged } from '@/lib/insights'
 
 /**
  * GET /api/technologies/[slug]
@@ -12,14 +17,15 @@ import type { NextRequest } from 'next/server'
  * - Related technologies (same category, top 6)
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const { slug } = await params
     const supabase = createSupabaseAdminClient()
+    const { scoringDate } = await getCanonicalScoringDate(supabase)
 
-    // Fetch the technology first — need id/category for the parallel queries below
+    // Fetch the technology first - need id/category for the parallel queries below
     const { data: technology, error: techError } = await supabase
       .from('technologies')
       .select('*')
@@ -31,36 +37,33 @@ export async function GET(
       return Response.json({ error: 'Technology not found' }, { status: 404 })
     }
 
-    const ninetyDaysAgo = new Date()
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
+    const chartStartDate = getTargetDateDaysAgo(scoringDate ?? new Date().toISOString().split('T')[0], 90)
+
+    const currentScoresQuery = supabase
+      .from('daily_scores')
+      .select('*')
+      .eq('technology_id', technology.id)
+      .order('score_date', { ascending: false })
+      .limit(1)
+
+    const chartQuery = supabase
+      .from('daily_scores')
+      .select('score_date, composite_score, github_score, community_score, jobs_score, ecosystem_score')
+      .eq('technology_id', technology.id)
+      .gte('score_date', chartStartDate)
+      .order('score_date', { ascending: true })
 
     // Run all independent queries in parallel
     const [currentScoresResult, chartResult, signalsResult, relatedTechsResult] = await Promise.all([
-      // Most recent score row
-      supabase
-        .from('daily_scores')
-        .select('*')
-        .eq('technology_id', technology.id)
-        .order('score_date', { ascending: false })
-        .limit(1)
-        .single(),
-
-      // 90-day chart
-      supabase
-        .from('daily_scores')
-        .select('score_date, composite_score, github_score, community_score, jobs_score, ecosystem_score')
-        .eq('technology_id', technology.id)
-        .gte('score_date', ninetyDaysAgo.toISOString().split('T')[0])
-        .order('score_date', { ascending: true }),
-
-      // Latest signals from data_points_latest (indexed single-row lookup per metric)
-      // metadata is needed for YouTube top_videos (actual video objects live there)
+      (scoringDate
+        ? currentScoresQuery.eq('score_date', scoringDate)
+        : currentScoresQuery
+      ).maybeSingle(),
+      scoringDate ? chartQuery.lte('score_date', scoringDate) : chartQuery,
       supabase
         .from('data_points_latest')
         .select('source, metric, value, metadata')
         .eq('technology_id', technology.id),
-
-      // Related techs in same category
       supabase
         .from('technologies')
         .select('id, slug, name, color')
@@ -71,12 +74,11 @@ export async function GET(
 
     const currentScores = currentScoresResult.data
     const chartRows = chartResult.data ?? []
-    let dataPoints = signalsResult.data ?? []
     const relatedTechs = relatedTechsResult.data ?? []
+    let dataPoints = signalsResult.data ?? []
 
     // Supplement with latest job data from data_points if data_points_latest lacks it.
-    // Jobs are fetched weekly and data_points_latest may not have been populated.
-    const hasJobSignals = dataPoints.some(dp => dp.metric === 'job_postings')
+    const hasJobSignals = dataPoints.some((dp) => dp.metric === 'job_postings')
     if (!hasJobSignals) {
       const { data: latestJobs } = await supabase
         .from('data_points')
@@ -84,10 +86,9 @@ export async function GET(
         .eq('technology_id', technology.id)
         .eq('metric', 'job_postings')
         .order('measured_at', { ascending: false })
-        .limit(10) // Grab latest from each source
+        .limit(10)
 
       if (latestJobs && latestJobs.length > 0) {
-        // Deduplicate: keep only the most recent entry per source
         const seenSources = new Set<string>()
         for (const dp of latestJobs) {
           if (!seenSources.has(dp.source)) {
@@ -124,15 +125,22 @@ export async function GET(
 
       if (allScoresOnDate && allScoresOnDate.length > 0) {
         totalRanked = allScoresOnDate.length
-        const rankIdx = allScoresOnDate.findIndex(s => s.technology_id === technology.id)
+        const rankIdx = allScoresOnDate.findIndex((s) => s.technology_id === technology.id)
         rank = rankIdx >= 0 ? rankIdx + 1 : null
 
-        // Dimension percentiles: where does this tech's sub-score rank among all sub-scores?
-        const computeDimPct = (myScore: number | null, allRows: typeof allScoresOnDate, field: keyof typeof allScoresOnDate[0]) => {
+        const computeDimPct = (
+          myScore: number | null,
+          allRows: typeof allScoresOnDate,
+          field: keyof typeof allScoresOnDate[0]
+        ) => {
           if (myScore === null) return null
-          const allValues = allRows.map(r => Number(r[field])).filter(v => !isNaN(v) && v !== null)
+          const allValues = allRows
+            .map((r) => r[field])
+            .filter((v): v is number => v !== null)
+            .map((v) => Number(v))
+            .filter((v) => !Number.isNaN(v))
           if (allValues.length === 0) return null
-          const below = allValues.filter(v => v < myScore).length
+          const below = allValues.filter((v) => v < myScore).length
           return Math.round((below / allValues.length) * 100)
         }
 
@@ -145,9 +153,8 @@ export async function GET(
       }
     }
 
-    // Fetch related tech scores (depends on relatedTechs result above)
+    // Fetch related tech scores
     const relatedWithScores: Array<{ slug: string; name: string; color: string; composite_score: number }> = []
-
     if (relatedTechs.length > 0 && currentScores) {
       const relatedIds = relatedTechs.map((t) => t.id)
       const { data: relatedScores } = await supabase
@@ -175,6 +182,29 @@ export async function GET(
       relatedWithScores.sort((a, b) => b.composite_score - a.composite_score)
     }
 
+    // Extract confidence grade for decision summary
+    const rawSubForDecision = currentScores?.raw_sub_scores as Record<string, unknown> | null | undefined
+    const confidenceGradeForDecision = (() => {
+      if (!rawSubForDecision) return null
+      const conf = rawSubForDecision.confidence as any
+      return typeof conf?.grade === 'string' ? conf.grade : null
+    })()
+
+    const decision_summary = currentScores
+      ? computeDecisionSummary(
+          Number(currentScores.composite_score),
+          Number(currentScores.momentum),
+          currentScores.jobs_score !== null ? Number(currentScores.jobs_score) : null,
+          currentScores.github_score !== null ? Number(currentScores.github_score) : null,
+          currentScores.community_score !== null ? Number(currentScores.community_score) : null,
+          currentScores.ecosystem_score !== null ? Number(currentScores.ecosystem_score) : null,
+          Number(currentScores.data_completeness),
+          confidenceGradeForDecision
+        )
+      : null
+
+    const what_changed = computeWhatChanged(chart_data)
+
     return Response.json({
       technology: {
         id: technology.id,
@@ -192,32 +222,30 @@ export async function GET(
         maintained_by: technology.maintained_by,
       },
       current_scores: currentScores
-        ? (() => {
-          // If jobs_score is null but we have actual job data, compute a quick estimate
-          let effectiveJobsScore = currentScores.jobs_score !== null
-            ? Number(currentScores.jobs_score)
-            : null
-
-          if (effectiveJobsScore === null && latest_signals.jobs && latest_signals.jobs.total > 0) {
-            // Quick heuristic: scale total jobs to a 0-100 score
-            // This is a temporary estimate until the scoring pipeline runs with the fix
-            const totalJobs = latest_signals.jobs.total
-            effectiveJobsScore = Math.min(100, Math.round(
-              Math.log10(totalJobs + 1) * 25 // logarithmic scale: 1→0, 10→25, 100→50, 1000→75, 10000→100
-            ))
-          }
-
-          return {
-            composite_score: Number(currentScores.composite_score),
-            github_score: currentScores.github_score !== null ? Number(currentScores.github_score) : null,
-            community_score: currentScores.community_score !== null ? Number(currentScores.community_score) : null,
-            jobs_score: effectiveJobsScore,
-            ecosystem_score: currentScores.ecosystem_score !== null ? Number(currentScores.ecosystem_score) : null,
-            momentum: Number(currentScores.momentum),
-            data_completeness: Number(currentScores.data_completeness),
-            raw_sub_scores: currentScores.raw_sub_scores,
-          }
-        })()
+        ? {
+          composite_score: Number(currentScores.composite_score),
+          github_score: currentScores.github_score !== null ? Number(currentScores.github_score) : null,
+          community_score: currentScores.community_score !== null ? Number(currentScores.community_score) : null,
+          jobs_score: currentScores.jobs_score !== null ? Number(currentScores.jobs_score) : null,
+          ecosystem_score: currentScores.ecosystem_score !== null ? Number(currentScores.ecosystem_score) : null,
+          onchain_score: currentScores.onchain_score !== null ? Number(currentScores.onchain_score) : null,
+          momentum: Number(currentScores.momentum),
+          data_completeness: Number(currentScores.data_completeness),
+          raw_sub_scores: currentScores.raw_sub_scores,
+        }
+        : null,
+      current_scores_meta: currentScores
+        ? {
+          is_complete: currentScores.jobs_score !== null,
+          scoring_date: currentScores.score_date,
+          missing_dimensions: [
+            currentScores.github_score === null ? 'github' : null,
+            currentScores.community_score === null ? 'community' : null,
+            currentScores.jobs_score === null ? 'jobs' : null,
+            currentScores.ecosystem_score === null ? 'ecosystem' : null,
+            technology.category === 'blockchain' && currentScores.onchain_score === null ? 'onchain' : null,
+          ].filter((v): v is string => v !== null),
+        }
         : null,
       chart_data,
       latest_signals,
@@ -225,6 +253,8 @@ export async function GET(
       rank,
       total_ranked: totalRanked,
       dimension_percentiles: dimensionPercentiles,
+      decision_summary,
+      what_changed,
     })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
@@ -235,7 +265,6 @@ export async function GET(
 function buildLatestSignals(
   dataPoints: Array<{ source: string; metric: string; value: number; metadata?: Record<string, unknown> | null }>
 ) {
-  // O(1) lookup via Map instead of repeated .find() calls
   const dpMap = new Map<string, number>()
   for (const dp of dataPoints) {
     dpMap.set(`${dp.source}:${dp.metric}`, Number(dp.value))
@@ -267,13 +296,12 @@ function buildLatestSignals(
   const jsearchJobs = get('jsearch', 'job_postings')
   const remotiveJobs = get('remotive', 'job_postings')
 
-  // YouTube signals
   const ytVideoCount = get('youtube', 'yt_video_count')
   const ytTotalViews = get('youtube', 'yt_total_views')
   const ytAvgLikes = get('youtube', 'yt_avg_likes')
   const ytUploadVelocity = get('youtube', 'yt_upload_velocity')
   const ytTopVideosDP = dataPoints.find(
-    dp => dp.source === 'youtube' && dp.metric === 'yt_top_videos'
+    (dp) => dp.source === 'youtube' && dp.metric === 'yt_top_videos'
   )
   const ytTopVideosMeta = ytTopVideosDP?.metadata as
     | { videos?: unknown[]; comparisonVideos?: unknown[] }
