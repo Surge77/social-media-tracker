@@ -3,7 +3,7 @@
 import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package, Link2, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package, Link2, ChevronRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAIInsight } from '@/hooks/useAIInsight'
@@ -21,7 +21,7 @@ import { ScoreBreakdown } from '@/components/technologies/ScoreBreakdown'
 import { TechRadarChart } from '@/components/technologies/TechRadarChart'
 import { TrendChart } from '@/components/technologies/TrendChart'
 import { SourceSignalCard } from '@/components/technologies/SourceSignalCard'
-import { RelatedTechnologies } from '@/components/technologies/RelatedTechnologies'
+import { StackMapPanel } from '@/components/technologies/StackMapPanel'
 import { StarHistoryChart } from '@/components/technologies/StarHistoryChart'
 import { MomentumDetailCard } from '@/components/technologies/MomentumDetailCard'
 import { YouTubeSignalsCard } from '@/components/technologies/YouTubeSignalsCard'
@@ -34,6 +34,9 @@ import { AnomalyBanner } from '@/components/technologies/AnomalyBanner'
 import { Loading } from '@/components/ui/loading'
 import { getRecommendation, getMomentumInsight, buildScoreExplainerDimensions } from '@/lib/insights'
 import { ScoreExplainer } from '@/components/technologies/ScoreExplainer'
+import { DecisionHeader } from '@/components/technologies/DecisionHeader'
+import { WhatChangedPanel } from '@/components/technologies/WhatChangedPanel'
+import { PairingIntelligencePanel } from '@/components/technologies/PairingIntelligencePanel'
 import type { TechnologyDetail } from '@/types'
 
 export function TechnologyDetailClient() {
@@ -46,6 +49,7 @@ export function TechnologyDetailClient() {
   const [data, setData] = React.useState<TechnologyDetail | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
+  const [advancedOpen, setAdvancedOpen] = React.useState(false)
 
   // AI insight hook — fetches from /api/ai/insights/[slug]
   const ai = useAIInsight(slug ?? null)
@@ -106,7 +110,7 @@ export function TechnologyDetailClient() {
     )
   }
 
-  const { technology, current_scores, chart_data, latest_signals, related_technologies, rank, total_ranked } = data
+  const { technology, current_scores, chart_data, latest_signals, rank, total_ranked, decision_summary, what_changed } = data
 
   // Extract confidence grade from raw_sub_scores (computed by confidence.ts, stored by pipeline.ts)
   const rawSub = current_scores?.raw_sub_scores as Record<string, unknown> | null | undefined
@@ -278,6 +282,22 @@ export function TechnologyDetailClient() {
         </div>
       </motion.div>
 
+      {/* Decision Header — Career Fit + Stack Fit */}
+      {decision_summary && (
+        <motion.section
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.05 }}
+          className="mb-8"
+        >
+          <DecisionHeader
+            decisionSummary={decision_summary}
+            techSlug={technology.slug}
+            techName={technology.name}
+          />
+        </motion.section>
+      )}
+
       {/* Anomaly Banner (if anomalies detected) */}
       {data.anomalies && data.anomalies.length > 0 && (
         <motion.section
@@ -296,6 +316,18 @@ export function TechnologyDetailClient() {
             }))}
             techSlug={slug}
           />
+        </motion.section>
+      )}
+
+      {/* What Changed */}
+      {what_changed && (what_changed.period7d.length > 0 || what_changed.period30d.length > 0) && (
+        <motion.section
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.12 }}
+          className="mb-8"
+        >
+          <WhatChangedPanel whatChanged={what_changed} />
         </motion.section>
       )}
 
@@ -349,6 +381,27 @@ export function TechnologyDetailClient() {
         )}
       </motion.section>
 
+      {/* Deep Analysis Toggle */}
+      <motion.div
+        initial={prefersReducedMotion ? {} : { opacity: 0 }}
+        animate={prefersReducedMotion ? {} : { opacity: 1 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.3, delay: 0.35 }}
+        className="mb-4"
+      >
+        <button
+          onClick={() => setAdvancedOpen((o) => !o)}
+          className="flex w-full items-center justify-between rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/30 transition-colors"
+          aria-expanded={advancedOpen}
+        >
+          <span>Deep Analysis</span>
+          <ChevronDown
+            className={cn('h-4 w-4 text-muted-foreground transition-transform duration-200', advancedOpen && 'rotate-180')}
+          />
+        </button>
+      </motion.div>
+
+      {advancedOpen && (
+        <>
       {/* Score Breakdown — "Why This Score?" expandable explainer */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -587,17 +640,18 @@ export function TechnologyDetailClient() {
         <AlternativesPanel slug={slug} />
       </motion.section>
 
-      {/* Related Technologies */}
-      {related_technologies && related_technologies.length > 0 && (
-        <motion.section
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.5 }}
-        >
-          <h2 className="mb-4 text-xl font-semibold text-foreground">Related Technologies</h2>
-          <RelatedTechnologies technologies={related_technologies} />
-        </motion.section>
+        </>
       )}
+
+      {/* Pairing Intelligence */}
+      <motion.section
+        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.5 }}
+        className="mb-8"
+      >
+        <PairingIntelligencePanel slug={slug} techName={technology.name} />
+      </motion.section>
     </div>
   )
 }
