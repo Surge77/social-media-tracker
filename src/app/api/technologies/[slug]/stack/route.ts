@@ -117,6 +117,10 @@ export async function GET(
             scoreMap.set(s.technology_id, Number(s.composite_score))
           }
 
+          const slugToId = new Map<string, string>(
+            techsInCategories.map((t) => [t.slug, t.id])
+          )
+
           candidates = techsInCategories
             .map((t) => ({
               slug: t.slug,
@@ -125,8 +129,8 @@ export async function GET(
               description: t.description,
             }))
             .sort((a, b) => {
-              const idA = techsInCategories.find((t) => t.slug === a.slug)?.id ?? ''
-              const idB = techsInCategories.find((t) => t.slug === b.slug)?.id ?? ''
+              const idA = slugToId.get(a.slug) ?? ''
+              const idB = slugToId.get(b.slug) ?? ''
               return (scoreMap.get(idB) ?? 0) - (scoreMap.get(idA) ?? 0)
             })
             .slice(0, 80) // up to 80 candidates
