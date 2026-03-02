@@ -19,6 +19,7 @@ import type { ChartDataPoint } from '@/types'
 
 interface TrendChartProps {
   data: ChartDataPoint[]
+  mode?: 'full' | 'compact'
   className?: string
 }
 
@@ -29,7 +30,8 @@ const SCORE_ZONES = [
 ] as const
 
 export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
-  ({ data, className }, ref) => {
+  ({ data, mode = 'full', className }, ref) => {
+    const compact = mode === 'compact'
     // Compute period change stats
     const periodStats = useMemo(() => {
       if (!data || data.length < 2) return null
@@ -47,7 +49,7 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
         <div
           ref={ref}
           className={className}
-          style={{ width: '100%', height: 400 }}
+          style={{ width: '100%', height: compact ? 220 : 400 }}
         >
           <div className="flex h-full items-center justify-center rounded-lg border border-border bg-muted/20">
             <p className="text-sm text-muted-foreground">No chart data available</p>
@@ -111,7 +113,7 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
         {/* Period change summary */}
         {periodStats && (
           <div className="flex items-center gap-4 text-xs">
-            <span className="text-muted-foreground">30-day change:</span>
+            <span className="text-muted-foreground">{compact ? '90-day change:' : '30-day change:'}</span>
             <span className={cn(
               'inline-flex items-center gap-1 font-semibold',
               periodStats.change > 0 ? 'text-emerald-400' :
@@ -128,28 +130,30 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
               ({periodStats.pctChange > 0 ? '+' : ''}{periodStats.pctChange}%)
             </span>
             {/* Score zone legend */}
-            <div className="ml-auto hidden items-center gap-3 sm:flex">
-              {SCORE_ZONES.map((zone) => (
-                <span key={zone.label} className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                  <span
-                    className="inline-block h-2 w-4 rounded-sm"
-                    style={{ backgroundColor: zone.fill, opacity: 0.15 }}
-                  />
-                  {zone.label}
-                </span>
-              ))}
-            </div>
+            {!compact && (
+              <div className="ml-auto hidden items-center gap-3 sm:flex">
+                {SCORE_ZONES.map((zone) => (
+                  <span key={zone.label} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    <span
+                      className="inline-block h-2 w-4 rounded-sm"
+                      style={{ backgroundColor: zone.fill, opacity: 0.15 }}
+                    />
+                    {zone.label}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        <div style={{ width: '100%', height: 380 }}>
+        <div style={{ width: '100%', height: compact ? 220 : 380 }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={data}
               margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
             >
               {/* Score zone backgrounds */}
-              {SCORE_ZONES.map((zone) => (
+              {!compact && SCORE_ZONES.map((zone) => (
                 <ReferenceArea
                   key={zone.label}
                   y1={zone.y1}
@@ -160,8 +164,8 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
               ))}
 
               {/* Threshold reference lines */}
-              <ReferenceLine y={70} stroke="#10B981" strokeOpacity={0.2} strokeDasharray="4 4" />
-              <ReferenceLine y={40} stroke="#F59E0B" strokeOpacity={0.2} strokeDasharray="4 4" />
+              {!compact && <ReferenceLine y={70} stroke="#10B981" strokeOpacity={0.2} strokeDasharray="4 4" />}
+              {!compact && <ReferenceLine y={40} stroke="#F59E0B" strokeOpacity={0.2} strokeDasharray="4 4" />}
 
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.2} />
               <XAxis
@@ -181,11 +185,13 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
                 ticks={[0, 20, 40, 60, 80, 100]}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Legend
-                wrapperStyle={{ fontSize: '0.75rem', paddingTop: '0.5rem' }}
-                iconType="circle"
-                iconSize={8}
-              />
+              {!compact && (
+                <Legend
+                  wrapperStyle={{ fontSize: '0.75rem', paddingTop: '0.5rem' }}
+                  iconType="circle"
+                  iconSize={8}
+                />
+              )}
               <Line
                 type="monotone"
                 dataKey="composite"
@@ -195,46 +201,50 @@ export const TrendChart = React.forwardRef<HTMLDivElement, TrendChartProps>(
                 dot={false}
                 activeDot={{ r: 5, strokeWidth: 2 }}
               />
-              <Line
-                type="monotone"
-                dataKey="github"
-                name="GitHub"
-                stroke="#8B5CF6"
-                strokeWidth={1.5}
-                strokeDasharray="5 3"
-                dot={false}
-                activeDot={{ r: 3 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="community"
-                name="Community"
-                stroke="#06B6D4"
-                strokeWidth={1.5}
-                strokeDasharray="5 3"
-                dot={false}
-                activeDot={{ r: 3 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="jobs"
-                name="Jobs"
-                stroke="#10B981"
-                strokeWidth={1.5}
-                strokeDasharray="5 3"
-                dot={false}
-                activeDot={{ r: 3 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="ecosystem"
-                name="Ecosystem"
-                stroke="#F97316"
-                strokeWidth={1.5}
-                strokeDasharray="5 3"
-                dot={false}
-                activeDot={{ r: 3 }}
-              />
+              {!compact && (
+                <>
+                  <Line
+                    type="monotone"
+                    dataKey="github"
+                    name="GitHub"
+                    stroke="#8B5CF6"
+                    strokeWidth={1.5}
+                    strokeDasharray="5 3"
+                    dot={false}
+                    activeDot={{ r: 3 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="community"
+                    name="Community"
+                    stroke="#06B6D4"
+                    strokeWidth={1.5}
+                    strokeDasharray="5 3"
+                    dot={false}
+                    activeDot={{ r: 3 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="jobs"
+                    name="Jobs"
+                    stroke="#10B981"
+                    strokeWidth={1.5}
+                    strokeDasharray="5 3"
+                    dot={false}
+                    activeDot={{ r: 3 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="ecosystem"
+                    name="Ecosystem"
+                    stroke="#F97316"
+                    strokeWidth={1.5}
+                    strokeDasharray="5 3"
+                    dot={false}
+                    activeDot={{ r: 3 }}
+                  />
+                </>
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>

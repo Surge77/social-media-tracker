@@ -13,6 +13,9 @@ export interface QualityChecks {
   matchesConfidence: boolean
   noHallucination: boolean
   hasActionableAdvice: boolean
+  hasProsCons: boolean
+  prosConsNonGeneric: boolean
+  practicalBlocksPresent: boolean
   appropriateLength: boolean
 }
 
@@ -37,7 +40,6 @@ export function checkInsightQuality(
   confidenceGrade: string
 ): QualityResult {
   const text = JSON.stringify(insight)
-
   // 1. Cites data: does it reference specific numbers?
   const numberPattern = /\d+[,.]?\d*/g
   const numbersFound = text.match(numberPattern)?.length ?? 0
@@ -96,8 +98,49 @@ export function checkInsightQuality(
   ]
   const hasActionableAdvice = advicePatterns.some((p) => p.test(text))
 
+  const pros = Array.isArray(insight.pros)
+    ? insight.pros.filter((v): v is string => typeof v === 'string')
+    : []
+  const cons = Array.isArray(insight.cons)
+    ? insight.cons.filter((v): v is string => typeof v === 'string')
+    : []
+  const hasProsCons = pros.length >= 3 && cons.length >= 3
+
+  const genericPhrases = [
+    /good performance/i,
+    /easy to use/i,
+    /popular/i,
+    /depends on project/i,
+    /not always best/i,
+    /it may change/i,
+    /general web apps/i,
+  ]
+  const prosConsText = `${pros.join(' ')} ${cons.join(' ')}`.trim()
+  const genericHits = genericPhrases.filter((p) => p.test(prosConsText)).length
+  const prosConsNonGeneric =
+    hasProsCons &&
+    genericHits <= 1 &&
+    (prosConsText.match(/\d+[,.]?\d*/g)?.length ?? 0) >= 2
+
+  const practical =
+    insight.practicalAnalysis && typeof insight.practicalAnalysis === 'object'
+      ? (insight.practicalAnalysis as Record<string, unknown>)
+      : null
+  const effort = practical?.effortEstimate
+  const practicalBlocksPresent =
+    !!practical &&
+    typeof practical.bestFitUseCases === 'string' &&
+    practical.bestFitUseCases.trim().length >= 8 &&
+    typeof practical.avoidIf === 'string' &&
+    practical.avoidIf.trim().length >= 8 &&
+    typeof practical.adoptionRisks === 'string' &&
+    practical.adoptionRisks.trim().length >= 8 &&
+    typeof practical.outlook90d === 'string' &&
+    practical.outlook90d.trim().length >= 8 &&
+    (effort === 'low' || effort === 'medium' || effort === 'high')
+
   // 6. Appropriate length: not too short, not too long
-  const appropriateLength = text.length >= 200 && text.length <= 5000
+  const appropriateLength = text.length >= 250 && text.length <= 7000
 
   // Score calculation (weighted)
   const checks: QualityChecks = {
@@ -106,15 +149,21 @@ export function checkInsightQuality(
     matchesConfidence,
     noHallucination,
     hasActionableAdvice,
+    hasProsCons,
+    prosConsNonGeneric,
+    practicalBlocksPresent,
     appropriateLength,
   }
 
   const weights = {
-    citesData: 25,
-    mentionsPeers: 15,
-    matchesConfidence: 15,
-    noHallucination: 20,
-    hasActionableAdvice: 15,
+    citesData: 18,
+    mentionsPeers: 12,
+    matchesConfidence: 10,
+    noHallucination: 15,
+    hasActionableAdvice: 12,
+    hasProsCons: 12,
+    prosConsNonGeneric: 11,
+    practicalBlocksPresent: 10,
     appropriateLength: 10,
   }
 
@@ -123,5 +172,6 @@ export function checkInsightQuality(
     0
   )
 
-  return { checks, score, passed: score >= 60 }
+  const hardFail = !hasProsCons || !practicalBlocksPresent || !prosConsNonGeneric
+  return { checks, score, passed: !hardFail && score >= 60 }
 }

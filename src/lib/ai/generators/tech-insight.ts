@@ -85,6 +85,16 @@ export interface TechInsight {
   momentumContext: string
   lifecycleStage: string
   confidenceNote: string
+  // v2 fields for decision-focused analysis (optional for backward compatibility with old cache rows)
+  pros?: string[]
+  cons?: string[]
+  practicalAnalysis?: {
+    bestFitUseCases: string
+    avoidIf: string
+    adoptionRisks: string
+    effortEstimate: 'low' | 'medium' | 'high'
+    outlook90d: string
+  }
   lastUpdated: string
 }
 
@@ -128,7 +138,12 @@ function buildTechPrompt(ctx: TechInsightContext): string {
     {
       key: 'instruction',
       priority: 1,
-      content: `Analyze this technology and generate a TechInsight JSON with these fields: headline, learningPriority (critical/high/medium/low/skip), trendNarrative, careerAdvice, riskFactors, scoreExplanation, momentumContext, lifecycleStage, confidenceNote, lastUpdated.`,
+      content: `Analyze this technology and generate a TechInsight JSON with these fields: headline, learningPriority (critical/high/medium/low/skip), trendNarrative, careerAdvice, riskFactors, scoreExplanation, momentumContext, lifecycleStage, confidenceNote, pros (3-5 plain bullets), cons (3-5 plain bullets), practicalAnalysis { bestFitUseCases, avoidIf, adoptionRisks, effortEstimate(low/medium/high), outlook90d }, lastUpdated.
+
+Rules:
+- pros/cons must be evidence-grounded, specific, and non-generic
+- practicalAnalysis must be directly useful for both consumers and developers
+- do not output markdown lists; return JSON arrays of strings for pros/cons`,
     },
     {
       key: 'identity',

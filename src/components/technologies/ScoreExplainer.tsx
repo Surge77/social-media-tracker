@@ -29,6 +29,7 @@ interface ScoreExplainerProps {
     dimensions: ExplainerDimension[]
     compositeScore: number | null
     confidenceGrade?: string | null
+    mode?: 'full' | 'compact'
     className?: string
 }
 
@@ -205,6 +206,7 @@ export function ScoreExplainer({
     dimensions,
     compositeScore,
     confidenceGrade,
+    mode = 'full',
     className,
 }: ScoreExplainerProps) {
     const isLowConfidence = confidenceGrade === 'D' || confidenceGrade === 'F'
@@ -217,6 +219,45 @@ export function ScoreExplainer({
     const topDrag = scoredDims.length > 0
         ? scoredDims.reduce((a, b) => (a.score! < b.score! ? a : b))
         : null
+
+    const compactDimensions = [...dimensions]
+        .filter((d) => d.score !== null)
+        .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+        .slice(0, 3)
+
+    if (mode === 'compact') {
+        return (
+            <div className={cn('space-y-2.5', className)}>
+                {compositeScore !== null && topBooster && topDrag && topBooster.key !== topDrag.key && (
+                    <div className="rounded-md border border-primary/15 bg-primary/5 px-3 py-2">
+                        <p className="text-xs text-muted-foreground">
+                            <span className="text-emerald-400 font-medium">Boost: {DIMENSION_LABELS[topBooster.key]}</span>
+                            {' · '}
+                            <span className="text-amber-400 font-medium">Drag: {DIMENSION_LABELS[topDrag.key]}</span>
+                        </p>
+                    </div>
+                )}
+                <div className="space-y-1.5">
+                    {compactDimensions.map((dim) => (
+                        <div key={dim.key} className="flex items-center justify-between rounded-md border border-border/40 bg-muted/10 px-2.5 py-2">
+                            <span className="text-xs text-muted-foreground">{DIMENSION_LABELS[dim.key]}</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-muted-foreground">{dim.weightPct}%</span>
+                                <span className={cn('font-mono text-xs font-semibold', getScoreColor(dim.score, isLowConfidence))}>
+                                    {dim.score != null ? Math.round(dim.score) : '—'}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                {isLowConfidence && (
+                    <p className="text-[11px] text-slate-400">
+                        Low confidence: this score may shift as additional sources are collected.
+                    </p>
+                )}
+            </div>
+        )
+    }
 
     return (
         <div className={cn('space-y-3', className)}>
