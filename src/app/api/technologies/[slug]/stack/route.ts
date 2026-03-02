@@ -67,9 +67,11 @@ export async function GET(
     // 3. Cache hit: parse content as { companions, stackSummary }
     if (cached?.content) {
       try {
-        const raw = cached.content as Record<string, unknown>
-        if (raw.companions && Array.isArray(raw.companions)) {
-          analysis = raw as unknown as StackAnalysisResult
+        const parsed = cached.content as Record<string, unknown>
+        const companions = (parsed.companions as StackAnalysisResult['companions']) ?? []
+        const stackSummary = typeof parsed.stackSummary === 'string' ? parsed.stackSummary : ''
+        if (Array.isArray(companions) && companions.length > 0) {
+          analysis = { companions, stackSummary }
         }
       } catch {
         // Cache corrupted — regenerate below
@@ -99,6 +101,7 @@ export async function GET(
           .in('category', complementCategories)
           .eq('is_active', true)
           .neq('id', technology.id)
+          .limit(80)
 
         if (techsInCategories && techsInCategories.length > 0) {
           const ids = techsInCategories.map((t) => t.id)
@@ -179,7 +182,8 @@ export async function GET(
       return NextResponse.json({ stack: [], stackSummary: null })
     }
 
-    // 5. Enrich companion entries with live scores — 2 parallel queries
+    // 5. Enrich companion entries with live scores
+    // Step A: fetch tech metadata + latest score date in parallel
     const companionSlugs = analysis.companions.map((c) => c.slug)
 
     const [techsResult, latestScoreDateResult] = await Promise.all([
@@ -198,15 +202,17 @@ export async function GET(
 
     const techs = techsResult.data ?? []
     const techMap = new Map(techs.map((t) => [t.slug, t]))
+    const techIds = techs.map((t) => t.id)
 
+    // Step B: fetch daily_scores using IDs obtained from Step A
     const scoreMap = new Map<string, { composite_score: number; momentum: number }>()
-    if (latestScoreDateResult.data && techs.length > 0) {
-      const ids = techs.map((t) => t.id)
+    if (latestScoreDateResult.data && techIds.length > 0) {
       const { data: scores } = await supabase
         .from('daily_scores')
         .select('technology_id, composite_score, momentum')
-        .in('technology_id', ids)
+        .in('technology_id', techIds)
         .eq('score_date', latestScoreDateResult.data.score_date)
+        .limit(techIds.length * 2)
 
       for (const s of scores ?? []) {
         scoreMap.set(s.technology_id, {
