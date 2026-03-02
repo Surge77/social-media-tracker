@@ -160,9 +160,11 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                   >
                     {data.hidden_gem.name}
                   </Link>
-                  <span className="text-xs text-muted-foreground">
-                    {data.hidden_gem.jobs_score} jobs score
-                  </span>
+                  {data.hidden_gem.jobs_score != null && (
+                    <span className="text-xs text-muted-foreground">
+                      {data.hidden_gem.jobs_score} jobs score
+                    </span>
+                  )}
                 </>
               ) : (
                 <span className="text-sm text-muted-foreground">None</span>
@@ -177,22 +179,25 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
             content={
               data.trending.length > 0 ? (
                 <div className="flex flex-col gap-0.5">
-                  {data.trending.slice(0, 3).map((tech) => (
-                    <div key={tech.slug} className="flex items-center justify-between gap-2">
-                      <Link
-                        href={`/technologies/${tech.slug}`}
-                        className="truncate text-sm font-medium text-foreground hover:text-primary transition-colors"
-                      >
-                        {tech.name}
-                      </Link>
-                      <span className={cn(
-                        'shrink-0 text-xs font-medium tabular-nums',
-                        tech.momentum > 0 ? 'text-emerald-400' : 'text-red-400'
-                      )}>
-                        {tech.momentum > 0 ? '+' : ''}{tech.momentum.toFixed(1)}
-                      </span>
-                    </div>
-                  ))}
+                  {data.trending.slice(0, 3).map((tech) => {
+                    const mom = tech.momentum ?? 0
+                    return (
+                      <div key={tech.slug} className="flex items-center justify-between gap-2">
+                        <Link
+                          href={`/technologies/${tech.slug}`}
+                          className="truncate text-sm font-medium text-foreground hover:text-primary transition-colors"
+                        >
+                          {tech.name}
+                        </Link>
+                        <span className={cn(
+                          'shrink-0 text-xs font-medium tabular-nums',
+                          mom > 0 ? 'text-emerald-400' : 'text-red-400'
+                        )}>
+                          {mom > 0 ? '+' : ''}{mom.toFixed(1)}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
               ) : (
                 <span className="text-sm text-muted-foreground">—</span>
@@ -213,9 +218,11 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                   >
                     {data.safest_bet.name}
                   </Link>
-                  <span className="text-xs text-muted-foreground">
-                    {data.safest_bet.composite_score} score
-                  </span>
+                  {data.safest_bet.composite_score != null && (
+                    <span className="text-xs text-muted-foreground">
+                      {data.safest_bet.composite_score} score
+                    </span>
+                  )}
                 </>
               ) : (
                 <span className="text-sm text-muted-foreground">—</span>
