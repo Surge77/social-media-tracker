@@ -27,8 +27,22 @@ export async function GET(request: Request) {
     console.log(`[Batch Scoring] Running scoring pipeline for ${today}`)
 
     const { scored, errors } = await runScoringPipeline(supabase, today)
+    const { data: rowsForDate } = await supabase
+      .from('daily_scores')
+      .select('technology_id, jobs_score, onchain_score')
+      .eq('score_date', today)
+    const { data: blockchainTechs } = await supabase
+      .from('technologies')
+      .select('id')
+      .eq('category', 'blockchain')
+      .eq('is_active', true)
 
     const duration = Date.now() - startTime
+    const totalRows = rowsForDate?.length ?? 0
+    const missingJobs = rowsForDate?.filter((r) => r.jobs_score === null).length ?? 0
+    const blockchainIdSet = new Set((blockchainTechs ?? []).map((t) => t.id as string))
+    const blockchainRows = rowsForDate?.filter((r) => blockchainIdSet.has(r.technology_id as string)) ?? []
+    const blockchainWithOnchain = blockchainRows.filter((r) => r.onchain_score !== null).length
 
     await supabase.from('fetch_logs').insert({
       source: 'daily_scoring',
@@ -48,6 +62,12 @@ export async function GET(request: Request) {
       scored,
       duration: `${duration}ms`,
       errors,
+      diagnostics: {
+        score_rows_for_date: totalRows,
+        rows_missing_jobs_score: missingJobs,
+        blockchain_rows: blockchainRows.length,
+        blockchain_rows_with_onchain: blockchainWithOnchain,
+      },
     })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)

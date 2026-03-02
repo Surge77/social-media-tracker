@@ -7,13 +7,18 @@ import {
   computeJobsScore,
   computeEcosystemScore,
   computeCompositeScore,
+  getExpectedDimensionCount,
 } from '@/lib/scoring/composite'
 import { bayesianSmooth } from '@/lib/scoring/bayesian'
 import { getAdaptiveWeights } from '@/lib/scoring/adaptive-weights'
 import { analyzeMomentum, computeLegacyMomentum } from '@/lib/scoring/enhanced-momentum'
 import { computeConfidence } from '@/lib/scoring/confidence'
 import { classifyLifecycle } from '@/lib/analysis/lifecycle'
-import { computeOnchainScore } from '@/lib/api/blockchain-score'
+import {
+  computeOnchainScore,
+  fetchOnchainSharedContext,
+  type OnchainScoreResult,
+} from '@/lib/api/blockchain-score'
 
 interface TechDataPoints {
   technologyId: string
@@ -108,7 +113,7 @@ export async function runScoringPipeline(
   // Step 2: Fetch today's data_points for all technologies
   const { data: dataPoints, error: dpError } = await supabase
     .from('data_points')
-    .select('technology_id, source, metric, value')
+    .select('technology_id, source, metric, value, measured_at')
     .eq('measured_at', date)
     .in('technology_id', techIds)
 
@@ -122,22 +127,31 @@ export async function runScoringPipeline(
 
   console.log(`[Scoring] Found ${dataPoints.length} data points for ${date}`)
 
-  // Step 2b: Supplement with latest job data from data_points_latest
+  // Step 2b: Supplement with latest job data from data_points table
   // Jobs are fetched weekly, so on most days there are no job data_points for today.
-  // We pull the latest job data to ensure jobs_score is always computed.
+  // We pull latest per source so jobs_score is always computed with known recency.
   const todayHasJobs = dataPoints.some(
     (dp) => dp.metric === 'job_postings'
   )
   if (!todayHasJobs) {
     const { data: latestJobPoints } = await supabase
-      .from('data_points_latest')
-      .select('technology_id, source, metric, value')
+      .from('data_points')
+      .select('technology_id, source, metric, value, measured_at')
       .eq('metric', 'job_postings')
       .in('technology_id', techIds)
+      .order('measured_at', { ascending: false })
 
     if (latestJobPoints && latestJobPoints.length > 0) {
-      console.log(`[Scoring] Supplemented with ${latestJobPoints.length} latest job data points`)
-      dataPoints.push(...latestJobPoints)
+      const sourceSeen = new Set<string>()
+      const deduped: typeof latestJobPoints = []
+      for (const dp of latestJobPoints) {
+        const key = `${dp.technology_id}:${dp.source}`
+        if (sourceSeen.has(key)) continue
+        sourceSeen.add(key)
+        deduped.push(dp)
+      }
+      console.log(`[Scoring] Supplemented with ${deduped.length} latest job data points`)
+      dataPoints.push(...deduped)
     }
   }
 
@@ -370,18 +384,30 @@ export async function runScoringPipeline(
     }
   }
 
+  // Shared blockchain context fetched once per run to avoid repeated network calls
+  const blockchainSharedContext = await fetchOnchainSharedContext().catch(() => ({
+    protocols: [],
+    chainActivityScore: 50,
+  }))
+
   // Step 6: Compute sub-scores and composite for each technology
 
   // Pre-build dpCount and sourceSet maps to avoid O(n²) filters inside the loop (OPT-01, OPT-02)
   const dpCountMap = new Map<string, number>()
   const sourceMap = new Map<string, Set<string>>()
+  const latestMeasuredAtMap = new Map<string, string>()
   for (const dp of dataPoints) {
     dpCountMap.set(dp.technology_id, (dpCountMap.get(dp.technology_id) ?? 0) + 1)
     if (!sourceMap.has(dp.technology_id)) sourceMap.set(dp.technology_id, new Set())
     sourceMap.get(dp.technology_id)!.add(dp.source)
+    if (typeof dp.measured_at === 'string') {
+      const prev = latestMeasuredAtMap.get(dp.technology_id)
+      if (!prev || dp.measured_at > prev) latestMeasuredAtMap.set(dp.technology_id, dp.measured_at)
+    }
   }
 
   const scoredRows: ScoredTechnology[] = []
+  const onchainDetailMap = new Map<string, OnchainScoreResult>()
   const rawComposites: number[] = []
   const dataPointCounts: number[] = []
 
@@ -484,7 +510,10 @@ export async function runScoringPipeline(
     const techSlug = techSlugMap.get(tech.technologyId) ?? ''
     let onchainScore: number | null = null
     if (category === 'blockchain') {
-      onchainScore = await computeOnchainScore(techSlug).then((r) => r.onchain_score).catch(() => null)
+      const onchainResult = await computeOnchainScore(techSlug, blockchainSharedContext)
+        .catch(() => null)
+      onchainScore = onchainResult?.onchain_score ?? null
+      if (onchainResult) onchainDetailMap.set(tech.technologyId, onchainResult)
     }
 
     // Compute adaptive weights based on category and maturity
@@ -495,7 +524,8 @@ export async function runScoringPipeline(
 
     // Count how many data points this tech has today (O(1) via pre-built map)
     const dpCount = dpCountMap.get(tech.technologyId) ?? 0
-    const dpCompleteness = dpCount / 12 // 12 is max possible metrics
+    const expectedDims = getExpectedDimensionCount(category)
+    const dpCompleteness = Math.min(1, dpCount / Math.max(1, expectedDims * 3))
 
     const adaptiveWeights = getAdaptiveWeights(category, dataAgeDays, dpCompleteness)
 
@@ -553,6 +583,7 @@ export async function runScoringPipeline(
         jobs: jobsScore,
         ecosystem: ecosystemScore,
         onchain: onchainScore,
+        onchain_detail: onchainDetailMap.get(tech.technologyId) ?? null,
         // Libraries.io signals (Source 2)
         librariesio: tech.sourcerank !== null || tech.dependentsCount !== null
           ? {
@@ -628,7 +659,10 @@ export async function runScoringPipeline(
     // Confidence scoring
     const category = techCategoryMap.get(row.technology_id) ?? 'language'
     const activeSources = sourceMap.get(row.technology_id)?.size ?? 0
-    const latestDpAge = 0 // Today's data is 0 hours old
+    const latestMeasuredAt = latestMeasuredAtMap.get(row.technology_id)
+    const latestDpAge = latestMeasuredAt
+      ? Math.max(0, (new Date(date).getTime() - new Date(latestMeasuredAt).getTime()) / 3600000)
+      : 168
     const historyDays = history.length
 
     const confidence = computeConfidence(
@@ -667,7 +701,9 @@ export async function runScoringPipeline(
       : 365
     const rowDpCount = dpCountMap.get(row.technology_id) ?? 0
     const rowCategory = techCategoryMap.get(row.technology_id) ?? 'language'
-    const rowAdaptiveWeights = getAdaptiveWeights(rowCategory, rowDataAgeDays, rowDpCount / 12)
+    const rowExpectedDims = getExpectedDimensionCount(rowCategory)
+    const rowCompleteness = Math.min(1, rowDpCount / Math.max(1, rowExpectedDims * 3))
+    const rowAdaptiveWeights = getAdaptiveWeights(rowCategory, rowDataAgeDays, rowCompleteness)
 
     // Store enhanced momentum + confidence + lifecycle in raw_sub_scores
     row.raw_sub_scores = {

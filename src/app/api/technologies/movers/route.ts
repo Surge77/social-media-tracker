@@ -1,6 +1,11 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getPrimaryDriver } from '@/lib/insights/ai-summaries'
 import { NextRequest } from 'next/server'
+import {
+  getCanonicalScoringDate,
+  getNearestDateAtOrBefore,
+  getTargetDateDaysAgo,
+} from '@/lib/scoring/scoring-date'
 
 /**
  * GET /api/technologies/movers?period=7d
@@ -15,46 +20,19 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') === '30d' ? '30d' : '7d'
     const daysAgo = period === '7d' ? 7 : 30
 
-    // Get the most recent score date (for display)
-    const { data: latestDateRow } = await supabase
-      .from('daily_scores')
-      .select('score_date')
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
-
-    const lastUpdated = latestDateRow?.score_date ?? null
+    const { lastUpdated, scoringDate } = await getCanonicalScoringDate(supabase)
 
     if (!lastUpdated) {
       return Response.json({ period, risers: [], fallers: [], last_updated: null })
     }
 
-    // Use the most recent date with complete scores (non-null jobs_score)
-    const { data: completeDateRow } = await supabase
-      .from('daily_scores')
-      .select('score_date')
-      .not('jobs_score', 'is', null)
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
-
-    const scoringDate = completeDateRow?.score_date ?? lastUpdated
+    const activeScoringDate = scoringDate ?? lastUpdated
 
     // Find nearest available date at least daysAgo before scoringDate
-    const targetDate = new Date(scoringDate)
-    targetDate.setDate(targetDate.getDate() - daysAgo)
-    const targetDateStr = targetDate.toISOString().split('T')[0]
-
-    const { data: prevDateRow } = await supabase
-      .from('daily_scores')
-      .select('score_date')
-      .lte('score_date', targetDateStr)
-      .not('jobs_score', 'is', null)
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
-
-    const previousDate = prevDateRow?.score_date ?? null
+    const targetDateStr = getTargetDateDaysAgo(activeScoringDate, daysAgo)
+    const previousDate = targetDateStr
+      ? await getNearestDateAtOrBefore(supabase, targetDateStr, true)
+      : null
 
     if (!previousDate) {
       return Response.json({ period, risers: [], fallers: [], last_updated: lastUpdated })
@@ -64,7 +42,7 @@ export async function GET(request: NextRequest) {
     const { data: latestScores } = await supabase
       .from('daily_scores')
       .select('technology_id, composite_score, github_score, community_score, jobs_score, ecosystem_score, momentum')
-      .eq('score_date', scoringDate)
+      .eq('score_date', activeScoringDate)
 
     // Fetch previous scores
     const { data: previousScores } = await supabase

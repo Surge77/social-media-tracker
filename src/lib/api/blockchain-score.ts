@@ -1,29 +1,45 @@
-import { fetchTopProtocols } from './defillama'
+import { fetchTopProtocols, type Protocol } from './defillama'
 import { fetchDeveloperData, computeCoinGeckoDevScore, COINGECKO_ID_MAP } from './coingecko'
 import { computeEthereumActivityScore } from './etherscan'
 
 export interface OnchainScoreResult {
-  onchain_score: number        // 0-100
-  tvl_score: number            // 0-100 (TVL rank among all protocols)
-  dev_activity_score: number   // 0-100 (CoinGecko dev data)
-  chain_activity_score: number // 0-100 (Etherscan network activity)
+  onchain_score: number
+  tvl_score: number
+  dev_activity_score: number
+  chain_activity_score: number
+}
+
+export interface OnchainSharedContext {
+  protocols: Protocol[]
+  chainActivityScore: number
 }
 
 // Map tech slugs to their DeFiLlama protocol slugs for TVL lookup
 const DEFILLAMA_SLUG_MAP: Record<string, string> = {
-  'uniswap':      'uniswap',
-  'aave':         'aave-v3',
-  'chainlink':    'chainlink',
-  'the-graph':    'the-graph',
-  'ipfs':         'filecoin',
-  'openzeppelin': '',  // No direct TVL — skip
+  uniswap: 'uniswap',
+  aave: 'aave-v3',
+  chainlink: 'chainlink',
+  'the-graph': 'the-graph',
+  ipfs: 'filecoin',
+  openzeppelin: '',
 }
 
-export async function computeOnchainScore(techSlug: string): Promise<OnchainScoreResult> {
+export async function fetchOnchainSharedContext(): Promise<OnchainSharedContext> {
   const [protocols, chainActivityScore] = await Promise.all([
     fetchTopProtocols().catch(() => []),
     computeEthereumActivityScore().catch(() => 50),
   ])
+
+  return { protocols, chainActivityScore }
+}
+
+export async function computeOnchainScore(
+  techSlug: string,
+  shared?: OnchainSharedContext
+): Promise<OnchainScoreResult> {
+  const sharedContext = shared ?? await fetchOnchainSharedContext()
+  const protocols = sharedContext.protocols
+  const chainActivityScore = sharedContext.chainActivityScore
 
   // TVL score: rank the protocol among top 100, normalize to 0-100
   const llamaSlug = DEFILLAMA_SLUG_MAP[techSlug]

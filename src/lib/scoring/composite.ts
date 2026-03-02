@@ -152,6 +152,11 @@ const MAX_POSSIBLE_DIMENSIONS: Record<string, number> = {
   other: 4,
 }
 
+export function getExpectedDimensionCount(category?: string): number {
+  if (!category) return 4
+  return MAX_POSSIBLE_DIMENSIONS[category] ?? 4
+}
+
 /**
  * Compute the final composite score with weight redistribution.
  *
@@ -192,7 +197,7 @@ export function computeCompositeScore(
   )
 
   // Use category-relative max so cloud/devops techs aren't unfairly penalized
-  const maxDims = category ? (MAX_POSSIBLE_DIMENSIONS[category] ?? 4) : 4
+  const maxDims = getExpectedDimensionCount(category)
   const completeness = Math.min(1, available.length / maxDims)
 
   return {

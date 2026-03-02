@@ -1,6 +1,11 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { CATEGORY_LABELS } from '@/types'
 import type { TechnologyCategory } from '@/types'
+import {
+  getCanonicalScoringDate,
+  getNearestDateAtOrBefore,
+  getTargetDateDaysAgo,
+} from '@/lib/scoring/scoring-date'
 
 type TrendLabel = 'Booming' | 'Growing' | 'Stable' | 'Mature' | 'Cooling'
 
@@ -40,53 +45,20 @@ const STACK_TEMPLATES = [
   { name: 'Backend Heavy', emoji: '⚙️', description: 'Scalable services', slugs: ['go', 'postgresql', 'redis', 'docker'] },
 ]
 
-/** Find the nearest available score_date that is <= the given target date string */
-async function findNearestDate(
-  supabase: ReturnType<typeof createSupabaseAdminClient>,
-  targetDate: string,
-): Promise<string | null> {
-  const { data } = await supabase
-    .from('daily_scores')
-    .select('score_date')
-    .lte('score_date', targetDate)
-    .order('score_date', { ascending: false })
-    .limit(1)
-    .single()
-  return data?.score_date ?? null
-}
-
 export async function GET() {
   try {
     const supabase = createSupabaseAdminClient()
 
-    // 1. Get the most recent scored date (for display)
-    const { data: latestDateRow } = await supabase
-      .from('daily_scores')
-      .select('score_date')
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
-
-    const lastUpdated = latestDateRow?.score_date ?? null
+    // 1. Canonical score dates (display latest + scoring latest complete)
+    const { lastUpdated, scoringDate } = await getCanonicalScoringDate(supabase)
     if (!lastUpdated) {
       return Response.json({ error: 'No score data available yet' }, { status: 404 })
     }
-
-    // 2. Use most recent complete date (non-null jobs_score) as the scoring date
-    const { data: completeDateRow } = await supabase
-      .from('daily_scores')
-      .select('score_date')
-      .not('jobs_score', 'is', null)
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
-
-    const scoringDate = completeDateRow?.score_date ?? lastUpdated
+    const activeScoringDate = scoringDate ?? lastUpdated
 
     // 3. Find nearest comparison date at least 7 days before scoringDate with complete data
-    const targetPrevDate = new Date(scoringDate)
-    targetPrevDate.setDate(targetPrevDate.getDate() - 7)
-    const previousDate = await findNearestDate(supabase, targetPrevDate.toISOString().split('T')[0])
+    const targetPrevDate = getTargetDateDaysAgo(activeScoringDate, 7)
+    const previousDate = await getNearestDateAtOrBefore(supabase, targetPrevDate, true)
 
     // 4. Run all queries in parallel
     const [techResult, latestScoresResult, previousScoresResult, newTechsResult] = await Promise.all([
@@ -97,7 +69,7 @@ export async function GET() {
       supabase
         .from('daily_scores')
         .select('technology_id, composite_score, community_score, github_score, ecosystem_score, momentum, jobs_score')
-        .eq('score_date', scoringDate),
+        .eq('score_date', activeScoringDate),
       previousDate
         ? supabase
             .from('daily_scores')
@@ -108,7 +80,7 @@ export async function GET() {
         .from('technologies')
         .select('id')
         .eq('is_active', true)
-        .gte('created_at', previousDate ?? scoringDate),
+        .gte('created_at', previousDate ?? activeScoringDate),
     ])
 
     if (techResult.error) throw new Error(techResult.error.message)

@@ -26,6 +26,7 @@ export type UseCase =
   | 'negotiation'
   | 'roadmap-summary'
   | 'recommendation'
+  | 'stack-analysis'
 
 interface RouteConfig {
   preferredProvider: string
@@ -132,6 +133,12 @@ export const ROUTING_TABLE: Record<UseCase, RouteConfig> = {
     fallbackOrder: ['mistral', 'xai', 'openrouter', 'groq', 'huggingface'],
     maxLatencyMs: 3000,
     temperature: 0.7,
+  },
+  'stack-analysis': {
+    preferredProvider: 'gemini',
+    fallbackOrder: ['xai', 'mistral', 'openrouter', 'groq', 'huggingface'],
+    maxLatencyMs: 5000,
+    temperature: 0.3,
   },
 }
 

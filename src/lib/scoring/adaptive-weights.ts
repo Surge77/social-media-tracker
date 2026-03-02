@@ -46,6 +46,7 @@ export function getAdaptiveWeights(
   dataCompleteness: number
 ): WeightProfile {
   const base = CATEGORY_WEIGHTS[category]
+  const isBlockchain = category === 'blockchain'
 
   // Maturity factor: 0 = brand new, 1 = mature (>365 days of data)
   const maturity = Math.min(1, dataAgeDays / 365)
@@ -57,6 +58,7 @@ export function getAdaptiveWeights(
     community: base.community * (1 + (1 - maturity) * 0.2),
     jobs:      base.jobs      * (1 + maturity * 0.2),
     ecosystem: base.ecosystem * (1 + maturity * 0.1),
+    ...(isBlockchain ? { onchain: (base.onchain ?? 0) * (1 + maturity * 0.15) } : {}),
   }
 
   // Low completeness: reduce weight of dimensions more likely to be missing
@@ -66,16 +68,23 @@ export function getAdaptiveWeights(
     raw.ecosystem *= 0.9
     raw.github *= 1.1
     raw.community *= 1.1
+    if (isBlockchain && raw.onchain !== undefined) {
+      raw.onchain *= 0.95
+    }
   }
 
   // Re-normalize so weights sum to 1.0
-  const total = raw.github + raw.community + raw.jobs + raw.ecosystem
-  return {
+  const total = raw.github + raw.community + raw.jobs + raw.ecosystem + (raw.onchain ?? 0)
+  const normalized = {
     github:    raw.github    / total,
     community: raw.community / total,
     jobs:      raw.jobs      / total,
     ecosystem: raw.ecosystem / total,
   }
+
+  return isBlockchain
+    ? { ...normalized, onchain: (raw.onchain ?? 0) / total }
+    : normalized
 }
 
 /**

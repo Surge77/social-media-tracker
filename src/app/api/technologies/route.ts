@@ -3,6 +3,11 @@ import { generateTechSummary } from '@/lib/insights/ai-summaries'
 import { getLifecycleDescription } from '@/lib/analysis/lifecycle'
 import type { TechnologyWithScore } from '@/types'
 import type { LifecycleStage } from '@/lib/analysis/lifecycle'
+import {
+  getCanonicalScoringDate,
+  getNearestDateAtOrBefore,
+  getTargetDateDaysAgo,
+} from '@/lib/scoring/scoring-date'
 
 /**
  * GET /api/technologies
@@ -14,48 +19,18 @@ export async function GET() {
   try {
     const supabase = createSupabaseAdminClient()
 
-    // Get the most recent score date (for display)
-    const { data: latestDateRow } = await supabase
-      .from('daily_scores')
-      .select('score_date')
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
+    const { lastUpdated, scoringDate } = await getCanonicalScoringDate(supabase)
 
-    const lastUpdated = latestDateRow?.score_date ?? null
-
-    // Use the most recent date WITH complete scores (non-null jobs_score).
-    // If the latest run is incomplete (jobs failed), fall back to the previous complete run.
-    const { data: completeDateRow } = await supabase
-      .from('daily_scores')
-      .select('score_date')
-      .not('jobs_score', 'is', null)
-      .order('score_date', { ascending: false })
-      .limit(1)
-      .single()
-
-    const scoringDate = completeDateRow?.score_date ?? lastUpdated
-
-    // Compute date ranges from the scoring date
-    const sevenDaysAgo = scoringDate ? new Date(scoringDate) : null
-    if (sevenDaysAgo) sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-    const sevenDaysAgoStr = sevenDaysAgo?.toISOString().split('T')[0]
-
-    // Find nearest date with data at least 7 days back
-    const prevDateResult = sevenDaysAgoStr
-      ? await supabase
-          .from('daily_scores')
-          .select('score_date')
-          .lte('score_date', sevenDaysAgoStr)
-          .order('score_date', { ascending: false })
-          .limit(1)
-          .single()
+    const sevenDaysAgoStr = scoringDate
+      ? getTargetDateDaysAgo(scoringDate, 7)
       : null
-    const previousDate = prevDateResult?.data?.score_date ?? null
+    const previousDate = sevenDaysAgoStr
+      ? await getNearestDateAtOrBefore(supabase, sevenDaysAgoStr, true)
+      : null
 
-    const thirtyDaysAgo = scoringDate ? new Date(scoringDate) : null
-    if (thirtyDaysAgo) thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-    const thirtyDaysAgoStr = thirtyDaysAgo?.toISOString().split('T')[0]
+    const thirtyDaysAgoStr = scoringDate
+      ? getTargetDateDaysAgo(scoringDate, 30)
+      : null
 
     // Run all queries in parallel (OPT-02)
     const [techResult, scoresResult, previousScoresResult, sparklineResult] = await Promise.all([
