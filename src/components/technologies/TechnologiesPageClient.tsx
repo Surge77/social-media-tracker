@@ -18,6 +18,7 @@ import { WeeklyDigest } from '@/components/technologies/WeeklyDigest'
 import { LiveContextStrip } from '@/components/technologies/LiveContextStrip'
 import PopularStacks from '@/components/technologies/PopularStacks'
 import MethodologyPanel from '@/components/technologies/MethodologyPanel'
+import { MetricsGlossary } from '@/components/technologies/MetricsGlossary'
 import { Loading } from '@/components/ui/loading'
 import { DotPattern } from '@/components/ui/dot-pattern'
 import { WordPullUp } from '@/components/ui/word-pull-up'
@@ -145,6 +146,9 @@ export function TechnologiesPageClient() {
               {new Date(lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
           )}
+        </div>
+        <div className="mt-4">
+          <MetricsGlossary variant="list" />
         </div>
       </motion.div>
 

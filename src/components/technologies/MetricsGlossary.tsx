@@ -20,23 +20,102 @@ interface Section {
   terms: Term[]
 }
 
-const SECTIONS: Section[] = [
+// ---- List page sections ----
+
+const LIST_SECTIONS: Section[] = [
+  {
+    title: 'Verdict Badges',
+    terms: [
+      {
+        term: 'Learn It',
+        definition: 'Strong job demand + rising momentum + above-median score. The clearest signal to invest time now — low risk, high reward.',
+        badge: { label: 'Learn It', className: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/25' },
+      },
+      {
+        term: 'Watch It',
+        definition: 'Momentum is accelerating or demand is building. Early movers will benefit — worth starting soon before competition increases.',
+        badge: { label: 'Watch It', className: 'text-amber-500 bg-amber-500/10 border-amber-500/25' },
+      },
+      {
+        term: 'Maintain',
+        definition: 'Solid demand but not accelerating. If it\'s already in your stack, keep it. New learners should compare alternatives first.',
+        badge: { label: 'Maintain', className: 'text-sky-400 bg-sky-500/10 border-sky-500/25' },
+      },
+      {
+        term: 'Caution',
+        definition: 'Job and momentum signals are inconsistent — one is strong, one is weak. Evaluate your specific context before committing significant time.',
+        badge: { label: 'Caution', className: 'text-orange-500 bg-orange-500/10 border-orange-500/25' },
+      },
+      {
+        term: 'Declining',
+        definition: 'Multiple signals — momentum, demand, or community — are falling. Your time is likely better spent on higher-momentum alternatives.',
+        badge: { label: 'Declining', className: 'text-red-400 bg-red-500/10 border-red-500/25' },
+      },
+    ],
+  },
+  {
+    title: 'Sub-score Bars  (GH · CO · JB · EC)',
+    terms: [
+      {
+        term: 'GH — GitHub',
+        definition: 'Open-source health: star velocity, fork momentum, issue close rate, and active contributors. High = lots of developer attention and active maintenance.',
+        badge: { label: 'GH', className: 'text-violet-400 bg-violet-500/10 border-violet-500/25' },
+      },
+      {
+        term: 'CO — Community',
+        definition: 'Developer buzz across Hacker News, Reddit, Dev.to, tech blogs, and YouTube. High = developers are actively talking about and teaching it.',
+        badge: { label: 'CO', className: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/25' },
+      },
+      {
+        term: 'JB — Jobs',
+        definition: 'Employer demand across Adzuna, JSearch, and Remotive job listings. High = companies are actively hiring for this skill right now.',
+        badge: { label: 'JB', className: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25' },
+      },
+      {
+        term: 'EC — Ecosystem',
+        definition: 'Adoption depth: package downloads, Stack Overflow question volume, and dependent package count. High = the ecosystem is mature and well-supported.',
+        badge: { label: 'EC', className: 'text-amber-400 bg-amber-500/10 border-amber-500/25' },
+      },
+    ],
+  },
+  {
+    title: 'Other Indicators',
+    terms: [
+      {
+        term: 'Score (0–100)',
+        definition: 'Composite signal combining GitHub, Community, Jobs, and Ecosystem — weighted by category. A language weights jobs heavily; an AI/ML framework weights community more.',
+      },
+      {
+        term: 'Momentum',
+        definition: 'Direction of change over the past 30–90 days, computed from a 3-window exponential moving average. Rising = score trending up; Declining = trending down; Stable = holding steady.',
+      },
+      {
+        term: 'Job demand bar',
+        definition: 'The raw jobs sub-score (0–100) visualized as a fill bar. Directly represents how many job postings mention this technology relative to all tracked techs.',
+      },
+    ],
+  },
+]
+
+// ---- Detail page sections ----
+
+const DETAIL_SECTIONS: Section[] = [
   {
     title: 'Career & Stack Verdicts',
     terms: [
       {
         term: 'Learn Now',
-        definition: 'Strong composite score, positive momentum, and solid job demand. Investing time now has a high expected return.',
+        definition: 'Strong composite score, positive momentum, and solid job demand. Investing time here has a high expected return.',
         badge: { label: 'Career', className: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25' },
       },
       {
         term: 'Watch',
-        definition: 'Promising signals but not yet a clear win — either data is limited, momentum is early, or job demand is uncertain. Check back in 30–60 days.',
+        definition: 'Promising signals but not yet a clear win — data may be limited, momentum is early, or job demand is uncertain. Revisit in 30–60 days.',
         badge: { label: 'Career', className: 'text-amber-400 bg-amber-500/10 border-amber-500/25' },
       },
       {
         term: 'Low Priority',
-        definition: 'Low composite score, limited job demand, or declining momentum. May still be worth learning for specific niche use cases.',
+        definition: 'Low composite score, limited job demand, or declining momentum. May still be valid for specific niche use cases.',
         badge: { label: 'Career', className: 'text-slate-400 bg-slate-500/10 border-slate-500/25' },
       },
       {
@@ -46,7 +125,7 @@ const SECTIONS: Section[] = [
       },
       {
         term: 'Pilot',
-        definition: 'Worth evaluating in a low-risk context (internal tool, side project, or proof of concept) before committing to production.',
+        definition: 'Worth evaluating in a low-risk context (internal tool, side project, proof of concept) before committing to production.',
         badge: { label: 'Stack', className: 'text-primary bg-primary/10 border-primary/25' },
       },
       {
@@ -66,12 +145,12 @@ const SECTIONS: Section[] = [
       },
       {
         term: 'C',
-        definition: 'Moderate coverage. Some data sources are missing or signals partially disagree. Directionally reliable but treat exact numbers with caution.',
+        definition: 'Moderate coverage. Some sources are missing or signals partially disagree. Directionally reliable but treat exact numbers with caution.',
         badge: { label: 'C', className: 'text-amber-400 bg-amber-500/10 border-amber-500/25' },
       },
       {
         term: 'D / F',
-        definition: 'Low coverage. Fewer than 4 data sources contributed, or signals strongly contradict each other. Use only as a weak indicator — not a basis for major decisions.',
+        definition: 'Low coverage. Fewer than 4 data sources contributed, or signals strongly contradict each other. Use only as a weak directional indicator.',
         badge: { label: 'D–F', className: 'text-red-400 bg-red-500/10 border-red-500/25' },
       },
     ],
@@ -81,59 +160,64 @@ const SECTIONS: Section[] = [
     terms: [
       {
         term: 'GitHub score',
-        definition: 'Measures open-source health: star velocity (30-day gain), fork momentum, issue close rate, and active contributor count. High = lots of developer attention and active maintenance.',
+        definition: 'Star velocity (30-day gain), fork momentum, issue close rate, and active contributor count. High = lots of developer attention and active maintenance.',
       },
       {
         term: 'Community score',
-        definition: 'Measures developer buzz across Hacker News, Reddit, Dev.to, RSS blogs, and YouTube tutorials. High = developers are actively talking about, writing about, and teaching this technology.',
+        definition: 'Developer buzz across Hacker News, Reddit, Dev.to, RSS blogs, and YouTube tutorials. High = developers are actively talking about and teaching this technology.',
       },
       {
         term: 'Jobs score',
-        definition: 'Measures employer demand across Adzuna, JSearch, and Remotive job listings. High = companies are actively hiring for this skill right now.',
+        definition: 'Employer demand across Adzuna, JSearch, and Remotive listings. High = companies are actively hiring for this skill right now.',
       },
       {
         term: 'Ecosystem score',
-        definition: 'Measures adoption depth: npm/package weekly downloads, Stack Overflow question volume (30-day and all-time), and dependent package count. High = the ecosystem around this tech is mature and well-supported.',
+        definition: 'Package downloads, Stack Overflow question volume (30-day and all-time), and dependent package count. High = mature, well-supported ecosystem.',
       },
       {
         term: 'Momentum',
-        definition: 'A signed score (positive = rising, negative = falling) derived from a 3-window exponential moving average of the composite score. Values above +5 indicate clear upward trend; below −5 indicate clear decline.',
+        definition: 'Signed score from a 3-window exponential moving average. Above +5 = clear upward trend; below −5 = clear decline; near 0 = holding steady.',
       },
     ],
   },
   {
-    title: 'Pair Score & Risk Flags',
+    title: 'Pair Scores & Risk Flags',
     terms: [
       {
         term: 'Pair score (0–100)',
-        definition: 'How well two technologies complement each other, based on: demand synergy (30%), momentum alignment (25%), ecosystem fit (20%), community validation (15%), and maturity balance (10%). Higher = stronger case for using them together.',
+        definition: 'How well two technologies complement each other: demand synergy (30%), momentum alignment (25%), ecosystem fit (20%), community validation (15%), maturity balance (10%).',
       },
       {
         term: 'Divergent trends',
-        definition: 'One technology is gaining momentum while the other is losing it. The pairing may become unbalanced — the rising tech could outgrow or replace the declining one.',
+        definition: 'One technology is gaining momentum while the other is losing it. The pairing may become unbalanced over time.',
       },
       {
         term: 'Hype vs. jobs gap',
-        definition: 'High community discussion but few actual job postings. The technology is popular in discourse but employers are not yet hiring for it at scale.',
+        definition: 'High community discussion but few actual job postings. Popular in discourse, but employers are not yet hiring for it at scale.',
       },
       {
         term: 'Both declining',
-        definition: 'Both technologies show strong negative momentum. Pairing two falling technologies increases risk — consider alternatives.',
+        definition: 'Both technologies show strong negative momentum. Pairing two falling technologies compounds adoption risk.',
       },
       {
         term: 'Thin ecosystem',
-        definition: 'One or both technologies have low ecosystem scores. Limited packages, Stack Overflow answers, or community resources increase production risk.',
+        definition: 'One or both technologies have low ecosystem scores — limited packages, Stack Overflow answers, or community resources.',
       },
       {
         term: 'Limited data',
-        definition: 'One or both technologies have low data completeness (< 30% of sources). The pair score is based on sparse signals and should not be weighted heavily.',
+        definition: 'One or both technologies have low data completeness (< 30% of sources). The pair score is based on sparse signals.',
       },
     ],
   },
 ]
 
-export function MetricsGlossary() {
+interface MetricsGlossaryProps {
+  variant?: 'list' | 'detail'
+}
+
+export function MetricsGlossary({ variant = 'detail' }: MetricsGlossaryProps) {
   const [open, setOpen] = React.useState(false)
+  const sections = variant === 'list' ? LIST_SECTIONS : DETAIL_SECTIONS
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -152,7 +236,7 @@ export function MetricsGlossary() {
 
       <CollapsibleContent className="mt-4 overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
         <div className="rounded-xl border border-border bg-muted/10 p-5 space-y-6">
-          {SECTIONS.map((section) => (
+          {sections.map((section) => (
             <div key={section.title}>
               <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {section.title}
@@ -186,9 +270,9 @@ export function MetricsGlossary() {
           ))}
 
           <p className="text-[11px] text-muted-foreground border-t border-border/40 pt-3">
-            Scores update daily from 15 data sources. Methodology:{' '}
+            Scores update daily from 15 data sources.{' '}
             <a href="/methodology" className="text-primary hover:underline underline-offset-2">
-              devtrends.io/methodology
+              Read the full methodology →
             </a>
           </p>
         </div>
