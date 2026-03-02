@@ -292,18 +292,20 @@ export function TechnologyDetailClient() {
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
           transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.05 }}
-          className="mb-8"
+          className="mb-4"
         >
           <DecisionHeader
             decisionSummary={decision_summary}
             techSlug={technology.slug}
             techName={technology.name}
           />
-          <div className="mt-3 px-0.5">
-            <MetricsGlossary />
-          </div>
         </motion.section>
       )}
+
+      {/* Metrics Glossary — always shown, explains every metric on this page */}
+      <div className="mb-8 px-0.5">
+        <MetricsGlossary variant="detail" />
+      </div>
 
       {/* Anomaly Banner (if anomalies detected) */}
       {data.anomalies && data.anomalies.length > 0 && (
