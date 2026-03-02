@@ -144,10 +144,11 @@ export async function GET() {
     // Use delta-based hottest/cooling when prev data exists, otherwise fall back to momentum
     const hasPrevData = prevScoreMap.size > 0
     const hottestEntry = hasPrevData ? sortedByDelta[0] : sortedByMomentum[0]
-    // Cooling: requires an actual negative delta (prev data) or genuine negative momentum (fallback)
+    // Cooling: always the worst performer — most negative delta (or smallest gain) if prev data exists,
+    // otherwise the lowest-momentum tech. Skip if same as hottest (edge case when all scores are flat).
     const coolingEntry = hasPrevData
-      ? (sortedByDelta[sortedByDelta.length - 1]?.score_delta < 0 ? sortedByDelta[sortedByDelta.length - 1] : null)
-      : (sortedByMomentum[sortedByMomentum.length - 1]?.momentum < -3 ? sortedByMomentum[sortedByMomentum.length - 1] : null)
+      ? (sortedByDelta.slice().reverse().find(t => t.technology_id !== hottestEntry?.technology_id) ?? null)
+      : (sortedByMomentum.slice().reverse().find(t => t.technology_id !== hottestEntry?.technology_id) ?? null)
 
     const hottestDelta = hottestEntry
       ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === hottestEntry.technology_id)?.score_delta ?? 0) : hottestEntry.momentum / 10) * 10) / 10
