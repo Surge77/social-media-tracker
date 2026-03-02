@@ -153,12 +153,17 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
             label="Hidden Gem"
             content={
               data.hidden_gem ? (
-                <Link
-                  href={`/technologies/${data.hidden_gem.slug}`}
-                  className="truncate font-semibold text-foreground hover:text-primary transition-colors"
-                >
-                  {data.hidden_gem.name}
-                </Link>
+                <>
+                  <Link
+                    href={`/technologies/${data.hidden_gem.slug}`}
+                    className="truncate font-semibold text-foreground hover:text-primary transition-colors"
+                  >
+                    {data.hidden_gem.name}
+                  </Link>
+                  <span className="text-xs text-muted-foreground">
+                    {data.hidden_gem.jobs_score} jobs score
+                  </span>
+                </>
               ) : (
                 <span className="text-sm text-muted-foreground">None</span>
               )
@@ -171,19 +176,22 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
             label="Trending"
             content={
               data.trending.length > 0 ? (
-                <div className="flex flex-wrap gap-x-1 gap-y-0.5">
-                  {data.trending.slice(0, 3).map((tech, idx) => (
-                    <React.Fragment key={tech.slug}>
+                <div className="flex flex-col gap-0.5">
+                  {data.trending.slice(0, 3).map((tech) => (
+                    <div key={tech.slug} className="flex items-center justify-between gap-2">
                       <Link
                         href={`/technologies/${tech.slug}`}
-                        className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                        className="truncate text-sm font-medium text-foreground hover:text-primary transition-colors"
                       >
                         {tech.name}
                       </Link>
-                      {idx < Math.min(data.trending.length, 3) - 1 && (
-                        <span className="text-muted-foreground/50 text-sm">·</span>
-                      )}
-                    </React.Fragment>
+                      <span className={cn(
+                        'shrink-0 text-xs font-medium tabular-nums',
+                        tech.momentum > 0 ? 'text-emerald-400' : 'text-red-400'
+                      )}>
+                        {tech.momentum > 0 ? '+' : ''}{tech.momentum.toFixed(1)}
+                      </span>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -198,12 +206,17 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
             label="Safest Bet"
             content={
               data.safest_bet ? (
-                <Link
-                  href={`/technologies/${data.safest_bet.slug}`}
-                  className="truncate font-semibold text-foreground hover:text-primary transition-colors"
-                >
-                  {data.safest_bet.name}
-                </Link>
+                <>
+                  <Link
+                    href={`/technologies/${data.safest_bet.slug}`}
+                    className="truncate font-semibold text-foreground hover:text-primary transition-colors"
+                  >
+                    {data.safest_bet.name}
+                  </Link>
+                  <span className="text-xs text-muted-foreground">
+                    {data.safest_bet.composite_score} score
+                  </span>
+                </>
               ) : (
                 <span className="text-sm text-muted-foreground">—</span>
               )

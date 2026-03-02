@@ -181,11 +181,11 @@ export async function GET() {
         ? { name: coolingEntry.name, slug: coolingEntry.slug, color: coolingEntry.color, score_delta: coolingDelta }
         : null,
       hidden_gem: hiddenGem
-        ? { name: hiddenGem.name, slug: hiddenGem.slug, color: hiddenGem.color }
+        ? { name: hiddenGem.name, slug: hiddenGem.slug, color: hiddenGem.color, jobs_score: Math.round(hiddenGem.jobs_score!) }
         : null,
-      trending: trending.map((t) => ({ name: t.name, slug: t.slug, color: t.color })),
+      trending: trending.map((t) => ({ name: t.name, slug: t.slug, color: t.color, momentum: Math.round(t.momentum * 10) / 10 })),
       safest_bet: safestBet
-        ? { name: safestBet.name, slug: safestBet.slug, color: safestBet.color }
+        ? { name: safestBet.name, slug: safestBet.slug, color: safestBet.color, composite_score: Math.round(safestBet.composite_score) }
         : null,
     }
 

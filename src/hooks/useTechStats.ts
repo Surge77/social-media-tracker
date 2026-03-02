@@ -10,9 +10,9 @@ export interface TechStatsResponse {
     hottest: { name: string; slug: string; color: string; score_delta: number } | null
     most_demanded: { name: string; slug: string; color: string; jobs_score: number } | null
     cooling: { name: string; slug: string; color: string; score_delta: number } | null
-    hidden_gem: { name: string; slug: string; color: string } | null
-    trending: { name: string; slug: string; color: string }[]
-    safest_bet: { name: string; slug: string; color: string } | null
+    hidden_gem: { name: string; slug: string; color: string; jobs_score: number } | null
+    trending: { name: string; slug: string; color: string; momentum: number }[]
+    safest_bet: { name: string; slug: string; color: string; composite_score: number } | null
   }
   category_health: {
     category: TechnologyCategory
