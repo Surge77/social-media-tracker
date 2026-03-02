@@ -68,7 +68,16 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
           Unable to load market pulse data.
         </div>
       ) : data ? (
-        <div className="grid grid-cols-2 divide-border/30 sm:grid-cols-3 lg:grid-cols-6 lg:divide-x [&>*]:border-b [&>*]:border-border/30 lg:[&>*]:border-b-0">
+        <div className={cn(
+          'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6',
+          '[&>*]:border-border/30',
+          // Row separators (bottom border on all cells, removed on lg where everything is one row)
+          '[&>*]:border-b lg:[&>*]:border-b-0',
+          // Column separators — right-column items per breakpoint
+          '[&>*:nth-child(2n)]:border-l',
+          'sm:[&>*:nth-child(2n)]:border-l-0 sm:[&>*:nth-child(3n+2)]:border-l sm:[&>*:nth-child(3n)]:border-l',
+          'lg:[&>*]:border-l-0 lg:[&>*:not(:first-child)]:border-l',
+        )}>
           {/* Hottest */}
           <SlotItem
             emoji="🔥"
@@ -83,7 +92,7 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                     {data.hottest.name}
                   </Link>
                   <span className="text-xs font-medium text-emerald-400">
-                    +{data.hottest.score_delta.toFixed(1)}
+                    {data.hottest.score_delta > 0 ? '+' : ''}{data.hottest.score_delta.toFixed(1)}
                   </span>
                 </>
               ) : (
@@ -129,7 +138,7 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                     {data.cooling.name}
                   </Link>
                   <span className="text-xs font-medium text-red-400">
-                    {data.cooling.score_delta.toFixed(1)}
+                    {data.cooling.score_delta > 0 ? '+' : ''}{data.cooling.score_delta.toFixed(1)}
                   </span>
                 </>
               ) : (

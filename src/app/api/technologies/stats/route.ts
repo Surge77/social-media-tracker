@@ -144,15 +144,16 @@ export async function GET() {
     // Use delta-based hottest/cooling when prev data exists, otherwise fall back to momentum
     const hasPrevData = prevScoreMap.size > 0
     const hottestEntry = hasPrevData ? sortedByDelta[0] : sortedByMomentum[0]
+    // Cooling: requires an actual negative delta (prev data) or genuine negative momentum (fallback)
     const coolingEntry = hasPrevData
       ? (sortedByDelta[sortedByDelta.length - 1]?.score_delta < 0 ? sortedByDelta[sortedByDelta.length - 1] : null)
-      : sortedByMomentum[sortedByMomentum.length - 1]
+      : (sortedByMomentum[sortedByMomentum.length - 1]?.momentum < -3 ? sortedByMomentum[sortedByMomentum.length - 1] : null)
 
     const hottestDelta = hottestEntry
-      ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === hottestEntry.technology_id)?.score_delta ?? 0) : hottestEntry.momentum) * 10) / 10
+      ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === hottestEntry.technology_id)?.score_delta ?? 0) : hottestEntry.momentum / 10) * 10) / 10
       : 0
     const coolingDelta = coolingEntry
-      ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === coolingEntry.technology_id)?.score_delta ?? 0) : coolingEntry.momentum) * 10) / 10
+      ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === coolingEntry.technology_id)?.score_delta ?? 0) : coolingEntry.momentum / 10) * 10) / 10
       : 0
 
     const mostDemanded = [...merged]
