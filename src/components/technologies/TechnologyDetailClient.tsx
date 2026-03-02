@@ -36,6 +36,9 @@ import { ScoreExplainer } from '@/components/technologies/ScoreExplainer'
 import { DecisionHeader } from '@/components/technologies/DecisionHeader'
 import { WhatChangedPanel } from '@/components/technologies/WhatChangedPanel'
 import { PairingIntelligencePanel } from '@/components/technologies/PairingIntelligencePanel'
+import { MetricsGlossary } from '@/components/technologies/MetricsGlossary'
+import { TechDecisionAnalysisCard } from '@/components/technologies/TechDecisionAnalysisCard'
+import { AdvancedMetricsCompact } from '@/components/technologies/AdvancedMetricsCompact'
 import type { TechnologyDetail } from '@/types'
 
 export function TechnologyDetailClient() {
@@ -49,6 +52,8 @@ export function TechnologyDetailClient() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const [advancedOpen, setAdvancedOpen] = React.useState(false)
+  const [showFullMetrics, setShowFullMetrics] = React.useState(false)
+  const [fullMetricsTab, setFullMetricsTab] = React.useState<'core' | 'adoption' | 'signals'>('core')
 
   // AI insight hook — fetches from /api/ai/insights/[slug]
   const ai = useAIInsight(slug ?? null)
@@ -294,6 +299,9 @@ export function TechnologyDetailClient() {
             techSlug={technology.slug}
             techName={technology.name}
           />
+          <div className="mt-3 px-0.5">
+            <MetricsGlossary />
+          </div>
         </motion.section>
       )}
 
@@ -380,7 +388,19 @@ export function TechnologyDetailClient() {
         )}
       </motion.section>
 
-      {/* Deep Analysis Toggle */}
+      {/* Decision Analysis (dynamic and practical) */}
+      {ai.insight && (
+        <motion.section
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.35, delay: 0.14 }}
+          className="mb-8"
+        >
+          <TechDecisionAnalysisCard insight={ai.insight} />
+        </motion.section>
+      )}
+
+      {/* Advanced Metrics Toggle */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0 }}
         animate={prefersReducedMotion ? {} : { opacity: 1 }}
@@ -388,11 +408,20 @@ export function TechnologyDetailClient() {
         className="mb-4"
       >
         <button
-          onClick={() => setAdvancedOpen((o) => !o)}
+          onClick={() =>
+            setAdvancedOpen((o) => {
+              const next = !o
+              if (!next) {
+                setShowFullMetrics(false)
+                setFullMetricsTab('core')
+              }
+              return next
+            })
+          }
           className="flex w-full items-center justify-between rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm font-medium text-foreground hover:bg-muted/30 transition-colors"
           aria-expanded={advancedOpen}
         >
-          <span>Deep Analysis</span>
+          <span>Advanced Metrics</span>
           <ChevronDown
             className={cn('h-4 w-4 text-muted-foreground transition-transform duration-200', advancedOpen && 'rotate-180')}
           />
@@ -400,6 +429,81 @@ export function TechnologyDetailClient() {
       </motion.div>
 
       {advancedOpen && (
+        <>
+      <motion.section
+        initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
+        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.3, delay: 0.15 }}
+      >
+        <AdvancedMetricsCompact
+          technology={technology}
+          currentScores={current_scores}
+          chartData={chart_data}
+          latestSignals={latest_signals}
+          confidenceGrade={confidenceGrade}
+          explainerDimensions={explainerDimensions}
+        />
+      </motion.section>
+
+      <div className="mb-8">
+        <button
+          onClick={() =>
+            setShowFullMetrics((v) => {
+              const next = !v
+              if (next) setFullMetricsTab('core')
+              return next
+            })
+          }
+          className="inline-flex items-center gap-2 rounded-md border border-border bg-card/40 px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/20 transition-colors"
+          aria-expanded={showFullMetrics}
+        >
+          {showFullMetrics ? 'Hide full metrics' : 'View full metrics'}
+          <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', showFullMetrics && 'rotate-180')} />
+        </button>
+      </div>
+
+      {showFullMetrics && (
+        <>
+      <div className="mb-6 rounded-lg border border-border/50 bg-card/30 p-3">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detailed Metrics</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setFullMetricsTab('core')}
+            className={cn(
+              'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
+              fullMetricsTab === 'core'
+                ? 'bg-primary/15 text-primary border border-primary/30'
+                : 'bg-muted/20 text-muted-foreground border border-border/40 hover:bg-muted/30'
+            )}
+          >
+            Core
+          </button>
+          <button
+            onClick={() => setFullMetricsTab('adoption')}
+            className={cn(
+              'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
+              fullMetricsTab === 'adoption'
+                ? 'bg-primary/15 text-primary border border-primary/30'
+                : 'bg-muted/20 text-muted-foreground border border-border/40 hover:bg-muted/30'
+            )}
+          >
+            Adoption
+          </button>
+          <button
+            onClick={() => setFullMetricsTab('signals')}
+            className={cn(
+              'rounded-md px-3 py-1.5 text-xs font-semibold transition-colors',
+              fullMetricsTab === 'signals'
+                ? 'bg-primary/15 text-primary border border-primary/30'
+                : 'bg-muted/20 text-muted-foreground border border-border/40 hover:bg-muted/30'
+            )}
+          >
+            Signals
+          </button>
+        </div>
+      </div>
+
+      {fullMetricsTab === 'core' && (
         <>
       {/* Score Breakdown — "Why This Score?" expandable explainer */}
       <motion.section
@@ -503,6 +607,12 @@ export function TechnologyDetailClient() {
         )}
       </motion.section>
 
+        </>
+      )}
+
+      {/* Star History */}
+      {fullMetricsTab === 'adoption' && (
+        <>
       {/* Star History */}
       {technology.github_repo && (
         <motion.section
@@ -546,6 +656,12 @@ export function TechnologyDetailClient() {
         </div>
       </motion.section>
 
+        </>
+      )}
+
+      {/* Latest Signals */}
+      {fullMetricsTab === 'signals' && (
+        <>
       {/* Latest Signals */}
       <motion.section
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
@@ -638,6 +754,12 @@ export function TechnologyDetailClient() {
         <h2 className="mb-4 text-xl font-semibold text-foreground">Alternatives</h2>
         <AlternativesPanel slug={slug} />
       </motion.section>
+
+        </>
+      )}
+
+        </>
+      )}
 
         </>
       )}
