@@ -21,13 +21,17 @@ export function selectCoolingEntry<T extends PulseEntry>(
 
   if (options.hasPreviousData) {
     const coolingCandidates = filtered.filter((entry) => entry.score_delta < 0)
-    if (coolingCandidates.length === 0) return null
+    if (coolingCandidates.length === 0) {
+      return [...filtered].sort((a, b) => a.score_delta - b.score_delta)[0]
+    }
     return [...coolingCandidates].sort(
       (a, b) => a.score_delta - b.score_delta
     )[0]
   }
 
   const momentumCandidates = filtered.filter((entry) => entry.momentum < 0)
-  if (momentumCandidates.length === 0) return null
+  if (momentumCandidates.length === 0) {
+    return [...filtered].sort((a, b) => a.momentum - b.momentum)[0]
+  }
   return [...momentumCandidates].sort((a, b) => a.momentum - b.momentum)[0]
 }

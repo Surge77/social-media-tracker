@@ -402,34 +402,70 @@ curl http://localhost:3000/api/cron/fetch-daily/batch-scoring       # Score comp
 
 ## Screenshots
 
-> **Note:** Replace these placeholders with actual screenshots once deployed.
+<div align="center">
 
-<!-- Landing page hero with trending tech cards -->
+### 🏠 Landing Page
+*Hero section with trending tech cards, scores, and momentum indicators*
+
 ![Landing Page](./assets/screenshots/landing.png)
 
-<!-- Technologies listing with score cards, filters, and trend indicators -->
+<br/>
+
+### 📊 Technologies Dashboard
+*Grid of 117 technologies with composite scores, filters, and trend classification*
+
 ![Technologies Dashboard](./assets/screenshots/technologies.png)
 
-<!-- Technology detail page: score breakdown + 90-day trend chart + signals -->
+<br/>
+
+### 🔍 Technology Detail Page
+*Score breakdown, 90-day trend chart, and data signals from 15 sources*
+
 ![Tech Detail Page](./assets/screenshots/tech-detail.png)
 
-<!-- Side-by-side comparison with radar chart and dimension breakdown -->
+<br/>
+
+### 🔀 Side-by-Side Comparison
+*Radar chart, dimension breakdown, lifecycle timeline, and career scorecards*
+
 ![Tech Comparison](./assets/screenshots/compare.png)
 
-<!-- Learn Next quiz result with StarterKitBento (Watch/Read/Build) -->
+<br/>
+
+### 🎯 Quiz — What Should You Learn Next?
+*AI-powered recommendation with Starter Kit Bento (Watch / Read / Build)*
+
 ![Quiz — Learn Next](./assets/screenshots/quiz-learn-next.png)
 
-<!-- Hype Check quiz showing verdict + market validation -->
+<br/>
+
+### 🕵️ Quiz — Hype Check
+*Hype detection verdict with market validation metrics*
+
 ![Quiz — Hype Check](./assets/screenshots/quiz-hype-check.png)
 
-<!-- AI chatbot interface -->
+<br/>
+
+### 💬 AI Chatbot
+*Conversational interface for natural language tech trend queries*
+
 ![AI Chatbot](./assets/screenshots/ask.png)
 
-<!-- Blockchain / Web3 intelligence dashboard: TVL, gas, L2 costs -->
+<br/>
+
+### ⛓️ Blockchain Intelligence
+*TVL charts, L2 cost comparison, gas tracker, bridge utilization, hack feed*
+
 ![Blockchain Dashboard](./assets/screenshots/blockchain.png)
 
-<!-- Weekly AI digest -->
+<br/>
+
+### 📰 Weekly Digest
+*AI-generated summary of the week's biggest tech shifts*
+
 ![Weekly Digest](./assets/screenshots/digest.png)
+
+</div>
 
 ---
 

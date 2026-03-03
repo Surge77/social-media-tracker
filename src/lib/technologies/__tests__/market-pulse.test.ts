@@ -19,14 +19,14 @@ describe('market pulse cooling selection', () => {
     expect(cooling?.technology_id).toBe('b')
   })
 
-  it('returns null when all deltas are non-negative', () => {
+  it('falls back to lowest delta when all deltas are non-negative', () => {
     const entries: Entry[] = [
       { technology_id: 'a', momentum: 4, score_delta: 1.2 },
       { technology_id: 'b', momentum: -1, score_delta: 0.0 },
     ]
 
     const cooling = selectCoolingEntry(entries, { hasPreviousData: true })
-    expect(cooling).toBeNull()
+    expect(cooling?.technology_id).toBe('b')
   })
 
   it('falls back to negative momentum when previous data is unavailable', () => {
@@ -40,13 +40,13 @@ describe('market pulse cooling selection', () => {
     expect(cooling?.technology_id).toBe('b')
   })
 
-  it('returns null when momentum fallback has no negative entries', () => {
+  it('falls back to lowest momentum when no negative momentum exists', () => {
     const entries: Entry[] = [
       { technology_id: 'a', momentum: 1, score_delta: 0 },
       { technology_id: 'b', momentum: 0.2, score_delta: 0 },
     ]
 
     const cooling = selectCoolingEntry(entries, { hasPreviousData: false })
-    expect(cooling).toBeNull()
+    expect(cooling?.technology_id).toBe('b')
   })
 })

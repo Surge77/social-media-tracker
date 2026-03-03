@@ -130,24 +130,23 @@ export async function GET() {
       return Response.json({ error: 'No scored technologies found' }, { status: 404 })
     }
 
-    // 7. Compute score deltas — if no previous date found, deltas default to 0
+    // 7. Compute score deltas
     const withDelta = merged.map((t) => ({
       ...t,
-      score_delta: prevScoreMap.size > 0
-        ? t.composite_score - (prevScoreMap.get(t.technology_id) ?? t.composite_score)
-        : 0,
+      score_delta: t.composite_score - (prevScoreMap.get(t.technology_id) ?? t.composite_score),
     }))
+    const comparableDelta = withDelta.filter((t) => prevScoreMap.has(t.technology_id))
 
     // 8. Market Pulse
-    const sortedByDelta = [...withDelta].sort((a, b) => b.score_delta - a.score_delta)
+    const sortedByDelta = [...comparableDelta].sort((a, b) => b.score_delta - a.score_delta)
     const sortedByMomentum = [...merged].sort((a, b) => b.momentum - a.momentum)
 
-    // Use delta-based hottest/cooling when prev data exists, otherwise fall back to momentum
-    const hasPrevData = prevScoreMap.size > 0
+    // Use delta-based hottest/cooling only when we have comparable previous scores
+    const hasPrevData = comparableDelta.length > 0
     const hottestEntry = hasPrevData ? sortedByDelta[0] : sortedByMomentum[0]
     // Cooling: always the worst performer — most negative delta (or smallest gain) if prev data exists,
     // otherwise the lowest-momentum tech. Skip if same as hottest (edge case when all scores are flat).
-    const coolingEntry = selectCoolingEntry(withDelta, {
+    const coolingEntry = selectCoolingEntry(hasPrevData ? comparableDelta : withDelta, {
       hasPreviousData: hasPrevData,
       hottestTechnologyId: hottestEntry?.technology_id,
     })
