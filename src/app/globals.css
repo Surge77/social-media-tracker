@@ -401,6 +401,13 @@ All colors MUST be HSL.
 }
 
 @layer base {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   * {
     border-color: hsl(var(--border));
   }
@@ -416,6 +423,16 @@ All colors MUST be HSL.
 
   .light body {
     font-weight: 450;
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-top {
+    padding-top: max(0.75rem, env(safe-area-inset-top));
   }
 }
 

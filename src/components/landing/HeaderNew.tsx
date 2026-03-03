@@ -114,7 +114,7 @@ export default function HeaderNew() {
               role="dialog"
               aria-modal="true"
               aria-label="Mobile navigation"
-              className="fixed right-0 top-0 z-[70] h-dvh w-[86vw] max-w-[380px] border-l border-border/50 bg-background/95 p-5 shadow-2xl backdrop-blur-2xl md:hidden"
+              className="safe-bottom fixed right-0 top-0 z-[70] h-dvh w-[88vw] max-w-[380px] border-l border-border/50 bg-background/95 p-4 shadow-2xl backdrop-blur-2xl sm:p-5 md:hidden"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}

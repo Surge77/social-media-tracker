@@ -324,9 +324,10 @@ export function LanguageRankingsClient() {
             </p>
           )}
 
-          {/* Column headers */}
           {processed.length > 0 && (
-            <div className="mb-1 flex items-center gap-3 px-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
+            <div className="mb-2 overflow-x-auto pb-1">
+              <div className="min-w-[640px]">
+                <div className="mb-1 flex items-center gap-3 px-4 text-[11px] font-bold uppercase tracking-widest text-muted-foreground/80">
               <div className="w-8 text-center">#</div>
               <div className="w-10">Δ</div>
               <div className="w-36 sm:w-40">Language</div>
@@ -351,6 +352,8 @@ export function LanguageRankingsClient() {
               <div className="hidden w-24 text-right lg:block">Market</div>
               <div className="w-4" /> {/* chevron spacer */}
             </div>
+              </div>
+            </div>
           )}
 
           {/* List */}
@@ -363,7 +366,8 @@ export function LanguageRankingsClient() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-1">
+            <div className="overflow-x-auto pb-1">
+              <div className="flex min-w-[640px] flex-col gap-1">
               {processed.map((ranking, i) => (
                 <motion.div
                   key={ranking.id}
@@ -382,6 +386,7 @@ export function LanguageRankingsClient() {
                   />
                 </motion.div>
               ))}
+              </div>
             </div>
           )}
         </>

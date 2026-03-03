@@ -120,8 +120,7 @@ export function AskAIWidget() {
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed bottom-24 right-6 z-50 flex w-[min(560px,calc(100vw-2rem))] flex-col rounded-2xl border border-border bg-background shadow-2xl"
-            style={{ maxHeight: 'min(600px, calc(100vh - 8rem))' }}
+            className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] z-50 flex max-h-[calc(100dvh-8.5rem)] flex-col rounded-2xl border border-border bg-background shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-[min(560px,calc(100vw-2rem))] sm:max-h-[min(600px,calc(100dvh-8rem))]"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -155,11 +154,11 @@ export function AskAIWidget() {
             </div>
 
             {/* Messages area */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 min-h-0">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-3 sm:px-5 sm:py-4">
               {messages.length === 0 && (
                 <div className="space-y-3">
                   <p className="text-xs font-medium text-muted-foreground">Suggested questions</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {SUGGESTED.map((s) => {
                       const Icon = s.icon
                       return (
@@ -215,7 +214,7 @@ export function AskAIWidget() {
             </div>
 
             {/* Input */}
-            <div className="border-t border-border px-4 py-3">
+            <div className="safe-bottom border-t border-border px-4 py-3">
               <form onSubmit={handleSubmit} className="relative">
                 <textarea
                   ref={inputRef}
@@ -257,7 +256,7 @@ export function AskAIWidget() {
         whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
         aria-label="Open AI chat (Cmd+K)"
         aria-expanded={isOpen}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-full border border-primary/30 bg-background px-4 py-3 shadow-lg shadow-primary/10 transition-colors hover:border-primary/60 hover:bg-primary/5"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 flex items-center gap-2.5 rounded-full border border-primary/30 bg-background px-4 py-3 shadow-lg shadow-primary/10 transition-colors hover:border-primary/60 hover:bg-primary/5 sm:bottom-6 sm:right-6"
       >
         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
           <Sparkles

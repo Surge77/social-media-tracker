@@ -54,7 +54,7 @@ export function QuizContainer({
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background px-3 py-6 sm:px-4 sm:py-12">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={prefersReducedMotion ? false : 'hidden'}
@@ -76,12 +76,12 @@ export function QuizContainer({
           />
 
           {/* Header */}
-          <div className="relative border-b border-border/50 p-6 md:p-8">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-4 flex-1">
+          <div className="relative border-b border-border/50 p-4 sm:p-6 md:p-8">
+            <div className="flex items-start justify-between gap-3 sm:gap-4">
+              <div className="flex flex-1 items-start gap-3 sm:gap-4">
                 <div
                   className={cn(
-                    'w-12 h-12 rounded-xl flex items-center justify-center',
+                    'h-10 w-10 shrink-0 rounded-xl sm:h-12 sm:w-12 flex items-center justify-center',
                     'bg-gradient-to-br',
                     gradient,
                     'text-white shadow-lg'
@@ -90,10 +90,10 @@ export function QuizContainer({
                   {icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+                  <h1 className="mb-1.5 text-xl font-bold text-foreground sm:mb-2 sm:text-2xl md:text-3xl">
                     {title}
                   </h1>
-                  <p className="text-sm md:text-base text-muted-foreground">
+                  <p className="text-sm text-muted-foreground md:text-base">
                     {description}
                   </p>
                 </div>
@@ -128,7 +128,7 @@ export function QuizContainer({
           </div>
 
           {/* Content */}
-          <div className="relative p-6 md:p-8">
+          <div className="relative p-4 sm:p-6 md:p-8">
             {children}
           </div>
         </motion.div>

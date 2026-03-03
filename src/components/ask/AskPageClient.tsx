@@ -74,14 +74,14 @@ export function AskPageClient() {
   }, [clearSession])
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8">
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.5 }}
       >
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold"><HyperText text="Ask DevTrends AI" /></h1>
+        <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl font-bold sm:text-3xl"><HyperText text="Ask DevTrends AI" /></h1>
           {messages.length > 0 && (
             <button
               onClick={handleNewChat}
@@ -92,7 +92,7 @@ export function AskPageClient() {
             </button>
           )}
         </div>
-        <p className="text-muted-foreground mb-8">
+        <p className="mb-6 text-sm text-muted-foreground sm:mb-8 sm:text-base">
           Get personalized career advice and technology insights powered by real-time trend data.
         </p>
 
@@ -105,10 +105,10 @@ export function AskPageClient() {
 
         <div className="space-y-4">
           {/* Chat messages */}
-          <div className="relative min-h-[400px] max-h-[600px] overflow-y-auto rounded-lg border bg-card p-6 space-y-4">
+          <div className="relative min-h-[320px] max-h-[65dvh] space-y-4 overflow-y-auto rounded-lg border bg-card p-4 sm:min-h-[400px] sm:max-h-[600px] sm:p-6">
             {isStreaming && <BorderBeam size={400} duration={4} colorFrom="#f97316" colorTo="#f59e0b" />}
             {messages.length === 0 && (
-              <div className="flex items-center justify-center h-full text-center text-muted-foreground">
+              <div className="flex h-full items-center justify-center text-center text-muted-foreground">
                 <p>Start a conversation by asking a question below</p>
               </div>
             )}

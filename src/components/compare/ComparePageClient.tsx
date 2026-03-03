@@ -27,7 +27,7 @@ export function ComparePageClient() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto max-w-7xl px-4 py-8">
+        <div className="container mx-auto max-w-7xl px-4 py-6 sm:py-8">
           <div className="flex min-h-[600px] items-center justify-center">
             <Loading size="lg" text="Loading comparison..." />
           </div>
@@ -177,7 +177,7 @@ function ComparePageContent() {
 
   if (showErrorPage) {
     return (
-      <div className="container mx-auto max-w-7xl px-4 py-8">
+      <div className="container mx-auto max-w-7xl px-4 py-6 sm:py-8">
         <div className="flex min-h-[600px] items-center justify-center">
           <div className="text-center">
             <p className="text-sm text-destructive">Error: {error}</p>
@@ -197,7 +197,7 @@ function ComparePageContent() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
+    <div className="container mx-auto max-w-7xl px-4 py-6 sm:py-8">
       {/* Header */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
@@ -205,12 +205,12 @@ function ComparePageContent() {
         transition={prefersReducedMotion ? {} : { duration: 0.4 }}
         className="mb-8"
       >
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
               Compare Technologies
             </h1>
-            <p className="mt-2 text-muted-foreground">
+            <p className="mt-1.5 text-sm text-muted-foreground sm:mt-2 sm:text-base">
               Side-by-side comparison of technology trends and metrics
             </p>
           </div>

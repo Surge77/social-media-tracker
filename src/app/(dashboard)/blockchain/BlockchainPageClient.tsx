@@ -400,7 +400,7 @@ export function BlockchainPageClient() {
   const [activeTab, setActiveTab] = useState<Tab>('market')
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Page Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -421,7 +421,7 @@ export function BlockchainPageClient() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="sticky top-[57px] z-10 -mx-4 bg-background/80 px-4 pb-3 pt-1 backdrop-blur-sm sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      <div className="sticky top-16 z-10 -mx-4 bg-background/80 px-4 pb-3 pt-1 backdrop-blur-sm sm:-mx-6 sm:top-[57px] sm:px-6 lg:-mx-8 lg:px-8">
         <div className="flex gap-1 overflow-x-auto scrollbar-hide">
           {TABS.map((tab) => {
             const Icon = tab.icon

@@ -211,21 +211,21 @@ export function QuizHubClient() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background px-4 py-12">
+    <div className="min-h-screen bg-background px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="mb-10 text-center">
+        <div className="mb-8 text-center sm:mb-10">
           <div className="mb-4 flex items-center justify-center gap-2">
-            <Target className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold text-foreground md:text-5xl">Career Quizzes</h1>
+            <Target className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
+            <h1 className="text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">Career Quizzes</h1>
           </div>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:text-lg">
             Make informed decisions in 30 seconds. Powered by real market data, not hype.
           </p>
         </div>
 
         {/* Start Here banner */}
-        <div className="mb-8 flex items-center gap-3 rounded-lg border border-primary/25 bg-primary/5 px-5 py-4">
+        <div className="mb-8 flex items-start gap-3 rounded-lg border border-primary/25 bg-primary/5 px-4 py-3.5 sm:items-center sm:px-5 sm:py-4">
           <Sparkles className="h-4 w-4 shrink-0 text-primary" />
           <p className="text-sm text-foreground">
             <span className="font-semibold">New here?</span>{' '}

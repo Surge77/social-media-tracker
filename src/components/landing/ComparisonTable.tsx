@@ -25,7 +25,7 @@ export default function ComparisonTable() {
 
   return (
     <section className="py-20 md:py-32 bg-gradient-to-b from-background to-muted/10 relative">
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
           whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
@@ -33,7 +33,7 @@ export default function ComparisonTable() {
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4">
+          <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
             How We Compare
           </h2>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
@@ -48,16 +48,14 @@ export default function ComparisonTable() {
           transition={{ duration: 0.6 }}
           className="max-w-3xl mx-auto"
         >
-          <div className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-2xl overflow-hidden">
-            {/* Table header */}
-            <div className="grid grid-cols-4 gap-4 px-6 py-4 border-b border-border/50 bg-muted/30">
+          <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm">
+            <div className="hidden grid-cols-4 gap-4 border-b border-border/50 bg-muted/30 px-6 py-4 md:grid">
               <div className="text-sm font-medium text-muted-foreground">Feature</div>
               <div className="text-sm font-bold text-primary text-center">DevTrends</div>
               <div className="text-sm font-medium text-muted-foreground text-center">Manual Checking</div>
               <div className="text-sm font-medium text-muted-foreground text-center">Google Trends</div>
             </div>
 
-            {/* Table rows */}
             {features.map((feature, index) => (
               <motion.div
                 key={feature.name}
@@ -65,12 +63,23 @@ export default function ComparisonTable() {
                 whileInView={prefersReducedMotion ? {} : { opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                className={`grid grid-cols-4 gap-4 px-6 py-4 ${index % 2 === 0 ? 'bg-background/30' : ''} ${index < features.length - 1 ? 'border-b border-border/30' : ''}`}
+                className={`${index % 2 === 0 ? 'bg-background/30' : ''} ${index < features.length - 1 ? 'border-b border-border/30' : ''} grid gap-2 px-4 py-3.5 md:grid-cols-4 md:gap-4 md:px-6 md:py-4`}
               >
-                <div className="text-sm text-foreground font-medium">{feature.name}</div>
-                <div className="flex justify-center"><StatusIcon status={feature.devtrends} /></div>
-                <div className="flex justify-center"><StatusIcon status={feature.manual} /></div>
-                <div className="flex justify-center"><StatusIcon status={feature.google} /></div>
+                <div className="text-sm font-medium text-foreground md:col-span-1">{feature.name}</div>
+                <div className="grid grid-cols-3 gap-3 rounded-lg bg-muted/20 px-3 py-2 md:contents">
+                  <div className="flex flex-col items-center gap-1 md:flex-row md:justify-center">
+                    <span className="text-[10px] text-muted-foreground md:hidden">DevTrends</span>
+                    <StatusIcon status={feature.devtrends} />
+                  </div>
+                  <div className="flex flex-col items-center gap-1 md:flex-row md:justify-center">
+                    <span className="text-[10px] text-muted-foreground md:hidden">Manual</span>
+                    <StatusIcon status={feature.manual} />
+                  </div>
+                  <div className="flex flex-col items-center gap-1 md:flex-row md:justify-center">
+                    <span className="text-[10px] text-muted-foreground md:hidden">Google</span>
+                    <StatusIcon status={feature.google} />
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>

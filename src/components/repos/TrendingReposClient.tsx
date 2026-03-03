@@ -78,7 +78,7 @@ export function TrendingReposClient() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-8">
+    <div className="container mx-auto max-w-7xl px-4 py-6 sm:py-8">
       {/* Header */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
@@ -86,7 +86,7 @@ export function TrendingReposClient() {
         transition={prefersReducedMotion ? {} : { duration: 0.4 }}
         className="mb-6"
       >
-        <h1 className="mb-1 text-3xl font-bold tracking-tight text-foreground">
+        <h1 className="mb-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           <WordPullUp text="Trending Repos" />
         </h1>
         <p className="text-muted-foreground">Open-source repositories gaining momentum on GitHub</p>
@@ -219,7 +219,7 @@ export function TrendingReposClient() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-10 flex items-center justify-center gap-3">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <button
                 onClick={() => goToPage(page - 1)}
                 disabled={page === 1}

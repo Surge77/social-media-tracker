@@ -33,7 +33,7 @@ export default function HeroNew() {
   const isLight = resolvedTheme === 'light';
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-10">
+    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pb-10 pt-20 sm:min-h-screen">
       {/* ── Layer 1: solid background base ─────────────────────────────── */}
       <div className="absolute inset-0 bg-background" />
 
@@ -78,11 +78,11 @@ export default function HeroNew() {
       )}
 
       {/* ── Layer 3: subtle centered glow (square = equal spread) ────── */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] pointer-events-none z-0" />
+      <div className="pointer-events-none absolute left-1/2 top-1/3 z-0 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[80px] sm:h-[500px] sm:w-[500px] sm:blur-[100px]" />
 
       <FloatingIcons />
 
-      <div className="container relative mx-auto px-6">
+      <div className="container relative mx-auto px-4 sm:px-6">
         <div className="text-center max-w-5xl mx-auto">
 
           {/* Badge — Magic UI AnimatedGradientText */}
@@ -112,7 +112,7 @@ export default function HeroNew() {
           >
             <HyperText
               text="Know what to learn"
-              className="block text-3xl sm:text-5xl md:text-6xl font-bold tracking-[-0.02em] leading-[1.02] text-foreground"
+              className="block text-3xl font-bold leading-[1.02] tracking-[-0.02em] text-foreground sm:text-5xl md:text-6xl"
               duration={1000}
             />
             <span className="mt-1.5 block text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.02em] leading-[1.04] bg-gradient-to-r from-orange-700 via-amber-600 to-orange-600 dark:from-orange-500 dark:via-amber-500 dark:to-orange-400 bg-clip-text text-transparent animate-gradient">
@@ -141,7 +141,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg md:text-xl text-foreground/80 dark:text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+            className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-foreground/80 dark:text-muted-foreground sm:text-lg md:text-xl"
           >
             Aggregated into daily scores for 100+ technologies.
             Skip the guesswork. See what the data actually says.
@@ -157,7 +157,7 @@ export default function HeroNew() {
             <AnimatedCTA
               href="/technologies"
               size="lg"
-              className="group relative px-12 py-5 text-xl font-semibold rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white border-0 shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] hover:scale-[1.02] active:scale-[0.98] overflow-hidden cursor-pointer transition-all duration-300"
+              className="group relative overflow-hidden rounded-full border-0 bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-4 text-lg font-semibold text-white shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] active:scale-[0.98] sm:px-12 sm:py-5 sm:text-xl"
               delay={150}
             >
               <span className="relative z-10 flex items-center gap-2">
@@ -229,7 +229,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-foreground/65 dark:text-muted-foreground mb-16"
+            className="mb-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-foreground/65 dark:text-muted-foreground sm:mb-16"
           >
             <span className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-green-500" />
@@ -260,13 +260,13 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 60 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="relative max-w-3xl mx-auto group"
+            className="group relative mx-auto w-full max-w-3xl"
           >
             <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 rounded-3xl blur-3xl group-hover:blur-2xl transition-all duration-500" />
             <div className="absolute -inset-4 bg-purple-500/8 rounded-3xl blur-2xl opacity-50" />
 
             {/* Card with Magic UI BorderBeam */}
-            <div className="relative bg-card/90 backdrop-blur-2xl border border-border/50 rounded-2xl p-6 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] transition-shadow duration-500 overflow-hidden">
+            <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] transition-shadow duration-500 hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] sm:p-6">
               <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="#f59e0b" />
 
               {/* Mockup header */}
@@ -286,7 +286,7 @@ export default function HeroNew() {
               </div>
 
               {/* Table header */}
-              <div className="grid grid-cols-[40px_1fr_80px_80px_50px] gap-3 text-xs text-muted-foreground font-medium uppercase tracking-wider mb-3 px-3">
+              <div className="mb-3 hidden grid-cols-[40px_1fr_80px_80px_50px] gap-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sm:grid">
                 <span>#</span>
                 <span>Technology</span>
                 <span className="text-right">Score</span>
@@ -302,7 +302,7 @@ export default function HeroNew() {
                     initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
                     animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.9 + index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className={`grid grid-cols-[40px_1fr_80px_80px_50px] gap-3 items-center px-3 py-2.5 rounded-lg hover:bg-muted/80 hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.2)] transition-all duration-200 group cursor-pointer ${index === 0 ? 'bg-orange-500/5' : ''}`}
+                    className={`grid grid-cols-[28px_1fr_62px_62px] items-center gap-2 rounded-lg px-2 py-2.5 transition-all duration-200 group cursor-pointer hover:bg-muted/80 hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.2)] sm:grid-cols-[40px_1fr_80px_80px_50px] sm:gap-3 sm:px-3 ${index === 0 ? 'bg-orange-500/5' : ''}`}
                   >
                     <span className={`text-sm font-bold ${index === 0 ? 'text-orange-500' : 'text-muted-foreground'}`}>{item.rank}</span>
                     <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
@@ -319,7 +319,7 @@ export default function HeroNew() {
                       {item.trend === 'up' ? <ArrowUpRight className="w-3.5 h-3.5" /> : item.trend === 'down' ? <ArrowDownRight className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
                       {item.change > 0 ? '+' : ''}{item.change}%
                     </span>
-                    <div className="flex justify-end">
+                    <div className="hidden justify-end sm:flex">
                       <Sparkline
                         data={MOCK_SPARKLINES[item.trend as keyof typeof MOCK_SPARKLINES]}
                         width={60}
