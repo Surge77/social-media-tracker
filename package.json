@@ -10,6 +10,14 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "browserslist": [
+    "last 2 Chrome versions",
+    "last 2 Edge versions",
+    "last 2 Firefox versions",
+    "last 2 Safari versions",
+    "last 2 iOS major versions",
+    "not dead"
+  ],
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@icons-pack/react-simple-icons": "^13.11.2",

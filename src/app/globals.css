@@ -317,11 +317,13 @@ All colors MUST be HSL.
   }
 
   .tech-row:hover {
+    background: transparent;
     background: linear-gradient(to right, color-mix(in srgb, var(--tech-color) 8%, transparent) 0%, transparent 50%);
     box-shadow: inset 3px 0 0 var(--tech-color);
   }
 
   .tech-row:hover .tech-dot {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.08);
     box-shadow: 0 0 8px color-mix(in srgb, var(--tech-color) 50%, transparent);
   }
 
@@ -370,6 +372,16 @@ All colors MUST be HSL.
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.45);
+    }
+  }
+
   /* Animated gradient blob background */
   .animate-blob {
     animation: blob 7s infinite;
@@ -406,6 +418,7 @@ All colors MUST be HSL.
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
   * {
@@ -422,7 +435,14 @@ All colors MUST be HSL.
   }
 
   .light body {
-    font-weight: 450;
+    font-weight: 400;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   }
 }
 

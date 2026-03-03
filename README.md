@@ -398,6 +398,19 @@ curl http://localhost:3000/api/cron/fetch-daily/batch-intelligence  # AI insight
 curl http://localhost:3000/api/cron/fetch-daily/batch-scoring       # Score computation
 ```
 
+### Browser Rendering Notes
+
+If typography or blur/glass effects look different across Brave, Firefox, Safari, and Chrome:
+
+- Fonts are loaded with `next/font` and now pinned to explicit fallback stacks in global CSS.
+- Some visual effects (`backdrop-filter`, `color-mix`) are progressive enhancements; browsers/privacy settings may reduce them.
+- Brave Shields, ad/privacy extensions, and strict anti-fingerprinting can alter font rendering and filter support.
+
+For consistent QA, compare with:
+- same zoom level (100%)
+- same OS text scaling
+- Brave Shields temporarily disabled for the site (to isolate extension/privacy impact)
+
 ---
 
 ## Screenshots

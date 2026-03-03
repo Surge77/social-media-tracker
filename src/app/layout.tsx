@@ -59,7 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${manrope.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${manrope.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
         <Providers>
           <NavigationProgress />
