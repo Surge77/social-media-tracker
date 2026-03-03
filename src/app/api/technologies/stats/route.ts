@@ -6,6 +6,7 @@ import {
   getNearestDateAtOrBefore,
   getTargetDateDaysAgo,
 } from '@/lib/scoring/scoring-date'
+import { selectCoolingEntry } from '@/lib/technologies/market-pulse'
 
 type TrendLabel = 'Booming' | 'Growing' | 'Stable' | 'Mature' | 'Cooling'
 
@@ -146,9 +147,10 @@ export async function GET() {
     const hottestEntry = hasPrevData ? sortedByDelta[0] : sortedByMomentum[0]
     // Cooling: always the worst performer — most negative delta (or smallest gain) if prev data exists,
     // otherwise the lowest-momentum tech. Skip if same as hottest (edge case when all scores are flat).
-    const coolingEntry = hasPrevData
-      ? (sortedByDelta.slice().reverse().find(t => t.technology_id !== hottestEntry?.technology_id) ?? null)
-      : (sortedByMomentum.slice().reverse().find(t => t.technology_id !== hottestEntry?.technology_id) ?? null)
+    const coolingEntry = selectCoolingEntry(withDelta, {
+      hasPreviousData: hasPrevData,
+      hottestTechnologyId: hottestEntry?.technology_id,
+    })
 
     const hottestDelta = hottestEntry
       ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === hottestEntry.technology_id)?.score_delta ?? 0) : hottestEntry.momentum / 10) * 10) / 10

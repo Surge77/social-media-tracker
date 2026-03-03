@@ -1,21 +1,21 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import {
+  buildInternalBearerHeaders,
+  buildInternalCronHeaders,
+  hasCronSecretConfigError,
+  runCronStepWithRetry,
+} from '@/lib/cron/orchestrator'
 
 export const maxDuration = 60
 
 /**
- * Weekly task orchestrator — consolidates all non-daily cron work into one slot.
+ * Weekly task orchestrator consolidates non-daily cron work into one slot.
  *
- * Fires in parallel:
- *   - /api/cron/fetch-weekly    (job market data)
- *   - /api/ai/digest/generate   (weekly AI digest)
- *
- * Additionally, on the first Monday of every month:
- *   - /api/cron/cleanup         (data retention — deletes data_points >90d, fetch_logs >30d)
- *
- * This exists solely to stay within Vercel Hobby plan's 2-cron-job limit.
- * The two registered crons are: /api/cron/fetch-daily and /api/cron/weekly-tasks.
- *
- * Schedule: Every Monday at 3:00 AM UTC (configured in vercel.json)
+ * Scheduled route: /api/cron/weekly-tasks
+ * Fan-out:
+ *   - /api/cron/fetch-weekly
+ *   - /api/ai/digest/generate
+ *   - /api/cron/cleanup (first Monday of month only)
  */
 export async function GET(request: Request) {
   const startTime = Date.now()
@@ -27,63 +27,108 @@ export async function GET(request: Request) {
     }
   }
 
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+  try {
+    if (hasCronSecretConfigError(process.env)) {
+      return Response.json(
+        {
+          success: false,
+          error: 'CRON_SECRET is required in production for internal cron fan-out',
+        },
+        { status: 500 }
+      )
+    }
 
-  const internalHeaders: Record<string, string> = {}
-  if (process.env.CRON_SECRET) {
-    internalHeaders['x-internal-cron'] = process.env.CRON_SECRET
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+
+    const internalHeaders = buildInternalCronHeaders(process.env)
+    const digestHeaders = buildInternalBearerHeaders(process.env, {
+      'Content-Type': 'application/json',
+    })
+
+    const [weeklyResult, digestResult] = await Promise.all([
+      runCronStepWithRetry({
+        name: 'fetch-weekly',
+        url: `${baseUrl}/api/cron/fetch-weekly`,
+        init: { headers: internalHeaders },
+      }),
+      runCronStepWithRetry({
+        name: 'digest-generate',
+        url: `${baseUrl}/api/ai/digest/generate`,
+        init: { method: 'POST', headers: digestHeaders },
+      }),
+    ])
+
+    const stepResults = [weeklyResult, digestResult]
+
+    const dayOfMonth = new Date().getDate()
+    if (dayOfMonth <= 7) {
+      const cleanupResult = await runCronStepWithRetry({
+        name: 'cleanup',
+        url: `${baseUrl}/api/cron/cleanup`,
+        init: { headers: internalHeaders },
+      })
+      stepResults.push(cleanupResult)
+    }
+
+    const failedSteps = stepResults.filter((step) => !step.ok)
+    const hasFailures = failedSteps.length > 0
+
+    const supabase = createSupabaseAdminClient()
+    const duration = Date.now() - startTime
+    await supabase.from('fetch_logs').insert({
+      source: 'weekly_tasks_orchestrator',
+      status: hasFailures ? 'failed' : 'success',
+      technologies_processed: 0,
+      data_points_created: 0,
+      error_message: hasFailures
+        ? failedSteps
+            .map((step) => `${step.name}: ${step.error ?? `HTTP ${step.status}`}`)
+            .join('; ')
+        : null,
+      duration_ms: duration,
+      started_at: new Date(startTime).toISOString(),
+      completed_at: new Date().toISOString(),
+    })
+
+    if (hasFailures) {
+      return Response.json(
+        {
+          success: false,
+          duration: `${duration}ms`,
+          stepResults,
+          failedSteps,
+        },
+        { status: 500 }
+      )
+    }
+
+    return Response.json({
+      success: true,
+      duration: `${duration}ms`,
+      stepResults,
+    })
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error)
+    console.error('[Weekly Tasks Orchestrator] Error:', errorMsg)
+
+    const duration = Date.now() - startTime
+    const supabase = createSupabaseAdminClient()
+    await supabase.from('fetch_logs').insert({
+      source: 'weekly_tasks_orchestrator',
+      status: 'failed',
+      technologies_processed: 0,
+      data_points_created: 0,
+      error_message: errorMsg,
+      duration_ms: duration,
+      started_at: new Date(startTime).toISOString(),
+      completed_at: new Date().toISOString(),
+    })
+
+    return Response.json(
+      { success: false, error: errorMsg, duration: `${duration}ms` },
+      { status: 500 }
+    )
   }
-
-  const results: Record<string, unknown> = {}
-
-  // Fire fetch-weekly and digest generation in parallel
-  const [weeklyResult, digestResult] = await Promise.allSettled([
-    fetch(`${baseUrl}/api/cron/fetch-weekly`, { headers: internalHeaders }),
-    fetch(`${baseUrl}/api/ai/digest/generate`, {
-      method: 'POST',
-      headers: {
-        ...internalHeaders,
-        'Content-Type': 'application/json',
-        ...(process.env.CRON_SECRET
-          ? { Authorization: `Bearer ${process.env.CRON_SECRET}` }
-          : {}),
-      },
-    }),
-  ])
-
-  results.fetchWeekly =
-    weeklyResult.status === 'fulfilled' ? `HTTP ${weeklyResult.value.status}` : `failed: ${weeklyResult.reason}`
-  results.digestGenerate =
-    digestResult.status === 'fulfilled' ? `HTTP ${digestResult.value.status}` : `failed: ${digestResult.reason}`
-
-  // Run cleanup only on the first Monday of the month (day 1–7)
-  const dayOfMonth = new Date().getDate()
-  if (dayOfMonth <= 7) {
-    const cleanupResult = await fetch(`${baseUrl}/api/cron/cleanup`, { headers: internalHeaders })
-    results.cleanup = `HTTP ${cleanupResult.status}`
-  } else {
-    results.cleanup = 'skipped (not first Monday of month)'
-  }
-
-  // Log orchestrator run
-  const supabase = createSupabaseAdminClient()
-  const duration = Date.now() - startTime
-  await supabase.from('fetch_logs').insert({
-    source: 'weekly_tasks_orchestrator',
-    status: 'success',
-    technologies_processed: 0,
-    data_points_created: 0,
-    error_message: null,
-    duration_ms: duration,
-    started_at: new Date(startTime).toISOString(),
-    completed_at: new Date().toISOString(),
-  })
-
-  return Response.json({
-    success: true,
-    duration: `${duration}ms`,
-    tasks: results,
-  })
 }

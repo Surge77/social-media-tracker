@@ -1,21 +1,24 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import {
+  buildInternalCronHeaders,
+  hasCronSecretConfigError,
+  runCronStepWithRetry,
+} from '@/lib/cron/orchestrator'
 
 export const maxDuration = 60
 
 /**
  * Daily cron orchestrator:
- * 1. Fires 3 fetcher batches in parallel (fire-and-forget)
- * 2. Waits 55s for them to finish
- * 3. Fires scoring batch (fire-and-forget)
- * 4. Returns
+ * 1. Validates scheduler/auth configuration
+ * 2. Runs all fetcher batches with retry
+ * 3. Runs scoring batch and awaits completion
+ * 4. Returns step-level status for observability
  *
  * Schedule: Every day at 2:00 AM UTC (configured in vercel.json)
  *
- * Batch routes (each has its own 60s timeout):
- *   - batch-1: GitHub + HN + Stack Overflow
- *   - batch-2: Packages + Dev.to
- *   - batch-3: Reddit + RSS
- *   - batch-scoring: Computes daily_scores from data_points
+ * Batch routes (each has its own timeout):
+ *   - batch-1..batch-6 + language-rankings for data collection
+ *   - batch-scoring for daily score computation
  */
 export async function GET(request: Request) {
   const startTime = Date.now()
@@ -29,6 +32,16 @@ export async function GET(request: Request) {
   }
 
   try {
+    if (hasCronSecretConfigError(process.env)) {
+      return Response.json(
+        {
+          success: false,
+          error: 'CRON_SECRET is required in production for internal cron fan-out',
+        },
+        { status: 500 }
+      )
+    }
+
     const baseUrl = process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
       : process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
@@ -45,54 +58,70 @@ export async function GET(request: Request) {
     ]
     const scoringRoute = `${baseUrl}/api/cron/fetch-daily/batch-scoring`
 
-    const headers: Record<string, string> = {}
-    if (process.env.CRON_SECRET) {
-      headers['x-internal-cron'] = process.env.CRON_SECRET
-    }
+    const headers = buildInternalCronHeaders(process.env)
 
-    // Fire all 5 fetcher batches and wait for results
-    const fetchResults = await Promise.allSettled(
-      fetcherBatches.map((url) => fetch(url, { headers }))
+    const fetchResults = await Promise.all(
+      fetcherBatches.map((url, i) =>
+        runCronStepWithRetry({
+          name: `fetcher-${i + 1}`,
+          url,
+          init: { headers },
+          retries: 1,
+        })
+      )
     )
 
-    // Retry once for any failed batches
-    const failedIndexes = fetchResults
-      .map((r, i) => ({ r, i }))
-      .filter((x) => x.r.status === 'rejected')
-      .map((x) => x.i)
-
-    if (failedIndexes.length > 0) {
-      console.warn(`[Daily Cron] Retrying ${failedIndexes.length} failed batches`)
-      await Promise.allSettled(
-        failedIndexes.map((i) => fetch(fetcherBatches[i], { headers }))
-      )
-    }
-
-    // Fire scoring after all fetchers complete
-    fetch(scoringRoute, { headers }).catch((err) => {
-      console.error('[Daily Cron] Failed to fire scoring:', err)
+    const scoringResult = await runCronStepWithRetry({
+      name: 'scoring',
+      url: scoringRoute,
+      init: { headers },
+      retries: 1,
     })
+
+    const stepResults = [...fetchResults, scoringResult]
+    const failedSteps = stepResults.filter((step) => !step.ok)
+    const hasFailures = failedSteps.length > 0
 
     // Log the orchestrator run
     const supabase = createSupabaseAdminClient()
     const duration = Date.now() - startTime
     await supabase.from('fetch_logs').insert({
       source: 'daily_cron',
-      status: 'success',
+      status: hasFailures ? 'failed' : 'success',
       technologies_processed: 0,
       data_points_created: 0,
-      error_message: null,
+      error_message: hasFailures
+        ? failedSteps
+            .map((step) => `${step.name}: ${step.error ?? `HTTP ${step.status}`}`)
+            .join('; ')
+        : null,
       duration_ms: duration,
       started_at: new Date(startTime).toISOString(),
       completed_at: new Date().toISOString(),
     })
 
-    return Response.json({
-      success: true,
-      message: 'Fired 8 fetcher batches + scoring',
-      batches: [...fetcherBatches, scoringRoute],
-      duration: `${duration}ms`,
-    })
+    if (hasFailures) {
+      return Response.json(
+        {
+          success: false,
+          message: 'One or more daily cron steps failed',
+          duration: `${duration}ms`,
+          stepResults,
+          failedSteps,
+        },
+        { status: 500 }
+      )
+    }
+
+    return Response.json(
+      {
+        success: true,
+        message: 'Completed 8 fetcher batches + scoring',
+        duration: `${duration}ms`,
+        stepResults,
+      },
+      { status: 200 }
+    )
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
     console.error('[Daily Cron] Orchestrator error:', errorMsg)

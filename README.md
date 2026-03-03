@@ -373,7 +373,15 @@ npm run test:watch    # Watch mode
 
 ### Triggering Data Fetches Manually
 
-Cron jobs run automatically on Vercel (configured in `vercel.json`). To trigger manually during development, call the routes in order:
+Cron jobs run automatically on Vercel (configured in `vercel.json`) with 2 scheduler entries:
+- `/api/cron/fetch-daily` (daily orchestrator)
+- `/api/cron/weekly-tasks` (weekly orchestrator)
+
+Important for production:
+- Set `CRON_SECRET` in Vercel environment variables.
+- Orchestrators now fail fast if `CRON_SECRET` is missing, because internal fan-out routes require authenticated `x-internal-cron` calls.
+
+To trigger manually during development, call the routes in order:
 
 ```bash
 # Data collection batches
@@ -468,7 +476,8 @@ Results are cached 30 days in `ai_insights` with `insight_type = 'project-idea'`
 
 ### Cron Batches
 
-All cron routes run on Vercel's scheduler. Run manually for local development.
+Vercel scheduler uses 2 cron routes (`/api/cron/fetch-daily` and `/api/cron/weekly-tasks`), and those orchestrate the batch routes below.
+Run batches manually for local development.
 
 | Endpoint | Schedule | Sources |
 |----------|----------|---------|
@@ -481,7 +490,8 @@ All cron routes run on Vercel's scheduler. Run manually for local development.
 | `/api/cron/fetch-daily/batch-6-youtube` | Daily | YouTube Data API v3 |
 | `/api/cron/fetch-daily/batch-intelligence` | Daily | AI insight generation |
 | `/api/cron/fetch-daily/batch-scoring` | Daily | Score computation |
-| `/api/cron/fetch-weekly` | Weekly | Digest generation |
+| `/api/cron/fetch-weekly` | Weekly | Job market data fetch |
+| `/api/cron/weekly-tasks` | Weekly | Orchestrator for weekly fetch + digest + monthly cleanup |
 
 ---
 
@@ -601,7 +611,7 @@ Contributions are welcome. Please follow these guidelines.
 | Database tables | 15 |
 | Quiz types | 6 |
 | Curated resources (resources.ts) | 67 techs |
-| Daily cron batches | 8 |
+| Daily cron batches | 8 (orchestrated by 1 scheduled route) |
 | Direct dependencies | 51 |
 
 ---
