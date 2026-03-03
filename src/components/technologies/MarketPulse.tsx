@@ -13,6 +13,10 @@ interface MarketPulseProps {
   isError: boolean
 }
 
+function asNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null
+}
+
 function SkeletonSlot() {
   return (
     <div className="flex flex-col gap-2 p-3">
@@ -91,8 +95,11 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                   >
                     {data.hottest.name}
                   </Link>
+                  <span className="text-xs text-muted-foreground">
+                    {(asNumber(data.hottest.composite_score) ?? 0).toFixed(0)} score
+                  </span>
                   <span className="text-xs font-medium text-emerald-400">
-                    {data.hottest.score_delta > 0 ? '+' : ''}{data.hottest.score_delta.toFixed(1)}
+                    {`${(asNumber(data.hottest.score_delta) ?? 0) > 0 ? '+' : ''}${(asNumber(data.hottest.score_delta) ?? 0).toFixed(1)}`}
                   </span>
                 </>
               ) : (
@@ -101,10 +108,10 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
             }
           />
 
-          {/* Most Demanded */}
+          {/* Top Score */}
           <SlotItem
             emoji="📈"
-            label="Most Demanded"
+            label="Top Score"
             content={
               data.most_demanded ? (
                 <>
@@ -115,7 +122,13 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                     {data.most_demanded.name}
                   </Link>
                   <span className="text-xs text-muted-foreground">
-                    {data.most_demanded.jobs_score.toFixed(0)} jobs score
+                    {(asNumber(data.most_demanded.composite_score) ?? 0).toFixed(0)} score
+                  </span>
+                  <span className={cn(
+                    'text-xs font-medium',
+                    (data.most_demanded.score_delta ?? 0) > 0 ? 'text-emerald-400' : ((data.most_demanded.score_delta ?? 0) < 0 ? 'text-red-400' : 'text-muted-foreground')
+                  )}>
+                    {`${(data.most_demanded.score_delta ?? 0) > 0 ? '+' : ''}${(data.most_demanded.score_delta ?? 0).toFixed(1)}`}
                   </span>
                 </>
               ) : (
@@ -137,8 +150,11 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                   >
                     {data.cooling.name}
                   </Link>
+                  <span className="text-xs text-muted-foreground">
+                    {(asNumber(data.cooling.composite_score) ?? 0).toFixed(0)} score
+                  </span>
                   <span className="text-xs font-medium text-red-400">
-                    {data.cooling.score_delta > 0 ? '+' : ''}{data.cooling.score_delta.toFixed(1)}
+                    {`${(asNumber(data.cooling.score_delta) ?? 0) > 0 ? '+' : ''}${(asNumber(data.cooling.score_delta) ?? 0).toFixed(1)}`}
                   </span>
                 </>
               ) : (
@@ -147,10 +163,10 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
             }
           />
 
-          {/* Hidden Gem */}
+          {/* Underrated */}
           <SlotItem
             emoji="💎"
-            label="Hidden Gem"
+            label="Underrated"
             content={
               data.hidden_gem ? (
                 <>
@@ -160,11 +176,15 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                   >
                     {data.hidden_gem.name}
                   </Link>
-                  {data.hidden_gem.jobs_score != null && (
-                    <span className="text-xs text-muted-foreground">
-                      {data.hidden_gem.jobs_score} jobs score
-                    </span>
-                  )}
+                  <span className="text-xs text-muted-foreground">
+                    {(asNumber(data.hidden_gem.composite_score) ?? 0).toFixed(0)} score
+                  </span>
+                  <span className={cn(
+                    'text-xs font-medium',
+                    (data.hidden_gem.score_delta ?? 0) > 0 ? 'text-emerald-400' : ((data.hidden_gem.score_delta ?? 0) < 0 ? 'text-red-400' : 'text-muted-foreground')
+                  )}>
+                    {`${(data.hidden_gem.score_delta ?? 0) > 0 ? '+' : ''}${(data.hidden_gem.score_delta ?? 0).toFixed(1)}`}
+                  </span>
                 </>
               ) : (
                 <span className="text-sm text-muted-foreground">None</span>
@@ -223,6 +243,12 @@ export function MarketPulse({ data, isLoading, isError }: MarketPulseProps) {
                       {data.safest_bet.composite_score} score
                     </span>
                   )}
+                  <span className={cn(
+                    'text-xs font-medium',
+                    (data.safest_bet.score_delta ?? 0) > 0 ? 'text-emerald-400' : ((data.safest_bet.score_delta ?? 0) < 0 ? 'text-red-400' : 'text-muted-foreground')
+                  )}>
+                    {`${(data.safest_bet.score_delta ?? 0) > 0 ? '+' : ''}${(data.safest_bet.score_delta ?? 0).toFixed(1)}`}
+                  </span>
                 </>
               ) : (
                 <span className="text-sm text-muted-foreground">—</span>

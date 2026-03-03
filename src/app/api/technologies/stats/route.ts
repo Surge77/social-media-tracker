@@ -74,7 +74,7 @@ export async function GET() {
       previousDate
         ? supabase
             .from('daily_scores')
-            .select('technology_id, composite_score')
+            .select('technology_id, composite_score, jobs_score')
             .eq('score_date', previousDate)
         : Promise.resolve({ data: [], error: null }),
       supabase
@@ -101,8 +101,13 @@ export async function GET() {
     }
 
     const prevScoreMap = new Map<string, number>()
+    const prevJobsMap = new Map<string, number | null>()
     for (const s of (previousScoresResult.data ?? [])) {
       prevScoreMap.set(s.technology_id, Number(s.composite_score ?? 0))
+      prevJobsMap.set(
+        s.technology_id,
+        s.jobs_score != null ? Number(s.jobs_score) : null
+      )
     }
 
     // 6. Merge technologies with scores
@@ -134,6 +139,11 @@ export async function GET() {
     const withDelta = merged.map((t) => ({
       ...t,
       score_delta: t.composite_score - (prevScoreMap.get(t.technology_id) ?? t.composite_score),
+      jobs_delta: (() => {
+        const prevJobs = prevJobsMap.get(t.technology_id)
+        if (prevJobs == null || t.jobs_score == null) return null
+        return t.jobs_score - prevJobs
+      })(),
     }))
     const comparableDelta = withDelta.filter((t) => prevScoreMap.has(t.technology_id))
 
@@ -158,36 +168,86 @@ export async function GET() {
       ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === coolingEntry.technology_id)?.score_delta ?? 0) : coolingEntry.momentum / 10) * 10) / 10
       : 0
 
-    const mostDemanded = [...merged]
-      .filter((t) => t.jobs_score !== null)
-      .sort((a, b) => (b.jobs_score ?? 0) - (a.jobs_score ?? 0))[0] ?? null
+    const topScore = [...merged]
+      .sort((a, b) => b.composite_score - a.composite_score)[0] ?? null
 
-    const hiddenGem = merged
-      .filter((t) => (t.jobs_score ?? 0) > 40 && (t.community_score ?? 0) < 55)
-      .sort((a, b) => ((b.jobs_score ?? 0) - (b.community_score ?? 0)) - ((a.jobs_score ?? 0) - (a.community_score ?? 0)))[0] ?? null
+    const hiddenGem =
+      [...withDelta]
+        .filter((t) => t.composite_score >= 40 && t.composite_score <= 75)
+        .sort((a, b) => {
+          if (b.score_delta !== a.score_delta) return b.score_delta - a.score_delta
+          return b.momentum - a.momentum
+        })[0] ??
+      sortedByDelta.find((t) =>
+        t.technology_id !== hottestEntry?.technology_id &&
+        t.technology_id !== topScore?.technology_id
+      ) ??
+      null
 
     const trending = sortedByMomentum.slice(0, 3)
 
     const safestBet = merged
       .filter((t) => Math.abs(t.momentum) < 5)
       .sort((a, b) => b.composite_score - a.composite_score)[0]
+    const withDeltaById = new Map(
+      withDelta.map((entry) => [entry.technology_id, entry])
+    )
 
     const market_pulse = {
       hottest: hottestEntry
-        ? { name: hottestEntry.name, slug: hottestEntry.slug, color: hottestEntry.color, score_delta: hottestDelta }
+        ? {
+            name: hottestEntry.name,
+            slug: hottestEntry.slug,
+            color: hottestEntry.color,
+            composite_score: Math.round(hottestEntry.composite_score),
+            score_delta: hottestDelta,
+          }
         : null,
-      most_demanded: mostDemanded
-        ? { name: mostDemanded.name, slug: mostDemanded.slug, color: mostDemanded.color, jobs_score: Math.round(mostDemanded.jobs_score!) }
+      most_demanded: topScore
+        ? {
+            name: topScore.name,
+            slug: topScore.slug,
+            color: topScore.color,
+            composite_score: Math.round(topScore.composite_score),
+            score_delta:
+              withDeltaById.get(topScore.technology_id) != null
+                ? Math.round((withDeltaById.get(topScore.technology_id)!.score_delta ?? 0) * 10) / 10
+                : null,
+          }
         : null,
       cooling: coolingEntry
-        ? { name: coolingEntry.name, slug: coolingEntry.slug, color: coolingEntry.color, score_delta: coolingDelta }
+        ? {
+            name: coolingEntry.name,
+            slug: coolingEntry.slug,
+            color: coolingEntry.color,
+            composite_score: Math.round(coolingEntry.composite_score),
+            score_delta: coolingDelta,
+          }
         : null,
       hidden_gem: hiddenGem
-        ? { name: hiddenGem.name, slug: hiddenGem.slug, color: hiddenGem.color, jobs_score: Math.round(hiddenGem.jobs_score!) }
+        ? {
+            name: hiddenGem.name,
+            slug: hiddenGem.slug,
+            color: hiddenGem.color,
+            composite_score: Math.round(hiddenGem.composite_score),
+            score_delta:
+              withDeltaById.get(hiddenGem.technology_id) != null
+                ? Math.round((withDeltaById.get(hiddenGem.technology_id)!.score_delta ?? 0) * 10) / 10
+                : null,
+          }
         : null,
       trending: trending.map((t) => ({ name: t.name, slug: t.slug, color: t.color, momentum: Math.round(t.momentum * 10) / 10 })),
       safest_bet: safestBet
-        ? { name: safestBet.name, slug: safestBet.slug, color: safestBet.color, composite_score: Math.round(safestBet.composite_score) }
+        ? {
+            name: safestBet.name,
+            slug: safestBet.slug,
+            color: safestBet.color,
+            composite_score: Math.round(safestBet.composite_score),
+            score_delta:
+              withDeltaById.get(safestBet.technology_id) != null
+                ? Math.round((withDeltaById.get(safestBet.technology_id)!.score_delta ?? 0) * 10) / 10
+                : null,
+          }
         : null,
     }
 
