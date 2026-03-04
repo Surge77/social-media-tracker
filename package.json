@@ -6,7 +6,7 @@
     "dev": "cross-env NODE_OPTIONS=--dns-result-order=ipv4first next dev --turbopack --hostname 127.0.0.1 -p 3000",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src/",
     "test": "vitest run",
     "test:watch": "vitest"
   },
