@@ -12,6 +12,8 @@ import {
 
 beforeEach(() => {
   mockFetch.mockReset()
+  // Default: historical TVL calls (one per chain in top-20) return empty history
+  mockFetch.mockResolvedValue({ ok: true, json: async () => [] })
 })
 
 // ─── fetchChainTVLs ───────────────────────────────────────────────────────────
