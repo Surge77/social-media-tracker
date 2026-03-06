@@ -15,7 +15,7 @@ export function LanguageRisingStars({ rankings }: LanguageRisingStarsProps) {
   const prefersReducedMotion = useReducedMotion()
 
   const risers = rankings
-    .filter((r) => r.prev_rank !== null && r.prev_rank - r.rank > 0)
+    .filter((ranking) => ranking.prev_rank !== null && ranking.prev_rank - ranking.rank > 0)
     .sort((a, b) => (b.prev_rank! - b.rank) - (a.prev_rank! - a.rank))
     .slice(0, 4)
 
@@ -31,35 +31,32 @@ export function LanguageRisingStars({ rankings }: LanguageRisingStarsProps) {
       <div className="mb-2.5 flex items-center gap-1.5">
         <Flame size={13} className="text-orange-500" />
         <span className="text-xs font-semibold text-foreground">Rising Stars</span>
-        <span className="text-xs text-muted-foreground">— biggest rank jumps this period</span>
+        <span className="text-xs text-muted-foreground">- biggest rank jumps this period</span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {risers.map((lang, i) => {
-          const color = LANG_COLORS[lang.language] ?? '#6b7280'
-          const change = lang.prev_rank! - lang.rank
+      <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:grid-cols-4">
+        {risers.map((language, index) => {
+          const color = LANG_COLORS[language.language] ?? '#6b7280'
+          const change = language.prev_rank! - language.rank
 
           return (
             <motion.div
-              key={lang.id}
+              key={language.id}
               initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.95 }}
               animate={prefersReducedMotion ? {} : { opacity: 1, scale: 1 }}
-              transition={prefersReducedMotion ? {} : { duration: 0.3, delay: 0.2 + i * 0.06 }}
+              transition={prefersReducedMotion ? {} : { duration: 0.3, delay: 0.2 + index * 0.06 }}
               className="flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors hover:bg-card/60"
               style={{
                 borderColor: `${color}30`,
                 background: `linear-gradient(120deg, ${color}08 0%, transparent 70%)`,
               }}
             >
-              <span
-                className="h-2.5 w-2.5 shrink-0 rounded-full"
-                style={{ backgroundColor: color }}
-              />
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-foreground">{lang.language}</p>
-                <p className="text-[10px] text-muted-foreground">Rank #{lang.rank}</p>
+                <p className="truncate text-xs font-semibold text-foreground">{language.language}</p>
+                <p className="text-[10px] text-muted-foreground">Rank #{language.rank}</p>
               </div>
-              <span className="shrink-0 text-xs font-bold text-emerald-500">↑{change}</span>
+              <span className="shrink-0 text-xs font-bold text-emerald-500">+{change}</span>
             </motion.div>
           )
         })}

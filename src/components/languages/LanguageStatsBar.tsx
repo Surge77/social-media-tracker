@@ -15,31 +15,29 @@ export function LanguageStatsBar({ rankings }: LanguageStatsBarProps) {
   const prefersReducedMotion = useReducedMotion()
   if (rankings.length === 0) return null
 
-  const top = rankings[0]
-  const topColor = LANG_COLORS[top.language] ?? '#6b7280'
+  const topLanguage = rankings[0]
+  const topColor = LANG_COLORS[topLanguage.language] ?? '#6b7280'
 
-  const biggestMover = rankings
-    .filter((r) => r.prev_rank !== null && r.prev_rank - r.rank > 0)
-    .sort((a, b) => (b.prev_rank! - b.rank) - (a.prev_rank! - a.rank))[0] ?? null
+  const biggestMover =
+    rankings
+      .filter((ranking) => ranking.prev_rank !== null && ranking.prev_rank - ranking.rank > 0)
+      .sort((a, b) => (b.prev_rank! - b.rank) - (a.prev_rank! - a.rank))[0] ?? null
 
-  const mostJobs = rankings.reduce((best, r) =>
-    r.job_listings > best.job_listings ? r : best, rankings[0])
+  const mostJobs = rankings.reduce((best, ranking) => (ranking.job_listings > best.job_listings ? ranking : best), rankings[0])
 
   const stats = [
     {
       icon: Trophy,
       label: 'Top Language',
-      value: top.language,
-      sub: `Rating: 100`,
+      value: topLanguage.language,
+      sub: 'Rating: 100',
       color: topColor,
     },
     {
       icon: TrendingUp,
       label: 'Biggest Mover',
-      value: biggestMover ? biggestMover.language : '—',
-      sub: biggestMover
-        ? `↑${biggestMover.prev_rank! - biggestMover.rank} places`
-        : 'No changes yet',
+      value: biggestMover ? biggestMover.language : '-',
+      sub: biggestMover ? `+${biggestMover.prev_rank! - biggestMover.rank} places` : 'No changes yet',
       color: biggestMover ? (LANG_COLORS[biggestMover.language] ?? '#10b981') : '#6b7280',
     },
     {
@@ -59,13 +57,13 @@ export function LanguageStatsBar({ rankings }: LanguageStatsBarProps) {
   ]
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {stats.map((stat, i) => (
+    <div className="mb-6 grid grid-cols-1 gap-3 min-[480px]:grid-cols-2 lg:grid-cols-4">
+      {stats.map((stat, index) => (
         <motion.div
           key={stat.label}
           initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
           animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-          transition={prefersReducedMotion ? {} : { duration: 0.35, delay: i * 0.07 }}
+          transition={prefersReducedMotion ? {} : { duration: 0.35, delay: index * 0.07 }}
           className="flex items-center gap-3 rounded-lg border border-border bg-card/40 px-4 py-3"
         >
           <div
