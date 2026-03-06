@@ -3,8 +3,33 @@ type CronEnv = Record<string, string | undefined> & {
   CRON_SECRET?: string
 }
 
+function getExpectedBearerToken(env: CronEnv): string | null {
+  return env.CRON_SECRET ? `Bearer ${env.CRON_SECRET}` : null
+}
+
 export function hasCronSecretConfigError(env: CronEnv): boolean {
   return env.VERCEL_ENV === 'production' && !env.CRON_SECRET
+}
+
+export function isAuthorizedScheduledRequest(
+  request: Request,
+  env: CronEnv
+): boolean {
+  const expectedBearerToken = getExpectedBearerToken(env)
+
+  return (
+    request.headers.get('x-vercel-cron') === '1' ||
+    (expectedBearerToken !== null &&
+      request.headers.get('authorization') === expectedBearerToken)
+  )
+}
+
+export function isAuthorizedCronRequest(request: Request, env: CronEnv): boolean {
+  return (
+    isAuthorizedScheduledRequest(request, env) ||
+    (!!env.CRON_SECRET &&
+      request.headers.get('x-internal-cron') === env.CRON_SECRET)
+  )
 }
 
 export function buildInternalCronHeaders(env: CronEnv): Record<string, string> {

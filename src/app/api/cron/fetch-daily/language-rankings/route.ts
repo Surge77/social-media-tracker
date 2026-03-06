@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { isAuthorizedCronRequest } from '@/lib/cron/orchestrator'
 import { fetchLanguageStats, computePopularityIndex, TRACKED_LANGUAGES, LanguageStats } from '@/lib/api/language-stats'
 
 export const maxDuration = 60
@@ -13,9 +14,7 @@ export const maxDuration = 60
 export async function GET(request: Request) {
   // Auth: accept Vercel cron header or internal orchestrator secret
   if (process.env.VERCEL_ENV === 'production') {
-    const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-    const isInternal = request.headers.get('x-internal-cron') === process.env.CRON_SECRET
-    if (!isVercelCron && !isInternal) {
+    if (!isAuthorizedCronRequest(request, process.env)) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }

@@ -2,6 +2,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { fetchPackageDownloads } from '@/lib/api/packages'
 import { fetchDevToData } from '@/lib/api/devto'
 import { fetchExtendedPackageDownloads } from '@/lib/api/packages-extended'
+import { isAuthorizedCronRequest } from '@/lib/cron/orchestrator'
 import type { Technology, FetcherResult } from '@/types'
 
 export const maxDuration = 60
@@ -14,9 +15,7 @@ export async function GET(request: Request) {
   const startTime = Date.now()
 
   if (process.env.VERCEL_ENV === 'production') {
-    const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-    const isInternal = request.headers.get('x-internal-cron') === process.env.CRON_SECRET
-    if (!isVercelCron && !isInternal) {
+    if (!isAuthorizedCronRequest(request, process.env)) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }

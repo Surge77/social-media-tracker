@@ -2,6 +2,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { fetchGitHubData } from '@/lib/api/github'
 import { fetchHackerNewsData } from '@/lib/api/hackernews'
 import { fetchStackOverflowData } from '@/lib/api/stackoverflow'
+import { isAuthorizedCronRequest } from '@/lib/cron/orchestrator'
 import type { Technology, FetcherResult } from '@/types'
 
 export const maxDuration = 60
@@ -15,9 +16,7 @@ export async function GET(request: Request) {
 
   // Allow both Vercel cron and internal orchestrator calls
   if (process.env.VERCEL_ENV === 'production') {
-    const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-    const isInternal = request.headers.get('x-internal-cron') === process.env.CRON_SECRET
-    if (!isVercelCron && !isInternal) {
+    if (!isAuthorizedCronRequest(request, process.env)) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }

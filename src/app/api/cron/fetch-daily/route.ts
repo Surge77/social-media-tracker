@@ -2,6 +2,7 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import {
   buildInternalCronHeaders,
   hasCronSecretConfigError,
+  isAuthorizedScheduledRequest,
   runCronStepWithRetry,
 } from '@/lib/cron/orchestrator'
 
@@ -25,8 +26,7 @@ export async function GET(request: Request) {
 
   // Verify this is a Vercel cron request in production
   if (process.env.VERCEL_ENV === 'production') {
-    const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-    if (!isVercelCron) {
+    if (!isAuthorizedScheduledRequest(request, process.env)) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
   }

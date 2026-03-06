@@ -104,4 +104,16 @@ describe('GET /api/cron/fetch-daily/batch-scoring', () => {
     expect(res.status).toBe(200)
     delete process.env.VERCEL_ENV
   })
+
+  it('succeeds in production with bearer auth', async () => {
+    process.env.VERCEL_ENV = 'production'
+    process.env.CRON_SECRET = 'my-secret'
+    const res = await GET(
+      new Request('http://localhost/api/cron/fetch-daily/batch-scoring', {
+        headers: { authorization: 'Bearer my-secret' },
+      }) as any
+    )
+    expect(res.status).toBe(200)
+    delete process.env.VERCEL_ENV
+  })
 })
