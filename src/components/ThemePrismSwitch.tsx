@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTheme } from 'next-themes';
+import { getThemePrismSwitchStyles } from '@/components/theme-prism-switch-styles';
 const THEMES = ['light', 'dark', 'midnight'] as const;
 type ThemeName = (typeof THEMES)[number];
 
@@ -29,6 +30,7 @@ const FACE_META: Record<ThemeName, { faceClass: string; icon: string }> = {
 export function ThemePrismSwitch() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const styles = getThemePrismSwitchStyles();
 
   useEffect(() => {
     setMounted(true);
@@ -49,7 +51,11 @@ export function ThemePrismSwitch() {
 
   if (!mounted) {
     return (
-      <button type="button" className="h-9 w-9 rounded-lg" aria-label="Switch theme" />
+      <button
+        type="button"
+        className={styles.placeholderClassName}
+        aria-label="Switch theme"
+      />
     );
   }
 
@@ -57,13 +63,13 @@ export function ThemePrismSwitch() {
     <button
       type="button"
       onClick={handleThemeSwitch}
-      className="h-9 w-9 rounded-lg grid place-items-center shrink-0 align-middle hover:scale-[1.03] active:scale-95 transition-transform"
+      className={styles.buttonClassName}
       aria-label={`Switch theme, current: ${activeTheme}`}
       title={`Theme: ${activeTheme}`}
     >
-      <div className="h-6 w-6 cursor-pointer" style={{ perspective: '200px' }}>
+      <div className={styles.frameClassName} style={{ perspective: '200px' }}>
         <div
-          className="relative h-8 w-8 [transform-style:preserve-3d]"
+          className={styles.cubeClassName}
           style={{
             transform: `rotateY(${PRISM_ROT[THEMES[activeIndex]]}deg)`,
             transition: 'transform 0.55s cubic-bezier(.34,1.46,.64,1)',
@@ -72,8 +78,8 @@ export function ThemePrismSwitch() {
           {THEMES.map((themeName, index) => (
             <div
               key={themeName}
-              className={`absolute inset-0 flex items-center justify-center rounded-[7px] border text-base shadow-sm [backface-visibility:hidden] ${FACE_META[themeName].faceClass}`}
-              style={{ transform: `rotateY(${index * 120}deg) translateZ(14px)` }}
+              className={`${styles.faceClassName} ${FACE_META[themeName].faceClass}`}
+              style={{ transform: `rotateY(${index * 120}deg) translateZ(12px)` }}
             >
               {FACE_META[themeName].icon}
             </div>

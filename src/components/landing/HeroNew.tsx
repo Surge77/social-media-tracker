@@ -12,6 +12,7 @@ import { BorderBeam } from '@/components/ui/border-beam';
 import { FlickeringGrid } from '@/components/ui/flickering-grid';
 import { MorphingText } from '@/components/ui/morphing-text';
 import { HyperText } from '@/components/ui/hyper-text';
+import { getHeroQuizPromptClassName } from '@/components/landing/hero-styles';
 
 const MOCK_SPARKLINES = {
   up:     [52, 54, 51, 56, 58, 55, 62, 66, 70, 75, 78, 82, 86, 90, 94],
@@ -31,6 +32,7 @@ export default function HeroNew() {
   const prefersReducedMotion = useReducedMotion();
   const { resolvedTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
+  const quizPromptClassName = getHeroQuizPromptClassName();
 
   return (
     <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pb-10 pt-20 sm:min-h-screen">
@@ -167,9 +169,9 @@ export default function HeroNew() {
             </AnimatedCTA>
             <a
               href="/quiz/learn-next"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
+              className={quizPromptClassName}
             >
-              Not sure where to start? Take the career quiz
+              Take the career quiz
               <ArrowUpRight className="w-3.5 h-3.5" />
             </a>
           </motion.div>
