@@ -7,7 +7,7 @@ import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useTechnologies } from '@/hooks/useTechnologies'
 import { useTechStats } from '@/hooks/useTechStats'
 import { MoversShakers } from '@/components/technologies/MoversShakers'
-import { SmartFilters, applySmartFilter, getFilterEmptyMessage, type SmartFilter } from '@/components/technologies/SmartFilters'
+import { SmartFilters, getFilterEmptyMessage, type SmartFilter } from '@/components/technologies/SmartFilters'
 import { TechCard } from '@/components/technologies/TechCard'
 import { TechTable } from '@/components/technologies/TechTable'
 import { ViewToggle, type ViewMode } from '@/components/technologies/ViewToggle'
@@ -22,10 +22,9 @@ import { MetricsGlossary } from '@/components/technologies/MetricsGlossary'
 import { Loading } from '@/components/ui/loading'
 import { DotPattern } from '@/components/ui/dot-pattern'
 import { WordPullUp } from '@/components/ui/word-pull-up'
-import type { TechnologyCategory, TechnologyWithScore } from '@/types'
+import type { TechnologyCategory } from '@/types'
 import { CATEGORY_LABELS } from '@/types'
-
-type SortKey = 'score' | 'jobs' | 'momentum' | 'name'
+import { filterTechnologiesForDisplay, type SortKey } from '@/components/technologies/filtering'
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'score',    label: 'Score' },
@@ -33,15 +32,6 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'momentum', label: 'Momentum' },
   { value: 'name',     label: 'Name' },
 ]
-
-function sortTechnologies(techs: TechnologyWithScore[], key: SortKey): TechnologyWithScore[] {
-  return [...techs].sort((a, b) => {
-    if (key === 'name')     return a.name.localeCompare(b.name)
-    if (key === 'jobs')     return (b.jobs_score ?? 0) - (a.jobs_score ?? 0)
-    if (key === 'momentum') return (b.momentum ?? 0) - (a.momentum ?? 0)
-    return (b.composite_score ?? 0) - (a.composite_score ?? 0)
-  })
-}
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -72,20 +62,12 @@ export function TechnologiesPageClient() {
   }, [])
 
   const filtered = useMemo(() => {
-    let result = applySmartFilter([...allTechnologies], smartFilter)
-
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase()
-      result = result.filter(
-        (t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
-      )
-    }
-
-    if (selectedCategory !== 'all' && smartFilter === 'all') {
-      result = result.filter((t) => t.category === selectedCategory)
-    }
-
-    return sortTechnologies(result, sortKey)
+    return filterTechnologiesForDisplay(allTechnologies, {
+      searchQuery,
+      selectedCategory,
+      smartFilter,
+      sortKey,
+    })
   }, [allTechnologies, searchQuery, selectedCategory, smartFilter, sortKey])
 
   if (isLoading) {
