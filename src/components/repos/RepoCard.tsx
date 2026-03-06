@@ -4,6 +4,7 @@ import React from 'react'
 import { Star, GitFork, AlertCircle, Clock, ExternalLink, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { TrendingRepo } from '@/lib/api/github-trending'
+import { getRepoCardFooterClassName } from '@/components/repos/repo-layout-styles'
 
 interface RepoCardProps {
   repo: TrendingRepo
@@ -29,6 +30,7 @@ function timeAgo(isoDate: string | null): string {
 export function RepoCard({ repo, rank }: RepoCardProps) {
   const [owner, repoName] = repo.full_name.split('/')
   const isHot = repo.stars_gained >= 500
+  const footerClassName = getRepoCardFooterClassName()
 
   return (
     <a
@@ -36,7 +38,7 @@ export function RepoCard({ repo, rank }: RepoCardProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'group flex h-full flex-col rounded-xl border bg-card/40 p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-card relative overflow-hidden',
+        'group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card/40 p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-card sm:p-5',
         isHot
           ? 'border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-[0_8px_24px_-12px_rgba(16,185,129,0.3)]'
           : 'border-border/60 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5'
@@ -52,14 +54,14 @@ export function RepoCard({ repo, rank }: RepoCardProps) {
       )}
       
       {/* Header: avatar + owner/repo + rank + external link */}
-      <div className="mb-3 flex items-start gap-3 relative">
+      <div className="relative mb-3 flex items-start gap-3">
         <img
           src={repo.owner_avatar_url}
           alt={owner}
           className="mt-0.5 h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-border/50 group-hover:ring-primary/30 transition-all duration-300 group-hover:scale-105"
         />
         <div className="min-w-0 flex-1 pt-0.5">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {rank && (
               <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-muted-foreground/50 group-hover:text-primary/60 transition-colors">
                 #{rank}
@@ -125,8 +127,8 @@ export function RepoCard({ repo, rank }: RepoCardProps) {
       </div>
 
       {/* Stats row — pinned to bottom */}
-      <div className="mt-auto flex flex-wrap items-center justify-between border-t border-border/50 pt-3">
-        <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground group-hover:text-foreground/70 transition-colors">
+      <div className={footerClassName}>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] font-medium text-muted-foreground transition-colors group-hover:text-foreground/70">
           {repo.language && (
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-primary/60 group-hover:shadow-[0_0_6px_rgba(var(--primary),0.6)] transition-shadow" />
@@ -143,7 +145,7 @@ export function RepoCard({ repo, rank }: RepoCardProps) {
           </span>
         </div>
         
-        <span className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
+        <span className="flex items-center gap-1 self-start text-[10px] text-muted-foreground/60 sm:self-auto">
           <Clock size={10} />
           {timeAgo(repo.last_pushed_at)}
         </span>
@@ -154,7 +156,7 @@ export function RepoCard({ repo, rank }: RepoCardProps) {
         <div className="mt-3">
           <button
             onClick={(e) => { e.preventDefault(); window.open(repo.hn_url, '_blank'); }}
-            className="flex items-center gap-1.5 rounded-md bg-orange-500/5 border border-orange-500/10 px-2.5 py-1.5 text-[10px] font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-500/10 hover:border-orange-500/30 transition-all w-fit group-hover:-translate-y-0.5"
+            className="flex w-full items-center justify-center gap-1.5 rounded-md border border-orange-500/10 bg-orange-500/5 px-2.5 py-1.5 text-[10px] font-semibold text-orange-600 transition-all hover:border-orange-500/30 hover:bg-orange-500/10 group-hover:-translate-y-0.5 dark:text-orange-400 sm:w-fit sm:justify-start"
           >
             <span className="text-[9px]">▲</span>
             <span>{repo.hn_points} pts on HN</span>

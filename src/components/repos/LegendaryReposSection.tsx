@@ -3,6 +3,7 @@
 import React from 'react'
 import { Star, GitFork, Trophy, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { LegendaryRepo } from '@/app/api/repos/legendary/route'
+import { getLegendaryCardClassName, getRepoViewToggleClassName } from '@/components/repos/repo-layout-styles'
 
 // How many cards are visible at once per breakpoint (used for scroll step)
 const CARDS_PER_PAGE = 4 // desktop — step 4 cards at a time
@@ -43,13 +44,14 @@ interface LegendaryRepoCardProps {
 
 function LegendaryRepoCard({ repo, rank, metric }: LegendaryRepoCardProps) {
   const [owner, name] = repo.full_name.split('/')
+  const cardClassName = getLegendaryCardClassName()
 
   return (
     <a
       href={repo.html_url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex w-[260px] shrink-0 flex-col gap-3 rounded-2xl border border-border/60 bg-card/30 p-5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:border-yellow-500/40 hover:bg-card hover:shadow-[0_12px_30px_-10px_rgba(234,179,8,0.2)] snap-start overflow-hidden"
+      className={cardClassName}
     >
       {/* Subtle glow on hover */}
       <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-yellow-500/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -140,6 +142,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
   const scrollRef = React.useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = React.useState(false)
   const [canScrollRight, setCanScrollRight] = React.useState(true)
+  const segmentedControlClassName = getRepoViewToggleClassName()
 
   const repos = tab === 'stars' ? byStars : byForks
 
@@ -170,8 +173,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
   function scroll(direction: 'left' | 'right') {
     const el = scrollRef.current
     if (!el) return
-    // Step by CARDS_PER_PAGE card widths (260px card + 12px gap = 272px)
-    const step = 272 * CARDS_PER_PAGE
+    const step = Math.max(el.clientWidth - 40, 220)
     el.scrollBy({ left: direction === 'left' ? -step : step, behavior: 'smooth' })
   }
 
@@ -193,7 +195,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
   React.useEffect(() => setActiveDot(0), [tab])
 
   return (
-    <div className="rounded-xl border border-border/60 bg-card/20 p-5 shadow-sm">
+    <div className="rounded-2xl border border-border/60 bg-card/20 p-4 shadow-sm sm:p-5">
       {/* Header row */}
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5">
@@ -208,35 +210,37 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-2 sm:items-end">
           {/* Tab toggle */}
-          <div className="flex items-center rounded-full border border-border/60 bg-muted/20 p-1 text-xs font-semibold">
+          <div className={`${segmentedControlClassName} text-xs font-semibold`}>
             <button
               onClick={() => setTab('stars')}
-              className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 transition-all duration-200 ${
+              className={`flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 transition-all duration-200 sm:rounded-full sm:py-1.5 ${
                 tab === 'stars'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Star size={12} className={tab === 'stars' ? 'text-yellow-500 fill-yellow-500/30' : ''} />
-              Most Starred
+              <span className="sm:hidden">Stars</span>
+              <span className="hidden sm:inline">Most Starred</span>
             </button>
             <button
               onClick={() => setTab('forks')}
-              className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 transition-all duration-200 ${
+              className={`flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 transition-all duration-200 sm:rounded-full sm:py-1.5 ${
                 tab === 'forks'
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <GitFork size={12} className={tab === 'forks' ? 'text-blue-400' : ''} />
-              Most Forked
+              <span className="sm:hidden">Forks</span>
+              <span className="hidden sm:inline">Most Forked</span>
             </button>
           </div>
 
           {/* Arrow controls */}
-          <div className="flex items-center gap-1">
+          <div className="hidden items-center gap-1 sm:flex">
             <button
               onClick={() => scroll('left')}
               disabled={!canScrollLeft}
@@ -254,6 +258,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
               <ChevronRight size={16} />
             </button>
           </div>
+          <p className="text-[11px] text-muted-foreground sm:hidden">Swipe to browse</p>
         </div>
       </div>
 
@@ -272,7 +277,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
 
         <div
           ref={scrollRef}
-          className="flex gap-3 overflow-x-auto pb-2 pt-1 px-1 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="flex gap-3 overflow-x-auto px-1 pb-2 pt-1 [scroll-snap-type:x_mandatory] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:gap-4"
         >
           {repos.map((repo, i) => (
             <LegendaryRepoCard
@@ -287,7 +292,7 @@ export function LegendaryReposSection({ byStars, byForks }: LegendaryReposSectio
 
       {/* Dot pagination */}
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-1.5">
+        <div className="mt-4 hidden items-center justify-center gap-1.5 sm:flex">
           {Array.from({ length: totalPages }).map((_, i) => (
             <button
               key={i}

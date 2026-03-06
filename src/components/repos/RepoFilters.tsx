@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { getRepoFilterTrackClassName } from '@/components/repos/repo-layout-styles'
 
 const LANGUAGES = [
   { value: 'all', label: 'All' },
@@ -29,15 +30,20 @@ interface RepoFiltersProps {
 }
 
 export function RepoFilters({ language, period, onLanguageChange, onPeriodChange }: RepoFiltersProps) {
+  const filterTrackClassName = getRepoFilterTrackClassName()
+
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      {/* Language pills */}
-      <div className="flex flex-wrap gap-1.5">
+    <div className="space-y-3">
+      <div>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+          Language
+        </p>
+        <div className={filterTrackClassName}>
         {LANGUAGES.map((l) => (
           <button
             key={l.value}
             onClick={() => onLanguageChange(l.value)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               language === l.value
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
@@ -46,17 +52,19 @@ export function RepoFilters({ language, period, onLanguageChange, onPeriodChange
             {l.label}
           </button>
         ))}
+        </div>
       </div>
 
-      <div className="h-4 w-px bg-border" />
-
-      {/* Period pills */}
-      <div className="flex gap-1.5">
+      <div>
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/70">
+          Time Range
+        </p>
+        <div className={filterTrackClassName}>
         {PERIODS.map((p) => (
           <button
             key={p.value}
             onClick={() => onPeriodChange(p.value)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
               period === p.value
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
@@ -65,6 +73,7 @@ export function RepoFilters({ language, period, onLanguageChange, onPeriodChange
             {p.label}
           </button>
         ))}
+        </div>
       </div>
     </div>
   )

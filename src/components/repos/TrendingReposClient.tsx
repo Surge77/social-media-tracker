@@ -9,6 +9,7 @@ import { RepoTable } from '@/components/repos/RepoTable'
 import { RepoFilters } from '@/components/repos/RepoFilters'
 import { RisingStarsSection } from '@/components/repos/RisingStarsSection'
 import { LegendaryReposSection } from '@/components/repos/LegendaryReposSection'
+import { getRepoGridClassName, getRepoViewToggleClassName } from '@/components/repos/repo-layout-styles'
 import { WordPullUp } from '@/components/ui/word-pull-up'
 import { Loading } from '@/components/ui/loading'
 import type { TrendingRepo } from '@/lib/api/github-trending'
@@ -20,6 +21,8 @@ type ViewMode = 'grid' | 'table'
 
 export function TrendingReposClient() {
   const prefersReducedMotion = useReducedMotion()
+  const repoGridClassName = getRepoGridClassName()
+  const viewToggleClassName = getRepoViewToggleClassName()
   const [language, setLanguage] = React.useState('all')
   const [period, setPeriod] = React.useState('7d')
   const [repos, setRepos] = React.useState<TrendingRepo[]>([])
@@ -78,13 +81,13 @@ export function TrendingReposClient() {
   }
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">
       {/* Header */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4 }}
-        className="mb-6"
+        className="mb-5 max-w-2xl sm:mb-6"
       >
         <h1 className="mb-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           <WordPullUp text="Trending Repos" />
@@ -109,41 +112,45 @@ export function TrendingReposClient() {
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.1 }}
-        className="mb-8 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center"
+        className="mb-6 rounded-2xl border border-border/60 bg-card/20 p-3 sm:mb-8 sm:p-4"
       >
-        <div className="flex-1">
-          <RepoFilters
-            language={language}
-            period={period}
-            onLanguageChange={(l) => { setLanguage(l); setPage(1) }}
-            onPeriodChange={(p) => { setPeriod(p); setPage(1) }}
-          />
-        </div>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="lg:flex-1">
+            <RepoFilters
+              language={language}
+              period={period}
+              onLanguageChange={(l) => { setLanguage(l); setPage(1) }}
+              onPeriodChange={(p) => { setPeriod(p); setPage(1) }}
+            />
+          </div>
 
-        {/* View toggle */}
-        <div className="self-end sm:self-auto flex items-center rounded-full border border-border/60 bg-muted/20 p-1">
-          <button
-            onClick={() => setView('grid')}
-            aria-label="Grid view"
-            className={`flex h-8 w-10 items-center justify-center rounded-full transition-all duration-200 ${
-              view === 'grid'
-                ? 'bg-background shadow-sm text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <LayoutGrid size={15} />
-          </button>
-          <button
-            onClick={() => setView('table')}
-            aria-label="Table view"
-            className={`flex h-8 w-10 items-center justify-center rounded-full transition-all duration-200 ${
-              view === 'table'
-                ? 'bg-background shadow-sm text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <List size={15} />
-          </button>
+          {/* View toggle */}
+          <div className={viewToggleClassName}>
+            <button
+              onClick={() => setView('grid')}
+              aria-label="Grid view"
+              className={`flex h-9 items-center justify-center rounded-lg transition-all duration-200 sm:h-8 sm:w-10 sm:rounded-full ${
+                view === 'grid'
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <LayoutGrid size={15} />
+              <span className="ml-2 text-xs font-medium sm:hidden">Grid</span>
+            </button>
+            <button
+              onClick={() => setView('table')}
+              aria-label="Table view"
+              className={`flex h-9 items-center justify-center rounded-lg transition-all duration-200 sm:h-8 sm:w-10 sm:rounded-full ${
+                view === 'table'
+                  ? 'bg-background shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <List size={15} />
+              <span className="ml-2 text-xs font-medium sm:hidden">List</span>
+            </button>
+          </div>
         </div>
       </motion.div>
 
@@ -175,7 +182,7 @@ export function TrendingReposClient() {
 
           {/* Page label */}
           {totalPages > 1 && (
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="mb-3 flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, repos.length)} of {repos.length} repos
               </p>
@@ -193,7 +200,7 @@ export function TrendingReposClient() {
               transition={prefersReducedMotion ? {} : { duration: 0.2 }}
             >
               {view === 'grid' ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className={repoGridClassName}>
                   {pageRepos.map((repo, i) => (
                     <motion.div
                       key={repo.github_id}
@@ -212,24 +219,24 @@ export function TrendingReposClient() {
           </AnimatePresence>
 
           {repos.length === 0 && (
-            <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-border">
+            <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-border">
               <p className="text-sm text-muted-foreground">No repos found for this filter combination</p>
             </div>
           )}
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-2 sm:mt-10 sm:gap-3">
               <button
                 onClick={() => goToPage(page - 1)}
                 disabled={page === 1}
-                className="flex h-10 items-center gap-1.5 rounded-full border border-border/60 bg-card/30 px-4 text-sm font-medium text-foreground transition-all hover:bg-muted/50 hover:border-border disabled:pointer-events-none disabled:opacity-40"
+                className="flex h-10 min-w-[2.75rem] items-center justify-center gap-1.5 rounded-full border border-border/60 bg-card/30 px-4 text-sm font-medium text-foreground transition-all hover:bg-muted/50 hover:border-border disabled:pointer-events-none disabled:opacity-40"
               >
                 <ChevronLeft size={16} />
                 <span className="hidden sm:inline">Previous</span>
               </button>
 
-              <div className="flex items-center gap-1.5">
+              <div className="order-first flex w-full items-center justify-center gap-1.5 sm:order-none sm:w-auto">
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
                   .reduce<(number | 'ellipsis')[]>((acc, p, idx, arr) => {
@@ -259,7 +266,7 @@ export function TrendingReposClient() {
               <button
                 onClick={() => goToPage(page + 1)}
                 disabled={page === totalPages}
-                className="flex h-10 items-center gap-1.5 rounded-full border border-border/60 bg-card/30 px-4 text-sm font-medium text-foreground transition-all hover:bg-muted/50 hover:border-border disabled:pointer-events-none disabled:opacity-40"
+                className="flex h-10 min-w-[2.75rem] items-center justify-center gap-1.5 rounded-full border border-border/60 bg-card/30 px-4 text-sm font-medium text-foreground transition-all hover:bg-muted/50 hover:border-border disabled:pointer-events-none disabled:opacity-40"
               >
                 <span className="hidden sm:inline">Next</span>
                 <ChevronRight size={16} />

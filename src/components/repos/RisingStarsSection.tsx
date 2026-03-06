@@ -1,6 +1,7 @@
 import React from 'react'
 import { Star, TrendingUp } from 'lucide-react'
 import type { TrendingRepo } from '@/lib/api/github-trending'
+import { getRisingStarsTrackClassName } from '@/components/repos/repo-layout-styles'
 
 interface RisingStarsSectionProps {
   repos: TrendingRepo[]
@@ -13,24 +14,27 @@ function formatNumber(n: number): string {
 
 export function RisingStarsSection({ repos }: RisingStarsSectionProps) {
   const top5 = repos.slice(0, 5)
+  const trackClassName = getRisingStarsTrackClassName()
 
   if (top5.length === 0) return null
 
   return (
-    <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <TrendingUp size={16} className="text-amber-500" />
-        <h2 className="text-sm font-semibold text-foreground">Rising Stars</h2>
+    <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 sm:p-5">
+      <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+        <div className="flex items-center gap-2">
+          <TrendingUp size={16} className="text-amber-500" />
+          <h2 className="text-sm font-semibold text-foreground">Rising Stars</h2>
+        </div>
         <span className="text-xs text-muted-foreground">Top 5 by total stars this period</span>
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className={trackClassName}>
         {top5.map((repo, i) => (
           <a
             key={repo.github_id}
             href={repo.html_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-background px-3 py-1.5 text-xs transition-colors hover:border-amber-500/40 hover:bg-amber-500/10"
+            className="flex shrink-0 snap-start items-center gap-1.5 rounded-full border border-amber-500/20 bg-background px-3 py-1.5 text-xs transition-colors hover:border-amber-500/40 hover:bg-amber-500/10"
           >
             <span className="font-bold text-amber-500">#{i + 1}</span>
             <span className="font-medium text-foreground">{repo.full_name.split('/')[1]}</span>

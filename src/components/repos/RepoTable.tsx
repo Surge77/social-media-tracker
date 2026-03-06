@@ -189,7 +189,7 @@ export function RepoTable({ repos, page, pageSize }: RepoTableProps) {
       </div>
 
       {/* Mobile: compact list (table doesn't work well on small screens) */}
-      <div className="divide-y divide-border/50 md:hidden bg-card/20">
+      <div className="divide-y divide-border/50 bg-card/20 md:hidden">
         {repos.map((repo, i) => {
           const rank = (page - 1) * pageSize + i + 1
           const [owner, repoName] = repo.full_name.split('/')
@@ -199,32 +199,45 @@ export function RepoTable({ repos, page, pageSize }: RepoTableProps) {
               href={repo.html_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-card/80"
+              className="group flex flex-col gap-2 px-4 py-4 transition-colors hover:bg-card/80"
             >
-              <span className="w-6 shrink-0 text-center text-xs font-bold text-muted-foreground/50 group-hover:text-foreground transition-colors">
-                {rank}
-              </span>
-              <img
-                src={repo.owner_avatar_url}
-                alt={owner}
-                className="h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-border/50 group-hover:ring-primary/40 transition-all"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors">
-                  <span className="text-muted-foreground/70 font-medium">{owner}/</span>{repoName}
-                </p>
-                <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground group-hover:text-foreground/80 transition-colors">
-                  {repo.language && <span className="font-medium">{repo.language}</span>}
-                  <span className="flex items-center gap-1">
-                    <Star size={11} className="text-yellow-500/80 group-hover:text-yellow-500 transition-colors" />
-                    <span className="font-medium">{formatNumber(repo.stars_total)}</span>
-                  </span>
-                  {repo.stars_gained > 0 && (
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-sm">+{formatNumber(repo.stars_gained)}</span>
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 w-6 shrink-0 text-center text-xs font-bold text-muted-foreground/50 transition-colors group-hover:text-foreground">
+                  {rank}
+                </span>
+                <img
+                  src={repo.owner_avatar_url}
+                  alt={owner}
+                  className="h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-border/50 transition-all group-hover:ring-primary/40"
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="truncate text-sm font-bold text-foreground transition-colors group-hover:text-primary">
+                      <span className="font-medium text-muted-foreground/70">{owner}/</span>{repoName}
+                    </p>
+                    <ExternalLink size={14} className="mt-0.5 shrink-0 text-muted-foreground/30 transition-colors group-hover:text-primary/60" />
+                  </div>
+                  {repo.description && (
+                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                      {repo.description}
+                    </p>
                   )}
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-muted-foreground transition-colors group-hover:text-foreground/80">
+                    {repo.language && <span className="font-medium">{repo.language}</span>}
+                    <span className="flex items-center gap-1">
+                      <Star size={11} className="text-yellow-500/80 transition-colors group-hover:text-yellow-500" />
+                      <span className="font-medium">{formatNumber(repo.stars_total)}</span>
+                    </span>
+                    {repo.stars_gained > 0 && (
+                      <span className="rounded-sm bg-emerald-500/10 px-1.5 py-0.5 font-bold text-emerald-600 dark:text-emerald-400">+{formatNumber(repo.stars_gained)}</span>
+                    )}
+                    <span className="flex items-center gap-1">
+                      <Clock size={11} />
+                      {timeAgo(repo.last_pushed_at)}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <ExternalLink size={14} className="shrink-0 text-muted-foreground/30 group-hover:text-primary/60 transition-colors" />
             </a>
           )
         })}
