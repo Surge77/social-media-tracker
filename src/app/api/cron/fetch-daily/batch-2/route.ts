@@ -2,7 +2,11 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { fetchPackageDownloads } from '@/lib/api/packages'
 import { fetchDevToData } from '@/lib/api/devto'
 import { fetchExtendedPackageDownloads } from '@/lib/api/packages-extended'
-import { isAuthorizedCronRequest } from '@/lib/cron/orchestrator'
+import {
+  isAuthorizedCronRequest,
+  resolveCronShardConfig,
+  selectItemsForCronShard,
+} from '@/lib/cron/orchestrator'
 import type { Technology, FetcherResult } from '@/types'
 
 export const maxDuration = 60
@@ -32,21 +36,30 @@ export async function GET(request: Request) {
       throw new Error(`Failed to fetch technologies: ${fetchError?.message}`)
     }
 
-    console.log(`[Batch 2] Fetched ${technologies.length} technologies`)
+    const shard = resolveCronShardConfig(request)
+    const shardTechnologies = selectItemsForCronShard(
+      technologies as Technology[],
+      shard
+    )
+
+    console.log(
+      `[Batch 2] Processing shard ${shard.shardIndex + 1}/${shard.shardCount} ` +
+      `(${shardTechnologies.length}/${technologies.length} technologies)`
+    )
 
     const results: FetcherResult[] = []
     const fetcherNames: string[] = []
 
     console.log('[Batch 2] Fetching package download data...')
-    results.push(await fetchPackageDownloads(technologies as Technology[]))
+    results.push(await fetchPackageDownloads(shardTechnologies))
     fetcherNames.push('packages')
 
     console.log('[Batch 2] Fetching Dev.to data...')
-    results.push(await fetchDevToData(technologies as Technology[]))
+    results.push(await fetchDevToData(shardTechnologies))
     fetcherNames.push('devto')
 
     console.log('[Batch 2] Fetching extended package registry data...')
-    results.push(await fetchExtendedPackageDownloads(technologies as Technology[]))
+    results.push(await fetchExtendedPackageDownloads(shardTechnologies))
     fetcherNames.push('packages-extended')
 
     // Aggregate and upsert
@@ -84,9 +97,11 @@ export async function GET(request: Request) {
 
     const duration = Date.now() - startTime
     await supabase.from('fetch_logs').insert({
-      source: 'daily_batch_2',
+      source: shard.shardCount > 1
+        ? `daily_batch_2_shard_${shard.shardIndex + 1}`
+        : 'daily_batch_2',
       status: allErrors.length === 0 ? 'success' : 'partial',
-      technologies_processed: technologies.length,
+      technologies_processed: shardTechnologies.length,
       data_points_created: allDataPoints.length,
       error_message: allErrors.length > 0 ? allErrors.join('; ') : null,
       duration_ms: duration,
@@ -97,6 +112,7 @@ export async function GET(request: Request) {
     return Response.json({
       success: true,
       batch: 2,
+      shard,
       duration: `${duration}ms`,
       dataPointsCreated: allDataPoints.length,
       errors: allErrors,
@@ -111,9 +127,12 @@ export async function GET(request: Request) {
     console.error('[Batch 2] Error:', errorMsg)
 
     const duration = Date.now() - startTime
+    const shard = resolveCronShardConfig(request)
     const supabase = createSupabaseAdminClient()
     await supabase.from('fetch_logs').insert({
-      source: 'daily_batch_2',
+      source: shard.shardCount > 1
+        ? `daily_batch_2_shard_${shard.shardIndex + 1}`
+        : 'daily_batch_2',
       status: 'failed',
       technologies_processed: 0,
       data_points_created: 0,

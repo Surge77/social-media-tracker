@@ -1,6 +1,10 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { fetchGitHubStats } from '@/lib/api/github-stats'
-import { isAuthorizedCronRequest } from '@/lib/cron/orchestrator'
+import {
+  isAuthorizedCronRequest,
+  resolveCronShardConfig,
+  selectItemsForCronShard,
+} from '@/lib/cron/orchestrator'
 import type { Technology } from '@/types'
 
 export const maxDuration = 60
@@ -32,9 +36,18 @@ export async function GET(request: Request) {
       throw new Error(`Failed to fetch technologies: ${fetchError?.message}`)
     }
 
-    console.log(`[Batch 4a] Fetching GitHub Stats for ${technologies.length} technologies`)
+    const shard = resolveCronShardConfig(request)
+    const shardTechnologies = selectItemsForCronShard(
+      technologies as Technology[],
+      shard
+    )
 
-    const result = await fetchGitHubStats(technologies as Technology[])
+    console.log(
+      `[Batch 4a] Fetching GitHub Stats for shard ${shard.shardIndex + 1}/${shard.shardCount} ` +
+      `(${shardTechnologies.length}/${technologies.length} technologies)`
+    )
+
+    const result = await fetchGitHubStats(shardTechnologies)
     const allErrors = result.errors.map((e) => `[github-stats] ${e}`)
 
     if (result.dataPoints.length > 0) {
@@ -64,9 +77,11 @@ export async function GET(request: Request) {
 
     const duration = Date.now() - startTime
     await supabase.from('fetch_logs').insert({
-      source: 'daily_batch_4a',
+      source: shard.shardCount > 1
+        ? `daily_batch_4a_shard_${shard.shardIndex + 1}`
+        : 'daily_batch_4a',
       status: allErrors.length === 0 ? 'success' : 'partial',
-      technologies_processed: technologies.length,
+      technologies_processed: shardTechnologies.length,
       data_points_created: result.dataPoints.length,
       error_message: allErrors.length > 0 ? allErrors.join('; ') : null,
       duration_ms: duration,
@@ -77,6 +92,7 @@ export async function GET(request: Request) {
     return Response.json({
       success: true,
       batch: '4a',
+      shard,
       duration: `${duration}ms`,
       dataPointsCreated: result.dataPoints.length,
       errors: allErrors,
@@ -86,9 +102,12 @@ export async function GET(request: Request) {
     console.error('[Batch 4a] Error:', errorMsg)
 
     const duration = Date.now() - startTime
+    const shard = resolveCronShardConfig(request)
     const supabase = createSupabaseAdminClient()
     await supabase.from('fetch_logs').insert({
-      source: 'daily_batch_4a',
+      source: shard.shardCount > 1
+        ? `daily_batch_4a_shard_${shard.shardIndex + 1}`
+        : 'daily_batch_4a',
       status: 'failed',
       technologies_processed: 0,
       data_points_created: 0,

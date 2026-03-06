@@ -11,6 +11,16 @@ export function hasCronSecretConfigError(env: CronEnv): boolean {
   return env.VERCEL_ENV === 'production' && !env.CRON_SECRET
 }
 
+export function resolveCronBaseUrl(request: Request, env: CronEnv): string {
+  try {
+    return new URL(request.url).origin
+  } catch {
+    if (env.NEXT_PUBLIC_APP_URL) return env.NEXT_PUBLIC_APP_URL
+    if (env.VERCEL_URL) return `https://${env.VERCEL_URL}`
+    return 'http://localhost:3000'
+  }
+}
+
 export function isAuthorizedScheduledRequest(
   request: Request,
   env: CronEnv
@@ -51,6 +61,61 @@ export function buildInternalBearerHeaders(
   }
 
   return headers
+}
+
+export type CronShardConfig = {
+  shardIndex: number
+  shardCount: number
+}
+
+export function resolveCronShardConfig(
+  request: Request,
+  defaultShardCount = 1
+): CronShardConfig {
+  try {
+    const url = new URL(request.url)
+    const shardCountParam = Number(url.searchParams.get('shardCount'))
+    const shardIndexParam = Number(url.searchParams.get('shardIndex'))
+
+    const shardCount = Number.isInteger(shardCountParam) && shardCountParam > 0
+      ? shardCountParam
+      : defaultShardCount
+    const shardIndex = Number.isInteger(shardIndexParam) && shardIndexParam >= 0
+      ? shardIndexParam
+      : 0
+
+    return {
+      shardIndex: Math.min(shardIndex, shardCount - 1),
+      shardCount,
+    }
+  } catch {
+    return {
+      shardIndex: 0,
+      shardCount: defaultShardCount,
+    }
+  }
+}
+
+export function selectItemsForCronShard<T>(
+  items: T[],
+  { shardIndex, shardCount }: CronShardConfig
+): T[] {
+  if (shardCount <= 1) return items
+  return items.filter((_, index) => index % shardCount === shardIndex)
+}
+
+export function buildShardedCronStepUrls(
+  baseUrl: string,
+  path: string,
+  shardCount = 1
+): string[] {
+  if (shardCount <= 1) {
+    return [`${baseUrl}${path}`]
+  }
+
+  return Array.from({ length: shardCount }, (_, shardIndex) => (
+    `${baseUrl}${path}?shardIndex=${shardIndex}&shardCount=${shardCount}`
+  ))
 }
 
 export type CronStepResult = {

@@ -1,8 +1,10 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import {
+  buildShardedCronStepUrls,
   buildInternalCronHeaders,
   hasCronSecretConfigError,
   isAuthorizedScheduledRequest,
+  resolveCronBaseUrl,
   runCronStepWithRetry,
 } from '@/lib/cron/orchestrator'
 
@@ -12,14 +14,14 @@ export const maxDuration = 60
  * Daily cron orchestrator:
  * 1. Validates scheduler/auth configuration
  * 2. Runs all fetcher batches with retry
- * 3. Runs scoring batch and awaits completion
- * 4. Returns step-level status for observability
+ * 3. Returns step-level status for observability
  *
  * Schedule: Every day at 2:00 AM UTC (configured in vercel.json)
  *
  * Batch routes (each has its own timeout):
- *   - batch-1..batch-6 + language-rankings for data collection
- *   - batch-scoring for daily score computation
+ *   - batch-1, batch-2, and batch-4a run as sharded fan-out
+ *   - remaining batch routes run once
+ *   - scoring runs on its own cron a few minutes later
  */
 export async function GET(request: Request) {
   const startTime = Date.now()
@@ -42,21 +44,18 @@ export async function GET(request: Request) {
       )
     }
 
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const baseUrl = resolveCronBaseUrl(request, process.env)
 
     const fetcherBatches = [
-      `${baseUrl}/api/cron/fetch-daily/batch-1`,
-      `${baseUrl}/api/cron/fetch-daily/batch-2`,
+      ...buildShardedCronStepUrls(baseUrl, '/api/cron/fetch-daily/batch-1', 6),
+      ...buildShardedCronStepUrls(baseUrl, '/api/cron/fetch-daily/batch-2', 4),
       `${baseUrl}/api/cron/fetch-daily/batch-3`,
-      `${baseUrl}/api/cron/fetch-daily/batch-4a`,
+      ...buildShardedCronStepUrls(baseUrl, '/api/cron/fetch-daily/batch-4a', 8),
       `${baseUrl}/api/cron/fetch-daily/batch-4b`,
       `${baseUrl}/api/cron/fetch-daily/language-rankings`,
       `${baseUrl}/api/cron/fetch-daily/batch-5-blockchain`,
       `${baseUrl}/api/cron/fetch-daily/batch-6-youtube`,
     ]
-    const scoringRoute = `${baseUrl}/api/cron/fetch-daily/batch-scoring`
 
     const headers = buildInternalCronHeaders(process.env)
 
@@ -71,14 +70,7 @@ export async function GET(request: Request) {
       )
     )
 
-    const scoringResult = await runCronStepWithRetry({
-      name: 'scoring',
-      url: scoringRoute,
-      init: { headers },
-      retries: 1,
-    })
-
-    const stepResults = [...fetchResults, scoringResult]
+    const stepResults = fetchResults
     const failedSteps = stepResults.filter((step) => !step.ok)
     const hasFailures = failedSteps.length > 0
 
@@ -116,7 +108,7 @@ export async function GET(request: Request) {
     return Response.json(
       {
         success: true,
-        message: 'Completed 8 fetcher batches + scoring',
+        message: 'Completed daily fetch fan-out; scoring runs on a separate cron schedule',
         duration: `${duration}ms`,
         stepResults,
       },

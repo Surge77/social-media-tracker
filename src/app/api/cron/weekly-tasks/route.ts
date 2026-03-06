@@ -4,6 +4,7 @@ import {
   buildInternalCronHeaders,
   hasCronSecretConfigError,
   isAuthorizedScheduledRequest,
+  resolveCronBaseUrl,
   runCronStepWithRetry,
 } from '@/lib/cron/orchestrator'
 
@@ -38,9 +39,7 @@ export async function GET(request: Request) {
       )
     }
 
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    const baseUrl = resolveCronBaseUrl(request, process.env)
 
     const internalHeaders = buildInternalCronHeaders(process.env)
     const digestHeaders = buildInternalBearerHeaders(process.env, {

@@ -53,6 +53,20 @@ export async function GET(request: Request) {
       skipped: libResult.errors.some((e) => e.startsWith('Skipped')),
     })
 
+    const librariesIoSkipped = libResult.errors.some((e) => e.startsWith('Skipped'))
+    if (!librariesIoSkipped) {
+      await supabase.from('fetch_logs').insert({
+        source: 'librariesio',
+        status: 'success',
+        technologies_processed: technologies.length,
+        data_points_created: libResult.dataPoints.length,
+        error_message: libResult.errors.length > 0 ? libResult.errors.join('; ') : null,
+        duration_ms: Date.now() - startTime,
+        started_at: new Date(startTime).toISOString(),
+        completed_at: new Date().toISOString(),
+      })
+    }
+
     // npms.io (runs daily, one bulk call)
     console.log('[Batch 4b] Fetching npms.io data...')
     const npmsResult = await fetchNpmsData(technologies as Technology[])
