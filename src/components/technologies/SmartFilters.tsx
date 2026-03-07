@@ -37,7 +37,7 @@ export const SMART_FILTERS: SmartFilterConfig[] = [
     id: 'career-switch',
     label: 'Career Switch',
     icon: Rocket,
-    description: 'High jobs + rising momentum -> learn this NOW',
+    description: 'High jobs + rising momentum -> learn this now',
     filter: (t) =>
       (t.jobs_score ?? 0) >= 55 &&
       (t.momentum ?? 0) > 5 &&
@@ -114,9 +114,11 @@ interface SmartFiltersProps {
 }
 
 export function SmartFilters({ activeFilter, onFilterChange }: SmartFiltersProps) {
+  const activeDescription = SMART_FILTERS.find((filter) => filter.id === activeFilter)?.description
+
   return (
-    <div className="mb-6">
-      <div className="flex flex-wrap gap-2">
+    <div className="app-section-tight">
+      <div className="app-chip-scroll">
         {SMART_FILTERS.map((filter) => {
           const Icon = filter.icon
           const isActive = activeFilter === filter.id
@@ -126,31 +128,25 @@ export function SmartFilters({ activeFilter, onFilterChange }: SmartFiltersProps
               key={filter.id}
               onClick={() => onFilterChange(filter.id)}
               className={cn(
-                'group relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all',
+                'tap-target shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all',
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                  : 'border border-border/60 bg-card/45 text-secondary-foreground hover:border-primary/30 hover:bg-card/70'
               )}
               title={filter.description}
             >
-              <Icon className="h-4 w-4" />
-              <span>{filter.label}</span>
-
-              {!isActive && (
-                <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-lg group-hover:block">
-                  {filter.description}
-                  <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-popover" />
-                </div>
-              )}
+              <span className="flex items-center gap-2">
+                <Icon className="h-4 w-4" />
+                <span>{filter.label}</span>
+              </span>
             </button>
           )
         })}
       </div>
 
-      {activeFilter !== 'all' && (
-        <div className="mt-3 text-sm text-muted-foreground">
-          <span className="font-medium">Showing: </span>
-          {SMART_FILTERS.find((f) => f.id === activeFilter)?.description}
+      {activeFilter !== 'all' && activeDescription && (
+        <div className="mt-3 rounded-2xl border border-border/60 bg-muted/25 px-4 py-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Showing:</span> {activeDescription}
         </div>
       )}
     </div>

@@ -27,10 +27,10 @@ import { CATEGORY_LABELS } from '@/types'
 import { filterTechnologiesForDisplay, type SortKey } from '@/components/technologies/filtering'
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: 'score',    label: 'Score' },
-  { value: 'jobs',     label: 'Job Demand' },
+  { value: 'score', label: 'Score' },
+  { value: 'jobs', label: 'Job Demand' },
   { value: 'momentum', label: 'Momentum' },
-  { value: 'name',     label: 'Name' },
+  { value: 'name', label: 'Name' },
 ]
 
 const sectionVariants = {
@@ -41,11 +41,11 @@ const sectionVariants = {
 export function TechnologiesPageClient() {
   const prefersReducedMotion = useReducedMotion()
 
-  const [searchQuery, setSearchQuery]           = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<TechnologyCategory | 'all'>('all')
-  const [smartFilter, setSmartFilter]           = useState<SmartFilter>('all')
-  const [sortKey, setSortKey]                   = useState<SortKey>('score')
-  const [viewMode, setViewMode]                 = useState<ViewMode>('cards')
+  const [smartFilter, setSmartFilter] = useState<SmartFilter>('all')
+  const [sortKey, setSortKey] = useState<SortKey>('score')
+  const [viewMode, setViewMode] = useState<ViewMode>('cards')
 
   const { technologies: allTechnologies, lastUpdated, isLoading, isError, error, refetch } = useTechnologies()
   const { stats, isLoading: statsLoading, isError: statsError } = useTechStats()
@@ -72,7 +72,7 @@ export function TechnologiesPageClient() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto max-w-7xl px-4 py-8">
+      <div className="app-page py-8">
         <div className="flex min-h-[600px] items-center justify-center">
           <Loading size="lg" text="Loading technologies..." />
         </div>
@@ -82,7 +82,7 @@ export function TechnologiesPageClient() {
 
   if (isError) {
     return (
-      <div className="container mx-auto max-w-7xl px-4 py-8">
+      <div className="app-page py-8">
         <div className="flex min-h-[600px] items-center justify-center">
           <div className="text-center">
             <p className="text-sm text-destructive">
@@ -101,22 +101,22 @@ export function TechnologiesPageClient() {
   }
 
   return (
-    <div className="relative container mx-auto max-w-7xl px-4 py-8">
-      <DotPattern className="opacity-40" />
+    <div className="relative app-page py-6 sm:py-8 lg:py-10">
+      <DotPattern className="mobile-noise-hidden opacity-30" />
 
-      {/* ① Page Header */}
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: -20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4 }}
-        className="mb-8 relative"
+        className="app-section relative"
       >
+        <p className="app-eyebrow mb-3">Technology intelligence</p>
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           <WordPullUp text="Technology Explorer" />
         </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-3">
-          <p className="text-muted-foreground">
-            {allTechnologies.length} technologies — find what&apos;s worth learning in 2026
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+          <p className="app-muted-copy">
+            {allTechnologies.length} technologies - find what is worth learning in 2026
           </p>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -125,7 +125,11 @@ export function TechnologiesPageClient() {
           {lastUpdated && (
             <span className="text-xs text-muted-foreground/60">
               Last run:{' '}
-              {new Date(lastUpdated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {new Date(lastUpdated).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </span>
           )}
         </div>
@@ -134,12 +138,11 @@ export function TechnologiesPageClient() {
         </div>
       </motion.div>
 
-      {/* ② Market Pulse */}
       <motion.div
         variants={prefersReducedMotion ? {} : sectionVariants}
         initial="hidden"
         animate="visible"
-        className="mb-6"
+        className="app-section-tight"
       >
         <MarketPulse
           data={stats?.market_pulse ?? null}
@@ -148,13 +151,12 @@ export function TechnologiesPageClient() {
         />
       </motion.div>
 
-      {/* ③ Category Health */}
       <motion.div
         variants={prefersReducedMotion ? {} : sectionVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
-        className="mb-8"
+        className="app-section"
       >
         <CategoryHealth
           data={stats?.category_health ?? null}
@@ -164,16 +166,14 @@ export function TechnologiesPageClient() {
         />
       </motion.div>
 
-      {/* ④ Movers & Shakers */}
       <MoversShakers />
 
-      {/* ⑤ Weekly Digest */}
       <motion.div
         variants={prefersReducedMotion ? {} : sectionVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
-        className="mb-6"
+        className="app-section-tight"
       >
         <WeeklyDigest
           data={stats?.weekly_digest ?? null}
@@ -182,91 +182,82 @@ export function TechnologiesPageClient() {
         />
       </motion.div>
 
-      {/* ⑥ Methodology Panel (collapsed by default) */}
-      <div className="mb-8">
+      <div className="app-section">
         <MethodologyPanel />
       </div>
 
-      {/* ⑦ Smart Filters + Search + View Toggle */}
       <div id="tech-results">
         <SmartFilters activeFilter={smartFilter} onFilterChange={handleSmartFilterChange} />
 
-        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-            {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search technologies..."
-                className="w-full rounded-lg border bg-background py-2 pl-10 pr-4 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
+        <div className="app-toolbar app-section-tight">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search technologies..."
+                  className="w-full rounded-2xl border bg-background py-3 pl-10 pr-4 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
 
-            {/* Category */}
-            {smartFilter === 'all' && (
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value as TechnologyCategory | 'all')}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <option value="all">All Categories</option>
-                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
-            )}
+              {smartFilter === 'all' && (
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value as TechnologyCategory | 'all')}
+                  className="rounded-2xl border bg-background px-3 py-3 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring lg:min-w-[13rem]"
+                >
+                  <option value="all">All Categories</option>
+                  {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              )}
 
-            {/* Sort */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="shrink-0 text-xs text-muted-foreground">Sort by</span>
-              <div className="flex flex-wrap overflow-hidden rounded-lg border border-border">
-                {SORT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setSortKey(opt.value)}
-                    className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                      sortKey === opt.value
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-background text-muted-foreground hover:bg-muted/40 hover:text-foreground'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                <span className="shrink-0 text-xs text-muted-foreground">Sort by</span>
+                <div className="app-chip-scroll rounded-2xl border border-border bg-background/70 p-1">
+                  {SORT_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setSortKey(opt.value)}
+                      className={`shrink-0 rounded-xl px-3 py-2 text-xs font-medium transition-colors ${
+                        sortKey === opt.value
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background text-muted-foreground hover:bg-muted/40 hover:text-foreground'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* View Toggle */}
-          <ViewToggle view={viewMode} onViewChange={setViewMode} />
+            <ViewToggle view={viewMode} onViewChange={setViewMode} />
+          </div>
         </div>
 
-        {/* ⑧ Live context strip */}
         <LiveContextStrip filtered={filtered} total={allTechnologies.length} />
 
-        {/* Empty state */}
         {filtered.length === 0 && (
-          <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-dashed">
+          <div className="app-surface-muted flex min-h-[300px] items-center justify-center border-dashed">
             <p className="text-sm text-muted-foreground">
               {searchQuery ? 'No technologies match your search' : getFilterEmptyMessage(smartFilter)}
             </p>
           </div>
         )}
 
-        {/* ⑩ Main Content — Cards / Table / Bubble Map */}
         {filtered.length > 0 && (
           <>
-            {viewMode === 'overview' && (
-              <TechHeatmap technologies={filtered} />
-            )}
-            {viewMode === 'table' && (
-              <TechTable technologies={filtered} />
-            )}
+            {viewMode === 'overview' && <TechHeatmap technologies={filtered} />}
+            {viewMode === 'table' && <TechTable technologies={filtered} />}
             {viewMode === 'cards' && (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {filtered.map((tech, i) => (
                   <TechCard
                     key={tech.id}
@@ -282,13 +273,12 @@ export function TechnologiesPageClient() {
         )}
       </div>
 
-      {/* ⑪ Popular Stacks (bottom of page) */}
       <motion.div
         variants={prefersReducedMotion ? {} : sectionVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}
-        className="mt-16"
+        className="mt-12 sm:mt-16"
       >
         <PopularStacks
           data={stats?.popular_stacks ?? null}
@@ -296,7 +286,6 @@ export function TechnologiesPageClient() {
           isError={statsError}
         />
       </motion.div>
-
     </div>
   )
 }

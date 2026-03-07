@@ -34,7 +34,7 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
 
       <div
         className={cn(
-          'max-w-[80%] rounded-lg px-4 py-3',
+          'max-w-[88%] rounded-2xl px-4 py-3 sm:max-w-[80%]',
           isUser
             ? 'bg-primary text-primary-foreground'
             : 'bg-muted text-foreground'

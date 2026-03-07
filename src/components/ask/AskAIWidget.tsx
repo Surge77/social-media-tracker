@@ -120,17 +120,17 @@ export function AskAIWidget() {
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] z-50 flex max-h-[calc(100dvh-8.5rem)] flex-col rounded-2xl border border-border bg-background shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-[min(560px,calc(100vw-2rem))] sm:max-h-[min(600px,calc(100dvh-8rem))]"
+            className="fixed inset-x-2 bottom-[calc(env(safe-area-inset-bottom)+4.75rem)] z-50 flex max-h-[calc(100dvh-6.75rem)] flex-col rounded-[26px] border border-border/70 bg-background/98 shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-5 sm:w-[min(560px,calc(100vw-2rem))] sm:max-h-[min(600px,calc(100dvh-8rem))]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+            <div className="flex items-center justify-between border-b border-border/70 px-4 py-3.5 sm:px-5 sm:py-4">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
                   <Sparkles className="h-4 w-4 text-primary" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground">Ask DevTrends AI</p>
-                  <p className="text-xs text-muted-foreground">Powered by real-time trend data</p>
+                  <p className="text-xs text-muted-foreground">Live answers from current trend data</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ export function AskAIWidget() {
                           key={s.question}
                           onClick={() => handleSuggestion(s.question)}
                           disabled={isStreaming}
-                          className="group flex flex-col gap-1.5 rounded-xl border border-border bg-card/50 p-3 text-left transition-all hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50"
+                          className="group flex flex-col gap-1.5 rounded-2xl border border-border/70 bg-card/55 p-3 text-left transition-all hover:border-primary/40 hover:bg-primary/5 disabled:opacity-50"
                         >
                           <div className="flex items-center gap-1.5">
                             <Icon size={12} className="text-primary" />
@@ -214,7 +214,7 @@ export function AskAIWidget() {
             </div>
 
             {/* Input */}
-            <div className="safe-bottom border-t border-border px-4 py-3">
+            <div className="safe-bottom border-t border-border/70 px-4 py-3">
               <form onSubmit={handleSubmit} className="relative">
                 <textarea
                   ref={inputRef}
@@ -230,7 +230,7 @@ export function AskAIWidget() {
                   rows={1}
                   style={{ minHeight: '44px' }}
                   disabled={isStreaming}
-                  className="w-full resize-none rounded-xl border border-border bg-muted/30 px-4 py-2.5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
+                  className="w-full resize-none rounded-2xl border border-border bg-muted/30 px-4 py-2.5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
                 />
                 <button
                   type="submit"
@@ -256,7 +256,7 @@ export function AskAIWidget() {
         whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
         aria-label="Open AI chat (Cmd+K)"
         aria-expanded={isOpen}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 flex items-center gap-2.5 rounded-full border border-primary/30 bg-background px-4 py-3 shadow-lg shadow-primary/10 transition-colors hover:border-primary/60 hover:bg-primary/5 sm:bottom-6 sm:right-6"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+0.9rem)] right-3 z-50 flex items-center gap-2 rounded-full border border-primary/25 bg-background/96 px-3 py-2.5 shadow-lg shadow-primary/10 transition-colors hover:border-primary/60 hover:bg-primary/5 sm:bottom-6 sm:right-6 sm:gap-2.5 sm:px-4 sm:py-3"
       >
         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
           <Sparkles
@@ -264,7 +264,7 @@ export function AskAIWidget() {
             className={`text-primary transition-transform ${isOpen ? 'rotate-12' : ''}`}
           />
         </div>
-        <span className="text-sm font-medium text-foreground">Ask AI</span>
+        <span className="text-sm font-semibold text-foreground max-[430px]:hidden">Ask AI</span>
         <kbd className="hidden rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground sm:inline">
           ⌘K
         </kbd>

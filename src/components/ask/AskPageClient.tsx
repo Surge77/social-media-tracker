@@ -74,27 +74,30 @@ export function AskPageClient() {
   }, [clearSession])
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <div className="app-page-chat py-6 sm:py-8 lg:py-10">
       <motion.div
         initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.5 }}
       >
-        <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl font-bold sm:text-3xl"><HyperText text="Ask DevTrends AI" /></h1>
-          {messages.length > 0 && (
-            <button
-              onClick={handleNewChat}
-              className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Plus size={13} />
-              New chat
-            </button>
-          )}
+        <div className="app-section-tight">
+          <p className="app-eyebrow mb-3">Decision support</p>
+          <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl font-bold sm:text-3xl"><HyperText text="Ask DevTrends AI" /></h1>
+            {messages.length > 0 && (
+              <button
+                onClick={handleNewChat}
+                className="flex items-center gap-1.5 rounded-xl border border-border/70 px-3 py-2 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <Plus size={13} />
+                New chat
+              </button>
+            )}
+          </div>
+          <p className="app-muted-copy max-w-2xl">
+            Get personalized career guidance and technology comparisons from the same live dataset that powers the rest of DevTrends.
+          </p>
         </div>
-        <p className="mb-6 text-sm text-muted-foreground sm:mb-8 sm:text-base">
-          Get personalized career advice and technology insights powered by real-time trend data.
-        </p>
 
         {messages.length === 0 && (
           <SuggestedQuestions
@@ -105,8 +108,12 @@ export function AskPageClient() {
 
         <div className="space-y-4">
           {/* Chat messages */}
-          <div className="relative min-h-[320px] max-h-[65dvh] space-y-4 overflow-y-auto rounded-lg border bg-card p-4 sm:min-h-[400px] sm:max-h-[600px] sm:p-6">
-            {isStreaming && <BorderBeam size={400} duration={4} colorFrom="#f97316" colorTo="#f59e0b" />}
+          <div className="app-surface relative min-h-[360px] max-h-[68dvh] space-y-4 overflow-y-auto p-4 sm:min-h-[420px] sm:max-h-[600px] sm:p-6">
+            {isStreaming && (
+              <div className="mobile-noise-hidden">
+                <BorderBeam size={400} duration={4} colorFrom="#f97316" colorTo="#f59e0b" />
+              </div>
+            )}
             {messages.length === 0 && (
               <div className="flex h-full items-center justify-center text-center text-muted-foreground">
                 <p>Start a conversation by asking a question below</p>
@@ -124,7 +131,7 @@ export function AskPageClient() {
             ))}
 
             {error && (
-              <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4">
+              <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-4">
                 <p className="text-sm text-destructive">{error}</p>
                 <div className="mt-2 flex gap-3">
                   <button
@@ -149,7 +156,7 @@ export function AskPageClient() {
           </div>
 
           {/* Input form */}
-          <form onSubmit={handleSubmit} className="relative">
+          <form onSubmit={handleSubmit} className="app-surface relative p-3 sm:p-4">
             <textarea
               ref={inputRef}
               id="chat-input"
@@ -164,7 +171,7 @@ export function AskPageClient() {
               placeholder="Ask about technologies, career advice, or learning paths..."
               aria-label="Ask a question"
               aria-describedby="chat-input-hint"
-              className="w-full rounded-lg border bg-background px-4 py-3 pr-12 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 overflow-hidden"
+              className="w-full resize-none overflow-hidden rounded-2xl border bg-background px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
               rows={3}
               style={{ minHeight: '72px' }}
               disabled={isStreaming}
@@ -174,7 +181,7 @@ export function AskPageClient() {
               type="submit"
               disabled={!input.trim() || isStreaming}
               aria-label="Send message"
-              className="absolute bottom-3 right-3 p-2"
+              className="absolute bottom-6 right-6 p-2"
             >
               <Send className="w-4 h-4" />
             </ShimmerButton>

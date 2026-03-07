@@ -12,7 +12,6 @@ interface ViewToggleProps {
 }
 
 export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
-  // Load saved preference from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('tech-view-mode')
     if (saved && (saved === 'overview' || saved === 'table' || saved === 'cards')) {
@@ -32,13 +31,13 @@ export function ViewToggle({ view, onViewChange }: ViewToggleProps) {
   ]
 
   return (
-    <div className="inline-flex rounded-lg border bg-background p-1">
+    <div className="inline-flex rounded-2xl border border-border bg-background/80 p-1 backdrop-blur-sm">
       {views.map(({ id, icon: Icon, label }) => (
         <button
           key={id}
           onClick={() => handleChange(id)}
           className={cn(
-            'flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+            'tap-target flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
             view === id
               ? 'bg-primary text-primary-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'

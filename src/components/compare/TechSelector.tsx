@@ -226,7 +226,7 @@ export const TechSelector = React.forwardRef<HTMLDivElement, TechSelectorProps>(
 
                   {searchQuery && filteredTechs.length === 0 && (
                     <div className="p-8 text-center text-sm text-muted-foreground">
-                      No technologies found matching "{searchQuery}"
+                      No technologies found matching &quot;{searchQuery}&quot;
                     </div>
                   )}
                 </div>

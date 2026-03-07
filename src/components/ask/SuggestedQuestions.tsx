@@ -37,12 +37,12 @@ export function SuggestedQuestions({ onSelectQuestion, disabled }: SuggestedQues
   const prefersReducedMotion = useReducedMotion()
 
   return (
-    <div className="mb-8">
-      <h2 className="text-sm font-medium text-muted-foreground mb-3">
+    <div className="app-section">
+      <h2 className="mb-3 text-sm font-medium text-muted-foreground">
         Suggested Questions
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {SUGGESTED_QUESTIONS.map((item, index) => {
           const Icon = item.icon
 
@@ -54,10 +54,10 @@ export function SuggestedQuestions({ onSelectQuestion, disabled }: SuggestedQues
               transition={prefersReducedMotion ? {} : { duration: 0.3, delay: index * 0.1 }}
               onClick={() => onSelectQuestion(item.question)}
               disabled={disabled}
-              className="text-left rounded-lg border bg-card p-4 hover:bg-accent hover:border-primary/50 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group text-left rounded-2xl border border-border/70 bg-card/45 p-4 transition-colors hover:border-primary/40 hover:bg-accent/50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <div className="flex items-start gap-3">
-                <div className="shrink-0 w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
                   <Icon className="w-4 h-4 text-primary" />
                 </div>
 

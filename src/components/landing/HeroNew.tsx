@@ -35,7 +35,7 @@ export default function HeroNew() {
   const quizPromptClassName = getHeroQuizPromptClassName();
 
   return (
-    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pb-10 pt-20 sm:min-h-screen">
+    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pb-14 pt-24 sm:min-h-screen sm:pb-16 sm:pt-28">
       {/* ── Layer 1: solid background base ─────────────────────────────── */}
       <div className="absolute inset-0 bg-background" />
 
@@ -51,7 +51,7 @@ export default function HeroNew() {
              c) Top + bottom linear fades — clean crop at header/section end.
       ──────────────────────────────────────────────────────────────── */}
       {!prefersReducedMotion && (
-        <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="mobile-noise-hidden absolute inset-0 z-0 pointer-events-none">
           <FlickeringGrid
             squareSize={4}
             gridGap={6}
@@ -80,11 +80,13 @@ export default function HeroNew() {
       )}
 
       {/* ── Layer 3: subtle centered glow (square = equal spread) ────── */}
-      <div className="pointer-events-none absolute left-1/2 top-1/3 z-0 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[80px] sm:h-[500px] sm:w-[500px] sm:blur-[100px]" />
+      <div className="mobile-glow-soft pointer-events-none absolute left-1/2 top-1/3 z-0 h-[280px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[72px] sm:h-[500px] sm:w-[500px] sm:blur-[100px]" />
 
-      <FloatingIcons />
+      <div className="mobile-noise-hidden">
+        <FloatingIcons />
+      </div>
 
-      <div className="container relative mx-auto px-4 sm:px-6">
+      <div className="app-page relative">
         <div className="text-center max-w-5xl mx-auto">
 
           {/* Badge — Magic UI AnimatedGradientText */}
@@ -92,7 +94,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8 flex justify-center"
+            className="mb-6 flex justify-center sm:mb-8"
           >
             <AnimatedGradientText>
               <span className="relative flex h-2 w-2 mr-2.5">
@@ -110,14 +112,14 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
             <HyperText
               text="Know what to learn"
               className="block text-3xl font-bold leading-[1.02] tracking-[-0.02em] text-foreground sm:text-5xl md:text-6xl"
               duration={1000}
             />
-            <span className="mt-1.5 block text-2xl sm:text-4xl md:text-5xl font-bold tracking-[-0.02em] leading-[1.04] bg-gradient-to-r from-orange-700 via-amber-600 to-orange-600 dark:from-orange-500 dark:via-amber-500 dark:to-orange-400 bg-clip-text text-transparent animate-gradient">
+            <span className="mt-2 block text-[1.85rem] font-bold leading-[1.06] tracking-[-0.02em] bg-gradient-to-r from-orange-700 via-amber-600 to-orange-600 bg-clip-text text-transparent animate-gradient dark:from-orange-500 dark:via-amber-500 dark:to-orange-400 sm:text-4xl md:text-5xl">
               before the market shifts
             </span>
           </motion.h1>
@@ -129,7 +131,7 @@ export default function HeroNew() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="mb-4 flex justify-center"
           >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-xs">
+            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-[11px] sm:px-3.5 sm:text-xs">
               <span className="text-muted-foreground font-medium shrink-0">Tracking:</span>
               <MorphingText
                 texts={["GitHub stars", "Stack Overflow velocity", "job postings", "community sentiment", "npm downloads"]}
@@ -143,7 +145,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-foreground/80 dark:text-muted-foreground sm:text-lg md:text-xl"
+            className="mx-auto mb-8 max-w-2xl px-2 text-base leading-relaxed text-foreground/80 dark:text-muted-foreground sm:mb-10 sm:px-0 sm:text-lg md:text-xl"
           >
             Aggregated into daily scores for 100+ technologies.
             Skip the guesswork. See what the data actually says.
@@ -154,12 +156,12 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="flex flex-col items-center gap-4 mb-6"
+            className="mb-6 flex flex-col items-stretch gap-3 sm:mb-8 sm:items-center sm:gap-4"
           >
             <AnimatedCTA
               href="/technologies"
               size="lg"
-              className="group relative overflow-hidden rounded-full border-0 bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-4 text-lg font-semibold text-white shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] active:scale-[0.98] sm:px-12 sm:py-5 sm:text-xl"
+              className="group relative w-full overflow-hidden rounded-full border-0 bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4 text-base font-semibold text-white shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] active:scale-[0.98] sm:w-auto sm:px-12 sm:py-5 sm:text-xl"
               delay={150}
             >
               <span className="relative z-10 flex items-center gap-2">
@@ -181,7 +183,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="flex items-center justify-center gap-2 text-sm text-foreground/65 dark:text-muted-foreground mb-8"
+            className="mb-8 flex flex-col items-center justify-center gap-3 text-center text-sm text-foreground/65 dark:text-muted-foreground sm:flex-row sm:gap-2 sm:text-left"
           >
             <div className="flex -space-x-2">
               <div className="w-8 h-8 rounded-full bg-[#61DAFB]/10 border-2 border-background flex items-center justify-center p-1.5">
@@ -231,7 +233,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="mb-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-foreground/65 dark:text-muted-foreground sm:mb-16"
+            className="mb-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-3 text-sm text-foreground/65 dark:text-muted-foreground sm:mb-16 sm:gap-x-6"
           >
             <span className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-green-500" />
@@ -264,12 +266,14 @@ export default function HeroNew() {
             transition={{ duration: 0.8, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
             className="group relative mx-auto w-full max-w-3xl"
           >
-            <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 rounded-3xl blur-3xl group-hover:blur-2xl transition-all duration-500" />
-            <div className="absolute -inset-4 bg-purple-500/8 rounded-3xl blur-2xl opacity-50" />
+            <div className="mobile-glow-soft absolute -inset-6 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 blur-3xl transition-all duration-500 group-hover:blur-2xl" />
+            <div className="mobile-noise-hidden absolute -inset-4 rounded-3xl bg-purple-500/8 blur-2xl opacity-50" />
 
             {/* Card with Magic UI BorderBeam */}
-            <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/90 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] transition-shadow duration-500 hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] sm:p-6">
-              <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="#f59e0b" />
+            <div className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card/92 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] transition-shadow duration-500 hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] sm:p-6">
+              <div className="mobile-noise-hidden">
+                <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="#f59e0b" />
+              </div>
 
               {/* Mockup header */}
               <div className="flex items-center justify-between mb-5">
