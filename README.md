@@ -395,7 +395,7 @@ curl http://localhost:3000/api/cron/fetch-daily/batch-6-youtube     # YouTube Da
 
 # Processing
 curl http://localhost:3000/api/cron/fetch-daily/batch-intelligence  # AI insight generation
-curl http://localhost:3000/api/cron/fetch-daily/batch-scoring       # Score computation
+curl http://localhost:3000/api/cron/fetch-daily/batch-scoring       # Daily score recomputation
 ```
 
 ### Browser Rendering Notes
@@ -538,7 +538,7 @@ Run batches manually for local development.
 | `/api/cron/fetch-daily/batch-5-blockchain` | Daily | DeFiLlama, L2Beat, Web3 |
 | `/api/cron/fetch-daily/batch-6-youtube` | Daily | YouTube Data API v3 |
 | `/api/cron/fetch-daily/batch-intelligence` | Daily | AI insight generation |
-| `/api/cron/fetch-daily/batch-scoring` | Daily | Score computation |
+| `/api/cron/fetch-daily/batch-scoring` | Daily | Score computation (scheduled in a later cron window) |
 | `/api/cron/fetch-weekly` | Weekly | Job market data fetch |
 | `/api/cron/weekly-tasks` | Weekly | Orchestrator for weekly fetch + digest + monthly cleanup |
 

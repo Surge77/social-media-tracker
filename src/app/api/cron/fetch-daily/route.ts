@@ -21,7 +21,7 @@ export const maxDuration = 60
  * Batch routes (each has its own timeout):
  *   - batch-1, batch-2, and batch-4a run as sharded fan-out
  *   - remaining batch routes run once
- *   - scoring runs on its own cron a few minutes later
+ *   - scoring runs in a later cron window to avoid Hobby plan schedule jitter
  */
 export async function GET(request: Request) {
   const startTime = Date.now()
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       ...buildShardedCronStepUrls(baseUrl, '/api/cron/fetch-daily/batch-1', 6),
       ...buildShardedCronStepUrls(baseUrl, '/api/cron/fetch-daily/batch-2', 4),
       `${baseUrl}/api/cron/fetch-daily/batch-3`,
-      ...buildShardedCronStepUrls(baseUrl, '/api/cron/fetch-daily/batch-4a', 8),
+      ...buildShardedCronStepUrls(baseUrl, '/api/cron/fetch-daily/batch-4a', 12),
       `${baseUrl}/api/cron/fetch-daily/batch-4b`,
       `${baseUrl}/api/cron/fetch-daily/language-rankings`,
       `${baseUrl}/api/cron/fetch-daily/batch-5-blockchain`,
@@ -108,7 +108,7 @@ export async function GET(request: Request) {
     return Response.json(
       {
         success: true,
-        message: 'Completed daily fetch fan-out; scoring runs on a separate cron schedule',
+        message: 'Completed daily fetch fan-out; scoring runs in a later cron window',
         duration: `${duration}ms`,
         stepResults,
       },
