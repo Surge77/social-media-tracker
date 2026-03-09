@@ -686,6 +686,6 @@ This project is licensed under the MIT License. See [LICENSE](./LICENSE) for det
 
 **Built for developers who make decisions with data, not hype.**
 
-[Live Demo](https://devtrends.app) · [Report a Bug](https://github.com/your-username/devtrends/issues) · [Request a Feature](https://github.com/your-username/devtrends/issues)
+[Live Demo](https://www.devtrends.pro/) · [Report a Bug](https://github.com/your-username/devtrends/issues) · [Request a Feature](https://github.com/your-username/devtrends/issues)
 
 </div>
