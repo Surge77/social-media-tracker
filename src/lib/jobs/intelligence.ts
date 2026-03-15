@@ -695,7 +695,7 @@ export async function getJobsOverview(supabase: SupabaseClient): Promise<JobsOve
     if (!technology) return []
     const jobsVelocity = Number(row.jobs_velocity ?? 0)
     const searchVelocity = Number(row.search_velocity ?? 0)
-    const quadrant =
+    const quadrant: SearchVsHiringPoint['quadrant'] =
       searchVelocity > 4 && jobsVelocity < 2 ? 'hype-risk'
       : jobsVelocity > 2 && searchVelocity > 2 ? 'real-growth'
       : jobsVelocity > 2 && searchVelocity <= 0 ? 'underrated'

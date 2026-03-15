@@ -271,10 +271,8 @@ export async function fetchRemotiveFallbackListings(
   }
 
   const payload = (await response.json()) as RemotiveJobResponse
-  const jobs = payload.jobs ?? []
-
-  return jobs
-    .map((job) => {
+  const jobs: NonNullable<RemotiveJobResponse['jobs']> = payload.jobs ?? []
+  const listings = jobs.map<NormalizedJobListing | null>((job) => {
       const title = job.title?.trim()
       if (!title) return null
       const descriptionText = job.description ?? null
@@ -322,5 +320,6 @@ export async function fetchRemotiveFallbackListings(
         extractedSkills: extractAdjacentSkills(`${title} ${descriptionText ?? ''}`),
       } satisfies NormalizedJobListing
     })
-    .filter((listing): listing is NormalizedJobListing => listing !== null)
+
+  return listings.filter((listing): listing is NormalizedJobListing => listing !== null)
 }
