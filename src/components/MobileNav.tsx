@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/quiz', label: 'Quizzes' },
   { href: '/digest', label: 'Digest' },
   { href: '/repos', label: 'Repos' },
+  { href: '/jobs', label: 'Jobs' },
   { href: '/languages', label: 'Languages' },
   { href: '/blockchain', label: 'Blockchain' },
   { href: '/methodology', label: 'Methodology' },

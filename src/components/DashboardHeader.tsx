@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
-import { ThemePrismSwitch } from '@/components/ThemePrismSwitch'
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
 import { MobileNav } from '@/components/MobileNav'
 import { useScrolled } from '@/hooks/useScrolled'
@@ -40,12 +39,13 @@ export function DashboardHeader() {
         <nav className="hidden items-center gap-6 md:flex">
           {/* Explore Dropdown */}
           <div className="group relative">
-            <button className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-foreground ${isGroupActive(['/technologies', '/languages', '/repos', '/blockchain']) ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
+            <button className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-foreground ${isGroupActive(['/technologies', '/languages', '/repos', '/blockchain', '/jobs']) ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
               Explore <ChevronDown size={14} className="transition-transform group-hover:rotate-180" />
             </button>
             <div className="absolute left-0 top-full hidden w-48 pt-2 group-hover:block">
               <div className="rounded-md border border-border bg-popover p-2 shadow-md">
                 <Link href="/technologies" className={navItemClass('/technologies')}>Technologies</Link>
+                <Link href="/jobs" className={navItemClass('/jobs')}>Jobs</Link>
                 <Link href="/languages" className={navItemClass('/languages')}>Languages</Link>
                 <Link href="/repos" className={navItemClass('/repos')}>Repositories</Link>
                 <Link href="/blockchain" className={navItemClass('/blockchain')}>Blockchain</Link>
@@ -77,7 +77,6 @@ export function DashboardHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <ThemePrismSwitch />
           <MobileNav />
         </div>
       </div>

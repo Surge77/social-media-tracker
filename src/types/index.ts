@@ -91,6 +91,7 @@ export type DataSource =
   | 'npms'                                             // Source 5
   | 'packagist' | 'rubygems' | 'nuget' | 'pubdev'     // Source 4
   | 'youtube'                                          // YouTube Data API v3
+  | 'googletrends'                                     // Search demand / interest
 
 export type DataMetric =
   | 'stars' | 'forks' | 'open_issues' | 'contributors' | 'watchers'
@@ -103,6 +104,8 @@ export type DataMetric =
   | 'quality_score' | 'popularity_score' | 'maintenance_score'              // Source 5
   | 'yt_video_count' | 'yt_total_views' | 'yt_avg_likes'                   // YouTube metrics
   | 'yt_upload_velocity' | 'yt_top_videos'                                  // YouTube metrics
+  | 'interest_index' | 'interest_velocity' | 'interest_acceleration'
+  | 'geo_spread' | 'related_queries_rising'
 
 export interface DailyScore {
   id: number
@@ -276,4 +279,127 @@ export interface FetcherResult {
   source: DataSource
   dataPoints: Omit<DataPoint, 'id' | 'created_at'>[]
   errors: string[]
+}
+
+// ---- Jobs intelligence types ----
+
+export type JobsPeriod = '7d' | '30d' | '90d'
+export type JobsRemoteFilter = 'all' | 'remote' | 'onsite'
+
+export type DemandQuadrant =
+  | 'real-growth'
+  | 'hype-risk'
+  | 'underrated'
+  | 'stable-demand'
+
+export interface JobOverviewPulse {
+  totalActiveJobs: number
+  totalRemoteJobs: number
+  remoteShare: number
+  trackedCompanies: number
+  trackedLocations: number
+  technologiesWithDemand: number
+}
+
+export interface HiringNowEntry {
+  technologyId: string
+  slug: string
+  name: string
+  color: string
+  category: TechnologyCategory
+  activeJobs: number
+  jobsScore: number | null
+  companyCount: number
+  remoteShare: number
+  freshnessScore: number
+}
+
+export interface RisingRoleEntry {
+  roleSlug: string
+  roleLabel: string
+  technologySlug: string
+  technologyName: string
+  technologyColor: string
+  activeJobs: number
+  growth7d: number
+  remoteRatio: number
+  companyCount: number
+}
+
+export interface RemoteStackEntry {
+  technologySlug: string
+  technologyName: string
+  technologyColor: string
+  activeJobs: number
+  remoteRatio: number
+  remoteJobs: number
+  companyCount: number
+}
+
+export interface CompanyRadarEntry {
+  companySlug: string
+  companyName: string
+  activeJobs: number
+  remoteRatio: number
+  locationCount: number
+  topTechnologies: Array<{
+    slug: string
+    name: string
+    color: string
+    activeJobs: number
+  }>
+}
+
+export interface LocationDemandEntry {
+  locationSlug: string
+  locationLabel: string
+  locationType: 'city' | 'region' | 'country'
+  technologySlug: string
+  technologyName: string
+  technologyColor: string
+  activeJobs: number
+  remoteRatio: number
+  companyCount: number
+}
+
+export interface SkillAdjacencyEntry {
+  technologySlug: string
+  technologyName: string
+  relatedSkillSlug: string
+  relatedSkillLabel: string
+  cooccurrenceCount: number
+  liftScore: number
+  remoteRatio: number
+}
+
+export interface SearchVsHiringPoint {
+  technologySlug: string
+  technologyName: string
+  technologyColor: string
+  jobsVelocity: number
+  searchVelocity: number
+  quadrant: DemandQuadrant
+  activeJobs: number
+  jobsScore: number | null
+}
+
+export interface JobsFilterOptions {
+  periods: JobsPeriod[]
+  remoteModes: JobsRemoteFilter[]
+  roles: Array<{ slug: string; label: string }>
+  technologies: Array<{ slug: string; name: string; color: string }>
+  locations: Array<{ slug: string; label: string; type: 'city' | 'region' | 'country' }>
+}
+
+export interface JobsOverviewResponse {
+  pulse: JobOverviewPulse
+  hiringNow: HiringNowEntry[]
+  risingRoles: RisingRoleEntry[]
+  remoteFriendlyStacks: RemoteStackEntry[]
+  companyRadar: CompanyRadarEntry[]
+  skillAdjacency: SkillAdjacencyEntry[]
+  geoDemand: LocationDemandEntry[]
+  searchVsHiring: SearchVsHiringPoint[]
+  filters: JobsFilterOptions
+  lastUpdated: string | null
 }

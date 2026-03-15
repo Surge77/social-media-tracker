@@ -56,3 +56,6 @@ next-env.d.ts
 
 # local MCP state
 /.playwright-mcp/
+
+# local vendor repos
+/vendor/antigravity-kit/

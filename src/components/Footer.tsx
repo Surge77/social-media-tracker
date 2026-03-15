@@ -76,7 +76,7 @@ const Footer = () => {
 
           <div className="grid gap-5 sm:grid-cols-3">
             {NAV_SECTIONS.map((section) => (
-              <div key={section.title} className="rounded-2xl border border-border/50 bg-card/25 p-4 sm:bg-transparent sm:p-0">
+              <div key={section.title} className="p-4 sm:p-0">
                 <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground/70">
                   {section.title}
                 </p>

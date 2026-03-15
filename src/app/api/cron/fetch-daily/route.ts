@@ -55,6 +55,7 @@ export async function GET(request: Request) {
       `${baseUrl}/api/cron/fetch-daily/language-rankings`,
       `${baseUrl}/api/cron/fetch-daily/batch-5-blockchain`,
       `${baseUrl}/api/cron/fetch-daily/batch-6-youtube`,
+      `${baseUrl}/api/cron/fetch-daily/jobs-trends`,
     ]
 
     const headers = buildInternalCronHeaders(process.env)

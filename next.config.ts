@@ -3,8 +3,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
+      { protocol: 'https', hostname: 'github.githubassets.com' },
       { protocol: 'https', hostname: 'i.ytimg.com' },
       { protocol: 'https', hostname: 'img.youtube.com' },
+      { protocol: 'https', hostname: 'libraries.io' },
+      { protocol: 'https', hostname: 'media2.dev.to' },
+      { protocol: 'https', hostname: 'news.ycombinator.com' },
+      { protocol: 'https', hostname: 'redditinc.com' },
+      { protocol: 'https', hostname: 'static-production.npmjs.com' },
+      { protocol: 'https', hostname: 'stackoverflow.com' },
+      { protocol: 'https', hostname: 'zunastatic-abf.kxcdn.com' },
     ],
   },
   experimental: {

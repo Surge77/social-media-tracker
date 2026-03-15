@@ -25,7 +25,7 @@ const faqItems = [
   {
     question: 'Is DevTrends really free?',
     answer:
-      'Yes. The product is currently in open beta and free to use. No account or credit card is required to explore rankings, comparisons, and trend views.',
+      'Yes. DevTrends is free to use. No account or credit card is required to explore rankings, comparisons, and trend views.',
   },
   {
     question: 'Can this replace my own research?',

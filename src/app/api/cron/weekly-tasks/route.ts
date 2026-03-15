@@ -46,10 +46,15 @@ export async function GET(request: Request) {
       'Content-Type': 'application/json',
     })
 
-    const [weeklyResult, digestResult] = await Promise.all([
+    const [weeklyResult, jobsIntelligenceResult, digestResult] = await Promise.all([
       runCronStepWithRetry({
         name: 'fetch-weekly',
         url: `${baseUrl}/api/cron/fetch-weekly`,
+        init: { headers: internalHeaders },
+      }),
+      runCronStepWithRetry({
+        name: 'jobs-intelligence',
+        url: `${baseUrl}/api/cron/fetch-weekly/jobs-intelligence`,
         init: { headers: internalHeaders },
       }),
       runCronStepWithRetry({
@@ -59,7 +64,7 @@ export async function GET(request: Request) {
       }),
     ])
 
-    const stepResults = [weeklyResult, digestResult]
+    const stepResults = [weeklyResult, jobsIntelligenceResult, digestResult]
 
     const dayOfMonth = new Date().getDate()
     if (dayOfMonth <= 7) {

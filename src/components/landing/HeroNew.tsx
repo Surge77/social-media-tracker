@@ -7,7 +7,6 @@ import { ArrowUpRight, ArrowDownRight, Minus, Users, Database, Zap } from 'lucid
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useTheme } from 'next-themes';
 import { Sparkline } from '@/components/technologies/Sparkline';
-import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { BorderBeam } from '@/components/ui/border-beam';
 import { FlickeringGrid } from '@/components/ui/flickering-grid';
 import { MorphingText } from '@/components/ui/morphing-text';
@@ -88,24 +87,6 @@ export default function HeroNew() {
 
       <div className="app-page relative">
         <div className="text-center max-w-5xl mx-auto">
-
-          {/* Badge — Magic UI AnimatedGradientText */}
-          <motion.div
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-6 flex justify-center sm:mb-8"
-          >
-            <AnimatedGradientText>
-              <span className="relative flex h-2 w-2 mr-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-              </span>
-              <span className="bg-gradient-to-r from-orange-500 via-amber-400 to-orange-500 bg-clip-text text-transparent font-semibold tracking-wide">
-                OPEN BETA
-              </span>
-            </AnimatedGradientText>
-          </motion.div>
 
           {/* Main headline */}
           <motion.h1
@@ -270,13 +251,14 @@ export default function HeroNew() {
             <div className="mobile-noise-hidden absolute -inset-4 rounded-3xl bg-purple-500/8 blur-2xl opacity-50" />
 
             {/* Card with Magic UI BorderBeam */}
-            <div className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card/92 p-3 shadow-[0_20px_70px_rgba(0,0,0,0.3),0_10px_30px_rgba(0,0,0,0.2)] transition-shadow duration-500 hover:shadow-[0_30px_90px_rgba(0,0,0,0.4),0_15px_40px_rgba(0,0,0,0.25)] sm:p-6">
+            <div className="relative overflow-hidden rounded-[28px] border border-border/80 bg-card/95 p-3 ring-1 ring-black/5 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_12px_36px_rgba(0,0,0,0.18)] transition-shadow duration-500 dark:ring-white/10 hover:shadow-[0_34px_110px_rgba(0,0,0,0.35),0_18px_52px_rgba(0,0,0,0.22)] sm:p-6">
+              <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-card/98 to-card/94 pointer-events-none" />
               <div className="mobile-noise-hidden">
                 <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="#f59e0b" />
               </div>
 
               {/* Mockup header */}
-              <div className="flex items-center justify-between mb-5">
+              <div className="relative flex items-center justify-between mb-5">
                 <div className="flex items-center gap-3">
                   <div className="flex gap-1.5">
                     <div className="w-3 h-3 rounded-full bg-red-500/80" />
@@ -292,7 +274,7 @@ export default function HeroNew() {
               </div>
 
               {/* Table header */}
-              <div className="mb-3 hidden grid-cols-[40px_1fr_80px_80px_50px] gap-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sm:grid">
+              <div className="relative mb-3 hidden grid-cols-[40px_1fr_80px_80px_50px] gap-3 px-3 text-xs font-medium uppercase tracking-wider text-muted-foreground sm:grid">
                 <span>#</span>
                 <span>Technology</span>
                 <span className="text-right">Score</span>
@@ -301,7 +283,7 @@ export default function HeroNew() {
               </div>
 
               {/* Table rows */}
-              <div className="space-y-1">
+              <div className="relative space-y-1">
                 {mockLeaderboard.map((item, index) => (
                   <motion.div
                     key={item.name}

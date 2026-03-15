@@ -1,142 +1,64 @@
 'use client'
 
-import { Marquee } from '@/components/ui/marquee'
+import Image from 'next/image'
+import { cn } from '@/lib/utils'
+import { DATA_SOURCE_LOGOS, type DataSourceLogo } from '@/components/landing/data-source-logos'
 
-type Source = {
-  name: string
-  icon: React.ReactNode
+const TOP_ROW_LOGOS = DATA_SOURCE_LOGOS.slice(0, 5)
+const BOTTOM_ROW_LOGOS = DATA_SOURCE_LOGOS.slice(5)
+
+function LogoMark({ source }: { source: DataSourceLogo }) {
+  if (source.kind === 'text') {
+    return <span className={cn('select-none leading-none', source.displayClassName)}>{source.label}</span>
+  }
+
+  return (
+    <Image
+      src={source.src}
+      alt={source.alt}
+      width={source.width}
+      height={source.height}
+      className={cn('object-contain select-none', source.displayClassName)}
+      loading="lazy"
+      unoptimized={source.src.startsWith('http')}
+      referrerPolicy={source.src.startsWith('http') ? 'no-referrer' : undefined}
+    />
+  )
 }
 
-const sources: Source[] = [
-  {
-    name: 'GitHub',
-    icon: (
-      <svg viewBox="0 0 98 96" className="h-6 w-6" fill="currentColor">
-        <path d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Stack Overflow',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-        <path d="M15.725 0l-1.72 1.277 6.39 8.588 1.716-1.277L15.725 0zm-3.94 3.418l-1.369 1.644 8.225 6.85 1.369-1.644-8.225-6.85zm-3.15 4.465l-.905 1.94 9.702 4.517.904-1.94-9.701-4.517zm-1.85 4.86l-.44 2.093 10.473 2.201.44-2.092-10.473-2.203zM1.89 15.47V17.5h10.86v-2.03H1.89zm-.875 4.471v2.03H12.75v-2.03H1.015z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Hacker News',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-        <path d="M0 24V0h24v24H0zM6.951 5.896l4.112 7.708v5.064h1.583v-4.972l4.148-7.799h-1.749l-2.457 4.875c-.372.745-.688 1.434-.688 1.434s-.297-.708-.651-1.434L8.831 5.896H6.951z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Reddit',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-        <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Dev.to',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-        <path d="M7.42 10.05c-.18-.16-.46-.23-.84-.23H6l.02 2.44.04 2.45.56-.02c.41 0 .63-.07.83-.26.24-.24.26-.36.26-2.2 0-1.91-.02-1.96-.29-2.18zM0 4.94v14.12h24V4.94H0zM8.56 15.3c-.44.58-1.06.77-2.53.77H4.71V8.53h1.4c1.67 0 2.16.18 2.6.9.27.43.29.6.32 2.57.05 2.23-.02 2.73-.47 3.3zm5.09-5.47h-2.47v1.77h1.52v1.28l-.72.04-.75.03v1.77l1.22.03 1.2.04v1.28h-1.6c-1.53 0-1.6-.01-1.87-.3l-.3-.28v-3.16c0-3.02.01-3.18.25-3.48.23-.31.25-.31 1.88-.31h1.64v1.29zm4.68 5.45c-.17.43-.64.79-1 .79-.18 0-.45-.15-.67-.39-.32-.32-.45-.63-.82-2.08l-.9-3.39-.45-1.67h.76c.4 0 .75.02.75.05 0 .06 1.16 4.54 1.26 4.83.04.15.32-.7.73-2.3l.66-2.52.74-.04c.4-.02.73 0 .73.04 0 .14-1.67 6.38-1.8 6.68z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'npm',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-        <path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L11.29 19.178H5.113z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Libraries.io',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-        <path d="M21 16.5c0 .38-.21.71-.53.88l-7.9 4.44c-.16.12-.36.18-.57.18-.21 0-.41-.06-.57-.18l-7.9-4.44A.991.991 0 0 1 3 16.5v-9c0-.38.21-.71.53-.88l7.9-4.44c.16-.12.36-.18.57-.18.21 0 .41.06.57.18l7.9 4.44c.32.17.53.5.53.88v9zM12 4.15L6.04 7.5 12 10.85l5.96-3.35L12 4.15zM5 15.91l6 3.38v-6.71L5 9.21v6.7zm8 3.38l6-3.38V9.21l-6 3.37v6.71z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Adzuna',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-        <path d="M20 7h-4V5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v2H4c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V9c0-1.103-.897-2-2-2zm-8-2h4v2h-4V5zm8 14H4v-7h4v2h2v-2h4v2h2v-2h4v7z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Google',
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-        <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Microsoft',
-    icon: (
-      <svg viewBox="0 0 21 21" className="h-6 w-6" fill="currentColor">
-        <path d="M0 0h10v10H0z" />
-        <path d="M11 0h10v10H11z" opacity="0.75" />
-        <path d="M0 11h10v10H0z" opacity="0.75" />
-        <path d="M11 11h10v10H11z" opacity="0.5" />
-      </svg>
-    ),
-  },
-  {
-    name: 'OpenAI',
-    icon: (
-      <svg viewBox="0 0 256 260" className="h-6 w-6" fill="currentColor">
-        <path d="M239.184 106.203a64.716 64.716 0 0 0-5.576-53.103C219.452 28.459 191 15.784 163.213 21.74A65.586 65.586 0 0 0 52.096 45.22a64.716 64.716 0 0 0-43.23 31.36c-14.31 24.602-11.061 55.634 8.033 76.74a64.665 64.665 0 0 0 5.525 53.102c14.174 24.65 42.644 37.324 70.446 31.36a64.72 64.72 0 0 0 48.754 21.744c28.481.025 53.714-18.361 62.414-45.481a64.767 64.767 0 0 0 43.229-31.36c14.137-24.558 10.875-55.423-8.083-76.483Zm-97.56 136.338a48.397 48.397 0 0 1-31.105-11.255l1.535-.87 51.67-29.825a8.595 8.595 0 0 0 4.247-7.367v-72.85l21.845 12.636c.218.111.37.32.409.563v60.367c-.056 26.818-21.783 48.545-48.601 48.601Zm-104.466-44.61a48.345 48.345 0 0 1-5.781-32.589l1.534.921 51.722 29.826a8.339 8.339 0 0 0 8.441 0l63.181-36.425v25.221a.87.87 0 0 1-.358.665l-52.335 30.184c-23.257 13.398-52.97 5.431-66.404-17.803ZM23.549 85.38a48.499 48.499 0 0 1 25.58-21.333v61.39a8.288 8.288 0 0 0 4.195 7.316l62.874 36.272-21.845 12.636a.819.819 0 0 1-.767 0L41.353 151.53c-23.211-13.454-31.171-43.144-17.804-66.405v.256Zm179.466 41.695-63.08-36.63L161.73 77.86a.819.819 0 0 1 .768 0l52.233 30.184a48.6 48.6 0 0 1-7.316 87.635v-61.391a8.544 8.544 0 0 0-4.4-7.213Zm21.742-32.69-1.535-.922-51.619-30.081a8.39 8.39 0 0 0-8.492 0L99.98 99.808V74.587a.716.716 0 0 1 .307-.665l52.233-30.133a48.652 48.652 0 0 1 72.236 50.391v.205ZM88.061 139.097l-21.845-12.585a.87.87 0 0 1-.41-.614V65.685a48.652 48.652 0 0 1 79.757-37.346l-1.535.87-51.67 29.825a8.595 8.595 0 0 0-4.246 7.367l-.051 72.697Zm11.868-25.58 28.138-16.217 28.188 16.218v32.434l-28.086 16.218-28.188-16.218-.052-32.434Z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Vercel',
-    icon: (
-      <svg viewBox="0 0 256 222" className="h-5 w-5" fill="currentColor">
-        <path d="m128 0 128 221.705H0z" />
-      </svg>
-    ),
-  },
-]
-
-function LogoItem({ source }: { source: Source }) {
+function LogoItem({ source }: { source: DataSourceLogo }) {
   return (
-    <div className="group flex flex-col items-center gap-3 px-10 cursor-default">
-      <div className="text-muted-foreground group-hover:text-foreground transition-colors duration-500 grayscale [&>svg]:h-8 [&>svg]:w-8">
-        {source.icon}
-      </div>
-      <span className="text-[10px] font-medium tracking-[0.18em] uppercase text-muted-foreground group-hover:text-foreground transition-colors duration-500 whitespace-nowrap">
-        {source.name}
-      </span>
+    <div className="group flex items-center justify-center px-7 transition-all duration-300 sm:px-10">
+      <LogoMark source={source} />
     </div>
   )
 }
 
 export default function DataSourcesMarquee() {
   return (
-    <section className="relative overflow-hidden py-10 sm:py-12 border-y border-border/20">
-      <p className="text-center text-[11px] font-semibold tracking-[0.25em] uppercase text-muted-foreground mb-8">
+    <section className="relative overflow-hidden bg-[#f8f3e6] py-10 text-[#16110c] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-1px_0_rgba(0,0,0,0.04)] dark:bg-[#17120d] dark:text-[#f1e5d3] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-1px_0_rgba(255,255,255,0.03)] sm:py-12">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.7),transparent_55%)] dark:bg-[radial-gradient(circle_at_top,rgba(255,248,236,0.08),transparent_58%)]" />
+
+      <p className="relative mb-8 text-center font-serif text-[1.55rem] italic tracking-tight text-[#2b2116] dark:text-[#eadac1] sm:text-[1.7rem]">
         Data sourced from
       </p>
 
-      <div className="pointer-events-none absolute left-0 bottom-0 z-10 h-3/4 w-20 sm:w-36 bg-gradient-to-r from-background to-transparent" />
-      <div className="pointer-events-none absolute right-0 bottom-0 z-10 h-3/4 w-20 sm:w-36 bg-gradient-to-l from-background to-transparent" />
+      <div className="pointer-events-none absolute left-0 bottom-0 z-10 h-full w-16 bg-gradient-to-r from-[#f8f3e6] to-transparent dark:from-[#17120d] sm:w-28" />
+      <div className="pointer-events-none absolute right-0 bottom-0 z-10 h-full w-16 bg-gradient-to-l from-[#f8f3e6] to-transparent dark:from-[#17120d] sm:w-28" />
 
-      <Marquee pauseOnHover className="[--duration:40s]" repeat={3}>
-        {sources.map(s => (
-          <LogoItem key={s.name} source={s} />
-        ))}
-      </Marquee>
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 sm:gap-8">
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:flex-nowrap sm:gap-x-10">
+          {TOP_ROW_LOGOS.map((s) => (
+            <LogoItem key={s.name} source={s} />
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:flex-nowrap sm:gap-x-10">
+          {BOTTOM_ROW_LOGOS.map((s) => (
+            <LogoItem key={s.name} source={s} />
+          ))}
+        </div>
+      </div>
     </section>
   )
 }
