@@ -6,7 +6,12 @@ import {
   getNearestDateAtOrBefore,
   getTargetDateDaysAgo,
 } from '@/lib/scoring/scoring-date'
-import { selectCoolingEntry } from '@/lib/technologies/market-pulse'
+import {
+  selectCoolingEntry,
+  selectHiddenGemEntry,
+  selectHottestEntry,
+  selectTopScoreEntry,
+} from '@/lib/technologies/market-pulse'
 
 type TrendLabel = 'Booming' | 'Growing' | 'Stable' | 'Mature' | 'Cooling'
 
@@ -146,20 +151,30 @@ export async function GET() {
       })(),
     }))
     const comparableDelta = withDelta.filter((t) => prevScoreMap.has(t.technology_id))
+    const sortedByDelta = [...comparableDelta].sort((a, b) => b.score_delta - a.score_delta)
 
     // 8. Market Pulse
-    const sortedByDelta = [...comparableDelta].sort((a, b) => b.score_delta - a.score_delta)
     const sortedByMomentum = [...merged].sort((a, b) => b.momentum - a.momentum)
 
     // Use delta-based hottest/cooling only when we have comparable previous scores
     const hasPrevData = comparableDelta.length > 0
-    const hottestEntry = hasPrevData ? sortedByDelta[0] : sortedByMomentum[0]
+    const pulseSource = hasPrevData ? comparableDelta : withDelta
+    const topScore = selectTopScoreEntry(merged)
+    const hottestEntry = selectHottestEntry(pulseSource, {
+      hasPreviousData: hasPrevData,
+      excludeTechnologyIds: topScore ? [topScore.technology_id] : [],
+    })
+
+    const usedTechnologyIds = new Set<string>()
+    if (topScore) usedTechnologyIds.add(topScore.technology_id)
+    if (hottestEntry) usedTechnologyIds.add(hottestEntry.technology_id)
     // Cooling: always the worst performer — most negative delta (or smallest gain) if prev data exists,
     // otherwise the lowest-momentum tech. Skip if same as hottest (edge case when all scores are flat).
-    const coolingEntry = selectCoolingEntry(hasPrevData ? comparableDelta : withDelta, {
+    const coolingEntry = selectCoolingEntry(pulseSource, {
       hasPreviousData: hasPrevData,
-      hottestTechnologyId: hottestEntry?.technology_id,
+      excludeTechnologyIds: usedTechnologyIds,
     })
+    if (coolingEntry) usedTechnologyIds.add(coolingEntry.technology_id)
 
     const hottestDelta = hottestEntry
       ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === hottestEntry.technology_id)?.score_delta ?? 0) : hottestEntry.momentum / 10) * 10) / 10
@@ -168,27 +183,17 @@ export async function GET() {
       ? Math.round((hasPrevData ? (withDelta.find(t => t.technology_id === coolingEntry.technology_id)?.score_delta ?? 0) : coolingEntry.momentum / 10) * 10) / 10
       : 0
 
-    const topScore = [...merged]
-      .sort((a, b) => b.composite_score - a.composite_score)[0] ?? null
-
-    const hiddenGem =
-      [...withDelta]
-        .filter((t) => t.composite_score >= 40 && t.composite_score <= 75)
-        .sort((a, b) => {
-          if (b.score_delta !== a.score_delta) return b.score_delta - a.score_delta
-          return b.momentum - a.momentum
-        })[0] ??
-      sortedByDelta.find((t) =>
-        t.technology_id !== hottestEntry?.technology_id &&
-        t.technology_id !== topScore?.technology_id
-      ) ??
-      null
+    const hiddenGem = selectHiddenGemEntry(withDelta, {
+      excludeTechnologyIds: usedTechnologyIds,
+    })
+    if (hiddenGem) usedTechnologyIds.add(hiddenGem.technology_id)
 
     const trending = sortedByMomentum.slice(0, 3)
 
-    const safestBet = merged
-      .filter((t) => Math.abs(t.momentum) < 5)
-      .sort((a, b) => b.composite_score - a.composite_score)[0]
+    const safestBet = selectTopScoreEntry(
+      merged.filter((t) => Math.abs(t.momentum) < 5),
+      { excludeTechnologyIds: usedTechnologyIds }
+    )
     const withDeltaById = new Map(
       withDelta.map((entry) => [entry.technology_id, entry])
     )
