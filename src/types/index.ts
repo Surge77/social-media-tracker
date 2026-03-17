@@ -403,3 +403,70 @@ export interface JobsOverviewResponse {
   filters: JobsFilterOptions
   lastUpdated: string | null
 }
+
+export interface JobSourceBadge {
+  source: string
+  label: string
+}
+
+export interface JobOpeningRecord {
+  id: string
+  canonicalHash: string
+  title: string
+  companyName: string | null
+  companySlug: string | null
+  jobUrl: string | null
+  locationText: string | null
+  locationCountry: string | null
+  locationRegion: string | null
+  locationCity: string | null
+  isRemote: boolean
+  employmentType: string | null
+  seniority: string | null
+  roleSlug: string | null
+  roleLabel: string | null
+  salaryMin: number | null
+  salaryMax: number | null
+  salaryCurrency: string | null
+  postedAt: string | null
+  source: string
+  sourceBadges: JobSourceBadge[]
+  sourceCount: number
+  matchedTechnologies: Array<{ slug: string; name: string; color: string | null }>
+  extractedSkills: Array<{ slug: string; label: string }>
+  confidenceScore: number
+  recommendationScore: number
+  whyThisMatters: string[]
+}
+
+export interface JobCompanySummary {
+  companySlug: string
+  companyName: string
+  activeOpenings: number
+  recentOpenings: number
+  remoteShare: number
+  sourceCoverage: number
+  topMarkets: string[]
+  topTechnologies: Array<{ slug: string; name: string; color: string | null; openings: number }>
+}
+
+export interface JobMarketHighlight {
+  title: string
+  body: string
+  tone: 'neutral' | 'positive'
+}
+
+export interface JobsOpeningsResponse {
+  openings: JobOpeningRecord[]
+  highlights: JobMarketHighlight[]
+  total: number
+  page: number
+  pageSize: number
+  lastUpdated: string | null
+}
+
+export interface JobsCompaniesResponse {
+  companies: JobCompanySummary[]
+  total: number
+  lastUpdated: string | null
+}

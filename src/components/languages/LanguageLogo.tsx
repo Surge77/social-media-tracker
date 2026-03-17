@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
 
 // ─── Devicons: full-color SVGs verified against devicon.json ────────────────
@@ -169,6 +170,8 @@ export function LanguageLogo({
   className,
   showBackground = true,
 }: LanguageLogoProps) {
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark' || resolvedTheme === 'midnight'
   // Determine starting stage: prefer devicons, fall back to simpleicons, else initials
   function getInitialStage(): Stage {
     if (diUrl(language)) return 'devicons'
@@ -179,6 +182,10 @@ export function LanguageLogo({
   const [stage, setStage] = useState<Stage>(getInitialStage)
 
   const brandColor = COLORS[language] ?? '#6b7280'
+  const ringColor = isDark ? `${brandColor}25` : `${brandColor}4d`
+  const bgGradient = isDark
+    ? `radial-gradient(circle at 35% 35%, ${brandColor}28, ${brandColor}10)`
+    : `radial-gradient(circle at 35% 35%, ${brandColor}38, #ffffff)`
   const imgSize    = Math.round(size * 0.62)
 
   const src =
@@ -209,9 +216,9 @@ export function LanguageLogo({
         width: size,
         height: size,
         background: showBackground
-          ? `radial-gradient(circle at 35% 35%, ${brandColor}28, ${brandColor}10)`
+          ? bgGradient
           : undefined,
-        boxShadow: showBackground ? `0 0 0 1px ${brandColor}25` : undefined,
+        boxShadow: showBackground ? `0 0 0 1px ${ringColor}` : undefined,
       }}
     >
       {src && stage !== 'initials' ? (

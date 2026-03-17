@@ -21,16 +21,16 @@ interface Props {
 type SortKey = 'tvl' | 'change_7d' | 'name'
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Dexes:            'bg-blue-500/15 text-blue-400',
-  Lending:          'bg-green-500/15 text-green-400',
-  Bridge:           'bg-violet-500/15 text-violet-400',
-  'Liquid Staking': 'bg-cyan-500/15 text-cyan-400',
-  CDP:              'bg-orange-500/15 text-orange-400',
-  CEX:              'bg-yellow-500/15 text-yellow-500',
-  Derivatives:      'bg-pink-500/15 text-pink-400',
-  Yield:            'bg-teal-500/15 text-teal-400',
-  RWA:              'bg-amber-500/15 text-amber-400',
-  Restaking:        'bg-purple-500/15 text-purple-400',
+  Dexes:            'bg-blue-500/15 text-blue-700 dark:text-blue-400',
+  Lending:          'bg-green-500/15 text-green-700 dark:text-green-400',
+  Bridge:           'bg-violet-500/15 text-violet-700 dark:text-violet-400',
+  'Liquid Staking': 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400',
+  CDP:              'bg-orange-500/15 text-orange-700 dark:text-orange-400',
+  CEX:              'bg-yellow-500/15 text-yellow-700 dark:text-yellow-500',
+  Derivatives:      'bg-pink-500/15 text-pink-700 dark:text-pink-400',
+  Yield:            'bg-teal-500/15 text-teal-700 dark:text-teal-400',
+  RWA:              'bg-amber-500/15 text-amber-700 dark:text-amber-400',
+  Restaking:        'bg-purple-500/15 text-purple-700 dark:text-purple-400',
 }
 
 function fmt(n: number): string {
@@ -95,7 +95,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
           className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition-all ${
             activeCategory === null
               ? 'bg-foreground text-background shadow-sm'
-              : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+              : 'bg-muted/60 text-foreground/70 dark:text-muted-foreground hover:bg-muted hover:text-foreground'
           }`}
         >
           All
@@ -107,7 +107,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
             className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition-all ${
               activeCategory === cat
                 ? 'bg-violet-600 text-white shadow-sm'
-                : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                : 'bg-muted/60 text-foreground/70 dark:text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
             {cat}
@@ -119,7 +119,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[540px] text-sm">
             <thead>
-              <tr className="border-b bg-muted/40 text-xs uppercase tracking-widest text-muted-foreground/80">
+              <tr className="border-b bg-muted/40 text-xs uppercase tracking-widest text-foreground/70 dark:text-muted-foreground/80">
                 <th className="w-8 px-3 py-3.5 text-left font-bold">#</th>
                 <th
                   className="cursor-pointer px-4 py-3.5 text-left font-bold hover:text-foreground transition-colors"
@@ -154,7 +154,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                 {displayedProtocols.map((p, i) => {
                   const change = p.change_7d ?? 0
                   const tvlBarPct = Math.max(4, (p.tvl / maxTVL) * 100)
-                  const catColor = CATEGORY_COLORS[p.category] ?? 'bg-muted/60 text-muted-foreground'
+                  const catColor = CATEGORY_COLORS[p.category] ?? 'bg-muted/60 text-foreground/70 dark:text-muted-foreground'
 
                   return (
                     <motion.tr
@@ -166,7 +166,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                       className="group border-b last:border-0 transition-colors hover:bg-muted/30"
                     >
                       {/* Rank */}
-                      <td className="px-3 py-3 text-sm font-mono font-bold text-muted-foreground/70 group-hover:text-foreground transition-colors">
+                      <td className="px-3 py-3 text-sm font-mono font-bold text-foreground/55 dark:text-muted-foreground/70 group-hover:text-foreground transition-colors">
                         {i + 1}
                       </td>
 
@@ -201,7 +201,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                       </td>
 
                       {/* Chains */}
-                      <td className="hidden px-4 py-3 text-sm font-medium text-muted-foreground sm:table-cell transition-colors group-hover:text-foreground">
+                      <td className="hidden px-4 py-3 text-sm font-medium text-foreground/70 dark:text-muted-foreground sm:table-cell transition-colors group-hover:text-foreground">
                         {p.chains.slice(0, 3).join(', ')}
                         {p.chains.length > 3 && ` +${p.chains.length - 3}`}
                       </td>
@@ -222,7 +222,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                       {/* 7d change */}
                       <td
                         className={`px-4 py-3 text-right text-sm font-extrabold transition-transform origin-right group-hover:scale-105 tabular-nums ${
-                          change >= 0 ? 'text-green-500 group-hover:text-green-400' : 'text-red-500 group-hover:text-red-400'
+                          change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                         }`}
                       >
                         {change >= 0 ? '+' : ''}{change.toFixed(1)}%

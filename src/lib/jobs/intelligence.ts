@@ -14,6 +14,7 @@ import type {
 } from '@/types'
 import type { NormalizedJobListing } from '@/lib/api/hasdata-jobs'
 import { CANONICAL_ROLES, slugifyText } from '@/lib/jobs/taxonomy'
+import { mergeNormalizedListings } from '@/lib/jobs/openings'
 
 type TechLookup = Pick<Technology, 'id' | 'slug' | 'name' | 'color' | 'category'>
 type MarketRow = {
@@ -47,6 +48,18 @@ function avg(values: number[]): number | null {
 
 function toIsoDate(date: Date): string {
   return date.toISOString().split('T')[0]
+}
+
+function isMissingTableError(message: string | undefined): boolean {
+  if (!message) return false
+  const lower = message.toLowerCase()
+  return lower.includes('does not exist') || lower.includes('could not find the table')
+}
+
+function toPersistedOpeningSource(source: NormalizedJobListing['source'], supportsExtendedSources: boolean): string {
+  if (supportsExtendedSources) return source
+  if (source === 'serpapi_google_jobs') return source
+  return 'hasdata_indeed'
 }
 
 async function getTechLookup(supabase: SupabaseClient): Promise<Map<string, TechLookup>> {
@@ -95,47 +108,118 @@ export async function upsertNormalizedListings(
 ): Promise<{ listingsUpserted: number; techLinksUpserted: number; skillLinksUpserted: number }> {
   if (listings.length === 0) return { listingsUpserted: 0, techLinksUpserted: 0, skillLinksUpserted: 0 }
 
-  const listingRows = listings.map((listing) => ({
-    source: listing.source,
-    external_id: listing.externalId,
-    canonical_hash: listing.canonicalHash,
-    title: listing.title,
-    company_name: listing.companyName,
-    company_slug: listing.companySlug,
-    job_url: listing.jobUrl,
-    description_text: listing.descriptionText,
-    location_text: listing.locationText,
-    location_country: listing.locationCountry,
-    location_region: listing.locationRegion,
-    location_city: listing.locationCity,
-    is_remote: listing.isRemote,
-    employment_type: listing.employmentType,
-    seniority: listing.seniority,
-    role_slug: listing.roleSlug,
-    role_label: listing.roleLabel,
-    salary_min: listing.salaryMin,
-    salary_max: listing.salaryMax,
-    salary_currency: listing.salaryCurrency,
-    posted_at: listing.postedAt,
-    last_seen_at: new Date().toISOString(),
-    is_active: true,
-    metadata: listing.metadata,
-  }))
+  const { error: sightingsProbeError } = await supabase
+    .from('job_listing_sightings')
+    .select('id')
+    .limit(1)
 
-  const { data: upserted, error } = await supabase
+  const supportsExtendedSources = !sightingsProbeError || !isMissingTableError(sightingsProbeError.message)
+
+  const openings = mergeNormalizedListings(listings)
+  const hashes = openings.map((opening) => opening.canonicalHash)
+  const { data: existingRows, error: existingError } = await supabase
     .from('job_listings')
-    .upsert(listingRows, { onConflict: 'source,external_id' })
-    .select('id, source, external_id')
+    .select('id, canonical_hash')
+    .in('canonical_hash', hashes)
 
-  if (error) throw new Error(`Failed to upsert job listings: ${error.message}`)
+  if (existingError) throw new Error(`Failed to fetch existing job openings: ${existingError.message}`)
 
-  const listingIdMap = new Map((upserted ?? []).map((row) => [`${row.source}:${row.external_id}`, row.id as string]))
+  const existingByHash = new Map((existingRows ?? []).map((row) => [row.canonical_hash as string, row.id as string]))
+  const inserts = openings
+    .filter((opening) => !existingByHash.has(opening.canonicalHash))
+      .map((opening) => ({
+      source: toPersistedOpeningSource(opening.source, supportsExtendedSources),
+      external_id: `canonical:${opening.canonicalHash}`,
+      canonical_hash: opening.canonicalHash,
+      title: opening.title,
+      company_name: opening.companyName,
+      company_slug: opening.companySlug,
+      job_url: opening.jobUrl,
+      description_text: opening.descriptionText,
+      location_text: opening.locationText,
+      location_country: opening.locationCountry,
+      location_region: opening.locationRegion,
+      location_city: opening.locationCity,
+      is_remote: opening.isRemote,
+      employment_type: opening.employmentType,
+      seniority: opening.seniority,
+      role_slug: opening.roleSlug,
+      role_label: opening.roleLabel,
+      salary_min: opening.salaryMin,
+      salary_max: opening.salaryMax,
+      salary_currency: opening.salaryCurrency,
+      posted_at: opening.postedAt,
+      last_seen_at: new Date().toISOString(),
+      is_active: true,
+      metadata: {
+        ...opening.metadata,
+        primarySource: opening.source,
+        sources: opening.sources,
+        sourceCount: opening.sourceCount,
+      },
+    }))
+
+  if (inserts.length > 0) {
+    const { data: insertedRows, error: insertError } = await supabase
+      .from('job_listings')
+      .insert(inserts)
+      .select('id, canonical_hash')
+
+    if (insertError) throw new Error(`Failed to insert canonical job openings: ${insertError.message}`)
+    for (const row of insertedRows ?? []) existingByHash.set(row.canonical_hash as string, row.id as string)
+  }
+
+  const updates = openings
+    .filter((opening) => existingByHash.has(opening.canonicalHash))
+    .map((opening) =>
+      supabase
+        .from('job_listings')
+        .update({
+          source: toPersistedOpeningSource(opening.source, supportsExtendedSources),
+          title: opening.title,
+          company_name: opening.companyName,
+          company_slug: opening.companySlug,
+          job_url: opening.jobUrl,
+          description_text: opening.descriptionText,
+          location_text: opening.locationText,
+          location_country: opening.locationCountry,
+          location_region: opening.locationRegion,
+          location_city: opening.locationCity,
+          is_remote: opening.isRemote,
+          employment_type: opening.employmentType,
+          seniority: opening.seniority,
+          role_slug: opening.roleSlug,
+          role_label: opening.roleLabel,
+          salary_min: opening.salaryMin,
+          salary_max: opening.salaryMax,
+          salary_currency: opening.salaryCurrency,
+          posted_at: opening.postedAt,
+          last_seen_at: new Date().toISOString(),
+          is_active: true,
+          metadata: {
+            ...opening.metadata,
+            primarySource: opening.source,
+            sources: opening.sources,
+            sourceCount: opening.sourceCount,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingByHash.get(opening.canonicalHash)!)
+    )
+
+  if (updates.length > 0) {
+    const results = await Promise.all(updates)
+    const failed = results.find((result) => result.error)
+    if (failed?.error) throw new Error(`Failed to update canonical job openings: ${failed.error.message}`)
+  }
+
+  const listingIdMap = new Map(openings.map((opening) => [opening.canonicalHash, existingByHash.get(opening.canonicalHash)!]))
   const techIdBySlug = new Map(technologies.map((technology) => [technology.slug, technology.id]))
 
-  const techLinks = listings.flatMap((listing) => {
-    const listingId = listingIdMap.get(`${listing.source}:${listing.externalId}`)
+  const techLinks = openings.flatMap((opening) => {
+    const listingId = listingIdMap.get(opening.canonicalHash)
     if (!listingId) return []
-    return listing.matchedTechnologySlugs
+    return opening.matchedTechnologySlugs
       .map((slug) => techIdBySlug.get(slug))
       .filter((technologyId): technologyId is string => Boolean(technologyId))
       .map((technologyId) => ({
@@ -153,10 +237,10 @@ export async function upsertNormalizedListings(
     if (techError) throw new Error(`Failed to upsert job listing technologies: ${techError.message}`)
   }
 
-  const skillLinks = listings.flatMap((listing) => {
-    const listingId = listingIdMap.get(`${listing.source}:${listing.externalId}`)
+  const skillLinks = openings.flatMap((opening) => {
+    const listingId = listingIdMap.get(opening.canonicalHash)
     if (!listingId) return []
-    return listing.extractedSkills.map((skill) => ({
+    return opening.extractedSkills.map((skill) => ({
       job_listing_id: listingId,
       skill_slug: skill.slug,
       skill_label: skill.label,
@@ -172,8 +256,31 @@ export async function upsertNormalizedListings(
     if (skillError) throw new Error(`Failed to upsert job listing skills: ${skillError.message}`)
   }
 
+  const sightings = openings.flatMap((opening) => {
+    const listingId = listingIdMap.get(opening.canonicalHash)
+    if (!listingId) return []
+    return opening.sightings.map((sighting) => ({
+      job_listing_id: listingId,
+      source: sighting.source,
+      external_id: sighting.externalId,
+      source_url: sighting.jobUrl,
+      posted_at: sighting.postedAt,
+      payload: sighting.metadata,
+      first_seen_at: new Date().toISOString(),
+      last_seen_at: new Date().toISOString(),
+    }))
+  })
+
+  if (supportsExtendedSources && sightings.length > 0) {
+    const { error: sightingsError } = await supabase
+      .from('job_listing_sightings')
+      .upsert(sightings, { onConflict: 'source,external_id' })
+
+    if (sightingsError) throw new Error(`Failed to upsert job listing sightings: ${sightingsError.message}`)
+  }
+
   return {
-    listingsUpserted: listingRows.length,
+    listingsUpserted: openings.length,
     techLinksUpserted: techLinks.length,
     skillLinksUpserted: skillLinks.length,
   }
@@ -524,6 +631,11 @@ async function buildFallbackOverview(supabase: SupabaseClient): Promise<JobsOver
       }
     })
 
+  const demandTechnologies = [...entries]
+    .filter((entry) => entry.totalJobs > 0)
+    .sort((a, b) => b.totalJobs - a.totalJobs || a.technology.name.localeCompare(b.technology.name))
+    .map((entry) => ({ slug: entry.technology.slug, name: entry.technology.name, color: entry.technology.color }))
+
   return {
     pulse: {
       totalActiveJobs: entries.reduce((sum, entry) => sum + entry.totalJobs, 0),
@@ -562,7 +674,7 @@ async function buildFallbackOverview(supabase: SupabaseClient): Promise<JobsOver
       periods: ['7d', '30d', '90d'],
       remoteModes: ['all', 'remote', 'onsite'],
       roles: CANONICAL_ROLES.map((role) => ({ slug: role.slug, label: role.label })),
-      technologies: Array.from(techLookup.values()).sort((a, b) => a.name.localeCompare(b.name)).map((technology) => ({ slug: technology.slug, name: technology.name, color: technology.color })),
+      technologies: demandTechnologies,
       locations: [],
     },
     lastUpdated: latestJobsDate ?? latestScoreDate,
@@ -715,6 +827,11 @@ export async function getJobsOverview(supabase: SupabaseClient): Promise<JobsOve
   const locationOptions = new Map<string, { slug: string; label: string; type: 'city' | 'region' | 'country' }>()
   for (const entry of geoDemand) locationOptions.set(`${entry.locationSlug}:${entry.locationType}`, { slug: entry.locationSlug, label: entry.locationLabel, type: entry.locationType })
 
+  const demandTechnologies = hiringNow
+    .filter((entry) => entry.activeJobs > 0)
+    .sort((a, b) => b.activeJobs - a.activeJobs || a.name.localeCompare(b.name))
+    .map((entry) => ({ slug: entry.slug, name: entry.name, color: entry.color }))
+
   return {
     pulse: {
       totalActiveJobs: (marketRes.data ?? []).reduce((sum, row) => sum + Number(row.active_jobs ?? 0), 0),
@@ -735,7 +852,7 @@ export async function getJobsOverview(supabase: SupabaseClient): Promise<JobsOve
       periods: ['7d', '30d', '90d'],
       remoteModes: ['all', 'remote', 'onsite'],
       roles: CANONICAL_ROLES.map((role) => ({ slug: role.slug, label: role.label })),
-      technologies: Array.from(techLookup.values()).sort((a, b) => a.name.localeCompare(b.name)).map((technology) => ({ slug: technology.slug, name: technology.name, color: technology.color })),
+      technologies: demandTechnologies,
       locations: Array.from(locationOptions.values()).sort((a, b) => a.label.localeCompare(b.label)),
     },
     lastUpdated: latestDate,

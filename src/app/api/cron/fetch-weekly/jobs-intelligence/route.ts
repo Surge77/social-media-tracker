@@ -1,5 +1,5 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { fetchHasDataJobsForTechnologies, fetchRemotiveFallbackListings } from '@/lib/api/hasdata-jobs'
+import { fetchAggregatedJobListings } from '@/lib/api/job-openings'
 import { rebuildJobsIntelligenceRollups, upsertNormalizedListings } from '@/lib/jobs/intelligence'
 import { isAuthorizedCronRequest } from '@/lib/cron/orchestrator'
 import type { Technology } from '@/types'
@@ -25,17 +25,12 @@ export async function GET(request: Request) {
       throw new Error(`Failed to fetch technologies: ${error?.message}`)
     }
 
-    let listings
-    try {
-      listings = await fetchHasDataJobsForTechnologies(technologies as Technology[], {
-        maxTechnologies: maxTechs,
-        pagesPerTechnology: 1,
-        location: 'United States',
-      })
-    } catch (error) {
-      console.warn('[Jobs Intelligence] HasData unavailable, falling back to Remotive listings:', error)
-      listings = await fetchRemotiveFallbackListings(technologies as Technology[])
-    }
+    const aggregated = await fetchAggregatedJobListings(technologies as Technology[], {
+      maxTechnologies: maxTechs,
+      pagesPerTechnology: Number(process.env.JOBS_INTELLIGENCE_PAGES_PER_TECH ?? 1),
+      maxMarkets: Number(process.env.JOBS_INTELLIGENCE_MAX_MARKETS ?? 3),
+    })
+    const listings = aggregated.listings
 
     const upserted = await upsertNormalizedListings(supabase, technologies as Technology[], listings)
     const rebuilt = await rebuildJobsIntelligenceRollups(supabase)
@@ -43,6 +38,7 @@ export async function GET(request: Request) {
     return Response.json({
       success: true,
       listingsFetched: listings.length,
+      sourceErrors: aggregated.errors,
       ...upserted,
       ...rebuilt,
     })

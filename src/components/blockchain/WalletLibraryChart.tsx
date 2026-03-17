@@ -25,7 +25,7 @@ export function WalletLibraryChart() {
   if (!libs.length) {
     return (
       <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed">
-        <p className="text-sm text-muted-foreground">Download data unavailable.</p>
+        <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">Download data unavailable.</p>
       </div>
     )
   }
@@ -41,7 +41,7 @@ export function WalletLibraryChart() {
     return row
   })
 
-  const tickColor = isDark ? '#71717a' : '#a1a1aa'
+  const tickColor = isDark ? '#71717a' : '#52525b'
 
   return (
     <div className="space-y-4">
@@ -51,14 +51,14 @@ export function WalletLibraryChart() {
           <div key={lib.package} className="rounded-lg border bg-card px-3 py-2.5">
             <p className="text-xs font-semibold" style={{ color: lib.color }}>{lib.label}</p>
             <p className="mt-1 text-base font-bold text-foreground">{fmtDl(lib.weeklyDownloads)}</p>
-            <p className="text-xs text-muted-foreground">/ week</p>
+            <p className="text-xs font-medium text-foreground/70 dark:text-muted-foreground">/ week</p>
           </div>
         ))}
       </div>
 
       {/* 90-day trend chart */}
       <div className="rounded-xl border bg-card p-5">
-        <p className="mb-3 text-xs text-muted-foreground">90-day weekly download trend</p>
+        <p className="mb-3 text-xs font-medium text-foreground/70 dark:text-muted-foreground">90-day weekly download trend</p>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: 8 }}>
             <XAxis
@@ -89,7 +89,7 @@ export function WalletLibraryChart() {
               iconType="circle"
               iconSize={6}
               formatter={(value) => (
-                <span style={{ fontSize: 10, color: isDark ? '#a1a1aa' : '#52525b' }}>{value}</span>
+                <span style={{ fontSize: 10, color: isDark ? '#a1a1aa' : '#3f3f46', fontWeight: 600 }}>{value}</span>
               )}
             />
             {libs.map((lib) => (

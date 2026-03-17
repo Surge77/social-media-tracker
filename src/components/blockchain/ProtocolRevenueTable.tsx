@@ -38,7 +38,7 @@ export function ProtocolRevenueTable() {
   if (!data?.length) {
     return (
       <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed">
-        <p className="text-sm text-muted-foreground">Revenue data unavailable.</p>
+        <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">Revenue data unavailable.</p>
       </div>
     )
   }
@@ -59,7 +59,7 @@ export function ProtocolRevenueTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/40 text-muted-foreground">
+            <tr className="border-b bg-muted/40 text-foreground/70 dark:text-muted-foreground">
               <th className="w-8 px-3 py-3 text-left">#</th>
               <th
                 className="cursor-pointer px-4 py-3 text-left hover:text-foreground transition-colors"
@@ -96,7 +96,7 @@ export function ProtocolRevenueTable() {
                   key={p.slug}
                   className="group border-b last:border-0 hover:bg-muted/30 transition-colors"
                 >
-                  <td className="px-3 py-3 font-mono text-muted-foreground">{i + 1}</td>
+                  <td className="px-3 py-3 font-mono text-foreground/65 dark:text-muted-foreground">{i + 1}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {p.logo && (
@@ -136,10 +136,10 @@ export function ProtocolRevenueTable() {
                       </div>
                     </div>
                   </td>
-                  <td className="hidden px-4 py-3 text-right font-mono text-muted-foreground sm:table-cell">
+                  <td className="hidden px-4 py-3 text-right font-mono text-foreground/70 dark:text-muted-foreground sm:table-cell">
                     {fmt(p.weeklyFees)}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono font-medium text-green-500">
+                  <td className="px-4 py-3 text-right font-mono font-semibold text-green-600 dark:text-green-400">
                     {fmt(p.dailyRevenue)}
                   </td>
                 </tr>

@@ -9,8 +9,16 @@ import {
 
 const HASDATA_BASE = 'https://api.hasdata.com/scrape'
 
+export type JobListingSource =
+  | 'hasdata_indeed'
+  | 'jsearch'
+  | 'adzuna'
+  | 'remotive'
+  | 'arbeitnow'
+  | 'serpapi_google_jobs'
+
 export interface NormalizedJobListing {
-  source: 'hasdata_indeed'
+  source: JobListingSource
   externalId: string
   canonicalHash: string
   title: string
@@ -290,7 +298,7 @@ export async function fetchRemotiveFallbackListings(
       if (matchedTechnologySlugs.length === 0) return null
 
       return {
-        source: 'hasdata_indeed',
+        source: 'remotive',
         externalId: String(job.id ?? job.url ?? title),
         canonicalHash: buildCanonicalHash([title, job.company_name, location, job.url]),
         title,

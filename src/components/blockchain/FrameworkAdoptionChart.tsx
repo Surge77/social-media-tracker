@@ -33,7 +33,7 @@ export function FrameworkAdoptionChart() {
   if (!frameworks.length) {
     return (
       <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed">
-        <p className="text-sm text-muted-foreground">Framework data unavailable.</p>
+        <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">Framework data unavailable.</p>
       </div>
     )
   }
@@ -45,14 +45,14 @@ export function FrameworkAdoptionChart() {
     ecosystem: f.ecosystem,
   }))
 
-  const tickColor = isDark ? '#71717a' : '#a1a1aa'
+  const tickColor = isDark ? '#71717a' : '#52525b'
   const maxCommits = Math.max(...frameworks.map((f) => f.weeklyCommits), 1)
 
   return (
     <div className="space-y-4">
       {/* Stars bar chart */}
       <div className="rounded-xl border bg-card p-5">
-        <p className="mb-4 text-xs text-muted-foreground">GitHub Stars</p>
+        <p className="mb-4 text-xs font-medium text-foreground/70 dark:text-muted-foreground">GitHub Stars</p>
         <ResponsiveContainer width="100%" height={160}>
           <BarChart data={chartData} margin={{ top: 4, right: 48, bottom: 4, left: 56 }} layout="vertical">
             <XAxis
@@ -101,7 +101,7 @@ export function FrameworkAdoptionChart() {
       <div className="overflow-hidden rounded-xl border bg-card">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/40 text-muted-foreground">
+            <tr className="border-b bg-muted/40 text-foreground/70 dark:text-muted-foreground">
               <th className="px-4 py-2.5 text-left font-medium">Framework</th>
               <th className="px-4 py-2.5 text-left font-medium">Ecosystem</th>
               <th className="px-4 py-2.5 text-right font-medium">
@@ -130,7 +130,7 @@ export function FrameworkAdoptionChart() {
                       <ExternalLink className="h-3 w-3 opacity-50" />
                     </a>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{f.ecosystem}</td>
+                  <td className="px-4 py-3 font-medium text-foreground/72 dark:text-muted-foreground">{f.ecosystem}</td>
                   <td className="px-4 py-3 text-right font-mono">{fmtStars(f.stars)}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -143,7 +143,7 @@ export function FrameworkAdoptionChart() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right text-muted-foreground">
+                  <td className="px-4 py-3 text-right font-medium text-foreground/72 dark:text-muted-foreground">
                     {timeAgo(f.lastPush)}
                   </td>
                 </tr>

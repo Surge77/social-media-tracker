@@ -288,9 +288,16 @@ function iconColor(brandHex: string, isDark: boolean): string {
   if (isDark && lum < 0.18) return '#b0bec5'
   if (!isDark && lum > 0.55) {
     const h = brandHex.replace('#', '')
-    const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.58)
-    const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.58)
-    const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.58)
+    const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.45)
+    const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.45)
+    const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.45)
+    return `rgb(${r},${g},${b})`
+  }
+  if (!isDark && lum > 0.35) {
+    const h = brandHex.replace('#', '')
+    const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.72)
+    const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.72)
+    const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.72)
     return `rgb(${r},${g},${b})`
   }
   return brandHex.startsWith('#') ? brandHex : `#${brandHex}`
@@ -371,9 +378,15 @@ export function LanguageIcon({
     }
     if (!isDark && lum > 0.55) {
       // Too bright for light bg — darken 42%
-      const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.58).toString(16).padStart(2, '0')
-      const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.58).toString(16).padStart(2, '0')
-      const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.58).toString(16).padStart(2, '0')
+      const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.45).toString(16).padStart(2, '0')
+      const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.45).toString(16).padStart(2, '0')
+      const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.45).toString(16).padStart(2, '0')
+      return `${r}${g}${b}`
+    }
+    if (!isDark && lum > 0.35) {
+      const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.72).toString(16).padStart(2, '0')
+      const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.72).toString(16).padStart(2, '0')
+      const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.72).toString(16).padStart(2, '0')
       return `${r}${g}${b}`
     }
     return h
@@ -390,9 +403,11 @@ export function LanguageIcon({
     width: size,
     height: size,
     background: showBackground
-      ? `radial-gradient(circle at 35% 35%, ${brandColor}28, ${brandColor}10)`
+      ? isDark
+        ? `radial-gradient(circle at 35% 35%, ${brandColor}28, ${brandColor}10)`
+        : `radial-gradient(circle at 35% 35%, ${brandColor}38, #ffffff)`
       : undefined,
-    boxShadow: showBackground ? `0 0 0 1px ${brandColor}25` : undefined,
+    boxShadow: showBackground ? `0 0 0 1px ${isDark ? `${brandColor}25` : `${brandColor}4d`}` : undefined,
   }
 
   // Local inline SVG icon (theme-adaptive color)

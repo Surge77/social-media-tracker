@@ -66,9 +66,17 @@ function adaptiveFill(brandHex: string, isDark: boolean): string {
 
   if (!isDark && lum > 0.55) {
     const h = brandHex.replace('#', '')
-    const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.6)
-    const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.6)
-    const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.6)
+    const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.45)
+    const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.45)
+    const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.45)
+    return `rgb(${r},${g},${b})`
+  }
+
+  if (!isDark && lum > 0.35) {
+    const h = brandHex.replace('#', '')
+    const r = Math.round(parseInt(h.slice(0, 2), 16) * 0.72)
+    const g = Math.round(parseInt(h.slice(2, 4), 16) * 0.72)
+    const b = Math.round(parseInt(h.slice(4, 6), 16) * 0.72)
     return `rgb(${r},${g},${b})`
   }
 
@@ -110,13 +118,15 @@ export function TechIcon({
   }
 
   const brandHex = icon ? `#${icon.hex}` : (color ?? '#6b7280')
-  const bgAlpha = '20'
-  const ringAlpha = '30'
+  const bgAlpha = isDark ? '20' : '2f'
+  const ringAlpha = isDark ? '30' : '4d'
 
   const containerStyle: React.CSSProperties = showBackground ? {
     width: size,
     height: size,
-    background: `radial-gradient(circle at 35% 35%, ${brandHex}${bgAlpha}, ${brandHex}0c)`,
+    background: isDark
+      ? `radial-gradient(circle at 35% 35%, ${brandHex}${bgAlpha}, ${brandHex}0c)`
+      : `radial-gradient(circle at 35% 35%, ${brandHex}${bgAlpha}, #ffffff)`,
     boxShadow: `0 0 0 1px ${brandHex}${ringAlpha}`,
     borderRadius: '6px',
     flexShrink: 0,
@@ -143,6 +153,9 @@ export function TechIcon({
           width={innerSize}
           height={innerSize}
           className="object-contain select-none"
+          style={{
+            filter: isDark ? undefined : 'contrast(1.18) saturate(1.12) brightness(0.84)',
+          }}
           onError={() => setStage(icon ? 'simple' : 'fallback')}
           draggable={false}
           loading="lazy"

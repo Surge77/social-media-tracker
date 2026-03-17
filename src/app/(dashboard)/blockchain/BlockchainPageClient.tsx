@@ -139,7 +139,7 @@ function MarketTab() {
       value: fmtTVL(totalTVL),
       sub: 'across all chains',
       icon: DollarSign,
-      color: 'text-blue-400',
+      color: 'text-blue-600 dark:text-blue-400',
       bg: 'bg-blue-500/10',
     },
     {
@@ -147,7 +147,7 @@ function MarketTab() {
       value: `${weightedChange24h >= 0 ? '+' : ''}${weightedChange24h.toFixed(2)}%`,
       sub: 'weighted avg',
       icon: weightedChange24h >= 0 ? TrendingUp : TrendingDown,
-      color: weightedChange24h >= 0 ? 'text-green-400' : 'text-red-400',
+      color: weightedChange24h >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
       bg: weightedChange24h >= 0 ? 'bg-green-500/10' : 'bg-red-500/10',
     },
     {
@@ -157,7 +157,7 @@ function MarketTab() {
         ? `${topGainer.change_1d >= 0 ? '+' : ''}${topGainer.change_1d.toFixed(1)}%`
         : '',
       icon: TrendingUp,
-      color: 'text-green-400',
+      color: 'text-green-600 dark:text-green-400',
       bg: 'bg-green-500/10',
     },
     {
@@ -165,7 +165,7 @@ function MarketTab() {
       value: `${data?.protocols.length ?? 0}+`,
       sub: 'tracked by DeFiLlama',
       icon: Activity,
-      color: 'text-violet-400',
+      color: 'text-violet-600 dark:text-violet-400',
       bg: 'bg-violet-500/10',
     },
   ]
@@ -173,7 +173,7 @@ function MarketTab() {
   if (isError) {
     return (
       <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed">
-        <p className="text-sm text-muted-foreground">Failed to load data. Data refreshes hourly.</p>
+        <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">Failed to load data. Data refreshes hourly.</p>
       </div>
     )
   }
@@ -190,7 +190,7 @@ function MarketTab() {
               className="group rounded-xl border bg-card p-4 transition-all hover:border-primary/20 hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex items-start justify-between gap-2">
-                <p className="text-xs leading-snug text-muted-foreground">{card.label}</p>
+                <p className="text-xs font-medium leading-snug text-foreground/70 dark:text-muted-foreground">{card.label}</p>
                 <div className={`shrink-0 rounded-md p-1.5 transition-transform group-hover:scale-110 ${card.bg}`}>
                   <Icon className={`h-3.5 w-3.5 ${card.color}`} />
                 </div>
@@ -200,7 +200,7 @@ function MarketTab() {
               ) : (
                 <p className={`mt-2.5 text-2xl font-bold leading-none tracking-tight ${card.color}`}>{card.value}</p>
               )}
-              <p className="mt-1.5 text-xs text-muted-foreground">{card.sub}</p>
+              <p className="mt-1.5 text-xs font-medium text-foreground/65 dark:text-muted-foreground">{card.sub}</p>
             </div>
           )
         })}
@@ -208,7 +208,7 @@ function MarketTab() {
 
       {/* Chain TVL Cards */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground/70 dark:text-muted-foreground">
           Top Chains by TVL
         </h2>
         <ChainTVLCards chains={data?.chains ?? []} isLoading={isLoading} />
@@ -220,7 +220,7 @@ function MarketTab() {
       {/* DeFi Breakdown + Protocol Table */}
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground/70 dark:text-muted-foreground">
             DeFi Category Breakdown
           </h2>
           {isLoading ? (
@@ -250,7 +250,7 @@ function MarketTab() {
                     onMouseEnter={(e) => setActiveIndex(categoryData.findIndex((d) => d.name === e.value))}
                     onMouseLeave={() => setActiveIndex(-1)}
                     formatter={(value) => (
-                      <span style={{ fontSize: 11, color: isDark ? '#a1a1aa' : '#52525b' }}>{value}</span>
+                      <span style={{ fontSize: 11, color: isDark ? '#a1a1aa' : '#3f3f46', fontWeight: 600 }}>{value}</span>
                     )}
                   />
                 </PieChart>
@@ -258,13 +258,13 @@ function MarketTab() {
             </div>
           ) : (
             <div className="flex min-h-[200px] items-center justify-center rounded-xl border border-dashed">
-              <p className="text-sm text-muted-foreground">Category data populates after first cron run.</p>
+              <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">Category data populates after first cron run.</p>
             </div>
           )}
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground/70 dark:text-muted-foreground">
             Top DeFi Protocols
           </h2>
           {isLoading ? (
@@ -286,7 +286,7 @@ function DeveloperTab() {
       <section>
         <div className="mb-4">
           <h2 className="text-base font-semibold text-foreground">Smart Contract Language Wars</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">
             Which languages are actually being used? Ranked by GitHub activity, Stack Overflow velocity, and npm adoption.
           </p>
         </div>
@@ -296,7 +296,7 @@ function DeveloperTab() {
       <section>
         <div className="mb-4">
           <h2 className="text-base font-semibold text-foreground">Framework Adoption</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">
             Foundry vs Hardhat vs Anchor vs Truffle — GitHub stars and recent commit velocity.
           </p>
         </div>
@@ -306,7 +306,7 @@ function DeveloperTab() {
       <section>
         <div className="mb-4">
           <h2 className="text-base font-semibold text-foreground">Wallet Library Trend</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">
             ethers.js vs viem vs wagmi vs web3.js — weekly npm download trends over 90 days.
           </p>
         </div>
@@ -324,7 +324,7 @@ function ChainHealthTab() {
       <section>
         <div className="mb-4">
           <h2 className="text-base font-semibold text-foreground">Gas Prices</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">
             Ethereum gas oracle + major L2s. Updates every 5 minutes.
           </p>
         </div>

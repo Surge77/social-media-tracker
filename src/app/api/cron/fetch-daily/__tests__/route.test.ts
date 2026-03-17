@@ -53,7 +53,7 @@ describe('GET /api/cron/fetch-daily', () => {
     const body = await response.json()
 
     expect(response.status).toBe(200)
-    expect(runCronStepWithRetry).toHaveBeenCalledTimes(27)
+    expect(runCronStepWithRetry).toHaveBeenCalledTimes(28)
     expect(runCronStepWithRetry).not.toHaveBeenCalledWith(
       expect.objectContaining({ name: 'scoring' })
     )
@@ -63,7 +63,7 @@ describe('GET /api/cron/fetch-daily', () => {
       })
     )
     expect(body.success).toBe(true)
-    expect(body.stepResults).toHaveLength(27)
+    expect(body.stepResults).toHaveLength(28)
   })
 
   it('does not run scoring when a fetch batch fails', async () => {
@@ -86,7 +86,7 @@ describe('GET /api/cron/fetch-daily', () => {
     const body = await response.json()
 
     expect(response.status).toBe(500)
-    expect(runCronStepWithRetry).toHaveBeenCalledTimes(27)
+    expect(runCronStepWithRetry).toHaveBeenCalledTimes(28)
     expect(runCronStepWithRetry).not.toHaveBeenCalledWith(
       expect.objectContaining({ name: 'scoring' })
     )

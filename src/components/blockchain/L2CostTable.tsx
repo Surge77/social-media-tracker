@@ -27,9 +27,9 @@ function calcUSD(gasPriceGwei: number, gasUnits: number): string {
 
 function costClass(gasPriceGwei: number, gasUnits: number): string {
   const usd = (gasPriceGwei * gasUnits * ETH_PRICE_USD) / 1e9
-  if (usd < 0.10) return 'text-green-500'
-  if (usd < 2.00) return 'text-yellow-500'
-  return 'text-red-500'
+  if (usd < 0.10) return 'text-green-600 dark:text-green-400'
+  if (usd < 2.00) return 'text-yellow-700 dark:text-yellow-400'
+  return 'text-red-600 dark:text-red-400'
 }
 
 // Chain ordering for the table
@@ -43,7 +43,7 @@ export function L2CostTable() {
   if (!chains?.length) {
     return (
       <div className="flex min-h-[160px] items-center justify-center rounded-xl border border-dashed">
-        <p className="text-sm text-muted-foreground">Cost data unavailable.</p>
+        <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">Cost data unavailable.</p>
       </div>
     )
   }
@@ -55,15 +55,15 @@ export function L2CostTable() {
   return (
     <div className="overflow-hidden rounded-xl border bg-card">
       <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3">
-        <Info className="h-3.5 w-3.5 text-muted-foreground" />
-        <p className="text-xs text-muted-foreground">
+        <Info className="h-3.5 w-3.5 text-foreground/60 dark:text-muted-foreground" />
+        <p className="text-xs font-medium text-foreground/70 dark:text-muted-foreground">
           Cost estimates based on standard gas price · ETH ≈ ${ETH_PRICE_USD.toLocaleString()}
         </p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/20 text-muted-foreground">
+            <tr className="border-b bg-muted/20 text-foreground/70 dark:text-muted-foreground">
               <th className="px-4 py-3 text-left font-medium">Chain</th>
               <th className="px-4 py-3 text-right font-medium">ETH Transfer</th>
               <th className="px-4 py-3 text-right font-medium">ERC-20</th>

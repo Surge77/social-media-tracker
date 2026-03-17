@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
-import { getJobsCompanyRows } from '@/lib/jobs/intelligence'
+import { getJobsCompanies, getJobsOpenings } from '@/lib/jobs/aggregator'
 
 type CompanyDetailPageProps = {
   params: Promise<{ slug: string }>
@@ -23,7 +23,11 @@ function prettyLabel(slug: string) {
 export default async function CompanyDetailPage({ params }: CompanyDetailPageProps) {
   const { slug } = await params
   const supabase = createSupabaseAdminClient()
-  const company = (await getJobsCompanyRows(supabase)).find((entry) => entry.companySlug === slug)
+  const [companies, openings] = await Promise.all([
+    getJobsCompanies(supabase, { company: slug }),
+    getJobsOpenings(supabase, { company: slug, page: 1, pageSize: 12 }),
+  ])
+  const company = companies.companies.find((entry) => entry.companySlug === slug)
 
   return (
     <div className="app-page py-8">
@@ -41,26 +45,68 @@ export default async function CompanyDetailPage({ params }: CompanyDetailPagePro
           </p>
 
           {company ? (
-            <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              <div className="rounded-3xl border border-border/60 bg-background/70 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Openings</p>
-                <p className="mt-2 text-2xl font-bold text-foreground">{company.activeJobs.toLocaleString()}</p>
+            <>
+              <div className="mt-6 grid gap-4 lg:grid-cols-4">
+                <div className="rounded-3xl border border-border/60 bg-background/70 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Openings</p>
+                  <p className="mt-2 text-2xl font-bold text-foreground">{company.activeOpenings.toLocaleString()}</p>
+                </div>
+                <div className="rounded-3xl border border-border/60 bg-background/70 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recent</p>
+                  <p className="mt-2 text-2xl font-bold text-foreground">{company.recentOpenings.toLocaleString()}</p>
+                </div>
+                <div className="rounded-3xl border border-border/60 bg-background/70 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remote share</p>
+                  <p className="mt-2 text-2xl font-bold text-foreground">{Math.round(company.remoteShare)}%</p>
+                </div>
+                <div className="rounded-3xl border border-border/60 bg-background/70 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Source coverage</p>
+                  <p className="mt-2 text-2xl font-bold text-foreground">{company.sourceCoverage.toFixed(1)}x</p>
+                </div>
               </div>
-              <div className="rounded-3xl border border-border/60 bg-background/70 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Remote share</p>
-                <p className="mt-2 text-2xl font-bold text-foreground">{Math.round(company.remoteRatio)}%</p>
-              </div>
-              <div className="rounded-3xl border border-border/60 bg-background/70 p-4">
+
+              <div className="mt-6 rounded-3xl border border-border/60 bg-background/70 p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Top stacks</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {company.topTechnologies.map((technology) => (
                     <span key={technology.slug} className="rounded-full border border-border/60 bg-card px-3 py-1 text-xs text-foreground">
-                      {technology.name}
+                      {technology.name} · {technology.openings}
                     </span>
                   ))}
                 </div>
               </div>
-            </div>
+
+              <div className="mt-6 overflow-hidden rounded-3xl border border-border/60 bg-background/70">
+                <div className="grid grid-cols-[minmax(0,1.3fr)_0.8fr_0.8fr_0.8fr] gap-3 border-b border-border/60 px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <span>Opening</span>
+                  <span className="text-right">Posted</span>
+                  <span className="text-right">Coverage</span>
+                  <span className="text-right">Score</span>
+                </div>
+                <div className="divide-y divide-border/50">
+                  {openings.openings.map((opening) => (
+                    <div key={opening.id} className="grid grid-cols-[minmax(0,1.3fr)_0.8fr_0.8fr_0.8fr] gap-3 px-5 py-4">
+                      <div className="min-w-0">
+                        {opening.jobUrl ? (
+                          <Link href={opening.jobUrl} target="_blank" className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground transition-colors hover:text-primary">
+                            {opening.title}
+                            <ArrowUpRight className="h-4 w-4 opacity-60" />
+                          </Link>
+                        ) : (
+                          <p className="text-sm font-semibold text-foreground">{opening.title}</p>
+                        )}
+                        <p className="mt-1 text-xs text-muted-foreground">{opening.locationText ?? 'Location unavailable'}</p>
+                      </div>
+                      <span className="text-right text-sm text-muted-foreground">
+                        {opening.postedAt ? new Date(opening.postedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                      </span>
+                      <span className="text-right text-sm text-muted-foreground">{opening.sourceCount} sources</span>
+                      <span className="text-right text-sm font-semibold text-foreground">{Math.round(opening.recommendationScore)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
           ) : (
             <div className="mt-6 rounded-3xl border border-dashed border-border/70 bg-background/60 px-5 py-6 text-sm text-muted-foreground">
               No company-specific jobs intelligence is available yet for this company.

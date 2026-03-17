@@ -19,17 +19,17 @@ function GasLevel({
   return (
     <div className="flex flex-col items-center gap-1.5 rounded-lg bg-muted/50 p-3">
       <Icon className={cn('h-[18px] w-[18px]', className)} />
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs font-medium text-foreground/70 dark:text-muted-foreground">{label}</span>
       <span className="text-base font-bold text-foreground">{gwei.toFixed(1)}</span>
-      <span className="text-xs text-muted-foreground">gwei</span>
+      <span className="text-xs font-medium text-foreground/70 dark:text-muted-foreground">gwei</span>
     </div>
   )
 }
 
 function speedColor(slow: number, standard: number, fast: number): string {
-  if (standard < 15) return 'text-green-400'
-  if (standard < 40) return 'text-yellow-400'
-  return 'text-red-400'
+  if (standard < 15) return 'text-green-600 dark:text-green-400'
+  if (standard < 40) return 'text-yellow-700 dark:text-yellow-400'
+  return 'text-red-600 dark:text-red-400'
 }
 
 export function GasTrackerWidget() {
@@ -48,7 +48,7 @@ export function GasTrackerWidget() {
   if (!allChains?.length) {
     return (
       <div className="flex min-h-[160px] items-center justify-center rounded-xl border border-dashed">
-        <p className="text-sm text-muted-foreground">Gas data unavailable.</p>
+        <p className="text-sm font-medium text-foreground/75 dark:text-muted-foreground">Gas data unavailable.</p>
       </div>
     )
   }
@@ -66,7 +66,7 @@ export function GasTrackerWidget() {
         <div className="rounded-xl border bg-card p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Flame className="h-[18px] w-[18px] text-orange-400" />
+              <Flame className="h-[18px] w-[18px] text-orange-600 dark:text-orange-400" />
               <span className="text-base font-semibold text-foreground">Ethereum Gas</span>
             </div>
             <span className={cn('text-xs font-medium rounded-full px-2 py-0.5', statusColor,
@@ -76,7 +76,7 @@ export function GasTrackerWidget() {
             </span>
           </div>
           {eth.baseFee && (
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs font-medium text-foreground/70 dark:text-muted-foreground">
               Base fee: {eth.baseFee.toFixed(2)} gwei
             </p>
           )}
@@ -100,7 +100,7 @@ export function GasTrackerWidget() {
                   <p className="text-sm font-semibold text-foreground">{chain.chain}</p>
                   <span className={cn(
                     'text-xs font-medium',
-                    isL2Cheap ? 'text-green-400' : 'text-yellow-400'
+                    isL2Cheap ? 'text-green-600 dark:text-green-400' : 'text-yellow-700 dark:text-yellow-400'
                   )}>
                     {isL2Cheap ? 'Cheap' : 'Normal'}
                   </span>

@@ -101,7 +101,7 @@ export function ChainTVLCards({ chains, isLoading }: Props) {
 
             {/* 7d change */}
             <div className="mt-1 flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">7d change</p>
+              <p className="text-xs font-medium text-foreground/70 dark:text-muted-foreground">7d change</p>
               <span
                 className="text-xs font-medium"
                 style={{ color: isUp ? '#16a34a' : '#dc2626' }}

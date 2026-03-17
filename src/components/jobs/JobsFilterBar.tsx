@@ -3,15 +3,17 @@
 import type { JobsDashboardFilters, JobsFilterOption, RemoteMode } from '@/hooks/useJobsIntelligence'
 import { cn } from '@/lib/utils'
 
+type FilterState = JobsDashboardFilters & { postedWithin?: string }
+
 interface JobsFilterBarProps {
-  filters: JobsDashboardFilters
+  filters: FilterState
   options: {
     periods: JobsFilterOption[]
     technologies: JobsFilterOption[]
     roleFamilies: JobsFilterOption[]
     locations: JobsFilterOption[]
   }
-  onChange: (next: Partial<JobsDashboardFilters>) => void
+  onChange: (next: Partial<FilterState>) => void
 }
 
 const REMOTE_OPTIONS: Array<{ value: RemoteMode; label: string }> = [
@@ -20,6 +22,13 @@ const REMOTE_OPTIONS: Array<{ value: RemoteMode; label: string }> = [
   { value: 'hybrid', label: 'Hybrid mix' },
   { value: 'onsite', label: 'Mostly on-site' },
 ]
+
+const POSTED_WITHIN_OPTIONS = [
+  { value: '24h', label: '24h' },
+  { value: '72h', label: '72h' },
+  { value: '7d', label: '7 days' },
+  { value: '30d', label: '30 days' },
+] as const
 
 function SelectField({
   label,
@@ -102,6 +111,28 @@ export function JobsFilterBar({ filters, options, onChange }: JobsFilterBarProps
             </div>
           </div>
 
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Posted within
+            </span>
+            <div className="app-chip-scroll rounded-2xl border border-border/70 bg-muted/20 p-1">
+              {POSTED_WITHIN_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => onChange({ postedWithin: option.value })}
+                  className={cn(
+                    'shrink-0 rounded-xl px-3 py-2 text-xs font-medium transition-colors',
+                    filters.postedWithin === option.value
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-transparent text-muted-foreground hover:bg-background hover:text-foreground'
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <SelectField
             label="Role family"
             value={filters.role}
@@ -112,7 +143,7 @@ export function JobsFilterBar({ filters, options, onChange }: JobsFilterBarProps
 
         <div className="grid gap-3 sm:grid-cols-2">
           <SelectField
-            label="Technology"
+            label="Hiring stack"
             value={filters.technology}
             options={options.technologies}
             onChange={(technology) => onChange({ technology })}
