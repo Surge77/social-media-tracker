@@ -25,6 +25,37 @@ export interface QualityResult {
   passed: boolean // true if score >= 60
 }
 
+export function isGenericTechInsight(insight: Record<string, unknown>): boolean {
+  const headline =
+    typeof insight.headline === 'string' ? insight.headline.trim() : ''
+  const careerAdvice =
+    typeof insight.careerAdvice === 'string' ? insight.careerAdvice.trim() : ''
+  const trendNarrative =
+    typeof insight.trendNarrative === 'string' ? insight.trendNarrative.trim() : ''
+  const scoreExplanation =
+    typeof insight.scoreExplanation === 'string' ? insight.scoreExplanation.trim() : ''
+  const practical =
+    insight.practicalAnalysis && typeof insight.practicalAnalysis === 'object'
+      ? (insight.practicalAnalysis as Record<string, unknown>)
+      : null
+  const pros = Array.isArray(insight.pros) ? insight.pros : []
+  const cons = Array.isArray(insight.cons) ? insight.cons : []
+
+  const genericHeadline = headline.length === 0 || /ai analysis$/i.test(headline)
+  const weakStructure =
+    pros.length < 2 ||
+    cons.length < 1 ||
+    !practical ||
+    typeof practical.bestFitUseCases !== 'string' ||
+    typeof practical.avoidIf !== 'string'
+  const weakNarrative =
+    careerAdvice.length < 40 ||
+    trendNarrative.length < 40 ||
+    scoreExplanation.length < 40
+
+  return genericHeadline && (weakStructure || weakNarrative)
+}
+
 // ---- Main checker ----
 
 /**

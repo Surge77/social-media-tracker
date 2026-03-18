@@ -26,7 +26,11 @@ export class AllProvidersExhaustedError extends Error {
 export async function resilientAICall<T>(
   useCase: UseCase,
   generateFn: (provider: AIProvider) => Promise<T>,
-  keyManager: KeyManager
+  keyManager: KeyManager,
+  options?: {
+    acceptResult?: (result: T) => boolean | Promise<boolean>
+    rejectionMessage?: string
+  }
 ): Promise<T> {
   // Try preferred provider with retry
   const primary = getProviderForUseCase(useCase, keyManager)
@@ -48,6 +52,12 @@ export async function resilientAICall<T>(
           }
         )
       )
+      if (options?.acceptResult) {
+        const accepted = await options.acceptResult(result)
+        if (!accepted) {
+          throw new Error(options.rejectionMessage ?? `Rejected result for ${useCase}`)
+        }
+      }
       keyManager.recordSuccess(primary.keyConfig, 0)
       return result
     } catch (error) {
@@ -74,6 +84,12 @@ export async function resilientAICall<T>(
       const result = await breaker.execute(() =>
         withRetry(() => generateFn(provider), { maxRetries: 1 })
       )
+      if (options?.acceptResult) {
+        const accepted = await options.acceptResult(result)
+        if (!accepted) {
+          throw new Error(options.rejectionMessage ?? `Rejected result for ${useCase}`)
+        }
+      }
       keyManager.recordSuccess(fallbackKey, 0)
       return result
     } catch (error) {

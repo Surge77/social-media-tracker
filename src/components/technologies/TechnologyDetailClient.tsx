@@ -31,10 +31,9 @@ import { AIInsightCard, AIInsightSkeleton, AIInsightError } from '@/components/a
 import { FeedbackButtons } from '@/components/ai/FeedbackButtons'
 import { AnomalyBanner } from '@/components/technologies/AnomalyBanner'
 import { Loading } from '@/components/ui/loading'
-import { getRecommendation, getMomentumInsight, buildScoreExplainerDimensions } from '@/lib/insights'
+import { getRecommendation, getMomentumInsight, buildScoreExplainerDimensions, buildDecisionFirstSummary } from '@/lib/insights'
 import { ScoreExplainer } from '@/components/technologies/ScoreExplainer'
-import { DecisionHeader } from '@/components/technologies/DecisionHeader'
-import { WhatChangedPanel } from '@/components/technologies/WhatChangedPanel'
+import { DecisionFirstHero } from '@/components/technologies/DecisionFirstHero'
 import { PairingIntelligencePanel } from '@/components/technologies/PairingIntelligencePanel'
 import { MetricsGlossary } from '@/components/technologies/MetricsGlossary'
 import { TechDecisionAnalysisCard } from '@/components/technologies/TechDecisionAnalysisCard'
@@ -114,7 +113,7 @@ export function TechnologyDetailClient() {
     )
   }
 
-  const { technology, current_scores, chart_data, latest_signals, rank, total_ranked, decision_summary, what_changed } = data
+  const { technology, current_scores, chart_data, latest_signals, rank, total_ranked, what_changed } = data
 
   // Extract confidence grade from raw_sub_scores (computed by confidence.ts, stored by pipeline.ts)
   const rawSub = current_scores?.raw_sub_scores as Record<string, unknown> | null | undefined
@@ -165,6 +164,23 @@ export function TechnologyDetailClient() {
       technology.category
     )
     : []
+
+  const decisionFirstSummary = buildDecisionFirstSummary({
+    techName: technology.name,
+    techSlug: technology.slug,
+    category: technology.category,
+    compositeScore: current_scores?.composite_score ?? null,
+    momentum: current_scores?.momentum ?? null,
+    jobsScore: current_scores?.jobs_score ?? null,
+    githubScore: current_scores?.github_score ?? null,
+    communityScore: current_scores?.community_score ?? null,
+    ecosystemScore: current_scores?.ecosystem_score ?? null,
+    confidenceGrade,
+    rank,
+    totalRanked: total_ranked,
+    whatChanged: what_changed,
+    aiInsight: ai.insight,
+  })
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
@@ -287,20 +303,14 @@ export function TechnologyDetailClient() {
       </motion.div>
 
       {/* Decision Header — Career Fit + Stack Fit */}
-      {decision_summary && (
-        <motion.section
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.05 }}
-          className="mb-4"
-        >
-          <DecisionHeader
-            decisionSummary={decision_summary}
-            techSlug={technology.slug}
-            techName={technology.name}
-          />
-        </motion.section>
-      )}
+      <motion.section
+        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.05 }}
+        className="mb-8"
+      >
+        <DecisionFirstHero summary={decisionFirstSummary} />
+      </motion.section>
 
       {/* Metrics Glossary — always shown, explains every metric on this page */}
       <div className="mb-8 px-0.5">
@@ -325,18 +335,6 @@ export function TechnologyDetailClient() {
             }))}
             techSlug={slug}
           />
-        </motion.section>
-      )}
-
-      {/* What Changed */}
-      {what_changed && (what_changed.period7d.length > 0 || what_changed.period30d.length > 0) && (
-        <motion.section
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-          animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-          transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.12 }}
-          className="mb-8"
-        >
-          <WhatChangedPanel whatChanged={what_changed} />
         </motion.section>
       )}
 
@@ -772,6 +770,7 @@ export function TechnologyDetailClient() {
         animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? {} : { duration: 0.4, delay: 0.5 }}
         className="mb-8"
+        id="pairing-intelligence"
       >
         <PairingIntelligencePanel slug={slug} techName={technology.name} />
       </motion.section>

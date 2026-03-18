@@ -15,7 +15,6 @@ import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { ScoreRing } from '@/components/ui/score-ring'
-import { TerminalCard } from '@/components/ui/terminal-card'
 import type { TechInsight } from '@/lib/ai/generators/tech-insight'
 
 // ---- Priority config ----
@@ -26,31 +25,31 @@ const PRIORITY_CONFIG: Record<
 > = {
   critical: {
     label: 'Must Learn',
-    color: 'text-red-400',
+    color: 'text-red-700',
     bgColor: 'bg-red-500/10',
     borderColor: 'border-red-500/30',
   },
   high: {
     label: 'High Priority',
-    color: 'text-orange-400',
+    color: 'text-orange-700',
     bgColor: 'bg-orange-500/10',
     borderColor: 'border-orange-500/30',
   },
   medium: {
     label: 'Worth Learning',
-    color: 'text-amber-400',
+    color: 'text-amber-700',
     bgColor: 'bg-amber-500/10',
     borderColor: 'border-amber-500/30',
   },
   low: {
     label: 'Optional',
-    color: 'text-blue-400',
+    color: 'text-blue-700',
     bgColor: 'bg-blue-500/10',
     borderColor: 'border-blue-500/30',
   },
   skip: {
     label: 'Low Priority',
-    color: 'text-slate-400',
+    color: 'text-slate-600',
     bgColor: 'bg-slate-500/10',
     borderColor: 'border-slate-500/30',
   },
@@ -130,7 +129,7 @@ function StaleIndicator({ freshness, age }: { freshness: string; age: number | n
     : null
 
   return (
-    <div className="flex items-center gap-1.5 text-[11px] text-amber-400/80">
+    <div className="flex items-center gap-1.5 text-[11px] text-amber-700/80">
       <Clock size={11} />
       <span>
         {freshness === 'stale' ? 'Updating...' : 'Last updated'}
@@ -194,7 +193,10 @@ export function AIInsightCard({
       initial={prefersReducedMotion ? {} : { opacity: 0, y: 15 }}
       animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
       transition={prefersReducedMotion ? {} : { duration: 0.4 }}
-      className={cn('rounded-lg border border-primary/20 bg-primary/5 p-5', className)}
+      className={cn(
+        'rounded-lg border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-card/90 to-card/80 p-5 shadow-[var(--shadow-card)]',
+        className
+      )}
     >
       {/* Header */}
       <div className="flex items-start gap-3">
@@ -233,24 +235,24 @@ export function AIInsightCard({
         </div>
       </div>
 
-      {/* Detail sections in terminal card */}
-      <TerminalCard title="ai-analysis" className="mt-4">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {sections.map((section) => (
-            <div key={section.title} className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-primary/70">{section.icon}</span>
-                <span className="font-mono text-[11px] font-semibold text-primary/80">
-                  {section.title}
-                </span>
-              </div>
-              <p className="font-mono text-[11px] leading-relaxed text-zinc-400">
-                {section.content}
-              </p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {sections.map((section) => (
+          <div
+            key={section.title}
+            className="rounded-lg border border-border/50 bg-background/70 p-3 shadow-[var(--shadow-card)]"
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="text-primary/70">{section.icon}</span>
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-wide text-primary/85">
+                {section.title}
+              </span>
             </div>
-          ))}
-        </div>
-      </TerminalCard>
+            <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">
+              {section.content}
+            </p>
+          </div>
+        ))}
+      </div>
 
       {/* Confidence + lifecycle note */}
       {insight.confidenceNote && (

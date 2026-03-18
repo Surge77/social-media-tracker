@@ -87,6 +87,28 @@ describe('resilientAICall()', () => {
     expect(result).toBe('fallback response')
   })
 
+  it('falls back to another provider when the primary result is rejected by quality gating', async () => {
+    const genericProvider = mockProvider(async () => 'generic response')
+    const strongProvider = mockProvider(async () => 'strong response')
+
+    vi.mocked(createProviderFromKey)
+      .mockReturnValueOnce(genericProvider as any)
+      .mockReturnValue(strongProvider as any)
+
+    const km = makeKeyManager(['gemini', 'mistral', 'xai', 'openrouter', 'groq', 'huggingface'])
+    const result = await resilientAICall(
+      'batch_insight',
+      (p) => p.generateText('prompt', {}),
+      km,
+      {
+        acceptResult: (value) => value !== 'generic response',
+        rejectionMessage: 'generic result rejected',
+      }
+    )
+
+    expect(result).toBe('strong response')
+  })
+
   it('throws AllProvidersExhaustedError when all providers fail', async () => {
     const failingProvider = mockProvider(async () => { throw new Error('fail') })
     vi.mocked(createProviderFromKey).mockReturnValue(failingProvider as any)

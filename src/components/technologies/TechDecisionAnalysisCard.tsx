@@ -12,9 +12,9 @@ interface TechDecisionAnalysisCardProps {
 }
 
 function getEffortTone(effort?: 'low' | 'medium' | 'high') {
-  if (effort === 'low') return 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
-  if (effort === 'high') return 'text-rose-400 border-rose-500/30 bg-rose-500/10'
-  return 'text-amber-400 border-amber-500/30 bg-amber-500/10'
+  if (effort === 'low') return 'text-emerald-700 border-emerald-500/30 bg-emerald-500/10'
+  if (effort === 'high') return 'text-rose-700 border-rose-500/30 bg-rose-500/10'
+  return 'text-amber-700 border-amber-500/30 bg-amber-500/10'
 }
 
 export function TechDecisionAnalysisCard({ insight, className }: TechDecisionAnalysisCardProps) {
@@ -49,7 +49,7 @@ export function TechDecisionAnalysisCard({ insight, className }: TechDecisionAna
       <div className="grid gap-3 sm:grid-cols-2">
         {pros.length > 0 && (
           <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-            <div className="mb-2 flex items-center gap-1.5 text-emerald-300">
+            <div className="mb-2 flex items-center gap-1.5 text-emerald-700">
               <CheckCircle2 size={14} />
               <p className="text-xs font-semibold uppercase tracking-wide">Pros</p>
             </div>
@@ -65,7 +65,7 @@ export function TechDecisionAnalysisCard({ insight, className }: TechDecisionAna
 
         {cons.length > 0 && (
           <div className="rounded-lg border border-rose-500/20 bg-rose-500/5 p-3">
-            <div className="mb-2 flex items-center gap-1.5 text-rose-300">
+            <div className="mb-2 flex items-center gap-1.5 text-rose-700">
               <AlertTriangle size={14} />
               <p className="text-xs font-semibold uppercase tracking-wide">Cons</p>
             </div>

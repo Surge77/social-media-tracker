@@ -37,6 +37,7 @@ vi.mock('@/lib/ai/key-manager', () => ({
 
 vi.mock('@/lib/ai/quality-monitor', () => ({
   checkInsightQuality: vi.fn().mockReturnValue({ passed: true, score: 90, checks: {} }),
+  isGenericTechInsight: vi.fn().mockReturnValue(false),
 }))
 
 // ─── Supabase mock ──────────────────────────────────────────────────────────
@@ -121,6 +122,7 @@ function makeSupabase(opts: { tech?: unknown; score?: unknown } = {}) {
 import { GET } from '@/app/api/ai/insights/[slug]/route'
 import { checkRateLimit } from '@/lib/ai/rate-limiter'
 import { getInsightWithFreshness } from '@/lib/ai/cache-strategy'
+import { resilientAICall } from '@/lib/ai/resilient-call'
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
@@ -153,7 +155,27 @@ describe('GET /api/ai/insights/[slug]', () => {
   })
 
   it('returns cached insight when cache is fresh', async () => {
-    const cachedInsight = { summary: 'Cached', outlook: 'Good', strengths: [], weaknesses: [], recommendation: 'Yes' }
+    const cachedInsight = {
+      headline: 'React analysis',
+      learningPriority: 'high',
+      trendNarrative: 'Cached trend narrative',
+      careerAdvice: 'Cached career advice',
+      riskFactors: 'Cached risk factors',
+      scoreExplanation: 'Cached score explanation',
+      momentumContext: 'Cached momentum context',
+      lifecycleStage: 'emerging',
+      confidenceNote: 'Cached confidence note',
+      pros: ['Cached pro one', 'Cached pro two', 'Cached pro three'],
+      cons: ['Cached con one', 'Cached con two', 'Cached con three'],
+      practicalAnalysis: {
+        bestFitUseCases: 'Cached best fit use cases',
+        avoidIf: 'Cached avoid if',
+        adoptionRisks: 'Cached adoption risks',
+        effortEstimate: 'medium',
+        outlook90d: 'Cached 90-day outlook',
+      },
+      lastUpdated: '2026-03-19T00:00:00.000Z',
+    }
     vi.mocked(getInsightWithFreshness).mockResolvedValue({ freshness: 'fresh', data: cachedInsight, age: 1 } as any)
 
     const res = await GET(
@@ -161,9 +183,36 @@ describe('GET /api/ai/insights/[slug]', () => {
       { params: Promise.resolve({ slug: 'react' }) }
     )
     expect(res.status).toBe(200)
-    const body = await res.json() as Record<string, unknown>
+    const body = await res.json() as Record<string, any>
     expect(body.cached).toBe(true)
-    expect(body.insight).toMatchObject(cachedInsight)
+    expect(body.insight.trendNarrative).toBe('Cached trend narrative')
+    expect(body.insight.careerAdvice).toBe('Cached career advice')
+    expect(body.insight.momentumContext).toBe('Cached momentum context')
+  })
+
+  it('bypasses legacy cached insight payloads and regenerates detail-page analysis', async () => {
+    const cachedInsight = {
+      summary: 'React remains widely used for production frontend work.',
+      outlook: 'Demand looks stable to growing over the next few quarters.',
+      strengths: ['Mature ecosystem', 'Strong hiring demand'],
+      weaknesses: ['Fast-moving ecosystem'],
+      recommendation: 'Worth learning if you build UI professionally.',
+    }
+    vi.mocked(getInsightWithFreshness).mockResolvedValue({ freshness: 'fresh', data: cachedInsight, age: 1 } as any)
+
+    const res = await GET(
+      new Request('http://localhost/api/ai/insights/react') as any,
+      { params: Promise.resolve({ slug: 'react' }) }
+    )
+
+    expect(res.status).toBe(200)
+    const body = await res.json() as Record<string, any>
+
+    expect(body.cached).toBe(false)
+    expect(body.insight.trendNarrative).toContain('React is a popular frontend library.')
+    expect(body.insight.careerAdvice).toContain('Recommended')
+    expect(body.insight.riskFactors).toContain('JSX learning curve')
+    expect(body.insight.scoreExplanation).toContain('React is a popular frontend library.')
   })
 
   it('generates insight and returns it when cache miss', async () => {
@@ -175,5 +224,21 @@ describe('GET /api/ai/insights/[slug]', () => {
     const body = await res.json() as Record<string, unknown>
     expect(body.cached).toBe(false)
     expect(body.insight).toBeDefined()
+  })
+
+  it('builds context-driven analysis when the model response is incomplete', async () => {
+    vi.mocked(resilientAICall).mockResolvedValueOnce({} as any)
+
+    const res = await GET(
+      new Request('http://localhost/api/ai/insights/react') as any,
+      { params: Promise.resolve({ slug: 'react' }) }
+    )
+
+    expect(res.status).toBe(200)
+    const body = await res.json() as Record<string, any>
+    expect(body.cached).toBe(false)
+    expect(body.insight.trendNarrative).toContain('#1 of 1')
+    expect(body.insight.scoreExplanation).toContain('75/100')
+    expect(body.insight.momentumContext).toContain('7d')
   })
 })

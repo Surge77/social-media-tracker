@@ -17,7 +17,8 @@ import {
 } from '@/lib/ai/cache-strategy'
 import { generateTechInsight } from '@/lib/ai/generators/tech-insight'
 import type { TechInsight, TechInsightContext } from '@/lib/ai/generators/tech-insight'
-import { checkInsightQuality } from '@/lib/ai/quality-monitor'
+import { hasStructuredTechInsight, normalizeTechInsight } from '@/lib/ai/normalize-tech-insight'
+import { checkInsightQuality, isGenericTechInsight } from '@/lib/ai/quality-monitor'
 import { logTelemetry } from '@/lib/ai/telemetry'
 import { checkRateLimit, rateLimitHeaders } from '@/lib/ai/rate-limiter'
 
@@ -78,8 +79,13 @@ export async function GET(
     supabase,
     dataHash
   )
+  const cacheHasStructuredInsight =
+    hasStructuredTechInsight(cacheResult.data) &&
+    !isGenericTechInsight(cacheResult.data as unknown as Record<string, unknown>)
 
-  if (cacheResult.freshness === 'fresh' && cacheResult.data) {
+  if (cacheResult.freshness === 'fresh' && cacheResult.data && cacheHasStructuredInsight) {
+    const insight = normalizeTechInsight(cacheResult.data, tech.name)
+
     logTelemetry(
       {
         event: 'cache_hit',
@@ -98,7 +104,7 @@ export async function GET(
 
     return NextResponse.json(
       {
-        insight: cacheResult.data,
+        insight,
         freshness: cacheResult.freshness,
         cached: true,
       },
@@ -109,7 +115,8 @@ export async function GET(
   // Serve stale cache immediately but regenerate in background
   if (
     (cacheResult.freshness === 'stale' || cacheResult.freshness === 'expired') &&
-    cacheResult.data
+    cacheResult.data &&
+    cacheHasStructuredInsight
   ) {
     queueRegeneration(tech.id, 'tech_single', async () => {
       // Background regeneration — fire and forget
@@ -119,17 +126,23 @@ export async function GET(
         const insight = await resilientAICall(
           'batch_insight',
           (provider) => generateTechInsight(context, provider, supabase),
-          keyManager
+          keyManager,
+          {
+            acceptResult: (result) => !isGenericTechInsight(result as unknown as Record<string, unknown>),
+            rejectionMessage: 'generic tech insight rejected',
+          }
         )
-        await cacheInsight(tech.id, insight, dataHash, supabase)
+        await cacheInsight(tech.id, normalizeTechInsight(insight, tech.name, context), dataHash, supabase)
       } catch (err) {
         console.error(`[Insight] Background regen failed for ${slug}:`, err)
       }
     })
 
+    const insight = normalizeTechInsight(cacheResult.data, tech.name)
+
     return NextResponse.json(
       {
-        insight: cacheResult.data,
+        insight,
         freshness: cacheResult.freshness,
         cached: true,
         age: cacheResult.age ? Math.round(cacheResult.age) : null,
@@ -145,12 +158,17 @@ export async function GET(
     const insight = await resilientAICall(
       'batch_insight',
       (provider) => generateTechInsight(context, provider, supabase),
-      keyManager
+      keyManager,
+      {
+        acceptResult: (result) => !isGenericTechInsight(result as unknown as Record<string, unknown>),
+        rejectionMessage: 'generic tech insight rejected',
+      }
     )
+    const normalizedInsight = normalizeTechInsight(insight, tech.name, context)
 
     // Quality check
     const quality = checkInsightQuality(
-      insight as unknown as Record<string, unknown>,
+      normalizedInsight as unknown as Record<string, unknown>,
       JSON.stringify(context),
       context.confidence.grade
     )
@@ -172,11 +190,11 @@ export async function GET(
     )
 
     if (quality.passed) {
-      await cacheInsight(tech.id, insight, dataHash, supabase)
+      await cacheInsight(tech.id, normalizedInsight, dataHash, supabase)
     }
 
     return NextResponse.json(
-      { insight, freshness: 'fresh', cached: false, quality: quality.score },
+      { insight: normalizedInsight, freshness: 'fresh', cached: false, quality: quality.score },
       { headers: rateLimitHeaders(rlResult) }
     )
   } catch (error) {

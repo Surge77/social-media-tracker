@@ -105,26 +105,26 @@ All colors MUST be HSL.
   }
 
   .light {
-    --background: 38 34% 95%;
-    --foreground: 28 18% 15%;
+    --background: 36 48% 96%;
+    --foreground: 24 20% 16%;
 
-    --card: 36 38% 97%;
-    --card-foreground: 28 18% 15%;
+    --card: 34 55% 98%;
+    --card-foreground: 24 20% 16%;
 
-    --popover: 34 42% 98%;
-    --popover-foreground: 28 18% 15%;
+    --popover: 34 60% 98%;
+    --popover-foreground: 24 20% 16%;
 
     --primary: 24 96% 54%;
     --primary-foreground: 0 0% 10%;
 
-    --secondary: 34 24% 89%;
-    --secondary-foreground: 28 16% 18%;
+    --secondary: 32 42% 92%;
+    --secondary-foreground: 24 18% 18%;
 
-    --muted: 36 20% 90%;
-    --muted-foreground: 28 10% 36%;
+    --muted: 34 34% 92%;
+    --muted-foreground: 26 12% 35%;
 
-    --accent: 32 26% 88%;
-    --accent-foreground: 28 18% 15%;
+    --accent: 30 40% 90%;
+    --accent-foreground: 24 20% 16%;
 
     --success: 158 64% 42%;
     --success-foreground: 0 0% 100%;
@@ -135,13 +135,13 @@ All colors MUST be HSL.
     --destructive: 0 72% 54%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 34 18% 79%;
-    --input: 34 18% 79%;
+    --border: 30 28% 82%;
+    --input: 30 28% 82%;
     --ring: 24 96% 54%;
 
-    --gradient-card: linear-gradient(135deg, hsl(36 42% 98%), hsl(34 28% 94%));
-    --shadow-card: 0 4px 20px hsl(28 18% 20% / 0.08);
-    --shadow-glow: 0 0 40px hsl(24 96% 54% / 0.25);
+    --gradient-card: linear-gradient(135deg, hsl(38 68% 98%), hsl(33 38% 94%));
+    --shadow-card: 0 6px 24px hsl(24 22% 34% / 0.09);
+    --shadow-glow: 0 0 44px hsl(24 96% 54% / 0.22);
     --chart-1: 12 76% 55%;
     --chart-2: 173 58% 36%;
     --chart-3: 197 37% 28%;

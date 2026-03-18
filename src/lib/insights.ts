@@ -6,6 +6,7 @@
  */
 
 import type { ExplainerDimension } from '@/components/technologies/ScoreExplainer'
+import type { TechInsight } from '@/lib/ai/generators/tech-insight'
 
 // ---- Status Labels ----
 
@@ -679,6 +680,46 @@ export interface WhatChanged {
   topMover7d: DimensionDelta | null
 }
 
+export interface DecisionFirstSummary {
+  verdict: string
+  bestFor: string[]
+  notIdealFor: string[]
+  whyThisIsMoving: string[]
+  nextActions: Array<{
+    label: string
+    href: string
+  }>
+}
+
+interface BuildDecisionFirstSummaryInput {
+  techName: string
+  techSlug: string
+  category: string
+  compositeScore: number | null
+  momentum: number | null
+  jobsScore: number | null
+  githubScore: number | null
+  communityScore: number | null
+  ecosystemScore: number | null
+  confidenceGrade: string | null
+  rank?: number | null
+  totalRanked?: number | null
+  whatChanged?: WhatChanged | null
+  aiInsight?: Partial<TechInsight> | null
+}
+
+function firstSentence(value: string): string {
+  const trimmed = value.trim()
+  if (!trimmed) return trimmed
+  const match = trimmed.match(/[^.!?]+[.!?]?/)
+  return match ? match[0].trim() : trimmed
+}
+
+function lowercaseFirst(value: string): string {
+  if (!value) return value
+  return value.charAt(0).toLowerCase() + value.slice(1)
+}
+
 export function computeWhatChanged(
   chartData: Array<{
     date: string
@@ -744,4 +785,142 @@ export function computeWhatChanged(
   }, null)
 
   return { period7d, period30d, topMover7d }
+}
+
+export function buildDecisionFirstSummary({
+  techName,
+  techSlug,
+  category,
+  compositeScore,
+  momentum,
+  jobsScore,
+  githubScore,
+  communityScore,
+  ecosystemScore,
+  confidenceGrade,
+  rank,
+  totalRanked,
+  whatChanged,
+  aiInsight,
+}: BuildDecisionFirstSummaryInput): DecisionFirstSummary {
+  const score = compositeScore ?? 0
+  const momentumValue = momentum ?? 0
+  const jobs = jobsScore ?? 0
+  const github = githubScore ?? 0
+  const community = communityScore ?? 0
+  const ecosystem = ecosystemScore ?? 0
+  const aiHeadline = typeof aiInsight?.headline === 'string' ? aiInsight.headline.trim() : ''
+  const aiTrend = typeof aiInsight?.trendNarrative === 'string' ? aiInsight.trendNarrative.trim() : ''
+  const aiRisk = typeof aiInsight?.riskFactors === 'string' ? aiInsight.riskFactors.trim() : ''
+  const aiCareerAdvice = typeof aiInsight?.careerAdvice === 'string' ? aiInsight.careerAdvice.trim() : ''
+  const aiVerdict =
+    aiHeadline.length > 0 && !/ai analysis$/i.test(aiHeadline)
+      ? aiHeadline
+      : aiTrend.length > 0 && aiRisk.length > 0
+        ? `${firstSentence(aiTrend)} Main caveat: ${lowercaseFirst(firstSentence(aiRisk))}`
+        : aiCareerAdvice.length > 0
+          ? aiCareerAdvice
+          : null
+  const aiBestFor = [
+    typeof aiInsight?.practicalAnalysis?.bestFitUseCases === 'string' ? aiInsight.practicalAnalysis.bestFitUseCases : null,
+    ...(Array.isArray(aiInsight?.pros) ? aiInsight.pros : []),
+  ].filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+  const aiNotIdealFor = [
+    typeof aiInsight?.practicalAnalysis?.avoidIf === 'string' ? aiInsight.practicalAnalysis.avoidIf : null,
+    typeof aiInsight?.practicalAnalysis?.adoptionRisks === 'string' ? aiInsight.practicalAnalysis.adoptionRisks : null,
+    ...(Array.isArray(aiInsight?.cons) ? aiInsight.cons : []),
+  ].filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+  const aiWhyMoving = [
+    typeof aiInsight?.trendNarrative === 'string' ? aiInsight.trendNarrative : null,
+    typeof aiInsight?.scoreExplanation === 'string' ? aiInsight.scoreExplanation : null,
+    typeof aiInsight?.momentumContext === 'string' ? aiInsight.momentumContext : null,
+  ].filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+
+  let verdict: string
+  if (aiVerdict) {
+    verdict = aiVerdict
+  } else if (jobs >= 60 && score >= 45) {
+    verdict = `${techName} is worth learning, but not a default bet for everyone.`
+  } else if (score >= 60 && ecosystem >= 55 && github >= 45) {
+    verdict = `${techName} looks like a solid practical bet if you already work in ${category}.`
+  } else if (momentumValue > 8 && jobs < 45) {
+    verdict = `${techName} is getting attention, but it still looks earlier than the hype suggests.`
+  } else if (score < 35) {
+    verdict = `${techName} is not a priority right now unless you already have a specific reason to use it.`
+  } else {
+    verdict = `${techName} looks viable, but it is still a situational choice rather than an automatic one.`
+  }
+
+  const bestFor: string[] = aiBestFor.length > 0 ? [...aiBestFor] : []
+  const categoryAudience: Record<string, string> = {
+    frontend: 'product-heavy app teams',
+    backend: 'API and service teams',
+    database: 'data-heavy products',
+    devops: 'platform and infrastructure teams',
+    cloud: 'teams standardizing on managed infrastructure',
+    language: 'developers building long-term core skills',
+    ai_ml: 'teams shipping AI-enabled features',
+    blockchain: 'crypto-native products',
+    mobile: 'mobile app teams',
+  }
+  if (bestFor.length === 0) {
+    if (jobs >= 60) bestFor.push(`${category} job seekers who care about live hiring demand`)
+    if (ecosystem >= 55) bestFor.push(categoryAudience[category] ?? `${category} teams that want mature tooling`)
+    if (momentumValue > 5) bestFor.push('people who want a trend that is still moving instead of fully plateaued')
+  }
+  if (bestFor.length === 0) bestFor.push(`${category} users with a specific problem this technology already solves well`)
+
+  const notIdealFor: string[] = aiNotIdealFor.length > 0 ? [...aiNotIdealFor] : []
+  if (notIdealFor.length === 0) {
+    if (jobs + 10 < community) notIdealFor.push('people making a pure hiring-demand bet right now')
+    if (community + 10 < jobs) notIdealFor.push('people optimizing for community excitement over employer demand')
+    if (ecosystem < 45) notIdealFor.push('teams that want low-risk, fully mature tooling on day one')
+    if (github < 40) notIdealFor.push('teams that depend on very strong maintainer activity')
+    if (confidenceGrade === 'D' || confidenceGrade === 'F') notIdealFor.push('people who only want high-confidence, low-noise signals')
+  }
+  if (notIdealFor.length === 0) notIdealFor.push('people looking for a totally obvious default with no tradeoffs')
+
+  const whyThisIsMoving: string[] = aiWhyMoving.length > 0 ? [...aiWhyMoving] : []
+  if (whyThisIsMoving.length === 0) {
+    if (jobs >= community + 10) {
+      whyThisIsMoving.push('Hiring demand is stronger than community buzz, so the signal looks more employer-led than hype-led.')
+    } else if (community >= jobs + 10) {
+      whyThisIsMoving.push('Community buzz is outrunning hiring demand, so attention is ahead of employer validation.')
+    }
+
+    if (ecosystem >= github + 10) {
+      whyThisIsMoving.push('The ecosystem looks healthier than raw GitHub activity, which suggests adoption is stronger than core maintainer energy.')
+    } else if (github >= ecosystem + 10) {
+      whyThisIsMoving.push('GitHub activity is stronger than ecosystem depth, which suggests builder interest is ahead of broader adoption.')
+    }
+
+    if (momentumValue > 8) {
+      whyThisIsMoving.push('Recent momentum is strong, so this is not a flat legacy signal.')
+    } else if (momentumValue < -5) {
+      whyThisIsMoving.push('Recent momentum is weakening, so the current score is less secure than it looks in isolation.')
+    } else {
+      whyThisIsMoving.push('The signal is moving, but not in a way that yet forces an obvious all-in decision.')
+    }
+
+    if (whatChanged?.topMover7d) {
+      const mover = whatChanged.topMover7d.label.replace(/\s+[+-].*$/, '')
+      whyThisIsMoving.push(`The most recent shift was concentrated in ${mover.toLowerCase()}, not across every dimension at once.`)
+    } else if (rank != null && totalRanked != null) {
+      whyThisIsMoving.push(`${techName} currently sits at #${rank} of ${totalRanked}, which means the overall position is solid but not dominant.`)
+    }
+  }
+
+  const nextActions = [
+    { label: `Compare ${techName} with alternatives`, href: `/compare?a=${techSlug}` },
+    { label: 'See paired skills', href: '#pairing-intelligence' },
+    { label: 'Get a 30-day learning plan', href: '/quiz/learn-next' },
+  ]
+
+  return {
+    verdict,
+    bestFor: bestFor.slice(0, 3),
+    notIdealFor: notIdealFor.slice(0, 3),
+    whyThisIsMoving: whyThisIsMoving.slice(0, 4),
+    nextActions,
+  }
 }
