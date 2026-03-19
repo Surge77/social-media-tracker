@@ -24,4 +24,17 @@ describe('technology detail AI analysis theme styling', () => {
     expect(decisionAnalysisSource).toContain('text-rose-700');
     expect(decisionAnalysisSource).toContain('text-amber-700');
   });
+
+  it('shows a visible loading placeholder while the AI analysis is generating', () => {
+    const aiInsightCardPath = path.join(
+      process.cwd(),
+      'src/components/ai/AIInsightCard.tsx'
+    );
+
+    const aiInsightCardSource = fs.readFileSync(aiInsightCardPath, 'utf8');
+
+    expect(aiInsightCardSource).toContain('AI analysis is loading');
+    expect(aiInsightCardSource).toContain('min-h-[220px]');
+    expect(aiInsightCardSource).toContain('Generating a grounded read on momentum, jobs, community, and ecosystem signals.');
+  });
 });

@@ -15,7 +15,7 @@ interface AIInsightState {
 
 export function useAIInsight(slug: string | null): AIInsightState {
   const [insight, setInsight] = useState<TechInsight | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(Boolean(slug))
   const [error, setError] = useState<string | null>(null)
   const [freshness, setFreshness] = useState<'fresh' | 'stale' | 'expired' | null>(null)
   const [cached, setCached] = useState(false)

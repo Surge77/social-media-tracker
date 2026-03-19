@@ -59,22 +59,44 @@ const PRIORITY_CONFIG: Record<
 
 export function AIInsightSkeleton() {
   return (
-    <div className="rounded-lg border border-border bg-card/30 p-5 animate-pulse">
+    <div className="min-h-[220px] rounded-lg border border-primary/20 bg-gradient-to-br from-primary/[0.07] via-card/90 to-card/80 p-5 shadow-[var(--shadow-card)]">
       <div className="flex items-start gap-3">
-        <div className="h-9 w-9 rounded-md bg-muted/50" />
-        <div className="flex-1 space-y-3">
-          <div className="h-4 w-3/4 rounded bg-muted/50" />
-          <div className="h-3 w-full rounded bg-muted/30" />
-          <div className="h-3 w-5/6 rounded bg-muted/30" />
-          <div className="h-3 w-2/3 rounded bg-muted/30" />
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10">
+          <div className="h-10 w-10 rounded-full bg-primary/15 animate-pulse" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-sm font-semibold text-foreground">AI analysis is loading</h2>
+            <span className="inline-flex items-center rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary/90">
+              Generating
+            </span>
+          </div>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            Generating a grounded read on momentum, jobs, community, and ecosystem signals.
+          </p>
+          <div className="mt-3 space-y-2 animate-pulse">
+            <div className="h-3 w-full rounded bg-muted/35" />
+            <div className="h-3 w-5/6 rounded bg-muted/30" />
+            <div className="h-3 w-2/3 rounded bg-muted/30" />
+          </div>
         </div>
       </div>
+
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="rounded-md bg-muted/20 p-3">
-            <div className="h-3 w-1/3 rounded bg-muted/40 mb-2" />
-            <div className="h-3 w-full rounded bg-muted/30" />
-            <div className="h-3 w-4/5 rounded bg-muted/30 mt-1" />
+          <div
+            key={i}
+            className="rounded-lg border border-border/50 bg-background/70 p-3 shadow-[var(--shadow-card)]"
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <div className="h-4 w-4 rounded bg-primary/15 animate-pulse" />
+              <div className="h-3 w-24 rounded bg-muted/40 animate-pulse" />
+            </div>
+            <div className="space-y-1.5 animate-pulse">
+              <div className="h-3 w-full rounded bg-muted/30" />
+              <div className="h-3 w-4/5 rounded bg-muted/30" />
+              <div className="h-3 w-3/5 rounded bg-muted/25" />
+            </div>
           </div>
         ))}
       </div>
