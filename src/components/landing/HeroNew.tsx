@@ -81,11 +81,11 @@ export default function HeroNew() {
       {/* ── Layer 3: subtle centered glow (square = equal spread) ────── */}
       <div className="mobile-glow-soft pointer-events-none absolute left-1/2 top-1/3 z-0 h-[280px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[72px] sm:h-[500px] sm:w-[500px] sm:blur-[100px]" />
 
-      <div className="mobile-noise-hidden">
+      <div className="pointer-events-none absolute inset-0 z-10" aria-hidden="true">
         <FloatingIcons />
       </div>
 
-      <div className="app-page relative">
+      <div className="app-page relative z-20">
         <div className="text-center max-w-5xl mx-auto">
 
           {/* Main headline */}

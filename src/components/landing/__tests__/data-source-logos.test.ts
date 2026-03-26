@@ -21,7 +21,7 @@ describe('DATA_SOURCE_LOGOS', () => {
     expect(byName['Stack Overflow'].displayClassName).toBe('h-[42px] w-auto');
     expect(byName['Google Trends'].displayClassName).toBe('h-[100px] w-auto bg-transparent');
     expect(byName.HasData.displayClassName).toBe('h-[68px] w-auto bg-transparent');
-    expect(byName['Libraries.io'].displayClassName).toBe('h-[34px] w-auto brightness-0 opacity-90');
+    expect(byName['Libraries.io'].displayClassName).toBe('h-[34px] w-auto invert dark:invert-0');
 
     expect(byName.Google).toBeUndefined();
     expect(byName.Microsoft).toBeUndefined();

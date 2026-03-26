@@ -1,13 +1,38 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Cloud,
-  fetchSimpleIcons,
   renderSimpleIcon,
   type ICloud,
   type SimpleIcon,
 } from 'react-icon-cloud'
+import {
+  siAngular,
+  siDocker,
+  siGithub,
+  siGooglecloud,
+  siGo,
+  siGraphql,
+  siKubernetes,
+  siLinux,
+  siMongodb,
+  siNextdotjs,
+  siNginx,
+  siNodedotjs,
+  siPostgresql,
+  siPrisma,
+  siPython,
+  siReact,
+  siRedis,
+  siRust,
+  siSvelte,
+  siTailwindcss,
+  siTerraform,
+  siTypescript,
+  siVercel,
+  siVuedotjs,
+} from 'simple-icons'
 
 export const cloudProps: Omit<ICloud, 'children'> = {
   containerProps: {
@@ -16,6 +41,7 @@ export const cloudProps: Omit<ICloud, 'children'> = {
       justifyContent: 'center',
       alignItems: 'center',
       width: '100%',
+      height: '320px',
     },
   },
   options: {
@@ -50,35 +76,51 @@ function renderCustomIcon(icon: SimpleIcon) {
   })
 }
 
-type IconData = Awaited<ReturnType<typeof fetchSimpleIcons>>
-
 export const TECH_SLUGS = [
   'typescript', 'react', 'python', 'rust', 'go', 'nodedotjs',
   'nextdotjs', 'vuedotjs', 'angular', 'svelte', 'kubernetes',
   'docker', 'postgresql', 'redis', 'mongodb', 'graphql',
-  'amazonaws', 'googlecloud', 'terraform', 'github',
+  'googlecloud', 'terraform', 'github',
   'linux', 'nginx', 'tailwindcss', 'prisma', 'vercel',
 ]
 
+const TECH_ICONS_BY_SLUG: Record<string, SimpleIcon> = {
+  typescript: siTypescript,
+  react: siReact,
+  python: siPython,
+  rust: siRust,
+  go: siGo,
+  nodedotjs: siNodedotjs,
+  nextdotjs: siNextdotjs,
+  vuedotjs: siVuedotjs,
+  angular: siAngular,
+  svelte: siSvelte,
+  kubernetes: siKubernetes,
+  docker: siDocker,
+  postgresql: siPostgresql,
+  redis: siRedis,
+  mongodb: siMongodb,
+  graphql: siGraphql,
+  googlecloud: siGooglecloud,
+  terraform: siTerraform,
+  github: siGithub,
+  linux: siLinux,
+  nginx: siNginx,
+  tailwindcss: siTailwindcss,
+  prisma: siPrisma,
+  vercel: siVercel,
+}
+
+export function getLocalTechIcons(slugs: string[] = TECH_SLUGS) {
+  return slugs
+    .map((slug) => TECH_ICONS_BY_SLUG[slug])
+    .filter((icon): icon is SimpleIcon => Boolean(icon))
+}
+
 export function IconCloud({ slugs = TECH_SLUGS }: { slugs?: string[] }) {
-  const [data, setData] = useState<IconData | null>(null)
-
-  useEffect(() => {
-    fetchSimpleIcons({ slugs }).then(setData)
-  }, [slugs])
-
   const icons = useMemo(() => {
-    if (!data) return null
-    return Object.values(data.simpleIcons).map(icon => renderCustomIcon(icon))
-  }, [data])
-
-  if (!icons) {
-    return (
-      <div className="flex h-[320px] w-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-      </div>
-    )
-  }
+    return getLocalTechIcons(slugs).map((icon) => renderCustomIcon(icon))
+  }, [slugs])
 
   return <Cloud {...cloudProps}>{icons}</Cloud>
 }

@@ -78,7 +78,7 @@ export function MoversShakers() {
     <section className="mb-12">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Flame className="h-6 w-6 text-orange-500" />
+          <Flame className="h-6 w-6 text-foreground" />
           <h2 className="text-2xl font-semibold">This Week&apos;s Movers</h2>
         </div>
         <div className="flex gap-2">
@@ -135,8 +135,8 @@ export function MoversShakers() {
             className="rounded-lg border bg-card p-6"
             variants={prefersReducedMotion ? {} : itemVariants}
           >
-            <div className="mb-4 flex items-center gap-2 text-success">
-              <TrendingUp className="h-5 w-5" />
+            <div className="mb-4 flex items-center gap-2 text-foreground">
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
               <h3 className="text-lg font-semibold">Rising</h3>
             </div>
             <div className="space-y-3">
@@ -159,8 +159,8 @@ export function MoversShakers() {
             className="rounded-lg border bg-card p-6"
             variants={prefersReducedMotion ? {} : itemVariants}
           >
-            <div className="mb-4 flex items-center gap-2 text-destructive">
-              <TrendingDown className="h-5 w-5" />
+            <div className="mb-4 flex items-center gap-2 text-foreground">
+              <TrendingDown className="h-5 w-5 text-muted-foreground" />
               <h3 className="text-lg font-semibold">Falling</h3>
             </div>
             <div className="space-y-3">
@@ -204,7 +204,7 @@ function MoverRow({ mover, index, type }: MoverRowProps) {
             <span className="text-sm font-medium text-muted-foreground">
               {index + 1}.
             </span>
-            <span className="font-semibold" style={{ color: mover.color }}>
+            <span className="font-semibold text-foreground">
               {mover.name}
             </span>
             <span className={cn('text-sm font-medium tabular-nums', deltaColor)}>
@@ -216,7 +216,7 @@ function MoverRow({ mover, index, type }: MoverRowProps) {
               {Math.abs(mover.rank_change)}
             </span>
             {Math.abs(mover.score_delta) > 10 && (
-              <span className="text-[10px] font-medium text-warning bg-warning/10 px-1.5 py-0.5 rounded-full">
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 ⚡ Significant
               </span>
             )}

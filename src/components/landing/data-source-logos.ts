@@ -97,7 +97,7 @@ export const DATA_SOURCE_LOGOS: DataSourceLogo[] = [
     alt: 'Libraries.io logo',
     width: 1000,
     height: 200,
-    displayClassName: 'h-[34px] w-auto brightness-0 opacity-90',
+    displayClassName: 'h-[34px] w-auto invert dark:invert-0',
     verified: true,
   },
   {

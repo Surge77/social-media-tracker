@@ -39,7 +39,7 @@ export const DevTrendsLogo = React.forwardRef<HTMLDivElement, DevTrendsLogoProps
         <DevTrendsMark size={icon} />
         {variant === 'full' && (
           <span className={cn(text, 'font-bold tracking-tight text-foreground select-none')}>
-            Dev<span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">Trends</span>
+            DevTrends
           </span>
         )}
       </div>

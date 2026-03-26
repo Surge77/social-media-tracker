@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useId } from 'react'
-import { AreaChart, Area, YAxis, ResponsiveContainer } from 'recharts'
+import { AreaChart, Area, YAxis } from 'recharts'
 
 interface SparklineProps {
   data: number[]
@@ -63,42 +63,43 @@ export const Sparkline = React.forwardRef<HTMLDivElement, SparklineProps>(
 
     return (
       <div ref={ref} className={`flex items-center gap-1.5 ${className ?? ''}`}>
-        <div style={{ width, height }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
-              <defs>
-                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={strokeColor} stopOpacity={0.35} />
-                  <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <YAxis domain={[yMin, yMax]} hide />
-              <Area
-                type="natural"
-                dataKey="value"
-                stroke={strokeColor}
-                strokeWidth={2}
-                fill={`url(#${gradientId})`}
-                dot={(props: { cx?: number; cy?: number; index?: number }) => {
-                  const { cx, cy, index } = props
-                  if (index !== data.length - 1) return <g key={index} />
-                  return (
-                    <circle
-                      key="end"
-                      cx={cx}
-                      cy={cy}
-                      r={2.5}
-                      fill={strokeColor}
-                      stroke="var(--background)"
-                      strokeWidth={1}
-                    />
-                  )
-                }}
-                isAnimationActive={false}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <AreaChart
+          width={width}
+          height={height}
+          data={chartData}
+          margin={{ top: 2, right: 0, bottom: 2, left: 0 }}
+        >
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.35} />
+              <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <YAxis domain={[yMin, yMax]} hide />
+          <Area
+            type="natural"
+            dataKey="value"
+            stroke={strokeColor}
+            strokeWidth={2}
+            fill={`url(#${gradientId})`}
+            dot={(props: { cx?: number; cy?: number; index?: number }) => {
+              const { cx, cy, index } = props
+              if (index !== data.length - 1) return <g key={index} />
+              return (
+                <circle
+                  key="end"
+                  cx={cx}
+                  cy={cy}
+                  r={2.5}
+                  fill={strokeColor}
+                  stroke="var(--background)"
+                  strokeWidth={1}
+                />
+              )
+            }}
+            isAnimationActive={false}
+          />
+        </AreaChart>
 
         {showDelta && (
           <span
