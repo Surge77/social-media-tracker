@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -75,16 +76,15 @@ export function ProtocolHealthTable({ protocols }: Props) {
     else { setSortKey(key); setSortDir('desc') }
   }
 
-  const SortIcon = ({ k }: { k: SortKey }) =>
-    sortKey === k ? (
-      sortDir === 'asc' ? (
-        <ArrowUp className="h-3 w-3" />
-      ) : (
-        <ArrowDown className="h-3 w-3" />
-      )
-    ) : (
-      <ArrowUpDown className="h-3 w-3 opacity-40 transition-opacity hover:opacity-100" />
-    )
+  const renderSortIcon = (key: SortKey) => {
+    if (sortKey !== key) {
+      return <ArrowUpDown className="h-3 w-3 opacity-40 transition-opacity hover:opacity-100" />
+    }
+
+    return sortDir === 'asc'
+      ? <ArrowUp className="h-3 w-3" />
+      : <ArrowDown className="h-3 w-3" />
+  }
 
   return (
     <div className="space-y-4">
@@ -126,7 +126,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                   onClick={() => handleSort('name')}
                 >
                   <span className="flex items-center gap-1">
-                    Protocol <SortIcon k="name" />
+                    Protocol {renderSortIcon('name')}
                   </span>
                 </th>
                 <th className="px-4 py-3.5 text-left font-bold">Category</th>
@@ -136,7 +136,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                   onClick={() => handleSort('tvl')}
                 >
                   <span className="flex items-center justify-end gap-1">
-                    TVL <SortIcon k="tvl" />
+                    TVL {renderSortIcon('tvl')}
                   </span>
                 </th>
                 <th
@@ -144,7 +144,7 @@ export function ProtocolHealthTable({ protocols }: Props) {
                   onClick={() => handleSort('change_7d')}
                 >
                   <span className="flex items-center justify-end gap-1">
-                    7d <SortIcon k="change_7d" />
+                    7d {renderSortIcon('change_7d')}
                   </span>
                 </th>
               </tr>
@@ -173,14 +173,16 @@ export function ProtocolHealthTable({ protocols }: Props) {
                       {/* Protocol name + logo + link */}
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <img
-                            src={`https://icons.llama.fi/protocols/${p.slug}.jpg`}
-                            alt={p.name}
-                            width={24}
-                            height={24}
-                            className="rounded-full bg-muted flex-shrink-0 transition-transform group-hover:scale-110 shadow-sm"
-                            onError={(e) => { e.currentTarget.style.display = 'none' }}
-                          />
+                          <span className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full bg-muted shadow-sm transition-transform group-hover:scale-110">
+                            <Image
+                              src={`https://icons.llama.fi/protocols/${p.slug}.jpg`}
+                              alt={p.name}
+                              fill
+                              sizes="24px"
+                              className="object-cover"
+                              unoptimized
+                            />
+                          </span>
                           <a
                             href={`https://defillama.com/protocol/${p.slug}`}
                             target="_blank"

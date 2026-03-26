@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint src/",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "postinstall": "node scripts/ensure-next-app-shim.mjs"
   },
   "browserslist": [
     "last 2 Chrome versions",
@@ -41,7 +42,7 @@
     "ldrs": "^1.1.9",
     "lucide-react": "^0.462.0",
     "nanospinner": "^1.2.2",
-    "next": "16.1.5",
+    "next": "^16.2.1",
     "next-themes": "^0.4.6",
     "react": "19.1.0",
     "react-countup": "^6.5.3",
@@ -66,7 +67,7 @@
     "autoprefixer": "^10.4.21",
     "cross-env": "^10.1.0",
     "eslint": "^9",
-    "eslint-config-next": "16.1.5",
+    "eslint-config-next": "^16.2.1",
     "fast-check": "^4.5.3",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",

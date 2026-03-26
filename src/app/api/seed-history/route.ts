@@ -1,4 +1,5 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { requireDevelopmentOnly } from '@/lib/http/route-guards'
 
 /**
  * GET /api/seed-history
@@ -13,6 +14,9 @@ import { createSupabaseAdminClient } from '@/lib/supabase/admin'
  * ONLY for development — remove before production deploy.
  */
 export async function GET() {
+  const guard = requireDevelopmentOnly(process.env)
+  if (guard) return guard
+
   try {
     const supabase = createSupabaseAdminClient()
 

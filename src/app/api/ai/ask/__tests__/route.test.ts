@@ -6,6 +6,12 @@ vi.mock('@/lib/supabase/server', () => ({
   createSupabaseServerClient: vi.fn().mockResolvedValue(mockSupabaseServer()),
 }))
 
+vi.mock('@/lib/supabase/admin', () => ({
+  createSupabaseAdminClient: vi.fn().mockReturnValue({
+    rpc: vi.fn(),
+  }),
+}))
+
 vi.mock('@/lib/ai/resilient-call', () => ({
   resilientAIStreamCall: vi.fn().mockImplementation(
     async (_useCase, _prompt, _opts, _km, onChunk) => {
@@ -18,6 +24,15 @@ vi.mock('@/lib/ai/resilient-call', () => ({
 
 vi.mock('@/lib/ai/key-manager', () => ({
   createKeyManager: vi.fn().mockReturnValue({}),
+}))
+
+vi.mock('@/lib/ai/rate-limiter', () => ({
+  checkRateLimit: vi.fn().mockResolvedValue({
+    allowed: true,
+    remaining: 4,
+    resetAt: new Date(Date.now() + 60_000).toISOString(),
+  }),
+  rateLimitHeaders: vi.fn().mockReturnValue({}),
 }))
 
 vi.mock('@/lib/ai/telemetry', () => ({
@@ -66,6 +81,7 @@ function mockSupabaseServer() {
 
 import { POST } from '@/app/api/ai/ask/route'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/ai/rate-limiter'
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
@@ -73,6 +89,11 @@ describe('POST /api/ai/ask', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(createSupabaseServerClient).mockResolvedValue(mockSupabaseServer() as any)
+    vi.mocked(checkRateLimit).mockResolvedValue({
+      allowed: true,
+      remaining: 4,
+      resetAt: new Date(Date.now() + 60_000).toISOString(),
+    } as any)
   })
 
   it('returns 400 when request body is invalid (missing question)', async () => {
@@ -110,6 +131,27 @@ describe('POST /api/ai/ask', () => {
     )
     expect(res.status).toBe(200)
     expect(res.headers.get('Content-Type')).toContain('text/event-stream')
+  })
+
+  it('returns 429 when rate limited', async () => {
+    vi.mocked(checkRateLimit).mockResolvedValue({
+      allowed: false,
+      remaining: 0,
+      resetAt: new Date(Date.now() + 60_000).toISOString(),
+    } as any)
+
+    const res = await POST(
+      new Request('http://localhost/api/ai/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: 'What should I learn next?',
+          sessionId: '123e4567-e89b-12d3-a456-426614174000',
+        }),
+      }) as any
+    )
+
+    expect(res.status).toBe(429)
   })
 
   it('SSE stream contains chunk and done events', async () => {

@@ -12,6 +12,9 @@ import { sanitizeUserInput, buildSafeUserPrompt } from '@/lib/ai/safety'
 import { resilientAIStreamCall } from '@/lib/ai/resilient-call'
 import { createKeyManager } from '@/lib/ai/key-manager'
 import { logTelemetry } from '@/lib/ai/telemetry'
+import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { checkRateLimit, rateLimitHeaders } from '@/lib/ai/rate-limiter'
+import { getClientIp } from '@/lib/http/route-guards'
 import { z, ZodError } from 'zod'
 
 const RequestSchema = z.object({
@@ -23,6 +26,20 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { question, sessionId } = RequestSchema.parse(body)
+
+    const rateLimitClient = createSupabaseAdminClient()
+    const rateLimit = await checkRateLimit(
+      '/api/ai/ask',
+      getClientIp(req),
+      rateLimitClient
+    )
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429, headers: rateLimitHeaders(rateLimit) }
+      )
+    }
 
     // 1. Sanitize input
     const sanitized = sanitizeUserInput(question)
@@ -209,7 +226,8 @@ Guidelines:
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
+        'Connection': 'keep-alive',
+        ...rateLimitHeaders(rateLimit),
       }
     })
   } catch (error) {

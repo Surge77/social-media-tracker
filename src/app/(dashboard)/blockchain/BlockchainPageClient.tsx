@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, Sector } from 'recharts'
 import { useTheme } from 'next-themes'
 import {
@@ -10,19 +11,44 @@ import {
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { ChainTVLCards } from '@/components/blockchain/ChainTVLCards'
-import { ChainTVLChart } from '@/components/blockchain/ChainTVLChart'
-import { ProtocolHealthTable } from '@/components/blockchain/ProtocolHealthTable'
-import { LanguageWarsChart } from '@/components/blockchain/LanguageWarsChart'
-import { FrameworkAdoptionChart } from '@/components/blockchain/FrameworkAdoptionChart'
-import { WalletLibraryChart } from '@/components/blockchain/WalletLibraryChart'
-import { GasTrackerWidget } from '@/components/blockchain/GasTrackerWidget'
-import { L2CostTable } from '@/components/blockchain/L2CostTable'
-import { StablecoinFlowChart } from '@/components/blockchain/StablecoinFlowChart'
-import { BridgeFlowChart } from '@/components/blockchain/BridgeFlowChart'
-import { ProtocolRevenueTable } from '@/components/blockchain/ProtocolRevenueTable'
-import { HacksFeed } from '@/components/blockchain/HacksFeed'
 import { useBlockchainOverview } from '@/hooks/useBlockchainOverview'
+
+const ChainTVLCards = dynamic(() => import('@/components/blockchain/ChainTVLCards').then((mod) => mod.ChainTVLCards), {
+  loading: () => <Skeleton className="h-40 rounded-xl" />,
+})
+const ChainTVLChart = dynamic(() => import('@/components/blockchain/ChainTVLChart').then((mod) => mod.ChainTVLChart), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />,
+})
+const ProtocolHealthTable = dynamic(() => import('@/components/blockchain/ProtocolHealthTable').then((mod) => mod.ProtocolHealthTable), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />,
+})
+const LanguageWarsChart = dynamic(() => import('@/components/blockchain/LanguageWarsChart').then((mod) => mod.LanguageWarsChart), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />,
+})
+const FrameworkAdoptionChart = dynamic(() => import('@/components/blockchain/FrameworkAdoptionChart').then((mod) => mod.FrameworkAdoptionChart), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />,
+})
+const WalletLibraryChart = dynamic(() => import('@/components/blockchain/WalletLibraryChart').then((mod) => mod.WalletLibraryChart), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />,
+})
+const GasTrackerWidget = dynamic(() => import('@/components/blockchain/GasTrackerWidget').then((mod) => mod.GasTrackerWidget), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />,
+})
+const L2CostTable = dynamic(() => import('@/components/blockchain/L2CostTable').then((mod) => mod.L2CostTable), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />,
+})
+const StablecoinFlowChart = dynamic(() => import('@/components/blockchain/StablecoinFlowChart').then((mod) => mod.StablecoinFlowChart), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />,
+})
+const BridgeFlowChart = dynamic(() => import('@/components/blockchain/BridgeFlowChart').then((mod) => mod.BridgeFlowChart), {
+  loading: () => <Skeleton className="h-80 rounded-xl" />,
+})
+const ProtocolRevenueTable = dynamic(() => import('@/components/blockchain/ProtocolRevenueTable').then((mod) => mod.ProtocolRevenueTable), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />,
+})
+const HacksFeed = dynamic(() => import('@/components/blockchain/HacksFeed').then((mod) => mod.HacksFeed), {
+  loading: () => <Skeleton className="h-64 rounded-xl" />,
+})
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -59,7 +85,6 @@ function fmtTVL(n: number): string {
   return `$${n.toFixed(0)}`
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderActiveShape = (props: any) => {
   const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, payload, value } = props
   return (
@@ -229,7 +254,6 @@ function MarketTab() {
             <div className="rounded-xl border bg-card p-5 transition-all hover:shadow-sm">
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {React.createElement(Pie as any, {
                     activeIndex,
                     activeShape: renderActiveShape,

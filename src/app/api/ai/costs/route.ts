@@ -6,8 +6,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { calculateCostSummary, updateBudgets } from '@/lib/ai/cost-tracker'
+import { requireAdminAccess } from '@/lib/http/route-guards'
 
 export async function GET(req: NextRequest) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const supabase = await createSupabaseServerClient()
 
@@ -28,6 +32,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const supabase = await createSupabaseServerClient()
     const body = await req.json()

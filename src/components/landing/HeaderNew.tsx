@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ArrowUpRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import AnimatedCTA from '@/components/AnimatedCTA';
 import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo';
 import { useScrolled } from '@/hooks/useScrolled';
 import { cn } from '@/lib/utils';
@@ -32,13 +33,14 @@ export default function HeaderNew() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link
+            <AnimatedCTA
               href="/technologies"
-              className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-background/60 px-4 py-2 text-sm font-semibold text-foreground backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary md:inline-flex"
+              variant="outline"
+              className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-background/60 px-4 py-2 text-sm font-semibold text-foreground backdrop-blur-sm transition-colors hover:border-primary/40 hover:bg-primary/5 hover:text-primary md:inline-flex"
             >
               Start Exploring
               <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
+            </AnimatedCTA>
           </div>
         </div>
       </header>

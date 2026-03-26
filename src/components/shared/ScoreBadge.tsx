@@ -1,5 +1,9 @@
+'use client'
+
 import React from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface ScoreBadgeProps {
   score: number | null
@@ -19,6 +23,7 @@ export const ScoreBadge = React.forwardRef<HTMLDivElement, ScoreBadgeProps>(
   ({ score, className, size = 'md', confidenceGrade }, ref) => {
     const isLowConfidence = confidenceGrade === 'D' || confidenceGrade === 'F'
     const tooltipText = isLowConfidence && confidenceGrade ? CONFIDENCE_TOOLTIP[confidenceGrade] : undefined
+    const prefersReducedMotion = useReducedMotion()
 
     if (score === null) {
       return (
@@ -47,10 +52,12 @@ export const ScoreBadge = React.forwardRef<HTMLDivElement, ScoreBadgeProps>(
     }
 
     return (
-      <div
+      <motion.div
         ref={ref}
+        whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
         className={cn(
-          'relative inline-flex items-center justify-center rounded border font-mono font-semibold tabular-nums',
+          'relative inline-flex items-center justify-center rounded border font-mono font-semibold tabular-nums cursor-default',
           size === 'sm' && 'h-5 min-w-[2.5rem] px-1.5 text-xs',
           size === 'md' && 'h-6 min-w-[3rem] px-2 text-sm',
           size === 'lg' && 'h-8 min-w-[4rem] px-3 text-base',
@@ -68,7 +75,7 @@ export const ScoreBadge = React.forwardRef<HTMLDivElement, ScoreBadgeProps>(
             aria-label="Low confidence score"
           />
         )}
-      </div>
+      </motion.div>
     )
   }
 )

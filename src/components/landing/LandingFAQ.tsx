@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useSpring, useTransform, type MotionValue } from 'framer-motion';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 import { HyperText } from '@/components/ui/hyper-text';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +38,36 @@ const faqItems = [
       'Developers choosing what to learn next, teams evaluating stack direction, and career switchers trying to prioritize skills based on real market and community movement.',
   },
 ];
+
+/** Spring-animated chevron that bounces on toggle */
+function SpringChevron({ isOpen, reduced }: { isOpen: boolean; reduced: boolean }) {
+  const target = isOpen ? 180 : 0;
+  const spring = useSpring(target, { stiffness: 300, damping: 20, mass: 0.8 });
+  // Update spring target when isOpen changes
+  spring.set(target);
+
+  if (reduced) {
+    return (
+      <ChevronDown
+        className={cn(
+          'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+          isOpen && 'rotate-180 text-primary',
+        )}
+      />
+    );
+  }
+
+  return (
+    <motion.div style={{ rotate: spring as MotionValue<number> }} className="shrink-0">
+      <ChevronDown
+        className={cn(
+          'h-4 w-4 text-muted-foreground transition-colors',
+          isOpen && 'text-primary',
+        )}
+      />
+    </motion.div>
+  );
+}
 
 export default function LandingFAQ() {
   const [openItem, setOpenItem] = useState<string>('item-0');
@@ -78,10 +108,15 @@ export default function LandingFAQ() {
               return (
                 <motion.div
                   key={item.question}
-                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
-                  whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 30, scale: 0.96 }}
+                  whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, margin: '-40px' }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  transition={prefersReducedMotion ? {} : {
+                    type: 'spring',
+                    stiffness: 100,
+                    damping: 20,
+                    delay: index * 0.06,
+                  }}
                   className="rounded-2xl"
                 >
                   <MagicCard
@@ -102,12 +137,7 @@ export default function LandingFAQ() {
                         >
                           {item.question}
                         </span>
-                        <ChevronDown
-                          className={cn(
-                            'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
-                            isOpen && 'rotate-180 text-primary'
-                          )}
-                        />
+                        <SpringChevron isOpen={isOpen} reduced={prefersReducedMotion} />
                       </CollapsibleTrigger>
                       <CollapsibleContent className="px-4 sm:px-5 pb-4 sm:pb-5 text-sm leading-relaxed text-muted-foreground">
                         {item.answer}

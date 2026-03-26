@@ -1,5 +1,9 @@
-import React from 'react'
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 interface DevTrendsLogoProps {
   variant?: 'icon' | 'full'
@@ -14,35 +18,45 @@ const sizeMap = {
   lg: { icon: 40, text: 'text-2xl', gap: 'gap-3' },
 } as const
 
-/**
- * DevTrends brand mark and wordmark.
- *
- * The mark: a rounded square with the signature gradient,
- * containing two intersecting trend lines (multi-source data)
- * and a peak node (the current insight moment).
- *
- * Design principles:
- * - Works at 16px (favicon) through 80px (hero)
- * - Distinct silhouette — not a generic chart icon
- * - Two lines represent multi-source intelligence
- * - The bright dot = "this is where you are now"
- */
 export const DevTrendsLogo = React.forwardRef<HTMLDivElement, DevTrendsLogoProps>(
   ({ variant = 'full', size = 'sm', className }, ref) => {
     const { icon, text, gap } = sizeMap[size]
+    const prefersReducedMotion = useReducedMotion()
+    const [hasAnimated, setHasAnimated] = useState(false)
+
+    useEffect(() => {
+      if (!prefersReducedMotion) {
+        const timer = setTimeout(() => setHasAnimated(true), 800)
+        return () => clearTimeout(timer)
+      }
+    }, [prefersReducedMotion])
 
     return (
-      <div
+      <motion.div
         ref={ref}
-        className={cn('inline-flex items-center', gap, className)}
+        className={cn('inline-flex items-center group', gap, className)}
+        // One-time spring bounce on initial load
+        initial={prefersReducedMotion ? {} : { scale: 0.9, opacity: 0 }}
+        animate={prefersReducedMotion ? {} : { scale: 1, opacity: 1 }}
+        transition={prefersReducedMotion ? {} : {
+          type: 'spring',
+          stiffness: 200,
+          damping: 12,
+          mass: 0.8,
+        }}
+        whileHover={prefersReducedMotion ? {} : { scale: 1.03 }}
       >
-        <DevTrendsMark size={icon} />
+        {/* Hover glow ring behind the mark */}
+        <div className="relative">
+          <div className="absolute -inset-1.5 rounded-lg bg-gradient-to-r from-orange-500/0 to-pink-500/0 blur-md transition-all duration-300 group-hover:from-orange-500/20 group-hover:to-pink-500/20" />
+          <DevTrendsMark size={icon} />
+        </div>
         {variant === 'full' && (
           <span className={cn(text, 'font-bold tracking-tight text-foreground select-none')}>
             DevTrends
           </span>
         )}
-      </div>
+      </motion.div>
     )
   }
 )
@@ -60,7 +74,7 @@ export function DevTrendsMark({ size = 32, className }: { size?: number; classNa
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
+      className={cn('relative', className)}
       aria-hidden="true"
     >
       <defs>

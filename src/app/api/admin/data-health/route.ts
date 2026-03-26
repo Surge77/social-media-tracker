@@ -1,5 +1,6 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
+import { requireAdminAccess } from '@/lib/http/route-guards'
 
 /**
  * GET /api/admin/data-health
@@ -9,7 +10,10 @@ import { NextResponse } from 'next/server'
  * - Dimension coverage breakdown
  * - Days since last scoring run
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const guard = requireAdminAccess(request, process.env)
+  if (guard) return guard
+
   try {
     const supabase = createSupabaseAdminClient()
 

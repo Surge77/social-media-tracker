@@ -2,6 +2,7 @@
  * DeFiLlama Fees & Revenue API
  * Docs: https://defillama.com/docs/api  (no key required)
  */
+import { unstable_cache } from 'next/cache'
 
 const BASE = 'https://api.llama.fi'
 
@@ -35,13 +36,13 @@ interface RawRevenueProtocol extends RawProtocol {
   revenue7d?: number
 }
 
-export async function fetchProtocolFees(limit = 20): Promise<ProtocolFees[]> {
+async function fetchProtocolFeesUncached(limit = 20): Promise<ProtocolFees[]> {
   const [feesRes, revenueRes] = await Promise.all([
     fetch(`${BASE}/overview/fees?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true`, {
-      next: { revalidate: 3600 },
+      cache: 'no-store',
     }),
     fetch(`${BASE}/overview/revenue?excludeTotalDataChart=true&excludeTotalDataChartBreakdown=true`, {
-      next: { revalidate: 3600 },
+      cache: 'no-store',
     }),
   ])
 
@@ -76,4 +77,15 @@ export async function fetchProtocolFees(limit = 20): Promise<ProtocolFees[]> {
         chains: p.chains ?? [],
       }
     })
+}
+
+const getCachedProtocolFees = unstable_cache(
+  async () => fetchProtocolFeesUncached(25),
+  ['blockchain-protocol-fees'],
+  { revalidate: 3600 }
+)
+
+export async function fetchProtocolFees(limit = 20): Promise<ProtocolFees[]> {
+  const fees = await getCachedProtocolFees()
+  return fees.slice(0, limit)
 }

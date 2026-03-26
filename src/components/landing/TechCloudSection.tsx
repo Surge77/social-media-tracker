@@ -1,6 +1,8 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { motion } from 'framer-motion'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import TextAnimation from '@/components/ui/scroll-text'
 
 const IconCloud = dynamic(
@@ -8,7 +10,11 @@ const IconCloud = dynamic(
   { ssr: false, loading: () => <div className="h-[320px]" /> },
 )
 
+const techPills = ['React', 'Rust', 'TypeScript', 'Go', 'Python', 'Kubernetes']
+
 export default function TechCloudSection() {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <section className="relative overflow-hidden py-16 md:py-24">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.06),transparent_60%)]" />
@@ -19,9 +25,15 @@ export default function TechCloudSection() {
 
             {/* Text side */}
             <div className="flex-1 text-center md:text-left">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary">
+              <motion.p
+                initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
+                whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35 }}
+                className="mb-3 text-xs font-semibold uppercase tracking-widest text-primary"
+              >
                 100+ technologies
-              </p>
+              </motion.p>
               <TextAnimation
                 as="h2"
                 text="Every language, framework, and tool that matters"
@@ -35,30 +47,70 @@ export default function TechCloudSection() {
                   },
                 }}
               />
-              <p className="text-base text-muted-foreground leading-relaxed">
+              <motion.p
+                initial={prefersReducedMotion ? {} : { opacity: 0, y: 12 }}
+                whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+                className="text-base text-muted-foreground leading-relaxed"
+              >
                 From JavaScript frameworks to systems languages, cloud platforms
                 to databases — if developers are talking about it, we're
                 tracking it. Scores updated every 24 hours across all signals.
-              </p>
+              </motion.p>
+
+              {/* Tech pills with stagger + hover pop */}
               <div className="mt-6 flex flex-wrap gap-2 md:justify-start justify-center">
-                {['React', 'Rust', 'TypeScript', 'Go', 'Python', 'Kubernetes'].map(t => (
-                  <span
+                {techPills.map((t, i) => (
+                  <motion.span
                     key={t}
-                    className="rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary"
+                    initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.8 }}
+                    whileInView={prefersReducedMotion ? {} : { opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={prefersReducedMotion ? {} : {
+                      type: 'spring',
+                      stiffness: 200,
+                      damping: 15,
+                      delay: 0.2 + i * 0.05,
+                    }}
+                    whileHover={prefersReducedMotion ? {} : { scale: 1.12, y: -2 }}
+                    className="cursor-default rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/10 hover:border-primary/40"
                   >
                     {t}
-                  </span>
+                  </motion.span>
                 ))}
-                <span className="rounded-full border border-border/40 px-3 py-1 text-xs font-medium text-muted-foreground">
+                <motion.span
+                  initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.8 }}
+                  whileInView={prefersReducedMotion ? {} : { opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={prefersReducedMotion ? {} : {
+                    type: 'spring',
+                    stiffness: 200,
+                    damping: 15,
+                    delay: 0.2 + techPills.length * 0.05,
+                  }}
+                  className="rounded-full border border-border/40 px-3 py-1 text-xs font-medium text-muted-foreground"
+                >
                   +94 more
-                </span>
+                </motion.span>
               </div>
             </div>
 
             {/* Icon cloud */}
-            <div className="w-full flex-1 max-w-[380px]">
+            <motion.div
+              initial={prefersReducedMotion ? {} : { opacity: 0, scale: 0.9 }}
+              whileInView={prefersReducedMotion ? {} : { opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={prefersReducedMotion ? {} : {
+                type: 'spring',
+                stiffness: 80,
+                damping: 20,
+                delay: 0.15,
+              }}
+              className="w-full flex-1 max-w-[380px]"
+            >
               <IconCloud />
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

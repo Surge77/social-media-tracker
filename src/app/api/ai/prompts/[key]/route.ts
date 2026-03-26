@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { requireAdminAccess } from '@/lib/http/route-guards'
 import {
   getActivePrompt,
   updatePrompt,
@@ -16,6 +17,9 @@ export async function GET(
   req: NextRequest,
   context: { params: Promise<{ key: string }> }
 ) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const { key } = await context.params
     const supabase = await createSupabaseServerClient()
@@ -44,6 +48,9 @@ export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ key: string }> }
 ) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const { key } = await context.params
     const supabase = await createSupabaseServerClient()
@@ -79,6 +86,9 @@ export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ key: string }> }
 ) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const { key } = await context.params
     const supabase = await createSupabaseServerClient()

@@ -7,8 +7,12 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { createKeyManager } from '@/lib/ai/key-manager'
+import { requireAdminAccess } from '@/lib/http/route-guards'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const guard = requireAdminAccess(request, process.env)
+  if (guard) return guard
+
   const keyManager = createKeyManager()
   const supabase = createSupabaseAdminClient()
 

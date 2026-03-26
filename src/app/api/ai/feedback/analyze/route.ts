@@ -7,8 +7,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { analyzeFeedback } from '@/lib/ai/feedback-analyzer'
+import { requireAdminAccess } from '@/lib/http/route-guards'
 
 export async function GET(req: NextRequest) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const supabase = await createSupabaseServerClient()
 

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { ArrowUpDown, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useBlockchainFees } from '@/hooks/useBlockchainFees'
-import type { ProtocolFees } from '@/lib/api/defillama-fees'
 
 type SortKey = 'dailyFees' | 'weeklyFees' | 'dailyRevenue' | 'name'
 
@@ -26,12 +25,12 @@ export function ProtocolRevenueTable() {
     else { setSortKey(key); setSortDir('desc') }
   }
 
-  const SortIcon = ({ k }: { k: SortKey }) =>
-    sortKey === k ? (
-      sortDir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
-    ) : (
-      <ArrowUpDown className="h-3 w-3 opacity-40" />
-    )
+  const renderSortIcon = (key: SortKey) => {
+    if (sortKey !== key) return <ArrowUpDown className="h-3 w-3 opacity-40" />
+    return sortDir === 'asc'
+      ? <ArrowUp className="h-3 w-3" />
+      : <ArrowDown className="h-3 w-3" />
+  }
 
   if (isLoading) return <Skeleton className="h-64 rounded-xl" />
 
@@ -65,26 +64,26 @@ export function ProtocolRevenueTable() {
                 className="cursor-pointer px-4 py-3 text-left hover:text-foreground transition-colors"
                 onClick={() => handleSort('name')}
               >
-                <span className="flex items-center gap-1">Protocol <SortIcon k="name" /></span>
+                <span className="flex items-center gap-1">Protocol {renderSortIcon('name')}</span>
               </th>
               <th className="px-4 py-3 text-left">Category</th>
               <th
                 className="cursor-pointer px-4 py-3 text-right hover:text-foreground transition-colors"
                 onClick={() => handleSort('dailyFees')}
               >
-                <span className="flex items-center justify-end gap-1">24h Fees <SortIcon k="dailyFees" /></span>
+                <span className="flex items-center justify-end gap-1">24h Fees {renderSortIcon('dailyFees')}</span>
               </th>
               <th
                 className="hidden cursor-pointer px-4 py-3 text-right hover:text-foreground transition-colors sm:table-cell"
                 onClick={() => handleSort('weeklyFees')}
               >
-                <span className="flex items-center justify-end gap-1">7d Fees <SortIcon k="weeklyFees" /></span>
+                <span className="flex items-center justify-end gap-1">7d Fees {renderSortIcon('weeklyFees')}</span>
               </th>
               <th
                 className="cursor-pointer px-4 py-3 text-right hover:text-foreground transition-colors"
                 onClick={() => handleSort('dailyRevenue')}
               >
-                <span className="flex items-center justify-end gap-1">Revenue <SortIcon k="dailyRevenue" /></span>
+                <span className="flex items-center justify-end gap-1">Revenue {renderSortIcon('dailyRevenue')}</span>
               </th>
             </tr>
           </thead>
@@ -100,6 +99,7 @@ export function ProtocolRevenueTable() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {p.logo && (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={p.logo}
                           alt={p.name}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, TrendingUp, ArrowUpRight, Zap, Bell, CheckCircle2, BarChart3, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import TextAnimation from '@/components/ui/scroll-text';
@@ -234,6 +234,57 @@ const features = [
   },
 ];
 
+function TiltCard({ children, className }: { children: React.ReactNode, className?: string }) {
+  const prefersReducedMotion = useReducedMotion();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const z = useMotionValue(0);
+  
+  const smoothX = useSpring(x, { stiffness: 300, damping: 30, mass: 0.8 });
+  const smoothY = useSpring(y, { stiffness: 300, damping: 30, mass: 0.8 });
+  const smoothZ = useSpring(z, { stiffness: 300, damping: 30, mass: 0.8 });
+  
+  const rotateX = useTransform(smoothY, [-0.5, 0.5], [6, -6]);
+  const rotateY = useTransform(smoothX, [-0.5, 0.5], [-6, 6]);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
+    const normalizedX = (e.clientX - rect.left) / width - 0.5;
+    const normalizedY = (e.clientY - rect.top) / height - 0.5;
+    
+    x.set(normalizedX);
+    y.set(normalizedY);
+    z.set(15);
+  };
+
+  const handlePointerLeave = () => {
+    x.set(0);
+    y.set(0);
+    z.set(0);
+  };
+
+  return (
+    <motion.div
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      style={{
+        rotateX: prefersReducedMotion ? 0 : rotateX,
+        rotateY: prefersReducedMotion ? 0 : rotateY,
+        z: prefersReducedMotion ? 0 : smoothZ,
+        transformPerspective: 1000,
+        transformStyle: "preserve-3d"
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export default function BentoFeaturesNew() {
   const prefersReducedMotion = useReducedMotion();
 
@@ -286,13 +337,13 @@ export default function BentoFeaturesNew() {
               return (
                 <motion.div
                   key={feature.title}
-                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 30 }}
-                  whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+                  initial={prefersReducedMotion ? {} : { opacity: 0, y: 40, scale: 0.95 }}
+                  whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true, margin: '-50px' }}
-                  transition={{ duration: 0.5, delay: index * 0.08 }}
+                  transition={{ type: "spring", stiffness: 100, damping: 20, delay: index * 0.08 }}
                   className={feature.large ? 'lg:col-span-2' : ''}
                 >
-                  <div className="group h-full border border-border/50 hover:border-primary/40 rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.15)] hover:shadow-primary/10 hover:-translate-y-1 overflow-hidden relative bg-card/50 backdrop-blur-sm shadow-sm cursor-pointer hover:bg-card">
+                  <TiltCard className="group h-full border border-border/50 hover:border-primary/40 rounded-2xl p-4 sm:p-5 transition-all duration-500 hover:shadow-[0_30px_60px_rgba(0,0,0,0.2)] hover:shadow-primary/10 overflow-hidden relative bg-card/50 backdrop-blur-sm shadow-sm cursor-pointer hover:bg-card">
                     <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                     <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     
@@ -304,12 +355,14 @@ export default function BentoFeaturesNew() {
                         {feature.title}
                         <ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all transform translate-y-1 -translate-x-1 group-hover:translate-y-0 group-hover:translate-x-0" />
                       </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-muted-foreground mt-1 transform-gpu transition-all duration-300 group-hover:translate-z-6">
                         {feature.description}
                       </p>
-                      <Mockup />
+                      <div className="transform-gpu transition-all duration-300 group-hover:translate-z-12">
+                        <Mockup />
+                      </div>
                     </div>
-                  </div>
+                  </TiltCard>
                 </motion.div>
               );
             })}

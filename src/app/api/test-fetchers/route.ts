@@ -9,6 +9,7 @@ import { fetchRedditData } from '@/lib/api/reddit'
 import { fetchRSSData } from '@/lib/api/rss'
 import { fetchJobsData } from '@/lib/api/jobs'
 import type { Technology } from '@/types'
+import { requireDevelopmentOnly } from '@/lib/http/route-guards'
 
 /**
  * Test API route for Day 3 & Day 4 fetchers
@@ -24,6 +25,9 @@ import type { Technology } from '@/types'
  * - insert: 'true' to insert into database, 'false' to just return data (default: false)
  */
 export async function GET(request: NextRequest) {
+  const guard = requireDevelopmentOnly(process.env)
+  if (guard) return guard
+
   const searchParams = request.nextUrl.searchParams
   const source = searchParams.get('source')
   const limit = parseInt(searchParams.get('limit') || '5', 10)

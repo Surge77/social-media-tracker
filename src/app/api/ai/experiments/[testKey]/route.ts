@@ -7,11 +7,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { activateVersion } from '@/lib/ai/prompt-manager'
 import type { ABTest } from '@/lib/ai/ab-testing'
+import { requireAdminAccess } from '@/lib/http/route-guards'
 
 export async function GET(
   req: NextRequest,
   context: { params: Promise<{ testKey: string }> }
 ) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const { testKey } = await context.params
     const supabase = await createSupabaseServerClient()
@@ -44,6 +48,9 @@ export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ testKey: string }> }
 ) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const { testKey } = await context.params
     const supabase = await createSupabaseServerClient()

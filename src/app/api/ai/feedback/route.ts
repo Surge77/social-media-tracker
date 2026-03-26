@@ -8,6 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logTelemetry } from '@/lib/ai/telemetry'
+import { checkRateLimit, rateLimitHeaders } from '@/lib/ai/rate-limiter'
+import { getClientIp } from '@/lib/http/route-guards'
 
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
@@ -20,6 +22,14 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = createSupabaseAdminClient()
+  const rateLimit = await checkRateLimit('/api/ai/feedback', getClientIp(req), supabase)
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded' },
+      { status: 429, headers: rateLimitHeaders(rateLimit) }
+    )
+  }
 
   const { error } = await supabase.from('insight_feedback').insert({
     insight_id: body.insightId,
@@ -56,5 +66,5 @@ export async function POST(req: NextRequest) {
     supabase
   )
 
-  return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true }, { headers: rateLimitHeaders(rateLimit) })
 }

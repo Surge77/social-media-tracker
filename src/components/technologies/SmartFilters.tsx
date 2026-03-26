@@ -1,9 +1,12 @@
 'use client'
 
 import React from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Rocket, TrendingUp, Shield, Gem, AlertTriangle, Grid } from 'lucide-react'
 import type { TechnologyWithScore } from '@/types'
 import { cn } from '@/lib/utils'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { BorderBeam } from '@/components/ui/border-beam'
 
 export type SmartFilter =
   | 'all'
@@ -115,6 +118,7 @@ interface SmartFiltersProps {
 
 export function SmartFilters({ activeFilter, onFilterChange }: SmartFiltersProps) {
   const activeDescription = SMART_FILTERS.find((filter) => filter.id === activeFilter)?.description
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <div className="app-section-tight">
@@ -124,31 +128,48 @@ export function SmartFilters({ activeFilter, onFilterChange }: SmartFiltersProps
           const isActive = activeFilter === filter.id
 
           return (
-            <button
+            <motion.button
               key={filter.id}
               onClick={() => onFilterChange(filter.id)}
+              whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+              whileHover={prefersReducedMotion ? {} : { scale: 1.04 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               className={cn(
-                'tap-target shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all',
+                'relative tap-target shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all overflow-hidden',
                 isActive
                   ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                   : 'border border-border/60 bg-card/45 text-secondary-foreground hover:border-primary/30 hover:bg-card/70'
               )}
               title={filter.description}
             >
-              <span className="flex items-center gap-2">
+              {/* Border beam on active chip */}
+              {isActive && !prefersReducedMotion && (
+                <BorderBeam size={80} duration={6} colorFrom="#f97316" colorTo="#f59e0b" />
+              )}
+              <span className="relative z-10 flex items-center gap-2">
                 <Icon className="h-4 w-4" />
                 <span>{filter.label}</span>
               </span>
-            </button>
+            </motion.button>
           )
         })}
       </div>
 
-      {activeFilter !== 'all' && activeDescription && (
-        <div className="mt-3 rounded-2xl border border-border/60 bg-muted/25 px-4 py-3 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Showing:</span> {activeDescription}
-        </div>
-      )}
+      <AnimatePresence>
+        {activeFilter !== 'all' && activeDescription && (
+          <motion.div
+            initial={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, height: 'auto' }}
+            exit={prefersReducedMotion ? {} : { opacity: 0, height: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-3 rounded-2xl border border-border/60 bg-muted/25 px-4 py-3 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">Showing:</span> {activeDescription}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

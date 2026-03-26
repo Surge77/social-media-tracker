@@ -1,6 +1,10 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
+import { requireDevelopmentOnly } from '@/lib/http/route-guards'
 
 export async function GET() {
+  const guard = requireDevelopmentOnly(process.env)
+  if (guard) return guard
+
   const supabase = createSupabaseAdminClient()
   const { data, error } = await supabase
     .from('technologies')

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -48,6 +48,29 @@ const AnimatedCTA = React.forwardRef<HTMLAnchorElement, AnimatedCTAProps>(
     const [isNavigating, setIsNavigating] = React.useState(false);
     const prefersReducedMotion = useReducedMotion();
 
+    // Magnetic physics state
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+    const magneticX = useSpring(x, { stiffness: 150, damping: 15, mass: 0.1 });
+    const magneticY = useSpring(y, { stiffness: 150, damping: 15, mass: 0.1 });
+
+    const handlePointerMove = React.useCallback(
+      (e: React.PointerEvent<HTMLDivElement>) => {
+        if (prefersReducedMotion || disabled || isNavigating) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        x.set((e.clientX - centerX) * 0.25);
+        y.set((e.clientY - centerY) * 0.25);
+      },
+      [prefersReducedMotion, disabled, isNavigating, x, y]
+    );
+
+    const handlePointerLeave = React.useCallback(() => {
+      x.set(0);
+      y.set(0);
+    }, [x, y]);
+
     const handleClick = React.useCallback(
       (event: React.MouseEvent<HTMLAnchorElement>) => {
         if (disabled) {
@@ -92,16 +115,20 @@ const AnimatedCTA = React.forwardRef<HTMLAnchorElement, AnimatedCTAProps>(
 
     return (
       <motion.div
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        style={{ x: magneticX, y: magneticY }}
         whileHover={prefersReducedMotion ? {} : { 
-          scale: 1.02,
-          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+          scale: 1.05,
+          boxShadow: "0 15px 35px -5px rgba(0, 0, 0, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.08)"
         }}
-        whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+        whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
         transition={prefersReducedMotion ? {} : { 
           type: "spring", 
           stiffness: 400, 
           damping: 17 
         }}
+        className="inline-block relative z-10"
       >
         <Link
           ref={ref}
@@ -131,6 +158,7 @@ const AnimatedCTA = React.forwardRef<HTMLAnchorElement, AnimatedCTAProps>(
             </motion.div>
           ) : (
             <motion.div
+              className="inline-flex items-center gap-2 whitespace-nowrap"
               initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 5 }}
               animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0.1 : 0.3 }}

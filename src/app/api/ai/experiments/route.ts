@@ -6,8 +6,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createABTest } from '@/lib/ai/ab-testing'
+import { requireAdminAccess } from '@/lib/http/route-guards'
 
 export async function GET(req: NextRequest) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const supabase = await createSupabaseServerClient()
 
@@ -31,6 +35,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const supabase = await createSupabaseServerClient()
     const body = await req.json()

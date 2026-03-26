@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import FloatingIcons from '../FloatingIcons';
 import AnimatedCTA from '../AnimatedCTA';
 import { ArrowUpRight, ArrowDownRight, Minus, Users, Database, Zap } from 'lucide-react';
@@ -33,8 +33,25 @@ export default function HeroNew() {
   const isLight = resolvedTheme === 'light';
   const quizPromptClassName = getHeroQuizPromptClassName();
 
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 40, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 40, damping: 20 });
+  
+  const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    if (prefersReducedMotion) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const normalizedX = (e.clientX - rect.left) / rect.width - 0.5;
+    const normalizedY = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(normalizedX * -80); // Parallax inverse tracking amplitude
+    mouseY.set(normalizedY * -80);
+  };
+
   return (
-    <section className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pb-14 pt-24 sm:min-h-screen sm:pb-16 sm:pt-28">
+    <section 
+      onPointerMove={handlePointerMove}
+      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pb-14 pt-24 sm:min-h-screen sm:pb-16 sm:pt-28"
+    >
       {/* ── Layer 1: solid background base ─────────────────────────────── */}
       <div className="absolute inset-0 bg-background" />
 
@@ -81,18 +98,22 @@ export default function HeroNew() {
       {/* ── Layer 3: subtle centered glow (square = equal spread) ────── */}
       <div className="mobile-glow-soft pointer-events-none absolute left-1/2 top-1/3 z-0 h-[280px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[72px] sm:h-[500px] sm:w-[500px] sm:blur-[100px]" />
 
-      <div className="pointer-events-none absolute inset-0 z-10" aria-hidden="true">
+      <motion.div 
+        className="pointer-events-none absolute inset-0 z-10"
+        style={{ x: springX, y: springY }}
+        aria-hidden="true"
+      >
         <FloatingIcons />
-      </div>
+      </motion.div>
 
       <div className="app-page relative z-20">
         <div className="text-center max-w-5xl mx-auto">
 
           {/* Main headline */}
           <motion.h1
-            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 30 }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 50, scale: 0.92 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: "spring", bounce: 0.4, duration: 1.2, delay: 0.1 }}
             className="mb-6 sm:mb-8"
           >
             <HyperText
@@ -134,9 +155,9 @@ export default function HeroNew() {
 
           {/* CTA */}
           <motion.div
-            initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            initial={prefersReducedMotion ? {} : { opacity: 0, y: 30, scale: 0.95 }}
+            animate={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.4 }}
             className="mb-6 flex flex-col items-stretch gap-3 sm:mb-8 sm:items-center sm:gap-4"
           >
             <AnimatedCTA
@@ -152,7 +173,7 @@ export default function HeroNew() {
             </AnimatedCTA>
             <a
               href="/quiz/learn-next"
-              className={quizPromptClassName}
+              className={`${quizPromptClassName} font-semibold text-foreground`}
             >
               Take the career quiz
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -204,8 +225,8 @@ export default function HeroNew() {
                 </svg>
               </div>
             </div>
-            <span className="font-medium">
-              <span className="text-foreground">100+ technologies</span> tracked with live data
+            <span className="font-semibold text-foreground">
+              <span className="font-bold text-foreground">100+ technologies</span> tracked with live data
             </span>
           </motion.div>
 
@@ -214,21 +235,21 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="mb-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-3 text-sm text-foreground/65 dark:text-muted-foreground sm:mb-16 sm:gap-x-6"
+            className="mb-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-3 text-sm text-foreground/80 dark:text-muted-foreground sm:mb-16 sm:gap-x-6"
           >
             <span className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-green-500" />
-              <span className="font-medium">Free forever</span>
+              <span className="font-semibold text-foreground">Free forever</span>
             </span>
             <span className="hidden sm:inline text-border">•</span>
             <span className="flex items-center gap-2">
               <Users className="h-4 w-4 text-blue-500" />
-              <span className="font-medium">No credit card</span>
+              <span className="font-semibold text-foreground">No credit card</span>
             </span>
             <span className="hidden sm:inline text-border">•</span>
             <span className="flex items-center gap-2">
               <Database className="h-4 w-4 text-amber-500" />
-              <span className="font-medium">8+ data sources</span>
+              <span className="font-semibold text-foreground">8+ data sources</span>
             </span>
             <span className="hidden sm:inline text-border">•</span>
             <span className="flex items-center gap-2">
@@ -236,16 +257,17 @@ export default function HeroNew() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
               </span>
-              <span className="font-medium">Updated daily</span>
+              <span className="font-semibold text-foreground">Updated daily</span>
             </span>
           </motion.div>
 
           {/* Dashboard mockup */}
           <motion.div
-            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 60 }}
-            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+            initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 80, rotateX: 10 }}
+            animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, rotateX: 0 }}
+            transition={{ type: "spring", bounce: 0.3, duration: 1.5, delay: 0.7 }}
             className="group relative mx-auto w-full max-w-3xl"
+            style={{ transformPerspective: 1200 }}
           >
             <div className="mobile-glow-soft absolute -inset-6 rounded-3xl bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-orange-500/20 blur-3xl transition-all duration-500 group-hover:blur-2xl" />
             <div className="mobile-noise-hidden absolute -inset-4 rounded-3xl bg-purple-500/8 blur-2xl opacity-50" />

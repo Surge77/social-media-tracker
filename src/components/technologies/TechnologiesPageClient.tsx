@@ -25,6 +25,10 @@ import { WordPullUp } from '@/components/ui/word-pull-up'
 import type { TechnologyCategory } from '@/types'
 import { CATEGORY_LABELS } from '@/types'
 import { filterTechnologiesForDisplay, type SortKey } from '@/components/technologies/filtering'
+import type {
+  TechnologiesResponse,
+  TechStatsResponse,
+} from '@/lib/server/technology-data'
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'score', label: 'Score' },
@@ -38,7 +42,15 @@ const sectionVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 }
 
-export function TechnologiesPageClient() {
+type TechnologiesPageClientProps = {
+  initialTechnologies?: TechnologiesResponse | null
+  initialStats?: TechStatsResponse | null
+}
+
+export function TechnologiesPageClient({
+  initialTechnologies = null,
+  initialStats = null,
+}: TechnologiesPageClientProps) {
   const prefersReducedMotion = useReducedMotion()
 
   const [searchQuery, setSearchQuery] = useState('')
@@ -47,8 +59,15 @@ export function TechnologiesPageClient() {
   const [sortKey, setSortKey] = useState<SortKey>('score')
   const [viewMode, setViewMode] = useState<ViewMode>('cards')
 
-  const { technologies: allTechnologies, lastUpdated, isLoading, isError, error, refetch } = useTechnologies()
-  const { stats, isLoading: statsLoading, isError: statsError } = useTechStats()
+  const {
+    technologies: allTechnologies,
+    lastUpdated,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useTechnologies({ initialData: initialTechnologies })
+  const { stats, isLoading: statsLoading, isError: statsError } = useTechStats(initialStats)
 
   const handleSmartFilterChange = useCallback((filter: SmartFilter) => {
     setSmartFilter(filter)

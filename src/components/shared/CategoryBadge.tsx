@@ -1,5 +1,9 @@
+'use client'
+
 import React from 'react'
+import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { useReducedMotion } from '@/hooks/useReducedMotion'
 import type { TechnologyCategory } from '@/types'
 import { CATEGORY_LABELS } from '@/types'
 
@@ -24,11 +28,15 @@ const CATEGORY_COLORS: Record<TechnologyCategory, string> = {
 
 export const CategoryBadge = React.forwardRef<HTMLDivElement, CategoryBadgeProps>(
   ({ category, className, size = 'sm' }, ref) => {
+    const prefersReducedMotion = useReducedMotion()
+
     return (
-      <div
+      <motion.div
         ref={ref}
+        whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
         className={cn(
-          'inline-flex items-center justify-center rounded border font-medium',
+          'inline-flex items-center justify-center rounded border font-medium cursor-default',
           size === 'sm' && 'h-5 px-2 text-xs',
           size === 'md' && 'h-6 px-2.5 text-sm',
           CATEGORY_COLORS[category],
@@ -36,7 +44,7 @@ export const CategoryBadge = React.forwardRef<HTMLDivElement, CategoryBadgeProps
         )}
       >
         {CATEGORY_LABELS[category]}
-      </div>
+      </motion.div>
     )
   }
 )

@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
 import { ArrowRight, TrendingUp, TrendingDown, Minus, CheckCircle2, Shield, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
@@ -34,6 +34,28 @@ const VERDICT_STYLES: Record<Verdict['recommendation'], {
   'declining': { border: 'hover:border-destructive/40', bg: '', badgeBg: 'bg-destructive/10 text-destructive', text: 'text-destructive', icon: <TrendingDown size={11} /> },
 }
 
+/** Animated bar that fills from 0% to target width when scrolled into view */
+function AnimatedJobBar({ width, reduced }: { width: number; reduced: boolean }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-20px' })
+
+  return (
+    <div ref={ref} className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+      <motion.div
+        className="h-full rounded-full bg-primary/60"
+        initial={{ width: '0%' }}
+        animate={isInView && !reduced ? { width: `${width}%` } : reduced ? { width: `${width}%` } : {}}
+        transition={reduced ? {} : {
+          type: 'spring',
+          stiffness: 60,
+          damping: 20,
+          delay: 0.2,
+        }}
+      />
+    </div>
+  )
+}
+
 export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
   ({ technology, rank, index = 0, className, allTechnologies = [] }, ref) => {
     const prefersReducedMotion = useReducedMotion()
@@ -55,23 +77,43 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
     return (
       <motion.div
         ref={ref}
-        initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? {} : { duration: 0.3, delay: Math.min(index * 0.04, 0.5) }}
+        initial={prefersReducedMotion ? {} : { opacity: 0, y: 24, scale: 0.97 }}
+        animate={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
+        transition={prefersReducedMotion ? {} : {
+          type: 'spring',
+          stiffness: 100,
+          damping: 20,
+          delay: Math.min(index * 0.04, 0.5),
+        }}
+        whileHover={prefersReducedMotion ? {} : {
+          y: -4,
+          scale: 1.01,
+          transition: { type: 'spring', stiffness: 300, damping: 20 },
+        }}
         className={cn('flex flex-col gap-1.5', className)}
       >
         <Link
           href={`/technologies/${technology.slug}`}
           className="group block rounded-lg focus:outline-none"
         >
-          <div className={`rounded-lg border border-border bg-card/30 p-5 backdrop-blur-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-card/60 hover:shadow-lg active:translate-y-0 active:shadow-md ${vstyle.border}`}>
+          <div className={`rounded-lg border border-border bg-card/30 p-5 backdrop-blur-sm transition-colors duration-200 hover:bg-card/60 hover:shadow-lg ${vstyle.border}`}>
 
             {/* Top row: verdict + lifecycle + category */}
             <div className="mb-3.5 flex items-center justify-between gap-2">
-              <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${vstyle.badgeBg}`}>
+              <motion.span
+                initial={prefersReducedMotion ? {} : { scale: 0, opacity: 0 }}
+                animate={prefersReducedMotion ? {} : { scale: 1, opacity: 1 }}
+                transition={prefersReducedMotion ? {} : {
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 15,
+                  delay: Math.min(index * 0.04, 0.5) + 0.2,
+                }}
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${vstyle.badgeBg}`}
+              >
                 {vstyle.icon}
                 {verdict.badge}
-              </span>
+              </motion.span>
               <div className="flex items-center gap-1">
                 <LifecycleBadge stage={technology.lifecycle_stage} />
                 <CategoryBadge category={technology.category} size="sm" />
@@ -92,7 +134,18 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
                   {technology.name}
                 </h3>
               </div>
-              <ArrowRight size={15} className="shrink-0 text-muted-foreground/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
+              {/* ArrowRight with elastic overshoot on group hover */}
+              <motion.div
+                className="shrink-0"
+                whileHover={prefersReducedMotion ? {} : {
+                  x: 4,
+                  rotate: -30,
+                  scale: 1.15,
+                  transition: { type: 'spring', stiffness: 400, damping: 10 },
+                }}
+              >
+                <ArrowRight size={15} className="text-muted-foreground/40 transition-colors duration-200 group-hover:text-primary" />
+              </motion.div>
             </div>
 
             {/* Description */}
@@ -107,18 +160,13 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
               </p>
             )}
 
-            {/* Job demand bar */}
+            {/* Job demand bar — animated fill from 0% */}
             <div className="mb-3.5">
               <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
                 <span>Job demand</span>
                 <span className="font-medium text-foreground">{jobsBarWidth}/100</span>
               </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary/60 transition-all"
-                  style={{ width: `${jobsBarWidth}%` }}
-                />
-              </div>
+              <AnimatedJobBar width={jobsBarWidth} reduced={prefersReducedMotion} />
             </div>
 
             {/* Stats row */}

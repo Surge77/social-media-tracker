@@ -1,18 +1,15 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import type { TechnologyWithScore, TechnologyCategory } from '@/types'
-
-interface TechnologiesResponse {
-  technologies: TechnologyWithScore[]
-  last_updated: string | null
-}
+import type { TechnologyCategory } from '@/types'
+import type { TechnologiesResponse } from '@/lib/server/technology-data'
 
 interface UseTechnologiesOptions {
   category?: TechnologyCategory | 'all'
   sort?: 'score' | 'momentum' | 'name'
   search?: string
   enabled?: boolean
+  initialData?: TechnologiesResponse | null
 }
 
 async function fetchTechnologies(): Promise<TechnologiesResponse> {
@@ -22,17 +19,23 @@ async function fetchTechnologies(): Promise<TechnologiesResponse> {
 }
 
 export function useTechnologies(options: UseTechnologiesOptions = {}) {
-  const { category = 'all', sort = 'score', search = '', enabled = true } = options
+  const {
+    category = 'all',
+    sort = 'score',
+    search = '',
+    enabled = true,
+    initialData = null,
+  } = options
 
   const query = useQuery({
     queryKey: ['technologies'],
     queryFn: fetchTechnologies,
-    staleTime: 60 * 60 * 1000, // 1 hour — matches API Cache-Control s-maxage
-    gcTime: 2 * 60 * 60 * 1000, // 2 hours
+    staleTime: 60 * 60 * 1000,
+    gcTime: 2 * 60 * 60 * 1000,
     enabled,
+    initialData: initialData ?? undefined,
   })
 
-  // Client-side filtering and sorting
   const filtered = query.data?.technologies
     ?.filter((tech) => {
       if (category !== 'all' && tech.category !== category) return false
@@ -41,7 +44,7 @@ export function useTechnologies(options: UseTechnologiesOptions = {}) {
         return (
           tech.name.toLowerCase().includes(q) ||
           tech.slug.toLowerCase().includes(q) ||
-          tech.aliases?.some((a) => a.toLowerCase().includes(q))
+          tech.aliases?.some((alias) => alias.toLowerCase().includes(q))
         )
       }
       return true

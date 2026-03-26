@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { requireAdminAccess } from '@/lib/http/route-guards'
 import {
   getAllPromptKeys,
   getPromptVersions,
@@ -13,6 +14,9 @@ import {
 } from '@/lib/ai/prompt-manager'
 
 export async function GET(req: NextRequest) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const supabase = await createSupabaseServerClient()
     const searchParams = req.nextUrl.searchParams
@@ -45,6 +49,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const guard = requireAdminAccess(req, process.env)
+  if (guard) return guard
+
   try {
     const supabase = await createSupabaseServerClient()
     const body = await req.json()
