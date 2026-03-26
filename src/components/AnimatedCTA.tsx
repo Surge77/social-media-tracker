@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
@@ -47,6 +48,7 @@ const AnimatedCTA = React.forwardRef<HTMLAnchorElement, AnimatedCTAProps>(
   ({ className, variant, size, href, children, delay = 150, disabled = false, onClick, ...props }, ref) => {
     const [isNavigating, setIsNavigating] = React.useState(false);
     const prefersReducedMotion = useReducedMotion();
+    const router = useRouter();
 
     // Magnetic physics state
     const x = useMotionValue(0);
@@ -92,14 +94,24 @@ const AnimatedCTA = React.forwardRef<HTMLAnchorElement, AnimatedCTAProps>(
         if (delay > 0) {
           event.preventDefault();
           setIsNavigating(true);
+
+          const isExternalNavigation =
+            href.startsWith('http') ||
+            href.startsWith('mailto:') ||
+            href.startsWith('tel:') ||
+            Boolean(props.download);
           
           setTimeout(() => {
-            // Use window.location for navigation after delay to ensure smooth transition
-            window.location.href = href;
+            if (isExternalNavigation) {
+              window.location.href = href;
+              return;
+            }
+
+            router.push(href);
           }, delay);
         }
       },
-      [disabled, onClick, delay, href]
+      [disabled, onClick, delay, href, props.download, router]
     );
 
     const ariaLabel = React.useMemo(() => {
@@ -148,13 +160,15 @@ const AnimatedCTA = React.forwardRef<HTMLAnchorElement, AnimatedCTAProps>(
         >
           {isNavigating ? (
             <motion.div
-              className="flex items-center gap-2"
+              className="inline-flex items-center gap-2.5 whitespace-nowrap"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: prefersReducedMotion ? 0.1 : 0.2 }}
             >
-              <LoadingSpinner size="sm" className="!border-current/20 !border-t-current" />
-              <span className="opacity-70">Loading...</span>
+              <span className="rounded-full bg-current/10 px-2.5 py-1 font-mono text-[0.65rem] font-bold tracking-[0.22em] text-current/90">
+                <LoadingSpinner size="md" className="align-middle" />
+              </span>
+              <span className="font-semibold text-current/85">Buffering...</span>
             </motion.div>
           ) : (
             <motion.div
