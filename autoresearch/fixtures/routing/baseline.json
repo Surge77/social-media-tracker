@@ -1,0 +1,64 @@
+{
+  "cases": [
+    {
+      "id": "chat_prefers_groq",
+      "weight": 25,
+      "useCase": "chat",
+      "providers": {
+        "groq": { "available": true, "success": true, "qualityScore": 92, "latencyMs": 320, "costUsd": 0.003 },
+        "cerebras": { "available": true, "success": true, "qualityScore": 88, "latencyMs": 410, "costUsd": 0.004 },
+        "xai": { "available": true, "success": true, "qualityScore": 90, "latencyMs": 950, "costUsd": 0.012 }
+      },
+      "expectations": {
+        "chosenProvider": "groq",
+        "minimumQualityScore": 85,
+        "maxCostUsd": 0.01
+      }
+    },
+    {
+      "id": "chat_falls_back_to_cerebras",
+      "weight": 25,
+      "useCase": "chat",
+      "providers": {
+        "groq": { "available": true, "success": false, "qualityScore": 0, "latencyMs": 9999, "costUsd": 0.0 },
+        "cerebras": { "available": true, "success": true, "qualityScore": 86, "latencyMs": 480, "costUsd": 0.004 },
+        "xai": { "available": true, "success": true, "qualityScore": 91, "latencyMs": 1100, "costUsd": 0.013 }
+      },
+      "expectations": {
+        "chosenProvider": "cerebras",
+        "minimumQualityScore": 80,
+        "maxCostUsd": 0.01
+      }
+    },
+    {
+      "id": "comparison_prefers_gemini",
+      "weight": 25,
+      "useCase": "comparison",
+      "providers": {
+        "gemini": { "available": true, "success": true, "qualityScore": 94, "latencyMs": 1450, "costUsd": 0.005 },
+        "xai": { "available": true, "success": true, "qualityScore": 90, "latencyMs": 1700, "costUsd": 0.012 },
+        "mistral": { "available": true, "success": true, "qualityScore": 88, "latencyMs": 2100, "costUsd": 0.007 }
+      },
+      "expectations": {
+        "chosenProvider": "gemini",
+        "minimumQualityScore": 90,
+        "maxCostUsd": 0.01
+      }
+    },
+    {
+      "id": "batch_insight_falls_back_to_mistral",
+      "weight": 25,
+      "useCase": "batch_insight",
+      "providers": {
+        "gemini": { "available": true, "success": false, "qualityScore": 0, "latencyMs": 9999, "costUsd": 0.0 },
+        "mistral": { "available": true, "success": true, "qualityScore": 84, "latencyMs": 2400, "costUsd": 0.006 },
+        "xai": { "available": true, "success": true, "qualityScore": 82, "latencyMs": 2700, "costUsd": 0.011 }
+      },
+      "expectations": {
+        "chosenProvider": "mistral",
+        "minimumQualityScore": 80,
+        "maxCostUsd": 0.01
+      }
+    }
+  ]
+}

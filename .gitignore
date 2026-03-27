@@ -59,3 +59,14 @@ next-env.d.ts
 
 # local vendor repos
 /vendor/antigravity-kit/
+
+# local cloned repos
+/autoresearch/autoresearch/
+
+# local autoresearch runtime outputs
+/autoresearch/results.tsv
+/autoresearch/reports/
+
+# allow tracked autoresearch docs
+!autoresearch/*.md
+!autoresearch/**/*.md

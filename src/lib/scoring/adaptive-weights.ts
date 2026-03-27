@@ -64,10 +64,10 @@ export function getAdaptiveWeights(
   // Low completeness: reduce weight of dimensions more likely to be missing
   // (jobs data is often sparse for niche techs)
   if (dataCompleteness < 0.5) {
-    raw.jobs *= 0.8
-    raw.ecosystem *= 0.9
-    raw.github *= 1.1
-    raw.community *= 1.1
+    raw.jobs *= 0.75
+    raw.ecosystem *= 0.85
+    raw.github *= 1.12
+    raw.community *= 1.12
     if (isBlockchain && raw.onchain !== undefined) {
       raw.onchain *= 0.95
     }
