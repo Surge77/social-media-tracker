@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "results": {
+    "file": "autoresearch/results.tsv",
+    "reportDir": "autoresearch/reports",
+    "template": "autoresearch/results.template.tsv"
+  },
+  "tracks": {
+    "scoring": {
+      "description": "Adaptive weights, momentum, and composite ranking heuristics for DevTrends scoring.",
+      "evaluatorScript": "scripts/autoresearch-eval-scoring.mjs",
+      "fixture": "autoresearch/fixtures/scoring/baseline.json",
+      "editable": [
+        "src/lib/scoring/adaptive-weights.ts",
+        "src/lib/scoring/enhanced-momentum.ts",
+        "src/lib/scoring/composite.ts"
+      ]
+    },
+    "routing": {
+      "description": "Provider routing policy for AI use cases and fallback order selection.",
+      "evaluatorScript": "scripts/autoresearch-eval-routing.mjs",
+      "fixture": "autoresearch/fixtures/routing/baseline.json",
+      "editable": [
+        "src/lib/ai/router.ts"
+      ]
+    }
+  }
+}

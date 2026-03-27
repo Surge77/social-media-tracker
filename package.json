@@ -9,6 +9,11 @@
     "lint": "eslint src/",
     "test": "vitest run",
     "test:watch": "vitest",
+    "benchmark": "node scripts/benchmark.mjs",
+    "autoresearch:eval:scoring": "node scripts/autoresearch-eval-scoring.mjs",
+    "autoresearch:eval:routing": "node scripts/autoresearch-eval-routing.mjs",
+    "autoresearch:loop:scoring": "node scripts/autoresearch-runner.mjs --track scoring",
+    "autoresearch:loop:routing": "node scripts/autoresearch-runner.mjs --track routing",
     "postinstall": "node scripts/ensure-next-app-shim.mjs"
   },
   "browserslist": [
@@ -44,6 +49,7 @@
     "nanospinner": "^1.2.2",
     "next": "^16.2.1",
     "next-themes": "^0.4.6",
+    "puppeteer": "^24.40.0",
     "react": "19.1.0",
     "react-countup": "^6.5.3",
     "react-dom": "19.1.0",
