@@ -1,48 +1,178 @@
-# DevTrends
+<div align="center">
 
-DevTrends is a Next.js application for developer career intelligence. It aggregates signals from engineering communities, job sources, package ecosystems, and blockchain data, then turns them into dashboards, comparisons, AI-assisted analysis, and recurring digests.
+<!-- PROJECT BANNER -->
+<!-- ![DevTrends Banner](./assets/banner.png) -->
 
-Production site: `https://devtrends.dev`
+```text
+██████╗ ███████╗██╗   ██╗████████╗██████╗ ███████╗███╗   ██╗██████╗ ███████╗
+██╔══██╗██╔════╝██║   ██║╚══██╔══╝██╔══██╗██╔════╝████╗  ██║██╔══██╗██╔════╝
+██║  ██║█████╗  ██║   ██║   ██║   ██████╔╝█████╗  ██╔██╗ ██║██║  ██║███████╗
+██║  ██║██╔══╝  ╚██╗ ██╔╝   ██║   ██╔══██╗██╔══╝  ██║╚██╗██║██║  ██║╚════██║
+██████╔╝███████╗ ╚████╔╝    ██║   ██║  ██║███████╗██║ ╚████║██████╔╝███████║
+╚═════╝ ╚══════╝  ╚═══╝     ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝
+```
 
-Repository: `https://github.com/Surge77/social-media-tracker`
+### Developer Career Intelligence
 
-## What the project does
+**Track what is rising, what is cooling off, and what is worth learning across live engineering, jobs, and blockchain signals.**
 
-- Tracks technologies across GitHub, Stack Overflow, Reddit, Dev.to, RSS, npm, jobs, and DeFiLlama-backed blockchain data.
-- Scores technologies with a daily pipeline instead of static editorial rankings.
-- Ships dashboard surfaces for technologies, languages, repos, jobs, blockchain, comparisons, quizzes, monitoring, and weekly digests.
-- Adds AI-assisted endpoints for summaries, comparisons, recommendations, digest generation, and chat.
-- Includes an `autoresearch/` workspace for guarded evaluation loops around scoring and AI routing.
+<br/>
 
-## Product areas
+[![Next.js](https://img.shields.io/badge/Next.js-16.2.1-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19.1.0-61dafb?style=for-the-badge&logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=for-the-badge&logo=typescript)](https://typescriptlang.org)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=for-the-badge&logo=supabase)](https://supabase.com)
+[![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
 
-The app currently includes:
+[![Version](https://img.shields.io/badge/version-0.9.0--beta.1-orange?style=flat-square)](./package.json)
+[![Typecheck](https://img.shields.io/badge/typecheck-tsc-blue?style=flat-square)](.)
+[![Tests](https://img.shields.io/badge/tests-vitest-6e9f18?style=flat-square)](.)
 
-- Landing page
-- Technology detail pages
-- Language rankings
-- Trending repositories
-- Jobs intelligence
-- Blockchain dashboard
-- Comparison flow
-- Quiz flows
-- Weekly digest
+<br/>
+
+[![Tech Stack](https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,supabase,postgres,vercel&theme=dark)](https://skillicons.dev)
+
+[Live Demo](https://devtrends.dev) · [Repository](https://github.com/Surge77/social-media-tracker)
+
+</div>
+
+---
+
+## Why DevTrends?
+
+Developers make career bets with fragmented information. GitHub shows one signal, job boards show another, community buzz shows a third, and blockchain ecosystems behave like a separate market entirely.
+
+**DevTrends pulls those signals into one product.** It collects data from engineering communities, package ecosystems, job sources, and DeFiLlama-backed blockchain feeds, then turns them into rankings, comparisons, AI-assisted analysis, weekly digests, and quiz-style decision flows.
+
+> *"Should I learn Go or Rust?"*  
+> *"Is this framework gaining real hiring demand or just hype?"*  
+> *"Which blockchain ecosystem is actually showing durable usage?"*
+>
+> DevTrends is built to answer those questions with data instead of vibes.
+
+---
+
+## Features
+
+| | Feature | Description |
+|---|---|---|
+| 📊 | **Trend Scoring** | Daily scoring pipeline for technologies instead of static editorial lists |
+| 🤖 | **AI Intelligence Layer** | AI-assisted summaries, comparisons, recommendations, digest generation, and chat |
+| 🎯 | **Career Quizzes** | Decision flows for learning direction, hype checks, stack health, and roadmap-style guidance |
+| 🔀 | **Tech Comparison** | Side-by-side comparison surfaces for competing technologies |
+| 💼 | **Jobs Intelligence** | Hiring signals and jobs-focused trend routes |
+| ⛓️ | **Blockchain Dashboard** | Chain TVL, protocol health, bridge leaderboard, gas data, and ecosystem snapshots |
+| 🗂️ | **Language Rankings** | Language pages and ranking-related ingestion routes |
+| 🔴 | **Trending Repositories** | Repo discovery and curated repository views |
+| 📰 | **Weekly Digest** | Scheduled digest generation and summary surfaces |
+| 🧪 | **Autoresearch Loops** | Guarded evaluation workflows for scoring and routing experiments |
+| 🔄 | **Cron Pipeline** | Daily and weekly scheduled routes for ingestion and recomputation |
+| 📈 | **Benchmark CLI** | Local benchmark script for measuring key routes and loading behavior |
+
+---
+
+## Product Areas
+
+The current dashboard surface includes 11 main areas under `src/app/(dashboard)`:
+
 - Ask AI
-- Monitoring and methodology pages
+- Blockchain
+- Compare
+- Digest
+- Jobs
+- Languages
+- Methodology
+- Monitoring
+- Quiz
+- Repos
+- Technologies
 
-## Tech stack
+The technology icon mapping currently covers **117 technologies**, based on [src/lib/tech-icons.ts](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/lib/tech-icons.ts).
 
-- Next.js 16 App Router
-- React 19
-- TypeScript
-- Tailwind CSS
-- TanStack Query
-- Supabase
-- Vitest
-- Vercel cron jobs
-- Puppeteer for local benchmark tooling
+---
 
-## Quick start
+## Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Framework** | Next.js 16 App Router | Pages, routing, APIs, and SSR |
+| **Language** | TypeScript | Application code and type-safe utilities |
+| **Styling** | Tailwind CSS | Design system and UI layout |
+| **State / Fetching** | TanStack Query | Client-side server state and refresh behavior |
+| **Database** | Supabase | Data storage, server access, and scheduled pipeline persistence |
+| **Charts / Viz** | Recharts, D3, Nivo | Data visualization across dashboards |
+| **Animation** | Framer Motion | UI animation where needed |
+| **Validation** | Zod | Runtime validation for typed inputs and config |
+| **Testing** | Vitest + fast-check | Unit tests and property-based checks |
+| **Automation** | Vercel Cron | Daily and weekly scheduled jobs |
+| **Benchmarking** | Puppeteer | Local route benchmarking via CLI |
+
+---
+
+## Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                          DEVTRENDS PLATFORM                         │
+│                                                                     │
+│   ┌─────────────┐    ┌──────────────────────────────────────────┐  │
+│   │   Browser   │◄──►│         Next.js App Router Pages         │  │
+│   └─────────────┘    │ Landing │ Dashboard │ API routes         │  │
+│                      └──────────────┬───────────────┬───────────┘  │
+│                                     │               │              │
+│                      ┌──────────────▼──────┐  ┌────▼────────────┐ │
+│                      │   Scoring / Trends  │  │   AI Layer      │ │
+│                      │ composite scoring   │  │ compare / ask   │ │
+│                      │ momentum / ranking  │  │ digest / recs   │ │
+│                      └──────────────┬──────┘  └────┬────────────┘ │
+│                                     │               │              │
+│                      ┌──────────────▼────────────────▼──────────┐  │
+│                      │        Data + Cron Ingestion Layer       │  │
+│                      │ GitHub | Reddit | Stack Overflow | Jobs  │  │
+│                      │ npm | Dev.to | RSS | YouTube | DeFiLlama │  │
+│                      └──────────────┬────────────────────────────┘  │
+│                                     │                               │
+│                      ┌──────────────▼───────────────┐               │
+│                      │      Supabase / system data  │               │
+│                      └──────────────────────────────┘               │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Project Structure
+
+```text
+tracker_final/
+├── src/
+│   ├── app/              # Next.js pages and API handlers
+│   ├── components/       # UI and page-level components
+│   ├── hooks/            # React hooks
+│   ├── lib/              # scoring, AI, fetchers, jobs, blockchain, utilities
+│   └── types/            # shared TypeScript types
+├── scripts/              # benchmark and autoresearch helpers
+├── supabase/             # SQL migrations
+├── autoresearch/         # fixtures, manifest, evaluation workspace
+├── assets/screenshots/   # README screenshots
+├── docs/                 # supporting docs
+├── .env.example
+├── package.json
+├── vercel.json
+└── vitest.config.ts
+```
+
+Useful folders:
+
+- [src/app](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/app)
+- [src/components](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/components)
+- [src/lib](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/lib)
+- [scripts](C:/Users/tdmne/OneDrive/Desktop/tracker_final/scripts)
+- [supabase/migrations](C:/Users/tdmne/OneDrive/Desktop/tracker_final/supabase/migrations)
+- [autoresearch](C:/Users/tdmne/OneDrive/Desktop/tracker_final/autoresearch)
+
+---
+
+## Quick Start
 
 ### Prerequisites
 
@@ -51,23 +181,26 @@ The app currently includes:
 - A Supabase project
 - API credentials for the sources you want to enable
 
-### Install
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Surge77/social-media-tracker.git
 cd social-media-tracker
+```
+
+### 2. Install dependencies
+
+```bash
 npm install
 ```
 
-### Configure environment variables
-
-Copy the template and fill in the values you need:
+### 3. Configure environment variables
 
 ```bash
 cp .env.example .env.local
 ```
 
-The repo supports many optional integrations. Start with the essentials:
+Start with the essentials:
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -77,21 +210,67 @@ The repo supports many optional integrations. Start with the essentials:
 - `REDDIT_CLIENT_ID`
 - `REDDIT_CLIENT_SECRET`
 
-Jobs, blockchain, and AI features each have their own optional keys. Use [.env.example](C:/Users/tdmne/OneDrive/Desktop/tracker_final/.env.example) as the source of truth.
+Optional integrations for jobs, blockchain, and AI live in [.env.example](C:/Users/tdmne/OneDrive/Desktop/tracker_final/.env.example).
 
-### Apply database migrations
+### 4. Apply database migrations
 
 Run the SQL files in [supabase/migrations](C:/Users/tdmne/OneDrive/Desktop/tracker_final/supabase/migrations) against your Supabase project.
 
-### Start the app
+### 5. Start the development server
 
 ```bash
 npm run dev
 ```
 
-The dev server runs on `http://127.0.0.1:3000`.
+The app runs at `http://127.0.0.1:3000`.
 
-## Common commands
+---
+
+## Environment Variables
+
+The template in [.env.example](C:/Users/tdmne/OneDrive/Desktop/tracker_final/.env.example) now matches the variables the app actually reads.
+
+### Core
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Browser-safe Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server-side Supabase service key |
+| `NEXT_PUBLIC_APP_URL` | Optional base URL override for cron fan-out |
+| `CRON_SECRET` | Internal cron authentication in production |
+| `ADMIN_API_SECRET` | Admin route protection |
+
+### Source integrations
+
+| Area | Variables |
+|------|-----------|
+| GitHub | `GITHUB_TOKEN` |
+| Stack Overflow | `STACKOVERFLOW_API_KEY` |
+| Reddit | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT` |
+| Dev.to | `DEVTO_API_KEY` |
+| Jobs | `ADZUNA_APP_ID`, `ADZUNA_API_KEY`, `RAPIDAPI_KEY`, `HASDATA_API_KEY`, `SERPAPI_API_KEY` |
+| Jobs guardrails | `JOBS_INTELLIGENCE_MAX_TECHS`, `JOBS_INTELLIGENCE_MAX_MARKETS`, `JOBS_INTELLIGENCE_PAGES_PER_TECH`, `JOBS_TRENDS_MAX_TECHS` |
+| Ecosystem | `LIBRARIESIO_API_KEY`, `YOUTUBE_API_KEY` |
+| Blockchain | `ETHERSCAN_API_KEY`, `COINGECKO_API_KEY` |
+
+### AI providers
+
+| Provider | Variables |
+|----------|-----------|
+| Gemini | `GEMINI_API_KEY`, `GEMINI_API_KEY_2` |
+| Groq | `GROQ_API_KEY` |
+| xAI | `XAI_API_KEY` |
+| Mistral | `MISTRAL_API_KEY` |
+| Cerebras | `CEREBRAS_API_KEY` |
+| OpenRouter | `OPENROUTER_API_KEY` |
+| Hugging Face | `HUGGINGFACE_API_KEY` |
+
+---
+
+## Commands
+
+### Core app commands
 
 ```bash
 npm run dev
@@ -101,27 +280,38 @@ npm run lint
 npm run test
 ```
 
-Additional project-specific commands:
+### Benchmarking
 
 ```bash
 npm run benchmark -- --help
+```
+
+This runs [scripts/benchmark.mjs](C:/Users/tdmne/OneDrive/Desktop/tracker_final/scripts/benchmark.mjs), which benchmarks selected routes locally.
+
+### Autoresearch
+
+```bash
 npm run autoresearch:eval:scoring
 npm run autoresearch:eval:routing
 npm run autoresearch:loop:scoring -- --dry-run
 npm run autoresearch:loop:routing -- --dry-run
 ```
 
-## Data pipeline
+For the full workflow, see [autoresearch/README.md](C:/Users/tdmne/OneDrive/Desktop/tracker_final/autoresearch/README.md).
+
+---
+
+## Data Pipeline
 
 Scheduled routes are defined in [vercel.json](C:/Users/tdmne/OneDrive/Desktop/tracker_final/vercel.json):
 
-- `/api/cron/fetch-daily`
-- `/api/cron/fetch-daily/batch-scoring`
-- `/api/cron/weekly-tasks`
+| Route | Schedule |
+|-------|----------|
+| `/api/cron/fetch-daily` | Daily |
+| `/api/cron/fetch-daily/batch-scoring` | Daily |
+| `/api/cron/weekly-tasks` | Weekly |
 
-For production, set `CRON_SECRET` so internal cron fan-out calls can authenticate.
-
-Useful API groups live under [src/app/api](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/app/api):
+Useful API groups under [src/app/api](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/app/api):
 
 - `ai`
 - `blockchain`
@@ -133,44 +323,94 @@ Useful API groups live under [src/app/api](C:/Users/tdmne/OneDrive/Desktop/track
 - `repos`
 - `technologies`
 
-## Project layout
+If you touch scheduled jobs, review the cron handlers and ensure `CRON_SECRET` is set in production.
 
-```text
-src/
-  app/            Next.js routes, pages, and API handlers
-  components/     UI and page-level components
-  hooks/          Client hooks
-  lib/            Fetchers, scoring, AI, jobs, blockchain, and utilities
-  types/          Shared TypeScript types
-scripts/          Benchmarks and autoresearch helpers
-supabase/         SQL migrations
-autoresearch/     Evaluation fixtures and guarded optimization workflows
-docs/             Supporting documentation
-```
+---
 
-Dashboard pages live under [src/app/(dashboard)](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/app/(dashboard)).
+## Screenshots
 
-## Testing and verification
+<div align="center">
 
-The project uses Vitest:
+### 🏠 Landing Page
+*Hero section with product framing and trend-focused entry points*
 
-```bash
-npm run test
-```
+![Landing Page](./assets/screenshots/landing.png)
 
-There is also a lightweight benchmark CLI in [scripts/benchmark.mjs](C:/Users/tdmne/OneDrive/Desktop/tracker_final/scripts/benchmark.mjs) for measuring selected routes locally.
+<br/>
 
-## Autoresearch
+### 📊 Technologies Dashboard
+*Technology surfaces, rankings, and score-driven navigation*
 
-The repo includes a guarded autoresearch workflow for scoring and routing experiments. See [autoresearch/README.md](C:/Users/tdmne/OneDrive/Desktop/tracker_final/autoresearch/README.md) for the evaluation commands, branch expectations, and loop behavior.
+![Technologies Dashboard](./assets/screenshots/technologies.png)
 
-## Notes for contributors
+<br/>
 
-- Keep environment access centralized through the existing env setup.
-- Prefer the established API and scoring modules in `src/lib` over adding parallel implementations.
+### 🔍 Technology Detail
+*Decision-first technology detail with analysis and supporting metrics*
+
+![Tech Detail Page](./assets/screenshots/tech-detail.png)
+
+<br/>
+
+### 🔀 Comparison
+*Side-by-side technology comparison flow*
+
+![Tech Comparison](./assets/screenshots/compare.png)
+
+<br/>
+
+### 🎯 Quiz Flow
+*Guided recommendation and hype-check surfaces*
+
+![Quiz — Learn Next](./assets/screenshots/quiz-learn-next.png)
+
+<br/>
+
+![Quiz — Hype Check](./assets/screenshots/quiz-hype-check.png)
+
+<br/>
+
+### 💬 Ask AI
+*Conversational trend and career assistant*
+
+![AI Chatbot](./assets/screenshots/ask.png)
+
+<br/>
+
+### ⛓️ Blockchain Dashboard
+*Chain, protocol, bridge, and gas intelligence*
+
+![Blockchain Dashboard](./assets/screenshots/blockchain.png)
+
+<br/>
+
+### 📰 Weekly Digest
+*Digest-style summary surface for shifts across the dataset*
+
+![Weekly Digest](./assets/screenshots/digest.png)
+
+</div>
+
+---
+
+## Notes for Contributors
+
+- Keep environment access aligned with the existing env setup.
+- Prefer the existing modules in `src/lib` over parallel rewrites.
 - Run `npm run test` before shipping changes.
-- If you touch scheduled jobs or source integrations, check the corresponding routes under `src/app/api/cron`.
+- If you touch scheduled jobs or ingestion sources, review the matching routes under `src/app/api/cron`.
+- If you touch autoresearch logic, keep the track boundaries in `autoresearch/manifest.json` intact.
 
-## Current status
+---
 
-This README was refreshed to match the current repository state on March 28, 2026. It intentionally avoids brittle file counts and placeholder links so it stays useful as the project changes.
+## Current Status
+
+This README was refreshed on March 28, 2026 to restore the original visual style while keeping the content aligned with the current repository state.
+
+<div align="center">
+
+**Built for developers who would rather use signals than guesswork.**
+
+[Live Demo](https://devtrends.dev) · [Repository](https://github.com/Surge77/social-media-tracker)
+
+</div>
