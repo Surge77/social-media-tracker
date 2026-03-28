@@ -1,5 +1,3 @@
-import puppeteer from 'puppeteer'
-
 const DEFAULT_CONFIG = {
   baseUrl: 'http://127.0.0.1:3000',
   paths: ['/', '/languages', '/repos'],
@@ -220,6 +218,7 @@ async function benchmarkPage(browser, baseUrl, path, timeoutMs) {
 }
 
 async function runBenchmarks(config) {
+  const { default: puppeteer } = await import('puppeteer')
   const browser = await puppeteer.launch({ headless: true })
 
   try {
