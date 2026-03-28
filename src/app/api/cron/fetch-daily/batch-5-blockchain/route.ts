@@ -1,6 +1,7 @@
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { fetchBlockchainJobCounts } from '@/lib/api/blockchain-jobs'
 import { fetchChainTVLs, fetchTopProtocols } from '@/lib/api/defillama'
+import { toOverviewProtocol } from '@/lib/blockchain/overview'
 import { isAuthorizedCronRequest } from '@/lib/cron/orchestrator'
 
 export const maxDuration = 60
@@ -38,14 +39,7 @@ export async function GET(request: Request) {
         change_1d: c.change_1d,
         change_7d: c.change_7d,
       })),
-      protocols: protocols.slice(0, 20).map((p) => ({
-        name: p.name,
-        slug: p.slug,
-        tvl: p.tvl,
-        category: p.category,
-        chains: p.chains,
-        change_7d: p.change_7d ?? 0,
-      })),
+      protocols: protocols.slice(0, 20).map(toOverviewProtocol),
       job_counts: Object.fromEntries(jobCounts),
       fetched_at: new Date().toISOString(),
     }

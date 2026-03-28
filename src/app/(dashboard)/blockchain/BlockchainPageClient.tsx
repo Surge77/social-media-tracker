@@ -368,9 +368,9 @@ function ChainHealthTab() {
       <div className="grid gap-8 lg:grid-cols-2">
         <section>
           <div className="mb-4">
-            <h2 className="text-base font-semibold text-foreground">Bridge Volume</h2>
+            <h2 className="text-base font-semibold text-foreground">Bridge TVL</h2>
             <p className="text-sm text-muted-foreground">
-              Top cross-chain bridges by 24h and 7d volume.
+              DeFiLlama moved bridge-volume APIs behind paid access, so this tracks top bridge protocols by TVL and weekly trend.
             </p>
           </div>
           <BridgeFlowChart />

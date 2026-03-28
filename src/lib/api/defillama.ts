@@ -21,6 +21,7 @@ export interface Protocol {
   change_7d: number | null
   category: string      // 'Dexes' | 'Lending' | 'Bridge' | etc.
   chains: string[]
+  logo?: string | null
   github?: string[]
   url: string
 }

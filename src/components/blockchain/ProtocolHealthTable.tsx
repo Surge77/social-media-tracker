@@ -13,6 +13,7 @@ interface Protocol {
   category: string
   chains: string[]
   change_7d?: number
+  logo?: string | null
 }
 
 interface Props {
@@ -174,14 +175,23 @@ export function ProtocolHealthTable({ protocols }: Props) {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <span className="relative h-6 w-6 flex-shrink-0 overflow-hidden rounded-full bg-muted shadow-sm transition-transform group-hover:scale-110">
-                            <Image
-                              src={`https://icons.llama.fi/protocols/${p.slug}.jpg`}
-                              alt={p.name}
-                              fill
-                              sizes="24px"
-                              className="object-cover"
-                              unoptimized
-                            />
+                            {p.logo ? (
+                              <Image
+                                src={p.logo}
+                                alt={p.name}
+                                fill
+                                sizes="24px"
+                                className="object-cover"
+                                unoptimized
+                              />
+                            ) : (
+                              <span
+                                aria-hidden="true"
+                                className="flex h-full w-full items-center justify-center text-[10px] font-black uppercase text-foreground/45"
+                              >
+                                {p.name.slice(0, 2)}
+                              </span>
+                            )}
                           </span>
                           <a
                             href={`https://defillama.com/protocol/${p.slug}`}

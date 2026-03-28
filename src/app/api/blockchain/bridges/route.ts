@@ -1,6 +1,6 @@
 import { fetchTopBridges } from '@/lib/api/defillama-bridges'
 
-export const revalidate = 3600 // 1 hour
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
