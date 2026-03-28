@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { fetchChainTVLs, fetchTopProtocols } from '@/lib/api/defillama'
+import { hasFreshBlockchainOverviewCache, toOverviewProtocol } from '@/lib/blockchain/overview'
 import { NextResponse } from 'next/server'
 
 export const revalidate = 3600 // 1 hour cache
@@ -17,10 +18,7 @@ export async function GET() {
 
     if (cached?.value) {
       const parsed = JSON.parse(cached.value as string)
-      const age = Date.now() - new Date(parsed.fetched_at).getTime()
-      // Invalidate if older than 24h OR if chain data is missing change fields (stale schema)
-      const hasChangeFields = parsed.chains?.[0]?.change_1d !== undefined
-      if (age < 86400000 && hasChangeFields) {
+      if (hasFreshBlockchainOverviewCache(parsed)) {
         return NextResponse.json({ success: true, data: parsed, source: 'cache' })
       }
     }
@@ -33,7 +31,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      data: { chains, protocols: protocols.slice(0, 20) },
+      data: { chains, protocols: protocols.slice(0, 20).map(toOverviewProtocol) },
       source: 'live',
     })
   } catch (error) {

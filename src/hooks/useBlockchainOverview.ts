@@ -14,6 +14,7 @@ export interface BlockchainOverviewData {
     category: string
     chains: string[]
     change_7d?: number
+    logo?: string | null
   }>
   job_counts: Record<string, number>
   fetched_at: string
