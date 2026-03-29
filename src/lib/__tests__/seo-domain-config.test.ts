@@ -35,6 +35,16 @@ describe('SEO domain configuration', () => {
     expect(layoutSource).toContain("google: 'HJZOWekjSh07-2FrEQOHeOUB2Tn05Il_8agggR7fjsg'")
   })
 
+  it('loads the Umami analytics script from the root layout', () => {
+    const layoutSource = fs.readFileSync(
+      path.join(process.cwd(), 'src/app/layout.tsx'),
+      'utf8'
+    )
+
+    expect(layoutSource).toContain('https://cloud.umami.is/script.js')
+    expect(layoutSource).toContain('3683c839-c353-4e16-a3e4-ec46b50c04ab')
+  })
+
   it('redirects legacy hosts to the canonical www.devtrends.pro domain', async () => {
     const redirects = await nextConfig.redirects?.()
 

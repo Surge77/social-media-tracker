@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Manrope } from "next/font/google";
+import Script from "next/script";
 import { NavigationProgress } from "@/components/NavigationProgress";
 import { SITE_URL, withCanonicalMetadata } from "@/lib/seo";
 import "./globals.css";
@@ -65,6 +66,11 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
+        <Script
+          src="https://cloud.umami.is/script.js"
+          data-website-id="3683c839-c353-4e16-a3e4-ec46b50c04ab"
+          strategy="afterInteractive"
+        />
         <Providers>
           <NavigationProgress />
           {children}
