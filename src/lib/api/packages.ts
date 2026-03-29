@@ -133,7 +133,7 @@ async function fetchCratesDownloads(crateName: string): Promise<number | null> {
 
   const response = await fetch(url, {
     headers: {
-      'User-Agent': 'DevTrends/1.0 (https://devtrends.dev)',
+      'User-Agent': 'DevTrends/1.0 (https://www.devtrends.pro)',
     },
   })
 

@@ -192,7 +192,7 @@ export class CerebrasProvider extends OpenAICompatibleProvider {
 export class OpenRouterProvider extends OpenAICompatibleProvider {
   constructor(apiKey: string, model: string) {
     super(apiKey, model, 'https://openrouter.ai/api/v1', {
-      'HTTP-Referer': 'https://devtrends.dev',
+      'HTTP-Referer': 'https://www.devtrends.pro',
       'X-Title': 'DevTrends Intelligence Engine',
     })
   }

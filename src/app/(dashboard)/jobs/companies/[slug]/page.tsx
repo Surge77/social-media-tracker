@@ -3,14 +3,10 @@ import type { Metadata } from 'next'
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getJobsCompanies, getJobsOpenings } from '@/lib/jobs/aggregator'
+import { withCanonicalMetadata } from '@/lib/seo'
 
 type CompanyDetailPageProps = {
   params: Promise<{ slug: string }>
-}
-
-export const metadata: Metadata = {
-  title: 'Company Hiring Detail',
-  description: 'Company-level hiring detail within the jobs intelligence surface.',
 }
 
 function prettyLabel(slug: string) {
@@ -18,6 +14,16 @@ function prettyLabel(slug: string) {
     .split('-')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ')
+}
+
+export async function generateMetadata({ params }: CompanyDetailPageProps): Promise<Metadata> {
+  const { slug } = await params
+  const label = prettyLabel(slug)
+
+  return withCanonicalMetadata(`/jobs/companies/${slug}`, {
+    title: `${label} Hiring Detail`,
+    description: `Company-level hiring radar for ${label}, including openings, stack concentration, remote share, and source coverage.`,
+  })
 }
 
 export default async function CompanyDetailPage({ params }: CompanyDetailPageProps) {

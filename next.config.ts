@@ -1,6 +1,15 @@
 import type { NextConfig } from 'next'
+import { LEGACY_HOSTS } from './src/lib/seo'
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return LEGACY_HOSTS.map((host) => ({
+      source: '/:path*',
+      has: [{ type: 'host' as const, value: host }],
+      destination: 'https://www.devtrends.pro/:path*',
+      permanent: true,
+    }))
+  },
   async headers() {
     return [
       {

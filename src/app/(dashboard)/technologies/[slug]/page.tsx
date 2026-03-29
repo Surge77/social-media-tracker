@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { TechnologyDetailClient } from '@/components/technologies/TechnologyDetailClient'
+import { withCanonicalMetadata } from '@/lib/seo'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -18,19 +19,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       .single()
 
     if (!tech) {
-      return { title: 'Technology Not Found' }
+      return withCanonicalMetadata(`/technologies/${slug}`, {
+        title: 'Technology Not Found',
+      })
     }
 
-    return {
+    return withCanonicalMetadata(`/technologies/${slug}`, {
       title: tech.name,
       description: `${tech.name} developer trends: GitHub activity, community buzz, job market demand, and ecosystem health. ${tech.description}`,
       openGraph: {
-        title: `${tech.name} — DevTrends`,
+        title: `${tech.name} - DevTrends`,
         description: tech.description,
       },
-    }
+    })
   } catch {
-    return { title: 'Technology Details' }
+    return withCanonicalMetadata(`/technologies/${slug}`, {
+      title: 'Technology Details',
+    })
   }
 }
 

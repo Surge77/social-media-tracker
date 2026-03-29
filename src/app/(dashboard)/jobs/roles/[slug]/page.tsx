@@ -3,14 +3,10 @@ import type { Metadata } from 'next'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { createSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getJobsRoleRows } from '@/lib/jobs/intelligence'
+import { withCanonicalMetadata } from '@/lib/seo'
 
 type RoleDetailPageProps = {
   params: Promise<{ slug: string }>
-}
-
-export const metadata: Metadata = {
-  title: 'Role Hiring Detail',
-  description: 'Role-family hiring detail within the jobs intelligence surface.',
 }
 
 function prettyLabel(slug: string) {
@@ -18,6 +14,16 @@ function prettyLabel(slug: string) {
     .split('-')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ')
+}
+
+export async function generateMetadata({ params }: RoleDetailPageProps): Promise<Metadata> {
+  const { slug } = await params
+  const label = prettyLabel(slug)
+
+  return withCanonicalMetadata(`/jobs/roles/${slug}`, {
+    title: `${label} Hiring Detail`,
+    description: `Hiring demand, growth, and remote-share detail for ${label} roles within the DevTrends jobs intelligence surface.`,
+  })
 }
 
 export default async function RoleDetailPage({ params }: RoleDetailPageProps) {

@@ -1,10 +1,12 @@
 import { ArrowRight, BarChart3, Brain, Clock, Database, Scale, Shield, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { withCanonicalMetadata } from '@/lib/seo'
 
-export const metadata = {
-  title: 'Methodology | DevTrends',
-  description: 'How DevTrends scores technologies: composite scoring from 9+ data sources, multi-window momentum analysis, Bayesian smoothing, and AI-powered insights.',
-}
+export const metadata = withCanonicalMetadata('/methodology', {
+  title: 'Methodology',
+  description:
+    'How DevTrends scores technologies: composite scoring from 9+ data sources, multi-window momentum analysis, Bayesian smoothing, and AI-powered insights.',
+})
 
 export default function MethodologyPage() {
   return (
