@@ -67,6 +67,18 @@ export default function RootLayout({
         className={`${manrope.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
         <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-RLY0FYR7RW"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-RLY0FYR7RW');
+          `}
+        </Script>
+        <Script
           src="https://cloud.umami.is/script.js"
           data-website-id="3683c839-c353-4e16-a3e4-ec46b50c04ab"
           strategy="afterInteractive"

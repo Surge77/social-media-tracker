@@ -45,6 +45,16 @@ describe('SEO domain configuration', () => {
     expect(layoutSource).toContain('3683c839-c353-4e16-a3e4-ec46b50c04ab')
   })
 
+  it('loads the GA4 Google tag from the root layout', () => {
+    const layoutSource = fs.readFileSync(
+      path.join(process.cwd(), 'src/app/layout.tsx'),
+      'utf8'
+    )
+
+    expect(layoutSource).toContain('https://www.googletagmanager.com/gtag/js?id=G-RLY0FYR7RW')
+    expect(layoutSource).toContain("gtag('config', 'G-RLY0FYR7RW')")
+  })
+
   it('redirects legacy hosts to the canonical www.devtrends.pro domain', async () => {
     const redirects = await nextConfig.redirects?.()
 
