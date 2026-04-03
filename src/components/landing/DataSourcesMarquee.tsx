@@ -68,7 +68,7 @@ export default function DataSourcesMarquee() {
       <div className="pointer-events-none absolute left-0 bottom-0 z-10 h-full w-16 bg-gradient-to-r from-[#f8f3e6] to-transparent dark:from-[#17120d] sm:w-28" />
       <div className="pointer-events-none absolute right-0 bottom-0 z-10 h-full w-16 bg-gradient-to-l from-[#f8f3e6] to-transparent dark:from-[#17120d] sm:w-28" />
 
-      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-6 px-6 sm:gap-8">
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 sm:gap-8 sm:px-6">
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-6 sm:flex-nowrap sm:gap-x-10">
           {TOP_ROW_LOGOS.map((s, i) => (
             <LogoItem key={s.name} source={s} index={i} reduced={prefersReducedMotion} />

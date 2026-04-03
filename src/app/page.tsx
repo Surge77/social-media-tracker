@@ -12,7 +12,7 @@ const Footer             = dynamic(() => import('@/components/Footer'),         
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen overflow-x-clip bg-background">
       <HeaderNew />
       <HeroNew />
       <DataSourcesMarquee />

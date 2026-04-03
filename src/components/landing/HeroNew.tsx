@@ -50,7 +50,7 @@ export default function HeroNew() {
   return (
     <section 
       onPointerMove={handlePointerMove}
-      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pb-14 pt-24 sm:min-h-screen sm:pb-16 sm:pt-28"
+      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pb-12 pt-24 sm:min-h-screen sm:pb-16 sm:pt-28"
     >
       {/* ── Layer 1: solid background base ─────────────────────────────── */}
       <div className="absolute inset-0 bg-background" />
@@ -99,7 +99,7 @@ export default function HeroNew() {
       <div className="mobile-glow-soft pointer-events-none absolute left-1/2 top-1/3 z-0 h-[280px] w-[280px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[72px] sm:h-[500px] sm:w-[500px] sm:blur-[100px]" />
 
       <motion.div 
-        className="pointer-events-none absolute inset-0 z-10"
+        className="pointer-events-none absolute inset-0 z-10 hidden lg:block"
         style={{ x: springX, y: springY }}
         aria-hidden="true"
       >
@@ -107,21 +107,21 @@ export default function HeroNew() {
       </motion.div>
 
       <div className="app-page relative z-20">
-        <div className="text-center max-w-5xl mx-auto">
+        <div className="mx-auto max-w-5xl text-center">
 
           {/* Main headline */}
           <motion.h1
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 50, scale: 0.92 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             transition={{ type: "spring", bounce: 0.4, duration: 1.2, delay: 0.1 }}
-            className="mb-6 sm:mb-8"
+            className="mb-5 sm:mb-8"
           >
             <HyperText
               text="Know what to learn"
-              className="block text-3xl font-bold leading-[1.02] tracking-[-0.02em] text-foreground sm:text-5xl md:text-6xl"
+              className="block text-[clamp(2.5rem,9vw,4.75rem)] font-bold leading-[0.98] tracking-[-0.03em] text-foreground"
               duration={1000}
             />
-            <span className="mt-2 block text-[1.85rem] font-bold leading-[1.06] tracking-[-0.02em] bg-gradient-to-r from-orange-700 via-amber-600 to-orange-600 bg-clip-text text-transparent animate-gradient dark:from-orange-500 dark:via-amber-500 dark:to-orange-400 sm:text-4xl md:text-5xl">
+            <span className="mt-2 block text-[clamp(1.7rem,6vw,3.5rem)] font-bold leading-[1.02] tracking-[-0.03em] bg-gradient-to-r from-orange-700 via-amber-600 to-orange-600 bg-clip-text text-transparent animate-gradient dark:from-orange-500 dark:via-amber-500 dark:to-orange-400">
               before the market shifts
             </span>
           </motion.h1>
@@ -133,8 +133,8 @@ export default function HeroNew() {
             transition={{ duration: 0.5, delay: 0.25 }}
             className="mb-4 flex justify-center"
           >
-            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1.5 text-[11px] sm:px-3.5 sm:text-xs">
-              <span className="text-muted-foreground font-medium shrink-0">Tracking:</span>
+            <div className="inline-flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-2xl border border-primary/20 bg-primary/5 px-3 py-1.5 text-[11px] sm:rounded-full sm:px-3.5 sm:text-xs">
+              <span className="shrink-0 font-medium text-muted-foreground">Tracking:</span>
               <MorphingText
                 texts={["GitHub stars", "Stack Overflow velocity", "job postings", "community sentiment", "npm downloads"]}
                 className="font-semibold text-primary"
@@ -147,7 +147,7 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
             animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="mx-auto mb-8 max-w-2xl px-2 text-base leading-relaxed text-foreground/80 dark:text-muted-foreground sm:mb-10 sm:px-0 sm:text-lg md:text-xl"
+            className="mx-auto mb-8 max-w-2xl px-2 text-[0.98rem] leading-relaxed text-foreground/80 dark:text-muted-foreground sm:mb-10 sm:px-0 sm:text-lg md:text-xl"
           >
             Aggregated into daily scores for 100+ technologies.
             Skip the guesswork. See what the data actually says.
@@ -160,23 +160,25 @@ export default function HeroNew() {
             transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.4 }}
             className="mb-6 flex flex-col items-stretch gap-3 sm:mb-8 sm:items-center sm:gap-4"
           >
-            <AnimatedCTA
-              href="/technologies"
-              size="lg"
-              className="group relative w-full overflow-hidden rounded-full border-0 bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4 text-base font-semibold text-white shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] active:scale-[0.98] sm:w-auto sm:px-12 sm:py-5 sm:text-xl"
-              delay={150}
-            >
-              <span className="relative z-10 flex items-center gap-2">
-                Start Exploring
-                <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
-              </span>
-            </AnimatedCTA>
+            <div className="w-full sm:w-auto">
+              <AnimatedCTA
+                href="/technologies"
+                size="lg"
+                className="group relative flex w-full overflow-hidden rounded-full border-0 bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4 text-base font-semibold text-white shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] active:scale-[0.98] sm:px-12 sm:py-5 sm:text-xl"
+                delay={150}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  Start Exploring
+                  <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+                </span>
+              </AnimatedCTA>
+            </div>
             <a
               href="/quiz/learn-next"
-              className={`${quizPromptClassName} font-semibold text-foreground`}
+              className={`${quizPromptClassName} self-center font-semibold text-foreground`}
             >
               Take the career quiz
-              <ArrowUpRight className="w-3.5 h-3.5" />
+              <ArrowUpRight className="h-3.5 w-3.5" />
             </a>
           </motion.div>
 
@@ -225,7 +227,7 @@ export default function HeroNew() {
                 </svg>
               </div>
             </div>
-            <span className="font-semibold text-foreground">
+            <span className="max-w-[24rem] font-semibold text-foreground sm:max-w-none">
               <span className="font-bold text-foreground">100+ technologies</span> tracked with live data
             </span>
           </motion.div>
@@ -235,24 +237,24 @@ export default function HeroNew() {
             initial={prefersReducedMotion ? {} : { opacity: 0 }}
             animate={prefersReducedMotion ? {} : { opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="mb-12 flex flex-wrap items-center justify-center gap-x-4 gap-y-3 text-sm text-foreground/80 dark:text-muted-foreground sm:mb-16 sm:gap-x-6"
+            className="mb-12 grid grid-cols-2 justify-center gap-x-3 gap-y-3 text-left text-sm text-foreground/80 dark:text-muted-foreground sm:mb-16 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-6"
           >
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 rounded-full border border-border/40 bg-card/35 px-3 py-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
               <Zap className="h-4 w-4 text-green-500" />
               <span className="font-semibold text-foreground">Free forever</span>
             </span>
             <span className="hidden sm:inline text-border">•</span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 rounded-full border border-border/40 bg-card/35 px-3 py-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
               <Users className="h-4 w-4 text-blue-500" />
               <span className="font-semibold text-foreground">No credit card</span>
             </span>
             <span className="hidden sm:inline text-border">•</span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 rounded-full border border-border/40 bg-card/35 px-3 py-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
               <Database className="h-4 w-4 text-amber-500" />
               <span className="font-semibold text-foreground">8+ data sources</span>
             </span>
             <span className="hidden sm:inline text-border">•</span>
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 rounded-full border border-border/40 bg-card/35 px-3 py-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
@@ -273,15 +275,15 @@ export default function HeroNew() {
             <div className="mobile-noise-hidden absolute -inset-4 rounded-3xl bg-purple-500/8 blur-2xl opacity-50" />
 
             {/* Card with Magic UI BorderBeam */}
-            <div className="relative overflow-hidden rounded-[28px] border border-border/80 bg-card/95 p-3 ring-1 ring-black/5 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_12px_36px_rgba(0,0,0,0.18)] transition-shadow duration-500 dark:ring-white/10 hover:shadow-[0_34px_110px_rgba(0,0,0,0.35),0_18px_52px_rgba(0,0,0,0.22)] sm:p-6">
+            <div className="relative overflow-hidden rounded-[24px] border border-border/80 bg-card/95 p-3 ring-1 ring-black/5 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_12px_36px_rgba(0,0,0,0.18)] transition-shadow duration-500 dark:ring-white/10 hover:shadow-[0_34px_110px_rgba(0,0,0,0.35),0_18px_52px_rgba(0,0,0,0.22)] sm:rounded-[28px] sm:p-6">
               <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-card/98 to-card/94 pointer-events-none" />
               <div className="mobile-noise-hidden">
                 <BorderBeam size={300} duration={10} colorFrom="#f97316" colorTo="#f59e0b" />
               </div>
 
               {/* Mockup header */}
-              <div className="relative flex items-center justify-between mb-5">
-                <div className="flex items-center gap-3">
+              <div className="relative mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="flex gap-1.5">
                     <div className="w-3 h-3 rounded-full bg-red-500/80" />
                     <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
@@ -312,7 +314,7 @@ export default function HeroNew() {
                     initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }}
                     animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.9 + index * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    className={`grid grid-cols-[28px_1fr_62px_62px] items-center gap-2 rounded-lg px-2 py-2.5 transition-all duration-200 group cursor-pointer hover:bg-muted/80 hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.2)] sm:grid-cols-[40px_1fr_80px_80px_50px] sm:gap-3 sm:px-3 ${index === 0 ? 'bg-orange-500/5' : ''}`}
+                    className={`group grid grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2 rounded-lg px-2 py-2.5 transition-all duration-200 hover:bg-muted/80 hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.2)] sm:grid-cols-[40px_1fr_80px_80px_50px] sm:gap-3 sm:px-3 ${index === 0 ? 'bg-orange-500/5' : ''}`}
                   >
                     <span className={`text-sm font-bold ${index === 0 ? 'text-orange-500' : 'text-muted-foreground'}`}>{item.rank}</span>
                     <span className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
@@ -323,10 +325,10 @@ export default function HeroNew() {
                         {item.score}
                       </div>
                     </div>
-                    <span className={`text-sm font-semibold text-right flex items-center justify-end gap-1 ${
+                    <span className={`hidden text-sm font-semibold text-right sm:flex sm:items-center sm:justify-end sm:gap-1 ${
                       item.trend === 'up' ? 'text-green-500' : item.trend === 'down' ? 'text-red-500' : 'text-yellow-500'
                     }`}>
-                      {item.trend === 'up' ? <ArrowUpRight className="w-3.5 h-3.5" /> : item.trend === 'down' ? <ArrowDownRight className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                      {item.trend === 'up' ? <ArrowUpRight className="h-3.5 w-3.5" /> : item.trend === 'down' ? <ArrowDownRight className="h-3.5 w-3.5" /> : <Minus className="h-3.5 w-3.5" />}
                       {item.change > 0 ? '+' : ''}{item.change}%
                     </span>
                     <div className="hidden justify-end sm:flex">
@@ -339,6 +341,10 @@ export default function HeroNew() {
                     </div>
                   </motion.div>
                 ))}
+              </div>
+              <div className="mt-3 flex items-center justify-between border-t border-border/50 px-1 pt-3 text-[11px] text-muted-foreground sm:hidden">
+                <span>Daily composite ranking</span>
+                <span>7D trends on desktop</span>
               </div>
             </div>
           </motion.div>

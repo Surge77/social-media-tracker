@@ -19,7 +19,7 @@ export default function TechCloudSection() {
     <section className="relative overflow-hidden py-16 md:py-24">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.06),transparent_60%)]" />
 
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col items-center gap-10 md:flex-row md:gap-16">
 
@@ -37,7 +37,7 @@ export default function TechCloudSection() {
               <TextAnimation
                 as="h2"
                 text="Every language, framework, and tool that matters"
-                classname="mb-4 text-3xl font-bold leading-tight text-foreground md:text-4xl"
+                classname="mb-4 text-[clamp(2rem,6vw,2.6rem)] font-bold leading-tight text-foreground"
                 direction="left"
                 variants={{
                   hidden: { filter: 'blur(8px)', opacity: 0, x: 20 },
@@ -52,7 +52,7 @@ export default function TechCloudSection() {
                 whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="text-base text-muted-foreground leading-relaxed"
+                className="text-base leading-relaxed text-muted-foreground"
               >
                 From JavaScript frameworks to systems languages, cloud platforms
                 to databases — if developers are talking about it, we're
@@ -60,7 +60,7 @@ export default function TechCloudSection() {
               </motion.p>
 
               {/* Tech pills with stagger + hover pop */}
-              <div className="mt-6 flex flex-wrap gap-2 md:justify-start justify-center">
+              <div className="mt-6 flex flex-wrap justify-center gap-2 md:justify-start">
                 {techPills.map((t, i) => (
                   <motion.span
                     key={t}
@@ -107,7 +107,7 @@ export default function TechCloudSection() {
                 damping: 20,
                 delay: 0.15,
               }}
-              className="w-full flex-1 max-w-[380px]"
+              className="w-full max-w-[320px] flex-1 sm:max-w-[380px]"
             >
               <IconCloud />
             </motion.div>
