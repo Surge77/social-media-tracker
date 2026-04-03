@@ -27,15 +27,23 @@ export async function GET(request: Request) {
     }
 
     const dataPoints = []
+    const errors: string[] = []
+    let technologiesSucceeded = 0
     for (const technology of technologies as Technology[]) {
-      const signal = await fetchTechnologyGoogleTrendsSignal(technology)
-      dataPoints.push(
-        { technology_id: technology.id, source: 'googletrends', metric: 'interest_index', value: signal.searchInterest ?? 0, metadata: signal.raw, measured_at: today },
-        { technology_id: technology.id, source: 'googletrends', metric: 'interest_velocity', value: signal.searchVelocity, metadata: signal.raw, measured_at: today },
-        { technology_id: technology.id, source: 'googletrends', metric: 'interest_acceleration', value: signal.searchAcceleration, metadata: signal.raw, measured_at: today },
-        { technology_id: technology.id, source: 'googletrends', metric: 'geo_spread', value: signal.geoSpread, metadata: signal.raw, measured_at: today },
-        { technology_id: technology.id, source: 'googletrends', metric: 'related_queries_rising', value: signal.relatedQueriesRisingCount, metadata: signal.raw, measured_at: today },
-      )
+      try {
+        const signal = await fetchTechnologyGoogleTrendsSignal(technology)
+        technologiesSucceeded += 1
+        dataPoints.push(
+          { technology_id: technology.id, source: 'googletrends', metric: 'interest_index', value: signal.searchInterest ?? 0, metadata: signal.raw, measured_at: today },
+          { technology_id: technology.id, source: 'googletrends', metric: 'interest_velocity', value: signal.searchVelocity, metadata: signal.raw, measured_at: today },
+          { technology_id: technology.id, source: 'googletrends', metric: 'interest_acceleration', value: signal.searchAcceleration, metadata: signal.raw, measured_at: today },
+          { technology_id: technology.id, source: 'googletrends', metric: 'geo_spread', value: signal.geoSpread, metadata: signal.raw, measured_at: today },
+          { technology_id: technology.id, source: 'googletrends', metric: 'related_queries_rising', value: signal.relatedQueriesRisingCount, metadata: signal.raw, measured_at: today },
+        )
+      } catch (fetchError) {
+        const message = fetchError instanceof Error ? fetchError.message : String(fetchError)
+        errors.push(`${technology.slug}: ${message}`)
+      }
     }
 
     if (dataPoints.length > 0) {
@@ -50,7 +58,10 @@ export async function GET(request: Request) {
     return Response.json({
       success: true,
       technologiesProcessed: technologies.length,
+      technologiesSucceeded,
+      technologiesFailed: technologies.length - technologiesSucceeded,
       dataPointsCreated: dataPoints.length,
+      errors,
       ...rebuilt,
     })
   } catch (error) {
