@@ -29,6 +29,8 @@ test-*.ts
 # documentation - ignore all markdown files except README
 *.md
 !README.md
+!CONTRIBUTING.md
+!SECURITY.md
 
 # debug
 npm-debug.log*
