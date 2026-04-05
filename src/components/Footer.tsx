@@ -29,6 +29,7 @@ const NAV_SECTIONS = [
     title: 'Company',
     links: [
       { name: 'Home', href: '/' },
+      { name: 'Docs', href: '/docs' },
       { name: 'Contact', href: 'mailto:hello@devtrends.io' },
     ],
   },

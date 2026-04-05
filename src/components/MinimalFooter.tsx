@@ -19,6 +19,12 @@ const MinimalFooter = () => {
               Methodology
             </Link>
             <Link
+              href="/docs"
+              className="text-muted-foreground transition-colors duration-200 hover:text-foreground"
+            >
+              Docs
+            </Link>
+            <Link
               href="/"
               className="text-muted-foreground transition-colors duration-200 hover:text-foreground"
             >

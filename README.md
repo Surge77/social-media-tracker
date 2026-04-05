@@ -38,6 +38,16 @@
 
 ---
 
+## Documentation
+
+Contributor documentation now lives in the Docusaurus app under `apps/docs`.
+
+- Run locally with `npm run docs:dev`
+- Build with `npm run docs:build`
+- Use the published docs for onboarding, architecture, subsystem guides, and contributor workflow
+
+---
+
 ## Why DevTrends?
 
 Developers make career bets with fragmented information. GitHub shows one signal, job boards show another, community buzz shows a third, and blockchain ecosystems behave like a separate market entirely.

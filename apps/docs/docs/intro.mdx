@@ -1,0 +1,66 @@
+---
+title: DevTrends Contributor Docs
+description: Contributor-first documentation for the DevTrends product, data systems, and operations.
+slug: /
+---
+
+# DevTrends Contributor Docs
+
+DevTrends is a Next.js product that helps developers make career bets with live signals instead of guesswork. It combines technology rankings, jobs intelligence, AI-assisted analysis, quiz flows, blockchain views, language rankings, repository discovery, and scheduled digest generation in one codebase.
+
+This docs site is the published contributor layer for that system. Use it to understand how the product is organized, how data moves through it, and how to work safely inside the repository.
+
+<div className="docs-grid">
+  <a className="docs-card" href="/docs/getting-started/local-development">
+    <strong>Start locally</strong>
+    <span>Install the project, run the app, and run the docs site without touching production systems.</span>
+  </a>
+  <a className="docs-card" href="/docs/product/feature-surfaces">
+    <strong>See the product surface</strong>
+    <span>Map the dashboard routes and understand which user problems each area is solving.</span>
+  </a>
+  <a className="docs-card" href="/docs/architecture/system-overview">
+    <strong>Understand the architecture</strong>
+    <span>Learn how the App Router frontend, grouped APIs, scoring layer, AI layer, cron jobs, and Supabase fit together.</span>
+  </a>
+  <a className="docs-card" href="/docs/subsystems/technologies-and-compare">
+    <strong>Dive into subsystems</strong>
+    <span>Read behavior-first guides for rankings, jobs, quiz flows, blockchain, repos, languages, and digests.</span>
+  </a>
+</div>
+
+## What this site covers
+
+- Local development and environment setup
+- Product intent and route-level feature mapping
+- Architecture, data ingestion, scoring, and AI provider routing
+- Contributor workflow, testing expectations, and docs maintenance
+- Public-safe operational guidance for cron jobs and protected routes
+
+## What stays outside the published docs
+
+- Draft plans and working notes in the repository root `docs/` folder
+- Secrets, bearer tokens, and sensitive admin procedures
+- Private runbooks that should not be exposed in a public documentation site
+
+:::tip Docs app only
+The docs site is a separate Docusaurus app in `apps/docs`. You can run it without starting the main Next.js product app.
+:::
+
+## Recommended reading order
+
+1. [Local Development](./getting-started/local-development.md)
+2. [Environment and Integrations](./getting-started/environment-and-integrations.md)
+3. [What DevTrends Does](./product/what-devtrends-does.md)
+4. [System Overview](./architecture/system-overview.md)
+5. [Testing and Quality](./contributor/testing-and-quality.md)
+
+## Source of truth
+
+This docs site is written from the current repository state, especially:
+
+- `README.md` for product framing and command inventory
+- `src/app/(dashboard)` for page surfaces
+- `src/app/api` for backend route groups
+- `src/lib/scoring`, `src/lib/ai`, `src/lib/cron`, `src/lib/jobs`, `src/lib/blockchain`, and `src/lib/quiz` for subsystem behavior
+- `.env.example` and `vercel.json` for environment and scheduling boundaries

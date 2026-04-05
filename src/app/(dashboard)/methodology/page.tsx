@@ -18,6 +18,13 @@ export default function MethodologyPage() {
         <p className="text-lg text-muted-foreground">
           Every score, ranking, and insight on this platform is computed from real data. Here's exactly what we measure, how we weight it, and where we know we fall short.
         </p>
+        <div className="mt-5 rounded-xl border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
+          This page is the product-facing summary of our scoring model. If you want the deeper contributor documentation for architecture, APIs, cron flows, and implementation details, visit{' '}
+          <Link href="/docs" className="font-medium text-primary transition-colors hover:text-primary/80">
+            the DevTrends docs
+          </Link>
+          .
+        </div>
       </div>
 
       {/* What we measure */}
@@ -398,6 +405,12 @@ export default function MethodologyPage() {
             className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/50"
           >
             Language Rankings
+          </Link>
+          <Link
+            href="/docs"
+            className="inline-flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted/50"
+          >
+            Contributor Docs
           </Link>
         </div>
       </Section>
