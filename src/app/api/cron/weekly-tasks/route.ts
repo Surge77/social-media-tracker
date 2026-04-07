@@ -10,6 +10,8 @@ import {
 
 export const maxDuration = 60
 
+const NON_BLOCKING_WEEKLY_STEPS = new Set(['jobs-intelligence'])
+
 /**
  * Weekly task orchestrator consolidates non-daily cron work into one slot.
  *
@@ -77,13 +79,17 @@ export async function GET(request: Request) {
     }
 
     const failedSteps = stepResults.filter((step) => !step.ok)
+    const blockingFailedSteps = failedSteps.filter(
+      (step) => !NON_BLOCKING_WEEKLY_STEPS.has(step.name)
+    )
     const hasFailures = failedSteps.length > 0
+    const hasBlockingFailures = blockingFailedSteps.length > 0
 
     const supabase = createSupabaseAdminClient()
     const duration = Date.now() - startTime
     await supabase.from('fetch_logs').insert({
       source: 'weekly_tasks_orchestrator',
-      status: hasFailures ? 'failed' : 'success',
+      status: hasBlockingFailures ? 'failed' : hasFailures ? 'partial' : 'success',
       technologies_processed: 0,
       data_points_created: 0,
       error_message: hasFailures
@@ -96,13 +102,13 @@ export async function GET(request: Request) {
       completed_at: new Date().toISOString(),
     })
 
-    if (hasFailures) {
+    if (hasBlockingFailures) {
       return Response.json(
         {
           success: false,
           duration: `${duration}ms`,
           stepResults,
-          failedSteps,
+          failedSteps: blockingFailedSteps,
         },
         { status: 500 }
       )
@@ -110,8 +116,10 @@ export async function GET(request: Request) {
 
     return Response.json({
       success: true,
+      partial: hasFailures,
       duration: `${duration}ms`,
       stepResults,
+      failedSteps,
     })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error)
