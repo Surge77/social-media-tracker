@@ -15,10 +15,8 @@ export function DashboardHeader() {
   const router = useRouter()
   const { user, loading, signOut } = useAuth()
 
-  const handleSignOut = async () => {
-    await fetch('/auth/signout', { method: 'POST' })
-    router.push('/')
-    router.refresh()
+  const handleSignOut = () => {
+    window.location.href = '/auth/signout'
   }
 
   const isActive = (path: string) => {
