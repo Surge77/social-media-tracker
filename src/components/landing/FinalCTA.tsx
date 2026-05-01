@@ -45,7 +45,7 @@ export default function FinalCTA() {
         <div className="mx-auto max-w-3xl text-center">
           <TextAnimation
             as="h2"
-            text="Stop learning what everyone already knows"
+            text="Build the roadmap your career actually needs"
             classname="mb-5 justify-center text-[clamp(2.2rem,8vw,4.75rem)] font-bold text-foreground sm:mb-6"
             letterAnime={false}
             variants={{
@@ -66,7 +66,7 @@ export default function FinalCTA() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="mx-auto mb-8 max-w-xl text-base text-foreground/80 dark:text-muted-foreground sm:mb-10 sm:text-lg"
           >
-            See what&apos;s rising, what&apos;s falling, and what&apos;s actually worth learning next.
+            Powered by live market signals — GitHub, job boards, community momentum, and more. Know exactly what to learn next for your career.
           </motion.p>
 
           <motion.div
@@ -81,13 +81,13 @@ export default function FinalCTA() {
                 <div className="absolute -inset-3 rounded-full bg-gradient-to-r from-orange-500/30 to-amber-500/30 blur-lg animate-[pulse-glow_2.5s_ease-in-out_infinite]" />
               )}
               <AnimatedCTA
-                href="/technologies"
+                href="/quiz/roadmap"
                 size="lg"
                 className="group relative flex w-full overflow-hidden rounded-full border-0 bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-4 text-lg font-semibold text-white shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all duration-300 hover:scale-[1.05] hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] active:scale-[0.98] sm:px-12 sm:py-5 sm:text-xl"
                 delay={150}
               >
                 <span className="flex items-center gap-2">
-                  Start Exploring
+                  Build My Learning Roadmap
                   <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
                 </span>
               </AnimatedCTA>

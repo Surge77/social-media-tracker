@@ -3,9 +3,9 @@
 // src/app/(dashboard)/quiz/roadmap/page.tsx
 // Career Roadmap Quiz Page
 
-import React, { useState, Suspense, lazy } from 'react'
+import React, { useState, Suspense, lazy, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Sparkles, BookmarkCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +14,8 @@ import { GroupedTechSelect } from '@/components/quiz/GroupedTechSelect'
 import { RoadmapSkeleton } from '@/components/quiz/roadmap/RoadmapSkeleton'
 import { roadmapQuestions, validateRoadmapAnswers } from '@/lib/quiz/roadmap-questions'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
+import { useAuth } from '@/hooks/useAuth'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
 // Lazy load RoadmapResult to reduce initial bundle size
@@ -23,8 +25,37 @@ export default function RoadmapQuizPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
   const [showResults, setShowResults] = useState(false)
+  const [savedBanner, setSavedBanner] = useState(false)
   const prefersReducedMotion = useReducedMotion()
   const questionRef = React.useRef<HTMLHeadingElement>(null)
+  const { user } = useAuth()
+
+  // Load saved roadmap for authenticated users
+  useEffect(() => {
+    if (!user) return
+    const supabase = createSupabaseBrowserClient()
+    supabase
+      .from('saved_roadmaps')
+      .select('answers')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.answers) {
+          setAnswers(data.answers as Record<string, string | string[]>)
+          setShowResults(true)
+        }
+      })
+  }, [user])
+
+  const saveRoadmap = async (finalAnswers: Record<string, string | string[]>) => {
+    if (!user) return
+    const supabase = createSupabaseBrowserClient()
+    await supabase
+      .from('saved_roadmaps')
+      .upsert({ user_id: user.id, answers: finalAnswers }, { onConflict: 'user_id' })
+    setSavedBanner(true)
+    setTimeout(() => setSavedBanner(false), 4000)
+  }
 
   const currentQuestion = roadmapQuestions[currentStep]
   const progress = ((currentStep + 1) / roadmapQuestions.length) * 100
@@ -40,6 +71,7 @@ export default function RoadmapQuizPage() {
       const validation = validateRoadmapAnswers(answers)
       if (validation.valid) {
         setShowResults(true)
+        void saveRoadmap(answers)
       } else {
         alert(validation.errors.join('\n'))
       }
@@ -71,16 +103,24 @@ export default function RoadmapQuizPage() {
 
   if (showResults) {
     return (
-      <Suspense fallback={<RoadmapSkeleton />}>
-        <RoadmapResult
-          answers={answers}
-          onRestart={() => {
-            setShowResults(false)
-            setCurrentStep(0)
-            setAnswers({})
-          }}
-        />
-      </Suspense>
+      <>
+        {savedBanner && (
+          <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success shadow-lg">
+            <BookmarkCheck className="h-4 w-4 shrink-0" />
+            Roadmap saved to your account
+          </div>
+        )}
+        <Suspense fallback={<RoadmapSkeleton />}>
+          <RoadmapResult
+            answers={answers}
+            onRestart={() => {
+              setShowResults(false)
+              setCurrentStep(0)
+              setAnswers({})
+            }}
+          />
+        </Suspense>
+      </>
     )
   }
 
@@ -93,6 +133,16 @@ export default function RoadmapQuizPage() {
           Answer 6 quick questions to get a personalized, data-backed learning path
         </p>
       </header>
+
+      {/* Sign-in nudge for guests */}
+      {!user && (
+        <div className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-secondary/20 px-4 py-3 text-sm text-muted-foreground">
+          <span>Sign in to save your roadmap and pick up where you left off</span>
+          <a href={`/login?next=/quiz/roadmap`} className="shrink-0 font-medium text-foreground underline underline-offset-2 hover:text-primary">
+            Sign in
+          </a>
+        </div>
+      )}
 
       {/* Screen reader announcement for question changes */}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">

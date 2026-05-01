@@ -149,8 +149,9 @@ export default function HeroNew() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="mx-auto mb-8 max-w-2xl px-2 text-[0.98rem] leading-relaxed text-foreground/80 dark:text-muted-foreground sm:mb-10 sm:px-0 sm:text-lg md:text-xl"
           >
-            Aggregated into daily scores for 100+ technologies.
-            Skip the guesswork. See what the data actually says.
+            Get a personalized learning roadmap powered by live market signals —
+            GitHub activity, job demand, community momentum, and more.
+            Know exactly what to learn next.
           </motion.p>
 
           {/* CTA */}
@@ -162,22 +163,22 @@ export default function HeroNew() {
           >
             <div className="w-full sm:w-auto">
               <AnimatedCTA
-                href="/technologies"
+                href="/quiz/roadmap"
                 size="lg"
                 className="group relative flex w-full overflow-hidden rounded-full border-0 bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-4 text-base font-semibold text-white shadow-[0_0_30px_rgba(249,115,22,0.3),0_15px_30px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(249,115,22,0.5),0_20px_40px_rgba(0,0,0,0.15)] active:scale-[0.98] sm:px-12 sm:py-5 sm:text-xl"
                 delay={150}
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  Start Exploring
+                  Build My Learning Roadmap
                   <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
                 </span>
               </AnimatedCTA>
             </div>
             <a
-              href="/quiz/learn-next"
+              href="/technologies"
               className={`${quizPromptClassName} self-center font-semibold text-foreground`}
             >
-              Take the career quiz
+              Explore technologies
               <ArrowUpRight className="h-3.5 w-3.5" />
             </a>
           </motion.div>

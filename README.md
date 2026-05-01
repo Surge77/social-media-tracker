@@ -32,7 +32,7 @@
 
 [![Tech Stack](https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,supabase,postgres,vercel&theme=dark)](https://skillicons.dev)
 
-[Live Demo](https://devtrends.dev) · [Repository](https://github.com/Surge77/social-media-tracker)
+[Live Demo](https://www.devtrends.pro) · [Repository](https://github.com/Surge77/DevTrends)
 
 </div>
 
@@ -97,7 +97,7 @@ The current dashboard surface includes 11 main areas under `src/app/(dashboard)`
 - Repos
 - Technologies
 
-The technology icon mapping currently covers **117 technologies**, based on [src/lib/tech-icons.ts](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/lib/tech-icons.ts).
+The technology icon mapping currently covers **117 technologies**, based on [src/lib/tech-icons.ts](C:/Users/tdmne/Desktop/tracker_final/src/lib/tech-icons.ts).
 
 ---
 
@@ -114,7 +114,7 @@ The technology icon mapping currently covers **117 technologies**, based on [src
 | **Animation** | Framer Motion | UI animation where needed |
 | **Validation** | Zod | Runtime validation for typed inputs and config |
 | **Testing** | Vitest + fast-check | Unit tests and property-based checks |
-| **Automation** | Vercel Cron | Daily and weekly scheduled jobs |
+| **Automation** | GitHub Actions | Daily and weekly scheduled jobs (free tier) |
 | **Benchmarking** | Puppeteer | Local route benchmarking via CLI |
 
 ---
@@ -122,30 +122,38 @@ The technology icon mapping currently covers **117 technologies**, based on [src
 ## Architecture
 
 ```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                          DEVTRENDS PLATFORM                         │
-│                                                                     │
-│   ┌─────────────┐    ┌──────────────────────────────────────────┐  │
-│   │   Browser   │◄──►│         Next.js App Router Pages         │  │
-│   └─────────────┘    │ Landing │ Dashboard │ API routes         │  │
-│                      └──────────────┬───────────────┬───────────┘  │
-│                                     │               │              │
-│                      ┌──────────────▼──────┐  ┌────▼────────────┐ │
-│                      │   Scoring / Trends  │  │   AI Layer      │ │
-│                      │ composite scoring   │  │ compare / ask   │ │
-│                      │ momentum / ranking  │  │ digest / recs   │ │
-│                      └──────────────┬──────┘  └────┬────────────┘ │
-│                                     │               │              │
-│                      ┌──────────────▼────────────────▼──────────┐  │
-│                      │        Data + Cron Ingestion Layer       │  │
-│                      │ GitHub | Reddit | Stack Overflow | Jobs  │  │
-│                      │ npm | Dev.to | RSS | YouTube | DeFiLlama │  │
-│                      └──────────────┬────────────────────────────┘  │
-│                                     │                               │
-│                      ┌──────────────▼───────────────┐               │
-│                      │      Supabase / system data  │               │
-│                      └──────────────────────────────┘               │
-└─────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────┐
+│                           DEVTRENDS PLATFORM                               │
+│                                                                            │
+│  ┌─────────────┐    ┌───────────────────────────────────────────────────┐ │
+│  │   Browser   │◄──►│           Next.js 16 App Router                   │ │
+│  └─────────────┘    │  Landing · Dashboard · API routes · Quiz flows    │ │
+│                     └─────────────────────┬──────────────┬──────────────┘ │
+│                                           │              │                │
+│                     ┌─────────────────────▼──┐  ┌────────▼─────────────┐ │
+│                     │    Scoring Engine       │  │    AI Layer          │ │
+│                     │  composite.ts           │  │  resilient-call.ts   │ │
+│                     │  adaptive-weights.ts    │  │  key-manager.ts      │ │
+│                     │  enhanced-momentum.ts   │  │  circuit-breaker.ts  │ │
+│                     │  pair-scoring.ts        │  │  7-provider fallback │ │
+│                     │  bayesian smoothing     │  │  state persisted to  │ │
+│                     └─────────────────────┬──┘  │  Supabase            │ │
+│                                           │     └────────┬─────────────┘ │
+│                     ┌─────────────────────▼──────────────▼─────────────┐ │
+│                     │           Cron Ingestion Pipeline                 │ │
+│                     │  GitHub Actions (free) → /api/cron/fetch-daily   │ │
+│                     │                        → /api/cron/weekly-tasks  │ │
+│                     │  Batched fan-out: batch-1 through batch-6-youtube │ │
+│                     │  Sources: GitHub · Reddit · Stack Overflow · Jobs │ │
+│                     │           npm · Dev.to · RSS · YouTube · DeFiLlama│ │
+│                     └─────────────────────────────────────┬────────────┘ │
+│                                                           │               │
+│                     ┌─────────────────────────────────────▼────────────┐ │
+│                     │              Supabase (PostgreSQL)                │ │
+│                     │  technologies · raw_data_points · score_history  │ │
+│                     │  system_config (AI state persistence)            │ │
+│                     └──────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -173,12 +181,12 @@ tracker_final/
 
 Useful folders:
 
-- [src/app](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/app)
-- [src/components](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/components)
-- [src/lib](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/lib)
-- [scripts](C:/Users/tdmne/OneDrive/Desktop/tracker_final/scripts)
-- [supabase/migrations](C:/Users/tdmne/OneDrive/Desktop/tracker_final/supabase/migrations)
-- [autoresearch](C:/Users/tdmne/OneDrive/Desktop/tracker_final/autoresearch)
+- [src/app](C:/Users/tdmne/Desktop/tracker_final/src/app)
+- [src/components](C:/Users/tdmne/Desktop/tracker_final/src/components)
+- [src/lib](C:/Users/tdmne/Desktop/tracker_final/src/lib)
+- [scripts](C:/Users/tdmne/Desktop/tracker_final/scripts)
+- [supabase/migrations](C:/Users/tdmne/Desktop/tracker_final/supabase/migrations)
+- [autoresearch](C:/Users/tdmne/Desktop/tracker_final/autoresearch)
 
 ---
 
@@ -194,8 +202,8 @@ Useful folders:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Surge77/social-media-tracker.git
-cd social-media-tracker
+git clone https://github.com/Surge77/DevTrends.git
+cd DevTrends
 ```
 
 ### 2. Install dependencies
@@ -220,11 +228,11 @@ Start with the essentials:
 - `REDDIT_CLIENT_ID`
 - `REDDIT_CLIENT_SECRET`
 
-Optional integrations for jobs, blockchain, and AI live in [.env.example](C:/Users/tdmne/OneDrive/Desktop/tracker_final/.env.example).
+Optional integrations for jobs, blockchain, and AI live in [.env.example](C:/Users/tdmne/Desktop/tracker_final/.env.example).
 
 ### 4. Apply database migrations
 
-Run the SQL files in [supabase/migrations](C:/Users/tdmne/OneDrive/Desktop/tracker_final/supabase/migrations) against your Supabase project.
+Run the SQL files in [supabase/migrations](C:/Users/tdmne/Desktop/tracker_final/supabase/migrations) against your Supabase project.
 
 ### 5. Start the development server
 
@@ -238,7 +246,7 @@ The app runs at `http://127.0.0.1:3000`.
 
 ## Environment Variables
 
-The template in [.env.example](C:/Users/tdmne/OneDrive/Desktop/tracker_final/.env.example) now matches the variables the app actually reads.
+The template in [.env.example](C:/Users/tdmne/Desktop/tracker_final/.env.example) now matches the variables the app actually reads.
 
 ### Core
 
@@ -296,7 +304,7 @@ npm run test
 npm run benchmark -- --help
 ```
 
-This runs [scripts/benchmark.mjs](C:/Users/tdmne/OneDrive/Desktop/tracker_final/scripts/benchmark.mjs), which benchmarks selected routes locally.
+This runs [scripts/benchmark.mjs](C:/Users/tdmne/Desktop/tracker_final/scripts/benchmark.mjs), which benchmarks selected routes locally.
 
 ### Autoresearch
 
@@ -307,33 +315,144 @@ npm run autoresearch:loop:scoring -- --dry-run
 npm run autoresearch:loop:routing -- --dry-run
 ```
 
-For the full workflow, see [autoresearch/README.md](C:/Users/tdmne/OneDrive/Desktop/tracker_final/autoresearch/README.md).
+For the full workflow, see [autoresearch/README.md](C:/Users/tdmne/Desktop/tracker_final/autoresearch/README.md).
 
 ---
 
 ## Data Pipeline
 
-Scheduled routes are defined in [vercel.json](C:/Users/tdmne/OneDrive/Desktop/tracker_final/vercel.json):
+### Cron Automation
 
-| Route | Schedule |
-|-------|----------|
-| `/api/cron/fetch-daily` | Daily |
-| `/api/cron/fetch-daily/batch-scoring` | Daily |
-| `/api/cron/weekly-tasks` | Weekly |
+Scheduled jobs run via **GitHub Actions** (free tier) rather than Vercel Pro cron. Two workflows live in `.github/workflows/`:
 
-Useful API groups under [src/app/api](C:/Users/tdmne/OneDrive/Desktop/tracker_final/src/app/api):
+| Workflow | Schedule | Route |
+|----------|----------|-------|
+| `daily-cron.yml` | 2:00 AM UTC daily | `/api/cron/fetch-daily` |
+| `weekly-cron.yml` | 3:00 AM UTC Monday | `/api/cron/weekly-tasks` |
 
-- `ai`
-- `blockchain`
-- `compare`
-- `cron`
-- `jobs`
-- `languages`
-- `quiz`
-- `repos`
-- `technologies`
+Both workflows send `Authorization: Bearer ${{ secrets.CRON_SECRET }}` which is validated by `isAuthorizedScheduledRequest()` in the route handlers. Add two GitHub Actions secrets to your repository:
 
-If you touch scheduled jobs, review the cron handlers and ensure `CRON_SECRET` is set in production.
+- `APP_URL` — your Vercel deployment URL (e.g. `https://devtrends.vercel.app`)
+- `CRON_SECRET` — same value as your Vercel `CRON_SECRET` env var
+
+### Daily Ingestion Batches
+
+`/api/cron/fetch-daily` fans out to sub-routes to stay within serverless execution limits:
+
+| Batch | Content |
+|-------|---------|
+| `batch-1` | GitHub stars, forks, issues |
+| `batch-2` | Stack Overflow, npm, PyPI, crates.io |
+| `batch-3` | Reddit, Dev.to, RSS feeds |
+| `batch-4a` / `batch-4b` | Job postings (Adzuna, JSearch, Remotive) |
+| `batch-5-blockchain` | DeFiLlama TVL, CoinGecko, Etherscan |
+| `batch-6-youtube` | YouTube video counts and views |
+| `batch-intelligence` | AI-assisted anomaly detection and insights |
+| `batch-scoring` | Composite score recomputation for all technologies |
+
+### Data Sources Catalog
+
+| Category | Sources |
+|----------|---------|
+| **Code / GitHub** | GitHub REST API (stars, forks, issues, trending), GitHub Trending scraper |
+| **Community** | Reddit API, Dev.to API, Stack Overflow API, Hacker News (Algolia + Firebase), RSS feeds (tech blogs, newsletters) |
+| **Packages** | npm Statistics API, npms.io, PyPI, crates.io, Libraries.io, Packagist, RubyGems, NuGet, Pub.dev |
+| **Jobs** | Adzuna, JSearch (RapidAPI), Remotive, Arbeitnow, HasData, SerpApi (Google Jobs) |
+| **Video** | YouTube Data API v3 |
+| **Blockchain** | DeFiLlama (TVL, bridges, fees, hacks, stables), CoinGecko, Etherscan |
+
+---
+
+## Scoring Engine
+
+The scoring pipeline lives in `src/lib/scoring/` and runs after every ingestion batch.
+
+### Composite Score Dimensions
+
+Each technology receives a 0–100 composite score computed as a weighted sum of six dimensions:
+
+| Dimension | Signals | Default Weight |
+|-----------|---------|---------------|
+| **GitHub** | Stars, forks, issues, trending mentions | ~25% |
+| **Community** | Reddit posts, Dev.to articles, HN mentions, RSS, sentiment | ~20% |
+| **Jobs** | Job posting volume across all job sources | ~30% |
+| **Ecosystem** | npm/package downloads, Libraries.io SourceRank | ~15% |
+| **YouTube** | Video count, total views, upload velocity | ~10% |
+| **Onchain** | DeFiLlama TVL, CoinGecko developer activity | Blockchain techs only |
+
+Weights are **adaptive** (`adaptive-weights.ts`): they shift based on the technology's category (e.g. blockchain techs get onchain weight), its age, and which data sources have complete coverage. Missing sources redistribute their weight proportionally rather than penalizing the score.
+
+### Statistical Safeguards
+
+- **Bayesian smoothing** (`bayesian.ts`): Technologies with fewer than ~20 data points are pulled toward the global mean to prevent low-sample noise from producing extreme scores.
+- **Z-score / percentile normalization** (`normalize.ts`): Raw metrics are normalized before dimension scoring so a 200K-star repo and a 5K-star repo compete on relative standing, not absolute numbers.
+- **Confidence scoring** (`confidence.ts`): Each score carries a 0–1 confidence value based on source coverage, data recency, historical depth, and inter-source agreement. Low-confidence scores display with reduced visual prominence.
+
+### Momentum
+
+Two momentum systems run in parallel:
+
+- **Simple momentum** (`momentum.ts`): 30-day delta in composite score. Quick to compute, used in list views.
+- **Enhanced momentum** (`enhanced-momentum.ts`): Multi-window EMA (7d / 30d / 90d) with acceleration and volatility detection. Produces trend classifications: `stable`, `rising`, `falling`, `reversing`, `volatile`. Used in tech detail pages and AI reasoning.
+
+### Pair Scoring
+
+`pair-scoring.ts` computes technology-pair compatibility for the "Companion Skills" feature. It weighs demand synergy, momentum alignment, ecosystem maturity, and community validation to produce a `compatibility_score` and flags specific risks (e.g. both techs declining, mismatched seniority levels).
+
+---
+
+## AI Layer
+
+### Provider Fallback Chain
+
+The AI layer supports 7 providers with automatic failover. Requests go through `resilientAICall()` in `src/lib/ai/resilient-call.ts`:
+
+```
+Request
+  └─ KeyManager.getBestKey()           ← picks lowest-load key
+      └─ CircuitBreaker.execute()      ← skips open circuits
+          └─ Provider call
+              ├─ Success → record, return
+              └─ Failure → record failure, try next provider
+                  └─ Fallback chain: Gemini → Groq → xAI → Mistral → Cerebras → OpenRouter → HuggingFace
+```
+
+### Key Manager
+
+`src/lib/ai/key-manager.ts` tracks per-key state:
+- RPM and TPM usage against provider limits
+- Escalating cooldown periods on failure (30s → 5m → 15m → 1h)
+- Daily usage reset at UTC midnight
+- Consecutive failure counting
+
+### Circuit Breaker
+
+`src/lib/ai/circuit-breaker.ts` implements per-provider circuit breaker with three states:
+- **Closed** (normal) → requests pass through
+- **Open** (provider failing) → requests skip this provider immediately
+- **Half-open** (recovery probe) → one test request; closes on success, reopens on failure
+
+### State Persistence
+
+Both KeyManager and CircuitBreaker persist their state to `system_config` in Supabase via `src/lib/ai/state-store.ts`. This survives Vercel serverless cold starts. An in-memory cache (60s TTL) avoids a DB read on every request; writes are fire-and-forget.
+
+---
+
+## API Surface
+
+Useful API groups under `src/app/api`:
+
+- `ai` — ask, compare, digest, recommend, insights, anomalies, experiments
+- `blockchain` — overview, bridges, fees, hacks, stables, gas
+- `compare` — side-by-side technology comparison
+- `cron` — scheduled ingestion and scoring routes
+- `jobs` — openings, companies, roles, locations, skill adjacency
+- `languages` — language rankings and stats
+- `quiz` — project suggestions for quiz flows
+- `repos` — trending and legendary repositories
+- `technologies` — list, detail, chart, stars, jobs, alternatives, pairs
+
+All cron routes require `Authorization: Bearer <CRON_SECRET>`. Admin routes require `X-Admin-Secret: <ADMIN_API_SECRET>`.
 
 ---
 
@@ -421,6 +540,6 @@ This README was refreshed on March 28, 2026 to restore the original visual style
 
 **Built for developers who would rather use signals than guesswork.**
 
-[Live Demo](https://devtrends.dev) · [Repository](https://github.com/Surge77/social-media-tracker)
+[Live Demo](https://www.devtrends.pro) · [Repository](https://github.com/Surge77/DevTrends)
 
 </div>

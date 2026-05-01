@@ -3,7 +3,15 @@
  *
  * Tracks RPM, TPM, daily usage, cooldowns, and failures for all 8 keys
  * across 7 providers. Picks the best available key per request.
+ *
+ * Cooldown, daily usage, and consecutive failure state is persisted to
+ * Supabase (system_config) so it survives serverless cold starts.
+ * RPM/TPM counters are intentionally in-memory only (they reset every minute).
  */
+
+import { loadPersistedState, persistState } from '@/lib/ai/state-store'
+
+const KEY_STORE_KEY = 'ai_key_cooldown_states'
 
 // ---- Types ----
 
@@ -32,13 +40,65 @@ export interface APIKeyConfig {
   cooldownUntil: number | null // timestamp, null = not cooling down
 }
 
+// ---- Persisted state shape ----
+
+interface PersistedKeyState {
+  cooldownUntil: number | null
+  consecutiveFailures: number
+  dailyUsage: number
+  lastResetDay: string
+}
+
+type PersistedAllKeys = Record<string, PersistedKeyState>
+
 // ---- Key Manager ----
 
 export class KeyManager {
   private keys: APIKeyConfig[]
+  private initialized = false
 
   constructor(configs: APIKeyConfig[]) {
     this.keys = configs
+  }
+
+  /** Unique stable ID for a key config used as the store key. */
+  private keyId(k: APIKeyConfig): string {
+    return `${k.provider}_${k.key.slice(-6)}`
+  }
+
+  /**
+   * Restore persisted cooldown/daily-usage state from Supabase on cold start.
+   * Call this once before the first getKey() in a new serverless instance.
+   */
+  async syncFromStore(): Promise<void> {
+    if (this.initialized) return
+    this.initialized = true
+
+    const saved = await loadPersistedState<PersistedAllKeys>(KEY_STORE_KEY)
+    if (!saved) return
+
+    for (const k of this.keys) {
+      const entry = saved[this.keyId(k)]
+      if (!entry) continue
+      k.cooldownUntil = entry.cooldownUntil
+      k.consecutiveFailures = entry.consecutiveFailures
+      k.dailyUsage = entry.dailyUsage
+      k.lastResetDay = entry.lastResetDay
+    }
+  }
+
+  /** Persist cooldown/daily-usage state — fire-and-forget. */
+  private syncToStore(): void {
+    const snapshot: PersistedAllKeys = {}
+    for (const k of this.keys) {
+      snapshot[this.keyId(k)] = {
+        cooldownUntil: k.cooldownUntil,
+        consecutiveFailures: k.consecutiveFailures,
+        dailyUsage: k.dailyUsage,
+        lastResetDay: k.lastResetDay,
+      }
+    }
+    persistState(KEY_STORE_KEY, snapshot)
   }
 
   /**
@@ -108,8 +168,15 @@ export class KeyManager {
     key.currentRPM++
     key.currentTPM += tokensUsed
     key.dailyUsage++
+
+    const hadCooldown = key.cooldownUntil !== null
+    const hadFailures = key.consecutiveFailures > 0
     key.consecutiveFailures = 0
     key.cooldownUntil = null
+
+    // Only persist when clearing a cooldown or failure streak — avoids
+    // a DB write on every successful call
+    if (hadCooldown || hadFailures) this.syncToStore()
   }
 
   /**
@@ -124,6 +191,7 @@ export class KeyManager {
 
     if (statusCode === 429) {
       key.cooldownUntil = Date.now() + 60_000
+      this.syncToStore()
       return
     }
 
@@ -134,6 +202,9 @@ export class KeyManager {
     } else if (key.consecutiveFailures >= 3) {
       key.cooldownUntil = Date.now() + 5 * 60_000
     }
+
+    // Persist on every failure so cross-instance state stays consistent
+    this.syncToStore()
   }
 
   /** Get usage stats for monitoring / health endpoint. */

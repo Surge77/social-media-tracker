@@ -32,6 +32,9 @@ export async function resilientAICall<T>(
     rejectionMessage?: string
   }
 ): Promise<T> {
+  // Restore persisted key cooldown state on cold start (no-op if already done)
+  await keyManager.syncFromStore()
+
   // Try preferred provider with retry
   const primary = getProviderForUseCase(useCase, keyManager)
   if (primary) {
@@ -121,6 +124,9 @@ export async function resilientAIStreamCall(
   keyManager: KeyManager,
   onChunk: (chunk: string) => Promise<void>
 ): Promise<{ providerUsed: string }> {
+  // Restore persisted key cooldown state on cold start (no-op if already done)
+  await keyManager.syncFromStore()
+
   const tryStream = async (
     provider: AIProvider,
     keyConfig: import('@/lib/ai/key-manager').APIKeyConfig

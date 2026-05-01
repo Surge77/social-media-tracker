@@ -1,0 +1,29 @@
+name: Weekly Tasks
+
+on:
+  schedule:
+    # 3:00 AM UTC every Monday — matches vercel.json schedule
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  weekly-tasks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger weekly tasks pipeline
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/weekly-tasks" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+
+          echo "Response status: $response"
+
+          if [ "$response" -lt 200 ] || [ "$response" -ge 300 ]; then
+            echo "Weekly tasks failed with status $response"
+            exit 1
+          fi
+
+          echo "Weekly tasks triggered successfully"

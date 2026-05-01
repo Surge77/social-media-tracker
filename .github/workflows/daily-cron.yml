@@ -1,0 +1,29 @@
+name: Daily Data Fetch
+
+on:
+  schedule:
+    # 2:00 AM UTC daily — matches vercel.json schedule
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+
+jobs:
+  fetch-daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger daily fetch pipeline
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/cron/fetch-daily" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+
+          echo "Response status: $response"
+
+          if [ "$response" -lt 200 ] || [ "$response" -ge 300 ]; then
+            echo "Daily fetch failed with status $response"
+            exit 1
+          fi
+
+          echo "Daily fetch triggered successfully"
