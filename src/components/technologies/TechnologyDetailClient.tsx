@@ -3,11 +3,13 @@
 import React from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package, Link2, ChevronRight, ChevronDown } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Github, MessageSquare, Briefcase, Package, Link2, ChevronRight, ChevronDown, Bookmark, BookmarkCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { useAIInsight } from '@/hooks/useAIInsight'
 import { useScrolled } from '@/hooks/useScrolled'
+import { useAuth } from '@/hooks/useAuth'
+import { useWatchlist } from '@/hooks/useWatchlist'
 import { cn } from '@/lib/utils'
 import { ScoreBadge } from '@/components/shared/ScoreBadge'
 import { TechIcon } from '@/components/shared/TechIcon'
@@ -46,6 +48,8 @@ export function TechnologyDetailClient() {
   const slug = params?.slug as string
   const prefersReducedMotion = useReducedMotion()
   const isScrolled = useScrolled(250)
+  const { user } = useAuth()
+  const { isWatched, toggle } = useWatchlist()
 
   const [data, setData] = React.useState<TechnologyDetail | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
@@ -255,6 +259,23 @@ export function TechnologyDetailClient() {
               size="lg"
               confidenceGrade={confidenceGrade}
             />
+            {user && (
+              <button
+                onClick={() => void toggle(technology.slug)}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+                  isWatched(technology.slug)
+                    ? 'border-primary/40 bg-primary/10 text-primary hover:bg-primary/20'
+                    : 'border-border bg-card/40 text-muted-foreground hover:text-foreground hover:bg-muted/20'
+                )}
+                aria-label={isWatched(technology.slug) ? 'Remove from watchlist' : 'Add to watchlist'}
+              >
+                {isWatched(technology.slug)
+                  ? <><BookmarkCheck className="h-3.5 w-3.5" /> Watching</>
+                  : <><Bookmark className="h-3.5 w-3.5" /> Watch</>
+                }
+              </button>
+            )}
           </div>
         </div>
 
