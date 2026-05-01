@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { DigestPageClient } from '@/components/digest/DigestPageClient'
+import { PersonalizedDigest } from '@/components/digest/PersonalizedDigest'
 import { withCanonicalMetadata } from '@/lib/seo'
 
 export const metadata: Metadata = withCanonicalMetadata('/digest', {
@@ -9,5 +10,12 @@ export const metadata: Metadata = withCanonicalMetadata('/digest', {
 })
 
 export default function DigestPage() {
-  return <DigestPageClient />
+  return (
+    <>
+      <div className="container mx-auto max-w-4xl px-4 pt-8">
+        <PersonalizedDigest />
+      </div>
+      <DigestPageClient />
+    </>
+  )
 }

@@ -7,13 +7,16 @@ import { DevTrendsLogo } from '@/components/shared/DevTrendsLogo'
 import { MobileNav } from '@/components/MobileNav'
 import { useScrolled } from '@/hooks/useScrolled'
 import { useAuth } from '@/hooks/useAuth'
+import { useWatchlist } from '@/hooks/useWatchlist'
 import { Button } from '@/components/ui/button'
+import { Bookmark } from 'lucide-react'
 
 export function DashboardHeader() {
   const isScrolled = useScrolled(8)
   const pathname = usePathname()
   const router = useRouter()
   const { user, loading, signOut } = useAuth()
+  const { slugs } = useWatchlist()
 
   const handleSignOut = () => {
     window.location.href = '/auth/signout'
@@ -71,6 +74,8 @@ export function DashboardHeader() {
                 <Link href="/compare" className={navItemClass('/compare')}>Compare</Link>
                 <Link href="/digest" className={navItemClass('/digest')}>Digest</Link>
                 <Link href="/quiz" className={navItemClass('/quiz')}>Quizzes</Link>
+                <Link href="/quiz/skill-gap" className={navItemClass('/quiz/skill-gap')}>Skill Gap</Link>
+                <Link href="/watchlist" className={navItemClass('/watchlist')}>Watchlist</Link>
               </div>
             </div>
           </div>
@@ -88,6 +93,10 @@ export function DashboardHeader() {
           {!loading && (
             user ? (
               <div className="hidden items-center gap-2 md:flex">
+                <Link href="/watchlist" className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  <Bookmark className="h-3.5 w-3.5" />
+                  {slugs.size > 0 && <span className="text-xs font-medium">{slugs.size}</span>}
+                </Link>
                 <div className="flex items-center gap-1.5 rounded-full border border-border/60 bg-secondary/40 px-3 py-1.5 text-sm text-muted-foreground">
                   <User className="h-3.5 w-3.5 shrink-0" />
                   <span className="max-w-[140px] truncate">{user.user_metadata?.full_name ?? user.email}</span>

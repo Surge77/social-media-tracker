@@ -3,7 +3,7 @@
 import React, { useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { motion, useInView } from 'framer-motion'
-import { ArrowRight, TrendingUp, TrendingDown, Minus, CheckCircle2, Shield, AlertTriangle } from 'lucide-react'
+import { ArrowRight, TrendingUp, TrendingDown, Minus, CheckCircle2, Shield, AlertTriangle, Bookmark, BookmarkCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 import { TechIcon } from '@/components/shared/TechIcon'
@@ -14,6 +14,8 @@ import LifecycleBadge from '@/components/technologies/LifecycleBadge'
 import QuickCompareLinks from '@/components/technologies/QuickCompareLinks'
 import { NumberTicker } from '@/components/ui/number-ticker'
 import { generateVerdict, type Verdict } from '@/lib/insights/verdict'
+import { useWatchlist } from '@/hooks/useWatchlist'
+import { useAuth } from '@/hooks/useAuth'
 import type { TechnologyWithScore } from '@/types'
 
 interface TechCardProps {
@@ -59,6 +61,9 @@ function AnimatedJobBar({ width, reduced }: { width: number; reduced: boolean })
 export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
   ({ technology, rank, index = 0, className, allTechnologies = [] }, ref) => {
     const prefersReducedMotion = useReducedMotion()
+    const { user } = useAuth()
+    const { isWatched, toggle } = useWatchlist()
+    const watched = isWatched(technology.slug)
 
     const verdict = useMemo(
       () => generateVerdict(technology.composite_score, technology.momentum, technology.jobs_score, technology.name),
@@ -98,7 +103,7 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
         >
           <div className={`rounded-lg border border-border bg-card/30 p-5 backdrop-blur-sm transition-colors duration-200 hover:bg-card/60 hover:shadow-lg ${vstyle.border}`}>
 
-            {/* Top row: verdict + lifecycle + category */}
+            {/* Top row: verdict + lifecycle + category + bookmark */}
             <div className="mb-3.5 flex items-center justify-between gap-2">
               <motion.span
                 initial={prefersReducedMotion ? {} : { scale: 0, opacity: 0 }}
@@ -114,9 +119,26 @@ export const TechCard = React.forwardRef<HTMLDivElement, TechCardProps>(
                 {vstyle.icon}
                 {verdict.badge}
               </motion.span>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <LifecycleBadge stage={technology.lifecycle_stage} />
                 <CategoryBadge category={technology.category} size="sm" />
+                {user && (
+                  <button
+                    onClick={e => { e.preventDefault(); void toggle(technology.slug) }}
+                    className={cn(
+                      'rounded-md p-1 transition-colors',
+                      watched
+                        ? 'text-primary hover:text-primary/70'
+                        : 'text-muted-foreground/40 hover:text-muted-foreground'
+                    )}
+                    aria-label={watched ? 'Remove from watchlist' : 'Add to watchlist'}
+                  >
+                    {watched
+                      ? <BookmarkCheck className="h-3.5 w-3.5" />
+                      : <Bookmark className="h-3.5 w-3.5" />
+                    }
+                  </button>
+                )}
               </div>
             </div>
 
