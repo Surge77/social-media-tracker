@@ -11,7 +11,7 @@ import { Suspense } from 'react'
 function LoginContent() {
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
-  const next = searchParams?.get('next') ?? '/'
+  const next = searchParams?.get('next') ?? '/quiz/roadmap'
   const error = searchParams?.get('error')
 
   const handleGoogleSignIn = async () => {
