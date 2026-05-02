@@ -24,7 +24,6 @@ test-*.ts
 # misc
 .DS_Store
 *.pem
-.claude/
 
 # documentation - ignore all markdown files except README
 *.md
@@ -72,3 +71,122 @@ next-env.d.ts
 # allow tracked autoresearch docs
 !autoresearch/*.md
 !autoresearch/**/*.md
+
+# ── AI Coding Assistant Local State ──────────────────────────────────────────
+# These folders are created by various AI tools and IDEs.
+# They contain only local config/session state and must never be committed.
+
+# Anthropic / Claude
+.claude/
+
+# Cursor IDE
+.cursor/
+
+# Windsurf (Codeium)
+.windsurf/
+
+# Augment Code
+.augment/
+
+# Continue.dev
+.continue/
+
+# Devin AI
+.devin/
+
+# Tabnine
+.tabnine/
+
+# Tencent CodeBuddy
+.codebuddy/
+
+# OpenHands (OpenDevin)
+.openhands/
+
+# Roo Code
+.roo/
+
+# Block Goose
+.goose/
+
+# Kilo Code
+.kilocode/
+
+# AWS Kiro
+.kiro/
+
+# JetBrains Junie
+.junie/
+
+# Trae AI IDE
+.trae/
+
+# Zencoder
+.zencoder/
+
+# Alibaba Qwen
+.qwen/
+
+# Crush AI
+.crush/
+
+# Neovate
+.neovate/
+
+# Aider-Desk
+.aider-desk/
+
+# MCPJam
+.mcpjam/
+
+# Atlassian Rovo Dev
+.rovodev/
+
+# iFlow AI
+.iflow/
+
+# Pochi AI
+.pochi/
+
+# Qoder AI
+.qoder/
+
+# Vibe
+.vibe/
+
+# Pi AI
+.pi/
+
+# Mux
+.mux/
+
+# Bob AI
+.bob/
+
+# Kode AI
+.kode/
+
+# Cortex AI
+.cortex/
+
+# Forge AI
+.forge/
+
+# Factory AI
+.factory/
+
+# CommandCode
+.commandcode/
+
+# CodeStudio
+.codestudio/
+
+# Huawei CodeArts Doer
+.codeartsdoer/
+
+# ADAL (Azure auth token cache)
+.adal/
+
+# ── Graphify (code graph analysis tool) ──────────────────────────────────────
+.graphify_detect.json
+.graphify_python
