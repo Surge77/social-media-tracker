@@ -28,7 +28,7 @@ const config: Config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/Surge77/social-media-tracker/tree/main/apps/docs/',
+          editUrl: 'https://github.com/Surge77/DevTrends/tree/main/apps/docs/',
         },
         blog: false,
         pages: false,
@@ -62,7 +62,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://github.com/Surge77/social-media-tracker',
+          href: 'https://github.com/Surge77/DevTrends',
           label: 'Repository',
           position: 'right',
         },
@@ -97,7 +97,7 @@ const config: Config = {
             },
             {
               label: 'Repository',
-              href: 'https://github.com/Surge77/social-media-tracker',
+              href: 'https://github.com/Surge77/DevTrends',
             },
           ],
         },
