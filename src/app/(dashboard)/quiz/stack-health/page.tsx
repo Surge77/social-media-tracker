@@ -46,6 +46,7 @@ export default function StackHealthQuizPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [technologies, setTechnologies] = useState<TechnologyWithScore[]>([])
   const [isLoadingTech, setIsLoadingTech] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<QuizResult | null>(null)
 
@@ -59,6 +60,7 @@ export default function StackHealthQuizPage() {
         setTechnologies(data.technologies || [])
       } catch (error) {
         console.error('Error fetching technologies:', error)
+        setFetchError('Failed to load technologies. Please refresh the page.')
       } finally {
         setIsLoadingTech(false)
       }
@@ -189,6 +191,27 @@ export default function StackHealthQuizPage() {
       >
         <div className="flex flex-col items-center justify-center py-12">
           <Loading size="md" text="Loading technologies..." />
+        </div>
+      </QuizContainer>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <QuizContainer
+        title="Is My Stack Still Relevant?"
+        description="Check if your tech stack is keeping up with market trends"
+        icon={<Activity className="w-6 h-6" />}
+        gradient="from-green-500 via-emerald-500 to-green-400"
+      >
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-6 text-center">
+          <p className="text-sm text-destructive">{fetchError}</p>
+          <button
+            className="mt-3 text-xs underline text-muted-foreground"
+            onClick={() => window.location.reload()}
+          >
+            Refresh page
+          </button>
         </div>
       </QuizContainer>
     )

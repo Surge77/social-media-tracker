@@ -107,13 +107,6 @@ function ComparePageContent() {
         }
 
         const data = await response.json()
-        console.log('ComparePageClient: Fetched data:', {
-          hasRelationships: !!data.relationships,
-          relationshipsCount: data.relationships?.length || 0,
-          hasLifecycle: !!data.lifecycle_data,
-          lifecycleKeys: Object.keys(data.lifecycle_data || {}),
-          technologies: data.technologies?.map((t: any) => t.slug)
-        })
         setCompareData(data)
         setIsLoading(false)
       } catch (err) {

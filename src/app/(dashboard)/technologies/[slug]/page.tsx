@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { TechnologyDetailClient } from '@/components/technologies/TechnologyDetailClient'
 import { withCanonicalMetadata } from '@/lib/seo'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 
 interface PageProps {
   params: Promise<{ slug: string }>

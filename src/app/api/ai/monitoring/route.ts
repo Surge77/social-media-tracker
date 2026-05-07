@@ -5,7 +5,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { createKeyManager } from '@/lib/ai/key-manager'
 import { requireAdminAccess } from '@/lib/http/route-guards'
 

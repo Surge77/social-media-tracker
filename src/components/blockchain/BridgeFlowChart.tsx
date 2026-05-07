@@ -87,13 +87,13 @@ export function BridgeFlowChart() {
               width={40}
             />
             <Tooltip
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              formatter={((value: number, _: string, entry: any) => {
+              formatter={((value: number, _name: string, entry: { payload?: { change_7d?: number; fullName?: string } }) => {
                 const trend = entry.payload?.change_7d ?? 0
                 return [
                   `${fmtMetric(value)} · ${trend >= 0 ? '+' : ''}${trend.toFixed(1)}% 7d`,
                   entry.payload?.fullName ?? '',
                 ]
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               }) as any}
               contentStyle={{
                 background: isDark ? '#111113' : '#fff',

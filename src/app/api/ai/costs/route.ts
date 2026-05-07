@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { calculateCostSummary, updateBudgets } from '@/lib/ai/cost-tracker'
 import { requireAdminAccess } from '@/lib/http/route-guards'
 

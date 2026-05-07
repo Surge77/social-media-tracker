@@ -11,10 +11,17 @@ export function useAuth() {
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
 
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-      setLoading(false)
-    })
+    async function loadUser() {
+      try {
+        const { data } = await supabase.auth.getUser()
+        setUser(data.user)
+      } catch {
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadUser()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)

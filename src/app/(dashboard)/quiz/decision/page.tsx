@@ -88,6 +88,7 @@ export default function DecisionQuizPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [technologies, setTechnologies] = useState<TechnologyWithScore[]>([])
   const [isLoadingTech, setIsLoadingTech] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<QuizResult | null>(null)
 
@@ -101,6 +102,7 @@ export default function DecisionQuizPage() {
         setTechnologies(data.technologies || [])
       } catch (error) {
         console.error('Error fetching technologies:', error)
+        setFetchError('Failed to load technologies. Please refresh the page.')
       } finally {
         setIsLoadingTech(false)
       }
@@ -236,6 +238,27 @@ export default function DecisionQuizPage() {
       >
         <div className="flex flex-col items-center justify-center py-12">
           <Loading size="md" text="Loading technologies..." />
+        </div>
+      </QuizContainer>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <QuizContainer
+        title="Which Framework Should I Pick?"
+        description="Get a technology recommendation based on your specific needs"
+        icon={<GitCompare className="w-6 h-6" />}
+        gradient="from-orange-500 via-red-500 to-orange-400"
+      >
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-6 text-center">
+          <p className="text-sm text-destructive">{fetchError}</p>
+          <button
+            className="mt-3 text-xs underline text-muted-foreground"
+            onClick={() => window.location.reload()}
+          >
+            Refresh page
+          </button>
         </div>
       </QuizContainer>
     )

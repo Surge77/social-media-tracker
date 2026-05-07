@@ -73,6 +73,7 @@ export default function LearnNextQuizPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [technologies, setTechnologies] = useState<TechnologyWithScore[]>([])
   const [isLoadingTech, setIsLoadingTech] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<QuizResult | null>(null)
 
@@ -86,6 +87,7 @@ export default function LearnNextQuizPage() {
         setTechnologies(data.technologies || [])
       } catch (error) {
         console.error('Error fetching technologies:', error)
+        setFetchError('Failed to load technologies. Please refresh the page.')
       } finally {
         setIsLoadingTech(false)
       }
@@ -220,6 +222,27 @@ export default function LearnNextQuizPage() {
       >
         <div className="flex flex-col items-center justify-center py-12">
           <Loading size="md" text="Loading technologies..." />
+        </div>
+      </QuizContainer>
+    )
+  }
+
+  if (fetchError) {
+    return (
+      <QuizContainer
+        title="What Should I Learn Next?"
+        description="Get personalized recommendations based on your skills and goals"
+        icon={<Target className="w-6 h-6" />}
+        gradient="from-blue-500 via-indigo-500 to-blue-400"
+      >
+        <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-6 text-center">
+          <p className="text-sm text-destructive">{fetchError}</p>
+          <button
+            className="mt-3 text-xs underline text-muted-foreground"
+            onClick={() => window.location.reload()}
+          >
+            Refresh page
+          </button>
         </div>
       </QuizContainer>
     )

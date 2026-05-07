@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { fetchChainTVLs, fetchTopProtocols } from '@/lib/api/defillama'
 import { hasFreshBlockchainOverviewCache, toOverviewProtocol } from '@/lib/blockchain/overview'
 import { NextResponse } from 'next/server'

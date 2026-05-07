@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { ConversationManager } from '@/lib/ai/conversation-manager'
 import { sanitizeUserInput, buildSafeUserPrompt } from '@/lib/ai/safety'
 import { resilientAIStreamCall } from '@/lib/ai/resilient-call'

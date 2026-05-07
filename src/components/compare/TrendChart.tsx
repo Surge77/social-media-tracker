@@ -114,14 +114,18 @@ export function TrendChart({ compareData, technologies, className }: TrendChartP
   }
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: {
+    active?: boolean
+    payload?: Array<{ dataKey?: string | number; name?: string; value?: number; color?: string; payload?: { isForecast?: boolean } }>
+    label?: string | number
+  }) => {
     if (!active || !payload || payload.length === 0) return null
 
     const dateStr = formatDate(label)
     const isForecast = payload[0]?.payload?.isForecast
     const sorted = [...payload]
-      .filter((p: any) => !p.dataKey.includes('_forecast'))
-      .sort((a: any, b: any) => (b.value ?? 0) - (a.value ?? 0))
+      .filter((p) => !String(p.dataKey ?? '').includes('_forecast'))
+      .sort((a, b) => (Number(b.value) ?? 0) - (Number(a.value) ?? 0))
 
     return (
       <div className="rounded-lg border border-border bg-card px-3 py-2.5 shadow-lg">
@@ -134,9 +138,10 @@ export function TrendChart({ compareData, technologies, className }: TrendChartP
           )}
         </p>
         <div className="space-y-1">
-          {sorted.map((entry: any) => {
-            const scoreLevel = entry.value >= 70 ? 'text-emerald-400' :
-              entry.value >= 40 ? 'text-amber-400' : 'text-red-400'
+          {sorted.map((entry) => {
+            const val = entry.value ?? 0
+            const scoreLevel = val >= 70 ? 'text-emerald-400' :
+              val >= 40 ? 'text-amber-400' : 'text-red-400'
             return (
               <div key={entry.name} className="flex items-center justify-between gap-4">
                 <span className="flex items-center gap-1.5 text-xs">
@@ -147,7 +152,7 @@ export function TrendChart({ compareData, technologies, className }: TrendChartP
                   {entry.name}
                 </span>
                 <span className={cn('text-xs font-mono font-semibold', scoreLevel)}>
-                  {Math.round(entry.value)}
+                  {Math.round(val)}
                 </span>
               </div>
             )

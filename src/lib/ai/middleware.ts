@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitHeaders } from '@/lib/ai/rate-limiter'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 
 export async function withAIRateLimit(
   req: NextRequest,

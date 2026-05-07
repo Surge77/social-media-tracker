@@ -60,14 +60,6 @@ export function RelationshipMap({ compareData, className }: RelationshipMapProps
   const prefersReducedMotion = useReducedMotion()
   const relationships = compareData.relationships || []
 
-  // DEBUG: Log what we're receiving
-  console.log('RelationshipMap DEBUG:', {
-    hasCompareData: !!compareData,
-    relationshipsFromData: compareData.relationships,
-    relationshipsLength: relationships.length,
-    technologies: compareData.technologies?.map(t => t.slug)
-  })
-
   // Build tech lookup
   const techBySlug = new Map(
     compareData.technologies.map((tech) => [tech.slug, tech])

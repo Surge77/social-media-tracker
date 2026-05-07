@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
-vi.mock('@/lib/supabase/server', () => ({
+vi.mock('@/lib/supabase/server-client', () => ({
   createSupabaseServerClient: vi.fn().mockResolvedValue(mockSupabaseServer()),
 }))
 
@@ -80,7 +80,7 @@ function mockSupabaseServer() {
 // ─── Import after mocks ─────────────────────────────────────────────────────
 
 import { POST } from '@/app/api/ai/ask/route'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { checkRateLimit } from '@/lib/ai/rate-limiter'
 
 // ─── Tests ──────────────────────────────────────────────────────────────────

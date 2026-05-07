@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { createABTest } from '@/lib/ai/ab-testing'
 import { requireAdminAccess } from '@/lib/http/route-guards'
 
